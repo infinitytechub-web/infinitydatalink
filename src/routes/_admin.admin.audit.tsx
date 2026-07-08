@@ -21,6 +21,7 @@ function AuditPage() {
         title="Audit trail"
         action={
           <ExportBar
+            permission="export:audit"
             title="Audit Trail"
             subtitle={`${trail.length} events`}
             filename="audit_trail"

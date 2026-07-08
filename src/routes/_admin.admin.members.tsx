@@ -42,6 +42,7 @@ function MembersPage() {
               className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
             />
             <ExportBar
+              permission="export:members"
               title="Membership Directory"
               subtitle={`${rows.length} of ${members.length} members`}
               filename="members"

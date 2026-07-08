@@ -42,6 +42,7 @@ function AdminDashboard() {
           className="lg:col-span-2"
           action={
             <ExportBar
+              permission="export:approvals"
               title="Approval Queue"
               subtitle={`${approvals.length} pending items`}
               filename="approval_queue"

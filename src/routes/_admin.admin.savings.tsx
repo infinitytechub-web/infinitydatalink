@@ -29,6 +29,7 @@ function AdminSavings() {
             title="Plan breakdown"
             action={
               <ExportBar
+                permission="export:savings"
                 title="Savings Plan Breakdown"
                 subtitle={`${plans.length} plans`}
                 filename="savings_plans"
