@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { z } from "zod";
-import { passwordStrength, recordLoginAttempt, useAuth } from "@/lib/auth";
+import { ADMIN_ROLE_LABEL, passwordStrength, recordLoginAttempt, useAuth, type AdminRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth")({
@@ -54,6 +54,7 @@ function LoginPanel({ role }: { role: "member" | "admin" }) {
   const [remember, setRemember] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [remaining, setRemaining] = useState(3);
+  const [adminRole, setAdminRole] = useState<AdminRole>("super_admin");
 
   const strength = useMemo(() => passwordStrength(password), [password]);
 
@@ -81,6 +82,7 @@ function LoginPanel({ role }: { role: "member" | "admin" }) {
       name: email.split("@")[0].replace(/\W/g, " ") || (isAdmin ? "Admin" : "Member"),
       email,
       role,
+      ...(isAdmin ? { adminRole } : {}),
     });
     navigate({ to: isAdmin ? "/admin" : "/app" });
   };
@@ -156,16 +158,31 @@ function LoginPanel({ role }: { role: "member" | "admin" }) {
         </Field>
 
         {isAdmin ? (
-          <Field label="2FA Code" isDark>
-            <input
-              inputMode="numeric"
-              maxLength={6}
-              className={inputClass(true)}
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              placeholder="123 456"
-            />
-          </Field>
+          <>
+            <Field label="Administrator role" isDark>
+              <select
+                className={inputClass(true)}
+                value={adminRole}
+                onChange={(e) => setAdminRole(e.target.value as AdminRole)}
+              >
+                {(Object.keys(ADMIN_ROLE_LABEL) as AdminRole[]).map((r) => (
+                  <option key={r} value={r} className="text-emerald-deep">
+                    {ADMIN_ROLE_LABEL[r]}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="2FA Code" isDark>
+              <input
+                inputMode="numeric"
+                maxLength={6}
+                className={inputClass(true)}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                placeholder="123 456"
+              />
+            </Field>
+          </>
         ) : null}
 
         <label
