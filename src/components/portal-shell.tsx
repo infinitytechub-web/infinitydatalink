@@ -1,5 +1,6 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 
@@ -22,8 +23,14 @@ export function PortalShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
-
-  return (
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const handleSignOut = async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await signOut();
+    navigate({ to: "/auth", replace: true });
+  };
     <div className="flex min-h-screen bg-cream font-sans text-emerald-deep">
       {/* Sidebar */}
       <aside
