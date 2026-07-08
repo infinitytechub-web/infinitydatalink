@@ -65,7 +65,6 @@ function AdminSavings() {
           </SectionCard>
         );
       })()}
-      </SectionCard>
     </>
   );
 }
