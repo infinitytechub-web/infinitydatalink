@@ -9,38 +9,316 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as MemberRouteImport } from './routes/_member'
+import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthResetRouteImport } from './routes/auth.reset'
+import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
+import { Route as MemberAppRouteImport } from './routes/_member.app'
+import { Route as AdminAdminRouteImport } from './routes/_admin.admin'
+import { Route as MemberAppIndexRouteImport } from './routes/_member.app.index'
+import { Route as AdminAdminIndexRouteImport } from './routes/_admin.admin.index'
+import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
+import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
+import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
+import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
+import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
+import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
+import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
+import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
+import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
+import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
+import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
+import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
+import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberRoute = MemberRouteImport.update({
+  id: '/_member',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/reset',
+  path: '/reset',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthForgotRoute = AuthForgotRouteImport.update({
+  id: '/forgot',
+  path: '/forgot',
+  getParentRoute: () => AuthRoute,
+} as any)
+const MemberAppRoute = MemberAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => MemberRoute,
+} as any)
+const AdminAdminRoute = AdminAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AdminRoute,
+} as any)
+const MemberAppIndexRoute = MemberAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const MemberAppTransactionsRoute = MemberAppTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppSupportRoute = MemberAppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppSavingsRoute = MemberAppSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppProfileRoute = MemberAppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppPaymentsRoute = MemberAppPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppLoansRoute = MemberAppLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const AdminAdminSettingsRoute = AdminAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSecurityRoute = AdminAdminSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSavingsRoute = AdminAdminSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminMembersRoute = AdminAdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminLoansRoute = AdminAdminLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/admin': typeof AdminAdminRouteWithChildren
+  '/app': typeof MemberAppRouteWithChildren
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/admin/audit': typeof AdminAdminAuditRoute
+  '/admin/loans': typeof AdminAdminLoansRoute
+  '/admin/members': typeof AdminAdminMembersRoute
+  '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/savings': typeof AdminAdminSavingsRoute
+  '/admin/security': typeof AdminAdminSecurityRoute
+  '/admin/settings': typeof AdminAdminSettingsRoute
+  '/app/loans': typeof MemberAppLoansRoute
+  '/app/payments': typeof MemberAppPaymentsRoute
+  '/app/profile': typeof MemberAppProfileRoute
+  '/app/savings': typeof MemberAppSavingsRoute
+  '/app/support': typeof MemberAppSupportRoute
+  '/app/transactions': typeof MemberAppTransactionsRoute
+  '/admin/': typeof AdminAdminIndexRoute
+  '/app/': typeof MemberAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/admin/audit': typeof AdminAdminAuditRoute
+  '/admin/loans': typeof AdminAdminLoansRoute
+  '/admin/members': typeof AdminAdminMembersRoute
+  '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/savings': typeof AdminAdminSavingsRoute
+  '/admin/security': typeof AdminAdminSecurityRoute
+  '/admin/settings': typeof AdminAdminSettingsRoute
+  '/app/loans': typeof MemberAppLoansRoute
+  '/app/payments': typeof MemberAppPaymentsRoute
+  '/app/profile': typeof MemberAppProfileRoute
+  '/app/savings': typeof MemberAppSavingsRoute
+  '/app/support': typeof MemberAppSupportRoute
+  '/app/transactions': typeof MemberAppTransactionsRoute
+  '/admin': typeof AdminAdminIndexRoute
+  '/app': typeof MemberAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_admin': typeof AdminRouteWithChildren
+  '/_member': typeof MemberRouteWithChildren
+  '/auth': typeof AuthRouteWithChildren
+  '/_admin/admin': typeof AdminAdminRouteWithChildren
+  '/_member/app': typeof MemberAppRouteWithChildren
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/_admin/admin/audit': typeof AdminAdminAuditRoute
+  '/_admin/admin/loans': typeof AdminAdminLoansRoute
+  '/_admin/admin/members': typeof AdminAdminMembersRoute
+  '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
+  '/_admin/admin/savings': typeof AdminAdminSavingsRoute
+  '/_admin/admin/security': typeof AdminAdminSecurityRoute
+  '/_admin/admin/settings': typeof AdminAdminSettingsRoute
+  '/_member/app/loans': typeof MemberAppLoansRoute
+  '/_member/app/payments': typeof MemberAppPaymentsRoute
+  '/_member/app/profile': typeof MemberAppProfileRoute
+  '/_member/app/savings': typeof MemberAppSavingsRoute
+  '/_member/app/support': typeof MemberAppSupportRoute
+  '/_member/app/transactions': typeof MemberAppTransactionsRoute
+  '/_admin/admin/': typeof AdminAdminIndexRoute
+  '/_member/app/': typeof MemberAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/app'
+    | '/auth/forgot'
+    | '/auth/reset'
+    | '/admin/audit'
+    | '/admin/loans'
+    | '/admin/members'
+    | '/admin/payments'
+    | '/admin/savings'
+    | '/admin/security'
+    | '/admin/settings'
+    | '/app/loans'
+    | '/app/payments'
+    | '/app/profile'
+    | '/app/savings'
+    | '/app/support'
+    | '/app/transactions'
+    | '/admin/'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/auth/forgot'
+    | '/auth/reset'
+    | '/admin/audit'
+    | '/admin/loans'
+    | '/admin/members'
+    | '/admin/payments'
+    | '/admin/savings'
+    | '/admin/security'
+    | '/admin/settings'
+    | '/app/loans'
+    | '/app/payments'
+    | '/app/profile'
+    | '/app/savings'
+    | '/app/support'
+    | '/app/transactions'
+    | '/admin'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/_admin'
+    | '/_member'
+    | '/auth'
+    | '/_admin/admin'
+    | '/_member/app'
+    | '/auth/forgot'
+    | '/auth/reset'
+    | '/_admin/admin/audit'
+    | '/_admin/admin/loans'
+    | '/_admin/admin/members'
+    | '/_admin/admin/payments'
+    | '/_admin/admin/savings'
+    | '/_admin/admin/security'
+    | '/_admin/admin/settings'
+    | '/_member/app/loans'
+    | '/_member/app/payments'
+    | '/_member/app/profile'
+    | '/_member/app/savings'
+    | '/_member/app/support'
+    | '/_member/app/transactions'
+    | '/_admin/admin/'
+    | '/_member/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  MemberRoute: typeof MemberRouteWithChildren
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_member': {
+      id: '/_member'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MemberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +326,231 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/forgot': {
+      id: '/auth/forgot'
+      path: '/forgot'
+      fullPath: '/auth/forgot'
+      preLoaderRoute: typeof AuthForgotRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_member/app': {
+      id: '/_member/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof MemberAppRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_admin/admin': {
+      id: '/_admin/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_member/app/': {
+      id: '/_member/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof MemberAppIndexRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_admin/admin/': {
+      id: '/_admin/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAdminIndexRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_member/app/transactions': {
+      id: '/_member/app/transactions'
+      path: '/transactions'
+      fullPath: '/app/transactions'
+      preLoaderRoute: typeof MemberAppTransactionsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/support': {
+      id: '/_member/app/support'
+      path: '/support'
+      fullPath: '/app/support'
+      preLoaderRoute: typeof MemberAppSupportRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/savings': {
+      id: '/_member/app/savings'
+      path: '/savings'
+      fullPath: '/app/savings'
+      preLoaderRoute: typeof MemberAppSavingsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/profile': {
+      id: '/_member/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof MemberAppProfileRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/payments': {
+      id: '/_member/app/payments'
+      path: '/payments'
+      fullPath: '/app/payments'
+      preLoaderRoute: typeof MemberAppPaymentsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/loans': {
+      id: '/_member/app/loans'
+      path: '/loans'
+      fullPath: '/app/loans'
+      preLoaderRoute: typeof MemberAppLoansRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_admin/admin/settings': {
+      id: '/_admin/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminAdminSettingsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/security': {
+      id: '/_admin/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminAdminSecurityRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/savings': {
+      id: '/_admin/admin/savings'
+      path: '/savings'
+      fullPath: '/admin/savings'
+      preLoaderRoute: typeof AdminAdminSavingsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/payments': {
+      id: '/_admin/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminAdminPaymentsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/members': {
+      id: '/_admin/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminAdminMembersRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/loans': {
+      id: '/_admin/admin/loans'
+      path: '/loans'
+      fullPath: '/admin/loans'
+      preLoaderRoute: typeof AdminAdminLoansRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/audit': {
+      id: '/_admin/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAdminAuditRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
   }
 }
 
+interface AdminAdminRouteChildren {
+  AdminAdminAuditRoute: typeof AdminAdminAuditRoute
+  AdminAdminLoansRoute: typeof AdminAdminLoansRoute
+  AdminAdminMembersRoute: typeof AdminAdminMembersRoute
+  AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
+  AdminAdminSavingsRoute: typeof AdminAdminSavingsRoute
+  AdminAdminSecurityRoute: typeof AdminAdminSecurityRoute
+  AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
+  AdminAdminIndexRoute: typeof AdminAdminIndexRoute
+}
+
+const AdminAdminRouteChildren: AdminAdminRouteChildren = {
+  AdminAdminAuditRoute: AdminAdminAuditRoute,
+  AdminAdminLoansRoute: AdminAdminLoansRoute,
+  AdminAdminMembersRoute: AdminAdminMembersRoute,
+  AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
+  AdminAdminSavingsRoute: AdminAdminSavingsRoute,
+  AdminAdminSecurityRoute: AdminAdminSecurityRoute,
+  AdminAdminSettingsRoute: AdminAdminSettingsRoute,
+  AdminAdminIndexRoute: AdminAdminIndexRoute,
+}
+
+const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
+  AdminAdminRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminAdminRoute: typeof AdminAdminRouteWithChildren
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdminRoute: AdminAdminRouteWithChildren,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface MemberAppRouteChildren {
+  MemberAppLoansRoute: typeof MemberAppLoansRoute
+  MemberAppPaymentsRoute: typeof MemberAppPaymentsRoute
+  MemberAppProfileRoute: typeof MemberAppProfileRoute
+  MemberAppSavingsRoute: typeof MemberAppSavingsRoute
+  MemberAppSupportRoute: typeof MemberAppSupportRoute
+  MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
+  MemberAppIndexRoute: typeof MemberAppIndexRoute
+}
+
+const MemberAppRouteChildren: MemberAppRouteChildren = {
+  MemberAppLoansRoute: MemberAppLoansRoute,
+  MemberAppPaymentsRoute: MemberAppPaymentsRoute,
+  MemberAppProfileRoute: MemberAppProfileRoute,
+  MemberAppSavingsRoute: MemberAppSavingsRoute,
+  MemberAppSupportRoute: MemberAppSupportRoute,
+  MemberAppTransactionsRoute: MemberAppTransactionsRoute,
+  MemberAppIndexRoute: MemberAppIndexRoute,
+}
+
+const MemberAppRouteWithChildren = MemberAppRoute._addFileChildren(
+  MemberAppRouteChildren,
+)
+
+interface MemberRouteChildren {
+  MemberAppRoute: typeof MemberAppRouteWithChildren
+}
+
+const MemberRouteChildren: MemberRouteChildren = {
+  MemberAppRoute: MemberAppRouteWithChildren,
+}
+
+const MemberRouteWithChildren =
+  MemberRoute._addFileChildren(MemberRouteChildren)
+
+interface AuthRouteChildren {
+  AuthForgotRoute: typeof AuthForgotRoute
+  AuthResetRoute: typeof AuthResetRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthForgotRoute: AuthForgotRoute,
+  AuthResetRoute: AuthResetRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  MemberRoute: MemberRouteWithChildren,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
