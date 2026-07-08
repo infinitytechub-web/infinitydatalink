@@ -107,21 +107,21 @@ function AdminDashboard() {
         </SectionCard>
       </div>
 
-      <SectionCard title="AI Business Intelligence">
-        <div className="grid gap-6 p-6 md:grid-cols-3">
-          {[
-            ["Default risk (30d)", "3 members flagged", "Trend down 0.8pt"],
-            ["Savings forecast", "GH₵ 620K next quarter", "+8% YoY"],
-            ["Cash reserve advice", "Reallocate GH₵ 150K", "Move to Prosperity Fund"],
-          ].map(([t, v, h]) => (
-            <div key={t} className="rounded border border-gold/20 bg-gold/5 p-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gold">{t}</p>
-              <p className="mt-1 font-serif text-lg text-emerald-deep">{v}</p>
-              <p className="mt-1 text-xs text-emerald-deep/60">{h}</p>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
+      <AiBusinessIntelligencePanel />
+    </>
+  );
+}
+
+function AiBusinessIntelligencePanel() {
+  return (
+    <SectionCard
+      title="AI Business Intelligence"
+      action={<AiRefreshButton />}
+    >
+      <AiInsightsGrid />
+    </SectionCard>
+  );
+}
     </>
   );
 }
