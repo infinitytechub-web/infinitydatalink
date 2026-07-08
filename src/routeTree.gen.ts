@@ -16,6 +16,12 @@ import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
 import { Route as MemberAppRouteImport } from './routes/_member.app'
 import { Route as MemberAppIndexRouteImport } from './routes/_member.app.index'
+import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
+import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
+import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
+import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
+import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
+import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -51,6 +57,36 @@ const MemberAppIndexRoute = MemberAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MemberAppRoute,
 } as any)
+const MemberAppTransactionsRoute = MemberAppTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppSupportRoute = MemberAppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppSavingsRoute = MemberAppSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppProfileRoute = MemberAppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppPaymentsRoute = MemberAppPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppLoansRoute = MemberAppLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -58,6 +94,12 @@ export interface FileRoutesByFullPath {
   '/app': typeof MemberAppRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/app/loans': typeof MemberAppLoansRoute
+  '/app/payments': typeof MemberAppPaymentsRoute
+  '/app/profile': typeof MemberAppProfileRoute
+  '/app/savings': typeof MemberAppSavingsRoute
+  '/app/support': typeof MemberAppSupportRoute
+  '/app/transactions': typeof MemberAppTransactionsRoute
   '/app/': typeof MemberAppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -65,6 +107,12 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/app/loans': typeof MemberAppLoansRoute
+  '/app/payments': typeof MemberAppPaymentsRoute
+  '/app/profile': typeof MemberAppProfileRoute
+  '/app/savings': typeof MemberAppSavingsRoute
+  '/app/support': typeof MemberAppSupportRoute
+  '/app/transactions': typeof MemberAppTransactionsRoute
   '/app': typeof MemberAppIndexRoute
 }
 export interface FileRoutesById {
@@ -75,13 +123,42 @@ export interface FileRoutesById {
   '/_member/app': typeof MemberAppRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/_member/app/loans': typeof MemberAppLoansRoute
+  '/_member/app/payments': typeof MemberAppPaymentsRoute
+  '/_member/app/profile': typeof MemberAppProfileRoute
+  '/_member/app/savings': typeof MemberAppSavingsRoute
+  '/_member/app/support': typeof MemberAppSupportRoute
+  '/_member/app/transactions': typeof MemberAppTransactionsRoute
   '/_member/app/': typeof MemberAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/app' | '/auth/forgot' | '/auth/reset' | '/app/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/app'
+    | '/auth/forgot'
+    | '/auth/reset'
+    | '/app/loans'
+    | '/app/payments'
+    | '/app/profile'
+    | '/app/savings'
+    | '/app/support'
+    | '/app/transactions'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/auth/forgot' | '/auth/reset' | '/app'
+  to:
+    | '/'
+    | '/auth'
+    | '/auth/forgot'
+    | '/auth/reset'
+    | '/app/loans'
+    | '/app/payments'
+    | '/app/profile'
+    | '/app/savings'
+    | '/app/support'
+    | '/app/transactions'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -90,6 +167,12 @@ export interface FileRouteTypes {
     | '/_member/app'
     | '/auth/forgot'
     | '/auth/reset'
+    | '/_member/app/loans'
+    | '/_member/app/payments'
+    | '/_member/app/profile'
+    | '/_member/app/savings'
+    | '/_member/app/support'
+    | '/_member/app/transactions'
     | '/_member/app/'
   fileRoutesById: FileRoutesById
 }
@@ -150,14 +233,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppIndexRouteImport
       parentRoute: typeof MemberAppRoute
     }
+    '/_member/app/transactions': {
+      id: '/_member/app/transactions'
+      path: '/transactions'
+      fullPath: '/app/transactions'
+      preLoaderRoute: typeof MemberAppTransactionsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/support': {
+      id: '/_member/app/support'
+      path: '/support'
+      fullPath: '/app/support'
+      preLoaderRoute: typeof MemberAppSupportRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/savings': {
+      id: '/_member/app/savings'
+      path: '/savings'
+      fullPath: '/app/savings'
+      preLoaderRoute: typeof MemberAppSavingsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/profile': {
+      id: '/_member/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof MemberAppProfileRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/payments': {
+      id: '/_member/app/payments'
+      path: '/payments'
+      fullPath: '/app/payments'
+      preLoaderRoute: typeof MemberAppPaymentsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/loans': {
+      id: '/_member/app/loans'
+      path: '/loans'
+      fullPath: '/app/loans'
+      preLoaderRoute: typeof MemberAppLoansRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
   }
 }
 
 interface MemberAppRouteChildren {
+  MemberAppLoansRoute: typeof MemberAppLoansRoute
+  MemberAppPaymentsRoute: typeof MemberAppPaymentsRoute
+  MemberAppProfileRoute: typeof MemberAppProfileRoute
+  MemberAppSavingsRoute: typeof MemberAppSavingsRoute
+  MemberAppSupportRoute: typeof MemberAppSupportRoute
+  MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
   MemberAppIndexRoute: typeof MemberAppIndexRoute
 }
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
+  MemberAppLoansRoute: MemberAppLoansRoute,
+  MemberAppPaymentsRoute: MemberAppPaymentsRoute,
+  MemberAppProfileRoute: MemberAppProfileRoute,
+  MemberAppSavingsRoute: MemberAppSavingsRoute,
+  MemberAppSupportRoute: MemberAppSupportRoute,
+  MemberAppTransactionsRoute: MemberAppTransactionsRoute,
   MemberAppIndexRoute: MemberAppIndexRoute,
 }
 
