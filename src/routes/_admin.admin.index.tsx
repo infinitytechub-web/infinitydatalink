@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
+import { formatMoney } from "@/lib/org-config";
 
 export const Route = createFileRoute("/_admin/admin/")({
   component: AdminDashboard,
@@ -35,7 +37,25 @@ function AdminDashboard() {
       </section>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        <SectionCard title="Approval queue" className="lg:col-span-2">
+        <SectionCard
+          title="Approval queue"
+          className="lg:col-span-2"
+          action={
+            <ExportBar
+              title="Approval Queue"
+              subtitle={`${approvals.length} pending items`}
+              filename="approval_queue"
+              columns={[
+                { header: "Ref", accessor: (a: typeof approvals[number]) => a.id },
+                { header: "Member", accessor: (a) => a.member },
+                { header: "Type", accessor: (a) => a.type },
+                { header: "Amount", accessor: (a) => formatMoney(a.amount), align: "right" },
+                { header: "Status", accessor: (a) => a.status.toUpperCase(), align: "right" },
+              ]}
+              rows={approvals}
+            />
+          }
+        >
           <table className="w-full">
             <thead>
               <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">

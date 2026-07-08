@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
 
 export const Route = createFileRoute("/_admin/admin/members")({
   component: MembersPage,
@@ -33,12 +34,27 @@ function MembersPage() {
       <SectionCard
         title="Directory"
         action={
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search members…"
-            className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search members…"
+              className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
+            />
+            <ExportBar
+              title="Membership Directory"
+              subtitle={`${rows.length} of ${members.length} members`}
+              filename="members"
+              columns={[
+                { header: "Member ID", accessor: (m: typeof members[number]) => m.id },
+                { header: "Name", accessor: (m) => m.name },
+                { header: "Region", accessor: (m) => m.region },
+                { header: "Tier", accessor: (m) => m.tier },
+                { header: "KYC", accessor: (m) => m.kyc.toUpperCase() },
+              ]}
+              rows={rows}
+            />
+          </div>
         }
       >
         <table className="w-full">
