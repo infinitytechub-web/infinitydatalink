@@ -6,16 +6,15 @@ export const Route = createFileRoute("/_admin")({
 });
 
 function AdminGate() {
-  const { user } = useAuth();
-  if (typeof window !== "undefined") {
-    const raw = window.localStorage.getItem("iw:session");
-    if (!raw && !user) return <Navigate to="/auth" />;
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.role !== "admin") return <Navigate to="/auth" />;
-    } else if (user && user.role !== "admin") {
-      return <Navigate to="/auth" />;
-    }
+  const { user, loading, isAdmin } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-cream text-emerald-deep">
+        <p className="text-xs uppercase tracking-widest">Loading portal…</p>
+      </div>
+    );
   }
+  if (!user) return <Navigate to="/auth" />;
+  if (!isAdmin) return <Navigate to="/app" />;
   return <Outlet />;
 }

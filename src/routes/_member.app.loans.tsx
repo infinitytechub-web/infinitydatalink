@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
+import { formatMoney } from "@/lib/org-config";
 
 export const Route = createFileRoute("/_member/app/loans")({
   component: LoansPage,
@@ -30,7 +32,27 @@ function LoansPage() {
         <KPIStat label="Loan eligibility" value={<>GH₵ <span className="tabular">65,000.00</span></>} accent hint="Based on savings + guarantors" />
       </section>
 
-      <SectionCard title="Loan facilities">
+      <SectionCard
+        title="Loan facilities"
+        action={
+          <ExportBar
+            title="My Loan Facilities"
+            subtitle={`${loans.length} facility record(s)`}
+            filename="my_loans"
+            permission="export:own_loans"
+            columns={[
+              { header: "Reference", accessor: (l: typeof loans[number]) => l.id },
+              { header: "Product", accessor: (l) => l.product },
+              { header: "Principal", accessor: (l) => formatMoney(l.principal), align: "right" },
+              { header: "Outstanding", accessor: (l) => formatMoney(l.balance), align: "right" },
+              { header: "Next", accessor: (l) => l.next },
+              { header: "Instalment", accessor: (l) => formatMoney(l.installment), align: "right" },
+              { header: "Status", accessor: (l) => l.status.toUpperCase(), align: "right" },
+            ]}
+            rows={loans}
+          />
+        }
+      >
         <table className="w-full">
           <thead>
             <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">

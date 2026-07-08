@@ -26,7 +26,7 @@ function ProfilePage() {
             Personal details
           </p>
           <dl className="grid gap-4 sm:grid-cols-2">
-            <Field label="Full name" value={user?.name ?? "—"} />
+            <Field label="Full name" value={user?.fullName ?? "—"} />
             <Field label="Email" value={user?.email ?? "—"} />
             <Field label="Gender" value="Prefer not to say" />
             <Field label="Date of birth" value="1990-01-01" />

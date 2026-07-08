@@ -29,8 +29,12 @@ function Forgot() {
         ) : (
           <form
             className="mt-6 space-y-4"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
+              const { supabase } = await import("@/integrations/supabase/client");
+              await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/auth/reset`,
+              });
               setSent(true);
             }}
           >

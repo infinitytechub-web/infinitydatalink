@@ -1,5 +1,6 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 
@@ -20,8 +21,16 @@ export function PortalShell({
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const handleSignOut = async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await signOut();
+    navigate({ to: "/auth", replace: true });
+  };
 
   return (
     <div className="flex min-h-screen bg-cream font-sans text-emerald-deep">
@@ -86,16 +95,16 @@ export function PortalShell({
         <div className="border-t border-emerald-mid/30 p-4">
           <div className="flex items-center gap-3">
             <div className="flex size-8 items-center justify-center rounded bg-gold/20 font-serif text-gold">
-              {(user?.name || "?").slice(0, 2).toUpperCase()}
+              {(user?.fullName || "?").slice(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1 text-xs">
-              <p className="truncate font-medium">{user?.name ?? "Guest"}</p>
+              <p className="truncate font-medium">{user?.fullName ?? "Guest"}</p>
               <p className="truncate capitalize text-white/50">
-                {user?.role ?? "no role"}
+                {user?.roles?.[0]?.replace(/_/g, " ") ?? "no role"}
               </p>
             </div>
             <button
-              onClick={logout}
+              onClick={handleSignOut}
               className="text-[10px] font-semibold uppercase tracking-widest text-white/60 hover:text-gold"
             >
               Exit

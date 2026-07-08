@@ -1,14 +1,15 @@
+// Supabase-backed auth context with RBAC. Roles come from the `user_roles` table.
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
-export type Role = "member" | "admin";
-
-// Admin sub-roles with granular permissions used across admin modules.
-export type AdminRole =
+export type AppRole =
   | "super_admin"
   | "compliance_officer"
   | "loan_officer"
   | "finance_officer"
-  | "auditor";
+  | "auditor"
+  | "member";
 
 export type Permission =
   | "export:members"
@@ -17,9 +18,15 @@ export type Permission =
   | "export:payments"
   | "export:security"
   | "export:audit"
-  | "export:approvals";
+  | "export:approvals"
+  | "export:own_transactions"
+  | "export:own_loans"
+  | "export:own_savings"
+  | "export:own_statement"
+  | "loans:decide"
+  | "members:manage";
 
-export const ADMIN_ROLE_LABEL: Record<AdminRole, string> = {
+export const ADMIN_ROLE_LABEL: Record<Exclude<AppRole, "member">, string> = {
   super_admin: "Super Admin",
   compliance_officer: "Compliance Officer",
   loan_officer: "Loan Officer",
@@ -27,86 +34,130 @@ export const ADMIN_ROLE_LABEL: Record<AdminRole, string> = {
   auditor: "Auditor",
 };
 
-// Permission matrix. Auditor has read-only export access to everything.
-// Super admin owns everything. Others get scoped exports.
-export const ADMIN_ROLE_PERMISSIONS: Record<AdminRole, Permission[]> = {
+export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   super_admin: [
-    "export:members",
-    "export:loans",
-    "export:savings",
-    "export:payments",
-    "export:security",
-    "export:audit",
-    "export:approvals",
+    "export:members", "export:loans", "export:savings", "export:payments",
+    "export:security", "export:audit", "export:approvals",
+    "loans:decide", "members:manage",
   ],
-  compliance_officer: ["export:members", "export:audit", "export:security"],
-  loan_officer: ["export:loans", "export:members", "export:approvals"],
+  compliance_officer: ["export:members", "export:audit", "export:security", "members:manage"],
+  loan_officer: ["export:loans", "export:members", "export:approvals", "loans:decide"],
   finance_officer: ["export:savings", "export:payments", "export:loans", "export:approvals"],
   auditor: [
-    "export:members",
-    "export:loans",
-    "export:savings",
-    "export:payments",
-    "export:security",
-    "export:audit",
-    "export:approvals",
+    "export:members", "export:loans", "export:savings", "export:payments",
+    "export:security", "export:audit", "export:approvals",
   ],
+  member: ["export:own_transactions", "export:own_loans", "export:own_savings", "export:own_statement"],
 };
 
+const ADMIN_ROLES: AppRole[] = [
+  "super_admin", "compliance_officer", "loan_officer", "finance_officer", "auditor",
+];
+
 export type SessionUser = {
-  name: string;
+  id: string;
   email: string;
-  role: Role;
-  adminRole?: AdminRole;
+  fullName: string;
+  roles: AppRole[];
 };
 
 type AuthState = {
   user: SessionUser | null;
+  loading: boolean;
   permissions: Permission[];
+  isMember: boolean;
+  isAdmin: boolean;
+  hasRole: (r: AppRole) => boolean;
   hasPermission: (p: Permission) => boolean;
   hasAnyPermission: (ps: Permission[]) => boolean;
-  login: (u: SessionUser) => void;
-  logout: () => void;
+  signOut: () => Promise<void>;
+  refresh: () => Promise<void>;
 };
 
-const KEY = "iw:session";
 const AuthCtx = createContext<AuthState | null>(null);
+
+async function loadRoles(userId: string): Promise<AppRole[]> {
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  if (error || !data) return [];
+  return data.map((r) => r.role as AppRole);
+}
+
+function toSessionUser(u: User, roles: AppRole[]): SessionUser {
+  return {
+    id: u.id,
+    email: u.email ?? "",
+    fullName:
+      (u.user_metadata?.full_name as string | undefined) ??
+      (u.email?.split("@")[0] ?? "Member"),
+    roles: roles.length ? roles : ["member"],
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const hydrate = async (authUser: User | null) => {
+    if (!authUser) {
+      setUser(null);
+      return;
+    }
+    const roles = await loadRoles(authUser.id);
+    setUser(toSessionUser(authUser, roles));
+  };
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(KEY);
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
+    let cancelled = false;
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (cancelled) return;
+      await hydrate(data.session?.user ?? null);
+      setLoading(false);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      // Defer to avoid deadlock inside the callback.
+      setTimeout(() => {
+        void hydrate(session?.user ?? null);
+      }, 0);
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
-  const login = (u: SessionUser) => {
-    // Default admin sessions to super_admin if none specified.
-    const withRole: SessionUser =
-      u.role === "admin" && !u.adminRole ? { ...u, adminRole: "super_admin" } : u;
-    setUser(withRole);
-    window.localStorage.setItem(KEY, JSON.stringify(withRole));
-  };
-  const logout = () => {
-    setUser(null);
-    window.localStorage.removeItem(KEY);
-  };
-
   const permissions = useMemo<Permission[]>(() => {
-    if (!user || user.role !== "admin" || !user.adminRole) return [];
-    return ADMIN_ROLE_PERMISSIONS[user.adminRole] ?? [];
+    if (!user) return [];
+    const set = new Set<Permission>();
+    for (const r of user.roles) for (const p of ROLE_PERMISSIONS[r] ?? []) set.add(p);
+    return Array.from(set);
   }, [user]);
 
+  const hasRole = (r: AppRole) => !!user?.roles.includes(r);
+  const isMember = !!user?.roles.includes("member");
+  const isAdmin = !!user?.roles.some((r) => ADMIN_ROLES.includes(r));
   const hasPermission = (p: Permission) => permissions.includes(p);
   const hasAnyPermission = (ps: Permission[]) => ps.some((p) => permissions.includes(p));
 
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const refresh = async () => {
+    const { data } = await supabase.auth.getSession();
+    await hydrate(data.session?.user ?? null);
+  };
+
   return (
     <AuthCtx.Provider
-      value={{ user, permissions, hasPermission, hasAnyPermission, login, logout }}
+      value={{
+        user, loading, permissions, isMember, isAdmin,
+        hasRole, hasPermission, hasAnyPermission, signOut, refresh,
+      }}
     >
       {children}
     </AuthCtx.Provider>
@@ -117,18 +168,6 @@ export function useAuth() {
   const ctx = useContext(AuthCtx);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
-}
-
-// Lockout tracker
-export function recordLoginAttempt(email: string, ok: boolean): { locked: boolean; remaining: number } {
-  const k = `iw:lockout:${email}`;
-  if (ok) {
-    window.localStorage.removeItem(k);
-    return { locked: false, remaining: 3 };
-  }
-  const n = Number(window.localStorage.getItem(k) ?? "0") + 1;
-  window.localStorage.setItem(k, String(n));
-  return { locked: n >= 3, remaining: Math.max(0, 3 - n) };
 }
 
 export function passwordStrength(pw: string): { score: 0 | 1 | 2 | 3 | 4; label: string } {
