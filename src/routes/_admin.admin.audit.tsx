@@ -17,7 +17,23 @@ function AuditPage() {
   return (
     <>
       <PageHeader eyebrow="Administrator" title="Audit & Activity" description="Immutable log of every privileged action across the platform." />
-      <SectionCard title="Audit trail">
+      <SectionCard
+        title="Audit trail"
+        action={
+          <ExportBar
+            title="Audit Trail"
+            subtitle={`${trail.length} events`}
+            filename="audit_trail"
+            columns={[
+              { header: "Timestamp", accessor: (t: typeof trail[number]) => t.at },
+              { header: "Actor", accessor: (t) => t.actor },
+              { header: "Action", accessor: (t) => t.action },
+              { header: "Target", accessor: (t) => t.target },
+            ]}
+            rows={trail}
+          />
+        }
+      >
         <table className="w-full">
           <thead>
             <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">

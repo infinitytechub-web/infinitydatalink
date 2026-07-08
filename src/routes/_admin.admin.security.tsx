@@ -22,7 +22,25 @@ function SecurityPage() {
         <KPIStat label="Malware scans" value={<span className="tabular">1,204</span>} hint="0 threats" />
         <KPIStat label="OWASP posture" value={<span className="tabular">A</span>} hint="ASVS L2" />
       </section>
-      <SectionCard title="Security events">
+      <SectionCard
+        title="Security events"
+        action={
+          <ExportBar
+            title="Security Events"
+            subtitle={`${events.length} events`}
+            filename="security_events"
+            columns={[
+              { header: "Time", accessor: (e: typeof events[number]) => e.when },
+              { header: "Actor", accessor: (e) => e.who },
+              { header: "IP", accessor: (e) => e.ip },
+              { header: "Geo", accessor: (e) => e.geo },
+              { header: "Event", accessor: (e) => e.event },
+              { header: "Status", accessor: (e) => e.status.toUpperCase(), align: "right" },
+            ]}
+            rows={events}
+          />
+        }
+      >
         <table className="w-full">
           <thead>
             <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">

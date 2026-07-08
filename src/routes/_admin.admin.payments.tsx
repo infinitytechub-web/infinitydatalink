@@ -16,7 +16,26 @@ function AdminPayments() {
         <KPIStat label="Bank transfers" value={<span className="tabular">318</span>} />
         <KPIStat label="Failed" value={<span className="tabular">12</span>} accent />
       </section>
-      <SectionCard title="Providers">
+      <SectionCard
+        title="Providers"
+        action={
+          (() => {
+            const providers = ["MTN MoMo", "Vodafone Cash", "AirtelTigo Money", "GCB Bank", "Fidelity Bank", "Visa / Mastercard"].map((name) => ({ name, status: "Connected" }));
+            return (
+              <ExportBar
+                title="Payment Providers"
+                subtitle={`${providers.length} connected rails`}
+                filename="payment_providers"
+                columns={[
+                  { header: "Provider", accessor: (p: { name: string; status: string }) => p.name },
+                  { header: "Status", accessor: (p) => p.status },
+                ]}
+                rows={providers}
+              />
+            );
+          })()
+        }
+      >
         <div className="grid gap-4 p-6 md:grid-cols-3">
           {["MTN MoMo", "Vodafone Cash", "AirtelTigo Money", "GCB Bank", "Fidelity Bank", "Visa / Mastercard"].map((p) => (
             <div key={p} className="rounded border border-emerald-deep/5 bg-cream/30 p-4">
