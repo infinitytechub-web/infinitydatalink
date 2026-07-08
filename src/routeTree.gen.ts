@@ -10,13 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as MemberRouteImport } from './routes/_member'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
+import { Route as MemberAppRouteImport } from './routes/_member.app'
+import { Route as MemberAppIndexRouteImport } from './routes/_member.app.index'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberRoute = MemberRouteImport.update({
+  id: '/_member',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -34,36 +41,61 @@ const AuthForgotRoute = AuthForgotRouteImport.update({
   path: '/forgot',
   getParentRoute: () => AuthRoute,
 } as any)
+const MemberAppRoute = MemberAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberAppIndexRoute = MemberAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/app': typeof MemberAppRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/app/': typeof MemberAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/app': typeof MemberAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_member': typeof MemberRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/_member/app': typeof MemberAppRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/_member/app/': typeof MemberAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/auth/forgot' | '/auth/reset'
+  fullPaths: '/' | '/auth' | '/app' | '/auth/forgot' | '/auth/reset' | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/auth/forgot' | '/auth/reset'
-  id: '__root__' | '/' | '/auth' | '/auth/forgot' | '/auth/reset'
+  to: '/' | '/auth' | '/auth/forgot' | '/auth/reset' | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/_member'
+    | '/auth'
+    | '/_member/app'
+    | '/auth/forgot'
+    | '/auth/reset'
+    | '/_member/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MemberRoute: typeof MemberRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
 }
 
@@ -74,6 +106,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_member': {
+      id: '/_member'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MemberRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -97,8 +136,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_member/app': {
+      id: '/_member/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof MemberAppRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/app/': {
+      id: '/_member/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof MemberAppIndexRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
   }
 }
+
+interface MemberAppRouteChildren {
+  MemberAppIndexRoute: typeof MemberAppIndexRoute
+}
+
+const MemberAppRouteChildren: MemberAppRouteChildren = {
+  MemberAppIndexRoute: MemberAppIndexRoute,
+}
+
+const MemberAppRouteWithChildren = MemberAppRoute._addFileChildren(
+  MemberAppRouteChildren,
+)
+
+interface MemberRouteChildren {
+  MemberAppRoute: typeof MemberAppRouteWithChildren
+}
+
+const MemberRouteChildren: MemberRouteChildren = {
+  MemberAppRoute: MemberAppRouteWithChildren,
+}
+
+const MemberRouteWithChildren =
+  MemberRoute._addFileChildren(MemberRouteChildren)
 
 interface AuthRouteChildren {
   AuthForgotRoute: typeof AuthForgotRoute
@@ -114,6 +190,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MemberRoute: MemberRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
