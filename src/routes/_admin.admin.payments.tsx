@@ -23,6 +23,7 @@ function AdminPayments() {
             const providers = ["MTN MoMo", "Vodafone Cash", "AirtelTigo Money", "GCB Bank", "Fidelity Bank", "Visa / Mastercard"].map((name) => ({ name, status: "Connected" }));
             return (
               <ExportBar
+                permission="export:payments"
                 title="Payment Providers"
                 subtitle={`${providers.length} connected rails`}
                 filename="payment_providers"

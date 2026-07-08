@@ -26,6 +26,7 @@ function SecurityPage() {
         title="Security events"
         action={
           <ExportBar
+            permission="export:security"
             title="Security Events"
             subtitle={`${events.length} events`}
             filename="security_events"

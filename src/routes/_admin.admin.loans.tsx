@@ -32,6 +32,7 @@ function AdminLoans() {
         title="Approval pipeline"
         action={
           <ExportBar
+            permission="export:loans"
             title="Loan Approval Pipeline"
             subtitle={`${pipeline.length} applications`}
             filename="loans_pipeline"
