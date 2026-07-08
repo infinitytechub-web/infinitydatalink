@@ -7,7 +7,7 @@ import {
   type ExportColumn,
 } from "@/lib/exports";
 import { useAuth, type Permission } from "@/lib/auth";
-import { toast } from "@/hooks/use-toast";
+
 
 type Props<T> = {
   title: string;
@@ -29,11 +29,7 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
 
   const guard = (fn: () => void) => () => {
     if (!allowed) {
-      toast({
-        title: "Access denied",
-        description: `Your role does not have "${permission}" permission.`,
-        variant: "destructive",
-      });
+      console.warn(`[RBAC] Blocked export — missing permission: ${permission}`);
       return;
     }
     fn();
