@@ -40,7 +40,7 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
       <div
         className="inline-flex items-center gap-2 rounded border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold"
         title={
-          user?.role === "admin"
+          user
             ? `Requires permission: ${permission}. Sign in with a role that grants export access.`
             : "Admin sign-in required to export."
         }
