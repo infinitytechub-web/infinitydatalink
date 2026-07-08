@@ -126,3 +126,77 @@ function AiBusinessIntelligencePanel() {
     </SectionCard>
   );
 }
+
+const INSIGHTS_KEY = ["admin", "ai-insights"];
+
+function useAiInsights() {
+  const call = useServerFn(generateBusinessInsights);
+  return useQuery({
+    queryKey: INSIGHTS_KEY,
+    queryFn: () => call(),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+}
+
+function AiRefreshButton() {
+  const qc = useQueryClient();
+  const { isFetching } = useAiInsights();
+  return (
+    <button
+      onClick={() => qc.invalidateQueries({ queryKey: INSIGHTS_KEY })}
+      disabled={isFetching}
+      className="inline-flex items-center gap-1.5 rounded border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold hover:bg-gold/20 disabled:opacity-50"
+    >
+      <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
+      {isFetching ? "Analyzing…" : "Refresh insights"}
+    </button>
+  );
+}
+
+function AiInsightsGrid() {
+  const { data, isLoading, isError, error } = useAiInsights();
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-6 p-6 md:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="animate-pulse rounded border border-gold/20 bg-gold/5 p-5">
+            <div className="h-3 w-24 rounded bg-gold/30" />
+            <div className="mt-3 h-5 w-40 rounded bg-emerald-deep/20" />
+            <div className="mt-2 h-3 w-32 rounded bg-emerald-deep/10" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 text-sm text-destructive">
+        AI insights unavailable: {(error as Error)?.message ?? "unknown error"}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="grid gap-6 p-6 md:grid-cols-3">
+        {data?.insights.map((i) => (
+          <div key={i.title} className="rounded border border-gold/20 bg-gold/5 p-5">
+            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gold">
+              <Sparkles className="h-3 w-3" /> {i.title}
+            </p>
+            <p className="mt-1 font-serif text-lg text-emerald-deep">{i.value}</p>
+            <p className="mt-1 text-xs text-emerald-deep/60">{i.hint}</p>
+          </div>
+        ))}
+      </div>
+      {data ? (
+        <p className="border-t border-emerald-deep/5 px-6 py-3 text-[10px] uppercase tracking-widest text-emerald-deep/40">
+          Generated {new Date(data.generatedAt).toLocaleString()} · {data.model}
+        </p>
+      ) : null}
+    </>
+  );
+}
