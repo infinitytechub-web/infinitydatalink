@@ -28,7 +28,24 @@ function AdminLoans() {
         <KPIStat label="At risk" value={<span className="tabular">3</span>} accent hint="Predicted default 30d" />
         <KPIStat label="Awaiting approval" value={<span className="tabular">7</span>} />
       </section>
-      <SectionCard title="Approval pipeline">
+      <SectionCard
+        title="Approval pipeline"
+        action={
+          <ExportBar
+            title="Loan Approval Pipeline"
+            subtitle={`${pipeline.length} applications`}
+            filename="loans_pipeline"
+            columns={[
+              { header: "Ref", accessor: (l: typeof pipeline[number]) => l.id },
+              { header: "Member", accessor: (l) => l.member },
+              { header: "Product", accessor: (l) => l.product },
+              { header: "Amount", accessor: (l) => formatMoney(l.amount), align: "right" },
+              { header: "Status", accessor: (l) => l.status.toUpperCase(), align: "right" },
+            ]}
+            rows={pipeline}
+          />
+        }
+      >
         <table className="w-full">
           <thead>
             <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">

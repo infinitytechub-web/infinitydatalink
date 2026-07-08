@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
+import { formatMoney } from "@/lib/org-config";
 
 export const Route = createFileRoute("/_admin/admin/")({
   component: AdminDashboard,

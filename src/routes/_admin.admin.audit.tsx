@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, SectionCard } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
 
 export const Route = createFileRoute("/_admin/admin/audit")({
   component: AuditPage,

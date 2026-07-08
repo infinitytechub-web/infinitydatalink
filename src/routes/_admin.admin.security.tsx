@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KPIStat, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
 
 export const Route = createFileRoute("/_admin/admin/security")({
   component: SecurityPage,
