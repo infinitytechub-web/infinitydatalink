@@ -21,10 +21,14 @@ function Reset() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-6 font-sans">
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
+          setErr(null);
           if (strength.score < 3) return setErr("Choose a stronger password");
           if (pw !== pw2) return setErr("Passwords don't match");
+          const { supabase } = await import("@/integrations/supabase/client");
+          const { error } = await supabase.auth.updateUser({ password: pw });
+          if (error) return setErr(error.message);
           nav({ to: "/auth" });
         }}
         className="w-full max-w-md space-y-4 rounded-sm border border-emerald-deep/5 bg-card p-8 shadow-sm"
