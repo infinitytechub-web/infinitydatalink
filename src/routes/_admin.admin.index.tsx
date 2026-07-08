@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
+import { generateBusinessInsights } from "@/lib/ai-insights.functions";
+import { RefreshCw, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_admin/admin/")({
   component: AdminDashboard,
@@ -120,8 +124,5 @@ function AiBusinessIntelligencePanel() {
     >
       <AiInsightsGrid />
     </SectionCard>
-  );
-}
-    </>
   );
 }
