@@ -1,10 +1,70 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Role = "member" | "admin";
-export type SessionUser = { name: string; email: string; role: Role };
+
+// Admin sub-roles with granular permissions used across admin modules.
+export type AdminRole =
+  | "super_admin"
+  | "compliance_officer"
+  | "loan_officer"
+  | "finance_officer"
+  | "auditor";
+
+export type Permission =
+  | "export:members"
+  | "export:loans"
+  | "export:savings"
+  | "export:payments"
+  | "export:security"
+  | "export:audit"
+  | "export:approvals";
+
+export const ADMIN_ROLE_LABEL: Record<AdminRole, string> = {
+  super_admin: "Super Admin",
+  compliance_officer: "Compliance Officer",
+  loan_officer: "Loan Officer",
+  finance_officer: "Finance Officer",
+  auditor: "Auditor",
+};
+
+// Permission matrix. Auditor has read-only export access to everything.
+// Super admin owns everything. Others get scoped exports.
+export const ADMIN_ROLE_PERMISSIONS: Record<AdminRole, Permission[]> = {
+  super_admin: [
+    "export:members",
+    "export:loans",
+    "export:savings",
+    "export:payments",
+    "export:security",
+    "export:audit",
+    "export:approvals",
+  ],
+  compliance_officer: ["export:members", "export:audit", "export:security"],
+  loan_officer: ["export:loans", "export:members", "export:approvals"],
+  finance_officer: ["export:savings", "export:payments", "export:loans", "export:approvals"],
+  auditor: [
+    "export:members",
+    "export:loans",
+    "export:savings",
+    "export:payments",
+    "export:security",
+    "export:audit",
+    "export:approvals",
+  ],
+};
+
+export type SessionUser = {
+  name: string;
+  email: string;
+  role: Role;
+  adminRole?: AdminRole;
+};
 
 type AuthState = {
   user: SessionUser | null;
+  permissions: Permission[];
+  hasPermission: (p: Permission) => boolean;
+  hasAnyPermission: (ps: Permission[]) => boolean;
   login: (u: SessionUser) => void;
   logout: () => void;
 };
@@ -25,15 +85,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (u: SessionUser) => {
-    setUser(u);
-    window.localStorage.setItem(KEY, JSON.stringify(u));
+    // Default admin sessions to super_admin if none specified.
+    const withRole: SessionUser =
+      u.role === "admin" && !u.adminRole ? { ...u, adminRole: "super_admin" } : u;
+    setUser(withRole);
+    window.localStorage.setItem(KEY, JSON.stringify(withRole));
   };
   const logout = () => {
     setUser(null);
     window.localStorage.removeItem(KEY);
   };
 
-  return <AuthCtx.Provider value={{ user, login, logout }}>{children}</AuthCtx.Provider>;
+  const permissions = useMemo<Permission[]>(() => {
+    if (!user || user.role !== "admin" || !user.adminRole) return [];
+    return ADMIN_ROLE_PERMISSIONS[user.adminRole] ?? [];
+  }, [user]);
+
+  const hasPermission = (p: Permission) => permissions.includes(p);
+  const hasAnyPermission = (ps: Permission[]) => ps.some((p) => permissions.includes(p));
+
+  return (
+    <AuthCtx.Provider
+      value={{ user, permissions, hasPermission, hasAnyPermission, login, logout }}
+    >
+      {children}
+    </AuthCtx.Provider>
+  );
 }
 
 export function useAuth() {
