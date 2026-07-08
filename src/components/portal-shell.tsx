@@ -31,6 +31,8 @@ export function PortalShell({
     await signOut();
     navigate({ to: "/auth", replace: true });
   };
+
+  return (
     <div className="flex min-h-screen bg-cream font-sans text-emerald-deep">
       {/* Sidebar */}
       <aside
