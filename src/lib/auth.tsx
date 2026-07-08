@@ -19,6 +19,10 @@ export type Permission =
   | "export:security"
   | "export:audit"
   | "export:approvals"
+  | "export:own_transactions"
+  | "export:own_loans"
+  | "export:own_savings"
+  | "export:own_statement"
   | "loans:decide"
   | "members:manage";
 
@@ -43,7 +47,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "export:members", "export:loans", "export:savings", "export:payments",
     "export:security", "export:audit", "export:approvals",
   ],
-  member: [],
+  member: ["export:own_transactions", "export:own_loans", "export:own_savings", "export:own_statement"],
 };
 
 const ADMIN_ROLES: AppRole[] = [
