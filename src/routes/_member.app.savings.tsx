@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
+import { formatMoney } from "@/lib/org-config";
 
 export const Route = createFileRoute("/_member/app/savings")({
   component: SavingsPage,
@@ -32,7 +34,26 @@ function SavingsPage() {
         <KPIStat label="Next contribution" value={<span className="tabular">GH₵ 250.00</span>} hint="Real Estate Fund · Oct 21" accent />
       </section>
 
-      <SectionCard title="Contribution schedules">
+      <SectionCard
+        title="Contribution schedules"
+        action={
+          <ExportBar
+            title="My Savings Contributions"
+            subtitle={`${plans.length} plans`}
+            filename="my_savings"
+            permission="export:own_savings"
+            columns={[
+              { header: "Plan", accessor: (p: typeof plans[number]) => p.name },
+              { header: "Schedule", accessor: (p) => p.schedule },
+              { header: "Next", accessor: (p) => p.next },
+              { header: "Amount", accessor: (p) => formatMoney(p.amount), align: "right" },
+              { header: "Balance", accessor: (p) => formatMoney(p.balance), align: "right" },
+              { header: "Status", accessor: (p) => p.status.toUpperCase(), align: "right" },
+            ]}
+            rows={plans}
+          />
+        }
+      >
         <table className="w-full">
           <thead>
             <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
