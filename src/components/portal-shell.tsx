@@ -104,7 +104,7 @@ export function PortalShell({
               </p>
             </div>
             <button
-              onClick={() => void signOut()}
+              onClick={handleSignOut}
               className="text-[10px] font-semibold uppercase tracking-widest text-white/60 hover:text-gold"
             >
               Exit
