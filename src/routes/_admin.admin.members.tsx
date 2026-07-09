@@ -183,6 +183,13 @@ function QueueBody() {
   const { data } = useSuspenseQuery(queueQuery(s));
   const { data: reviewers = [] } = useQuery(reviewersQuery);
 
+  // Tick every 60s so SLA countdowns refresh live without refetching.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDialog, setBulkDialog] = useState<null | "approved" | "rejected">(null);
   const [bulkNotes, setBulkNotes] = useState("");
