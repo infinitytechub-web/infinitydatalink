@@ -2,6 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+const PageInput = z.object({
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(5).max(100).default(10),
+  sortBy: z.string().default("created_at"),
+  sortDir: z.enum(["asc", "desc"]).default("desc"),
+});
+export type PageInput = z.infer<typeof PageInput>;
+export type Paginated<T> = { rows: T[]; total: number; page: number; pageSize: number };
+
 export type SavingsRow = {
   id: string;
   name: string;
