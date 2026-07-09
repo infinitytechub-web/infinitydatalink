@@ -261,6 +261,29 @@ export const decideKyc = createServerFn({ method: "POST" })
       meta: { notes: data.notes || null, member_id: data.member_id },
     });
 
+    // Fire-and-log notification email (never fails the decision)
+    try {
+      const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
+      const res = await sendKycDecisionEmail(sb, {
+        memberId: data.member_id,
+        decision: data.decision,
+        reviewerNote: data.notes || null,
+        reviewedAt: now,
+      });
+      if (!res.ok) {
+        await sb.from("audit_log").insert({
+          actor_id: context.userId,
+          actor_email: (context.claims as any)?.email ?? null,
+          actor_role: role,
+          action: "kyc.notification_failed",
+          target: data.member_id,
+          meta: { error: res.error ?? res.skipped ?? "unknown" },
+        });
+      }
+    } catch (err: any) {
+      console.error("kyc notification error", err);
+    }
+
     return { member_id: data.member_id, kyc: profileKyc };
   });
 
