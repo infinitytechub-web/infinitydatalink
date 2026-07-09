@@ -26,6 +26,7 @@ const search = z.object({
   to: fallback(z.string(), "").default(""),
   page: fallback(z.number().int(), 1).default(1),
   pageSize: fallback(z.number().int(), 25).default(25),
+  selected: fallback(z.string(), "").default(""),
 });
 type SearchInput = z.infer<typeof search>;
 
