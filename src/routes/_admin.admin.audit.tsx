@@ -228,6 +228,168 @@ function AuditContent() {
         </>
       )}
     </SectionCard>
+    <AuditDetailsDialog entry={selected} onClose={() => setSelected(null)} />
+    </>
+  );
+}
+
+function AuditDetailsDialog({
+  entry,
+  onClose,
+}: {
+  entry: LoanAuditEntry | null;
+  onClose: () => void;
+}) {
+  const copy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error("Copy failed");
+    }
+  };
+
+  return (
+    <Dialog open={!!entry} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl text-emerald-deep">
+            Loan decision details
+          </DialogTitle>
+          <DialogDescription>
+            Immutable audit entry recorded at the moment the decision was written.
+          </DialogDescription>
+        </DialogHeader>
+
+        {entry && (
+          <div className="space-y-5 text-sm">
+            <div className="flex items-center justify-between rounded border border-emerald-deep/10 bg-cream/30 px-4 py-3">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                  Decision
+                </div>
+                <div className="mt-1">
+                  <StatusPill status={entry.action === "loan.approved" ? "approved" : "rejected"} />
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                  Timestamp
+                </div>
+                <div className="tabular mt-1 text-xs text-emerald-deep/80">
+                  {new Date(entry.created_at).toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <Section title="Loan">
+              <Row label="Reference" value={entry.loan_ref ?? "—"} mono onCopy={entry.loan_ref ? () => copy(entry.loan_ref!, "Reference") : undefined} />
+              <Row label="Loan ID" value={entry.target ?? "—"} mono onCopy={entry.target ? () => copy(entry.target!, "Loan ID") : undefined} />
+              <Row label="Amount" value={entry.amount != null ? formatMoney(entry.amount) : "—"} />
+              <Row label="Action code" value={entry.action} mono />
+            </Section>
+
+            <Section title="Member">
+              <Row label="Full name" value={entry.member_name ?? "—"} />
+              <Row label="Member no" value={entry.member_no ?? "—"} mono />
+              <Row
+                label="Member ID"
+                value={entry.member_id ?? "—"}
+                mono
+                onCopy={entry.member_id ? () => copy(entry.member_id!, "Member ID") : undefined}
+              />
+            </Section>
+
+            <Section title="Deciding officer">
+              <Row label="Email" value={entry.actor_email ?? "—"} />
+              <Row label="Role" value={entry.actor_role ?? "—"} uppercase />
+              <Row
+                label="User ID"
+                value={entry.actor_id ?? "—"}
+                mono
+                onCopy={entry.actor_id ? () => copy(entry.actor_id!, "Officer ID") : undefined}
+              />
+            </Section>
+
+            <Section title="Justification">
+              <div className="whitespace-pre-wrap rounded border border-emerald-deep/10 bg-card px-4 py-3 text-xs text-emerald-deep/80">
+                {entry.note ?? <span className="text-emerald-deep/40">— no note recorded —</span>}
+              </div>
+            </Section>
+
+            <Section title="Audit entry">
+              <Row
+                label="Entry ID"
+                value={entry.id}
+                mono
+                onCopy={() => copy(entry.id, "Entry ID")}
+              />
+            </Section>
+          </div>
+        )}
+
+        <DialogFooter>
+          <button
+            onClick={onClose}
+            className="rounded border border-emerald-deep/15 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+          >
+            Close
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+        {title}
+      </div>
+      <div className="divide-y divide-emerald-deep/5 rounded border border-emerald-deep/10 bg-card">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  mono,
+  uppercase,
+  onCopy,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  uppercase?: boolean;
+  onCopy?: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 px-4 py-2.5 text-xs">
+      <div className="text-emerald-deep/50">{label}</div>
+      <div className="flex items-center gap-2">
+        <div
+          className={[
+            "text-right text-emerald-deep/90 break-all",
+            mono ? "tabular font-mono" : "",
+            uppercase ? "uppercase tracking-widest text-[10px] font-bold" : "",
+          ].join(" ")}
+        >
+          {value}
+        </div>
+        {onCopy && (
+          <button
+            onClick={onCopy}
+            className="rounded border border-emerald-deep/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-emerald-deep/60 hover:bg-cream/50"
+          >
+            Copy
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
