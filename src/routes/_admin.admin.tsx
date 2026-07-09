@@ -40,6 +40,11 @@ const CRUMBS: Record<string, string> = {
   "/admin/settings": "Settings",
 };
 
+function crumbFor(pathname: string) {
+  if (pathname.startsWith("/admin/members/")) return "Member review";
+  return CRUMBS[pathname] ?? "Administration";
+}
+
 export const Route = createFileRoute("/_admin/admin")({
   head: () => ({
     meta: [{ title: "Administrator — Infinity Wealth" }, { name: "robots", content: "noindex" }],
@@ -49,7 +54,7 @@ export const Route = createFileRoute("/_admin/admin")({
 
 function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const breadcrumb = CRUMBS[pathname] ?? "Administration";
+  const breadcrumb = crumbFor(pathname);
   return (
     <PortalShell
       brand="Infinity Admin"
