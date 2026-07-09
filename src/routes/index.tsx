@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "One platform for savings, loans, payments and investment — built for cooperatives, SACCOs, and membership organisations.",
+          "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations.",
       },
     ],
   }),

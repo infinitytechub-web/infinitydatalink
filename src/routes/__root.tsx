@@ -77,20 +77,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#064e3b" },
-      { title: "Infinity Wealth — Savings, Loans & Financial Management" },
+      { title: "Infinity Wealth — Enterprise Financial Management Platform" },
       {
         name: "description",
         content:
-          "Enterprise-grade savings, loans, payments and investment platform for cooperatives, SACCOs, and membership organisations.",
+          "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations.",
       },
-      { property: "og:title", content: "Infinity Wealth App" },
+      { property: "og:title", content: "Infinity Wealth — Enterprise Financial Management Platform" },
       {
         property: "og:description",
         content:
-          "Enterprise savings, loans and payments platform with member and administrator portals.",
+          "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Infinity Wealth — Enterprise Financial Management Platform" },
+      { name: "twitter:description", content: "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
