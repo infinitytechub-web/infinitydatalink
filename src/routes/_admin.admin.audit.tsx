@@ -233,7 +233,7 @@ function AuditContent() {
         </>
       )}
     </SectionCard>
-    <AuditDetailsDialog entry={selected} onClose={() => setSelected(null)} />
+    <AuditDetailsDialog entry={selected} onClose={() => selectEntry(null)} />
     </>
   );
 }
