@@ -33,6 +33,7 @@ import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.pa
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
 import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
+import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -152,6 +153,11 @@ const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminAdminMembersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -162,7 +168,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset': typeof AuthResetRoute
   '/admin/audit': typeof AdminAdminAuditRoute
   '/admin/loans': typeof AdminAdminLoansRoute
-  '/admin/members': typeof AdminAdminMembersRoute
+  '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/savings': typeof AdminAdminSavingsRoute
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
+  '/admin/members/$id': typeof AdminAdminMembersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -184,7 +191,7 @@ export interface FileRoutesByTo {
   '/auth/reset': typeof AuthResetRoute
   '/admin/audit': typeof AdminAdminAuditRoute
   '/admin/loans': typeof AdminAdminLoansRoute
-  '/admin/members': typeof AdminAdminMembersRoute
+  '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/savings': typeof AdminAdminSavingsRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
+  '/admin/members/$id': typeof AdminAdminMembersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -211,7 +219,7 @@ export interface FileRoutesById {
   '/auth/reset': typeof AuthResetRoute
   '/_admin/admin/audit': typeof AdminAdminAuditRoute
   '/_admin/admin/loans': typeof AdminAdminLoansRoute
-  '/_admin/admin/members': typeof AdminAdminMembersRoute
+  '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/reports': typeof AdminAdminReportsRoute
   '/_admin/admin/savings': typeof AdminAdminSavingsRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/_member/app/transactions': typeof MemberAppTransactionsRoute
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
+  '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/app/transactions'
     | '/admin/'
     | '/app/'
+    | '/admin/members/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/app/transactions'
     | '/admin'
     | '/app'
+    | '/admin/members/$id'
   id:
     | '__root__'
     | '/'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/_member/app/transactions'
     | '/_admin/admin/'
     | '/_member/app/'
+    | '/_admin/admin/members/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -478,13 +490,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminAuditRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/members/$id': {
+      id: '/_admin/admin/members/$id'
+      path: '/$id'
+      fullPath: '/admin/members/$id'
+      preLoaderRoute: typeof AdminAdminMembersIdRouteImport
+      parentRoute: typeof AdminAdminMembersRoute
+    }
   }
 }
+
+interface AdminAdminMembersRouteChildren {
+  AdminAdminMembersIdRoute: typeof AdminAdminMembersIdRoute
+}
+
+const AdminAdminMembersRouteChildren: AdminAdminMembersRouteChildren = {
+  AdminAdminMembersIdRoute: AdminAdminMembersIdRoute,
+}
+
+const AdminAdminMembersRouteWithChildren =
+  AdminAdminMembersRoute._addFileChildren(AdminAdminMembersRouteChildren)
 
 interface AdminAdminRouteChildren {
   AdminAdminAuditRoute: typeof AdminAdminAuditRoute
   AdminAdminLoansRoute: typeof AdminAdminLoansRoute
-  AdminAdminMembersRoute: typeof AdminAdminMembersRoute
+  AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminReportsRoute: typeof AdminAdminReportsRoute
   AdminAdminSavingsRoute: typeof AdminAdminSavingsRoute
@@ -496,7 +526,7 @@ interface AdminAdminRouteChildren {
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminAuditRoute: AdminAdminAuditRoute,
   AdminAdminLoansRoute: AdminAdminLoansRoute,
-  AdminAdminMembersRoute: AdminAdminMembersRoute,
+  AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminReportsRoute: AdminAdminReportsRoute,
   AdminAdminSavingsRoute: AdminAdminSavingsRoute,

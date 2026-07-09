@@ -40,6 +40,11 @@ const CRUMBS: Record<string, string> = {
   "/admin/settings": "Settings",
 };
 
+function crumbFor(pathname: string) {
+  if (pathname.startsWith("/admin/members/")) return "Member review";
+  return CRUMBS[pathname] ?? "Administration";
+}
+
 export const Route = createFileRoute("/_admin/admin")({
   head: () => ({
     meta: [{ title: "Administrator — Infinity Wealth" }, { name: "robots", content: "noindex" }],
