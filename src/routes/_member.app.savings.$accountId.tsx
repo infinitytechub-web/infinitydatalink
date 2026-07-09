@@ -60,7 +60,7 @@ function Body({ accountId }: { accountId: string }) {
         eyebrow="Savings account"
         title={a.nickname || a.plan_name}
         description={`${a.plan_name} · ${a.plan_schedule} · ${a.plan_interest_rate}% p.a.`}
-        actions={
+        action={
           <div className="flex gap-2">
             <ContributionDialog accountId={a.id} />
             <WithdrawalDialog accountId={a.id} balance={a.balance} />
