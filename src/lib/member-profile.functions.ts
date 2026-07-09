@@ -52,7 +52,7 @@ export type MemberProfileFull = {
     address_line: string | null;
     occupation: string | null;
     employer: string | null;
-    kyc: KycDocStatus;
+    kyc: ProfileKycStatus;
     kyc_notes: string | null;
     kyc_reviewed_at: string | null;
     tier: string;

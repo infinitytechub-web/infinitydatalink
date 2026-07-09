@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { KycDocStatus, KycDocument, NextOfKin } from "./member-profile.functions";
+import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -21,7 +21,7 @@ export type KycQueueRow = {
   region: string | null;
   phone: string | null;
   national_id: string | null;
-  kyc: KycDocStatus;
+  kyc: ProfileKycStatus;
   kyc_reviewed_at: string | null;
   pending_docs: number;
   last_document_at: string | null;
@@ -117,7 +117,7 @@ export type MemberKycDetail = {
     address_line: string | null;
     occupation: string | null;
     employer: string | null;
-    kyc: KycDocStatus;
+    kyc: ProfileKycStatus;
     kyc_notes: string | null;
     kyc_reviewed_at: string | null;
     kyc_reviewed_by: string | null;
