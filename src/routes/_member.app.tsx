@@ -12,6 +12,7 @@ const groups: NavGroup[] = [
       { to: "/app/transactions", label: "Transactions" },
       { to: "/app/payments", label: "Payments" },
       { to: "/app/profile", label: "Profile & KYC" },
+      { to: "/app/kyc", label: "Verification status" },
     ],
   },
   {
