@@ -10,6 +10,7 @@ export type KycDocType =
   | "other";
 
 export type KycDocStatus = "pending" | "approved" | "rejected";
+export type ProfileKycStatus = "pending" | "active" | "rejected";
 
 export type KycDocument = {
   id: string;
