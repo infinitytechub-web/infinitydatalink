@@ -170,7 +170,11 @@ function AuditContent() {
             </thead>
             <tbody className="divide-y divide-emerald-deep/5">
               {rows.map((e) => (
-                <tr key={e.id} className="align-top">
+                <tr
+                  key={e.id}
+                  onClick={() => setSelected(e)}
+                  className="align-top cursor-pointer hover:bg-cream/40"
+                >
                   <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
                     {new Date(e.created_at).toLocaleString()}
                   </td>
@@ -197,7 +201,19 @@ function AuditContent() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-xs text-emerald-deep/80 max-w-md whitespace-pre-wrap">
-                    {e.note ?? <span className="text-emerald-deep/40">— no note —</span>}
+                    <div className="line-clamp-2">
+                      {e.note ?? <span className="text-emerald-deep/40">— no note —</span>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        setSelected(e);
+                      }}
+                      className="mt-1 text-[10px] font-bold uppercase tracking-widest text-emerald-mid hover:underline"
+                    >
+                      View details →
+                    </button>
                   </td>
                 </tr>
               ))}
