@@ -104,9 +104,10 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
   const qc = useQueryClient();
   const decide = useServerFn(decideLoan);
   const mutation = useMutation({
-    mutationFn: decide,
+    mutationFn: (input: { loan_id: string; decision: "approved" | "rejected"; note: string }) =>
+      decide({ data: input }),
     onSuccess: (_d, vars) => {
-      toast.success(`Loan ${vars.data.decision}`);
+      toast.success(`Loan ${vars.decision}`);
       qc.invalidateQueries({ queryKey: ["admin", "overview"] });
       qc.invalidateQueries({ queryKey: ["admin", "loans"] });
       qc.invalidateQueries({ queryKey: ["admin", "loan-audit"] });
