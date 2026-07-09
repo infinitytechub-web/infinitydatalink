@@ -62,7 +62,7 @@ function AuditContent() {
   const { data } = useSuspenseQuery(auditQuery(s));
 
   const setSearch = (patch: Partial<SearchInput>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
+    navigate({ search: (prev: SearchInput) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
 
   const rows = data.rows;
 
