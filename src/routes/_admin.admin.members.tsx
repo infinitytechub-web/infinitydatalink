@@ -1,15 +1,26 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Suspense } from "react";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { Suspense, useMemo, useState } from "react";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { toast } from "sonner";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listKycQueue, type KycQueueRow } from "@/lib/admin-kyc.functions";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  listKycQueue,
+  getKycSummary,
+  listKycReviewers,
+  assignKyc,
+  bulkDecideKyc,
+  type KycQueueRow,
+} from "@/lib/admin-kyc.functions";
 
 const search = z.object({
   status: fallback(z.enum(["all", "pending", "active", "rejected"]), "pending").default("pending"),
+  assignee: fallback(z.string(), "any").default("any"),
   q: fallback(z.string(), "").default(""),
   page: fallback(z.number().int().min(1), 1).default(1),
 });
@@ -19,20 +30,38 @@ const PAGE_SIZE = 25;
 
 const queueQuery = (s: SearchInput) =>
   queryOptions({
-    queryKey: ["admin", "kyc", "queue", s.status, s.q, s.page],
+    queryKey: ["admin", "kyc", "queue", s.status, s.assignee, s.q, s.page],
     queryFn: () =>
       listKycQueue({
-        data: { status: s.status, q: s.q || undefined, page: s.page, page_size: PAGE_SIZE },
+        data: {
+          status: s.status,
+          assignee: s.assignee || "any",
+          q: s.q || undefined,
+          page: s.page,
+          page_size: PAGE_SIZE,
+        },
       }),
     staleTime: 15_000,
   });
 
+const summaryQuery = queryOptions({
+  queryKey: ["admin", "kyc", "summary"],
+  queryFn: () => getKycSummary(),
+  staleTime: 15_000,
+});
+
+const reviewersQuery = queryOptions({
+  queryKey: ["admin", "kyc", "reviewers"],
+  queryFn: () => listKycReviewers(),
+  staleTime: 60_000,
+});
+
 export const Route = createFileRoute("/_admin/admin/members")({
   validateSearch: zodValidator(search),
-  head: () => ({ meta: [{ title: "Members — KYC Queue" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "KYC queue — Admin" }, { name: "robots", content: "noindex" }] }),
   component: MembersPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Members failed to load: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Queue failed to load: {error.message}</div>
   ),
 });
 
@@ -41,146 +70,429 @@ function MembersPage() {
     <>
       <PageHeader
         eyebrow="Administrator"
-        title="Membership & KYC"
-        description="Review member identity submissions and manage the compliance queue."
+        title="KYC review queue"
+        description="Assign reviewers, take decisions individually, or approve and reject in bulk."
       />
-      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-        <MembersBody />
-      </Suspense>
+      <div className="space-y-6">
+        <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+          <SummaryCards />
+        </Suspense>
+        <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+          <QueueBody />
+        </Suspense>
+      </div>
     </>
   );
 }
 
-function MembersBody() {
+function SummaryCards() {
+  const { data } = useSuspenseQuery(summaryQuery);
+  const items = [
+    { label: "Pending", value: data.pending, tone: "text-gold" },
+    { label: "Assigned to me", value: data.assigned_to_me, tone: "text-emerald-mid" },
+    { label: "Unassigned", value: data.unassigned_pending, tone: "text-red-600" },
+    { label: "Decided (24h)", value: data.decided_today, tone: "text-emerald-deep" },
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      {items.map((it) => (
+        <div key={it.label} className="rounded border border-emerald-deep/10 bg-card p-4">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+            {it.label}
+          </div>
+          <div className={`mt-1 text-2xl font-semibold tabular ${it.tone}`}>{it.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function QueueBody() {
   const s = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
+  const qc = useQueryClient();
   const { data } = useSuspenseQuery(queueQuery(s));
+  const { data: reviewers = [] } = useQuery(reviewersQuery);
 
-  const setSearch = (patch: Partial<SearchInput>) =>
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDialog, setBulkDialog] = useState<null | "approved" | "rejected">(null);
+  const [bulkNotes, setBulkNotes] = useState("");
+  const [assignOpenFor, setAssignOpenFor] = useState<string | null>(null);
+
+  const setSearch = (patch: Partial<SearchInput>) => {
+    setSelected(new Set());
     navigate({ search: (prev: SearchInput) => ({ ...prev, page: 1, ...patch }) });
+  };
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
+  const allChecked = data.rows.length > 0 && data.rows.every((r) => selected.has(r.member_id));
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["admin", "kyc"] });
+  };
+
+  const assignMutation = useMutation({
+    mutationFn: (args: { member_ids: string[]; assignee_id: string | null }) =>
+      assignKyc({ data: args }),
+    onSuccess: (res) => {
+      toast.success(`${res.updated} member${res.updated === 1 ? "" : "s"} updated`);
+      setSelected(new Set());
+      setAssignOpenFor(null);
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Assignment failed"),
+  });
+
+  const bulkMutation = useMutation({
+    mutationFn: (args: { member_ids: string[]; decision: "approved" | "rejected"; notes: string }) =>
+      bulkDecideKyc({ data: args }),
+    onSuccess: (res) => {
+      const failed = res.failed.length;
+      if (failed === 0) toast.success(`${res.succeeded} member${res.succeeded === 1 ? "" : "s"} ${bulkDialog}`);
+      else toast.warning(`${res.succeeded} succeeded · ${failed} failed`);
+      setSelected(new Set());
+      setBulkDialog(null);
+      setBulkNotes("");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Bulk decision failed"),
+  });
+
+  const selectedList = useMemo(() => Array.from(selected), [selected]);
 
   return (
-    <SectionCard
-      title="Directory"
-      action={
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            defaultValue={s.q}
-            placeholder="Search name, member no., national ID…"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") setSearch({ q: (e.target as HTMLInputElement).value });
-            }}
-            className="w-64 rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
-          />
-          <div className="inline-flex rounded border border-emerald-deep/15 bg-card p-0.5 text-[10px] uppercase tracking-widest">
-            {(["all", "pending", "active", "rejected"] as const).map((st) => (
-              <button
-                key={st}
-                onClick={() => setSearch({ status: st })}
-                className={`rounded px-2.5 py-1 font-bold ${
-                  s.status === st ? "bg-emerald-deep text-cream" : "text-emerald-deep/70 hover:bg-cream/50"
-                }`}
-              >
-                {st}
-              </button>
-            ))}
+    <>
+      <SectionCard
+        title="Directory"
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              defaultValue={s.q}
+              placeholder="Search name, member no., national ID…"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setSearch({ q: (e.target as HTMLInputElement).value });
+              }}
+              className="w-56 rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
+            />
+            <select
+              value={s.assignee}
+              onChange={(e) => setSearch({ assignee: e.target.value })}
+              className="rounded border border-emerald-deep/15 bg-card px-2 py-1.5 text-xs"
+            >
+              <option value="any">Any reviewer</option>
+              <option value="me">Assigned to me</option>
+              <option value="unassigned">Unassigned</option>
+              {reviewers.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+            <div className="inline-flex rounded border border-emerald-deep/15 bg-card p-0.5 text-[10px] uppercase tracking-widest">
+              {(["all", "pending", "active", "rejected"] as const).map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setSearch({ status: st })}
+                  className={`rounded px-2.5 py-1 font-bold ${
+                    s.status === st ? "bg-emerald-deep text-cream" : "text-emerald-deep/70 hover:bg-cream/50"
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+            <ExportBar
+              permission="export:members"
+              title="KYC Queue"
+              subtitle={`${data.total} member${data.total === 1 ? "" : "s"} · ${s.status}`}
+              filename={`members_${s.status}`}
+              columns={[
+                { header: "Member No", accessor: (m: KycQueueRow) => m.member_no ?? "—" },
+                { header: "Name", accessor: (m) => m.full_name ?? "—" },
+                { header: "Region", accessor: (m) => m.region ?? "—" },
+                { header: "Phone", accessor: (m) => m.phone ?? "—" },
+                { header: "National ID", accessor: (m) => m.national_id ?? "—" },
+                { header: "KYC", accessor: (m) => m.kyc },
+                { header: "Assignee", accessor: (m) => m.kyc_assigned_name ?? "—" },
+                { header: "Pending docs", accessor: (m) => m.pending_docs, align: "right" },
+              ]}
+              rows={data.rows}
+            />
           </div>
-          <ExportBar
-            permission="export:members"
-            title="Membership Directory"
-            subtitle={`${data.total} member${data.total === 1 ? "" : "s"} · ${s.status}`}
-            filename={`members_${s.status}`}
-            columns={[
-              { header: "Member No", accessor: (m: KycQueueRow) => m.member_no ?? "—" },
-              { header: "Name", accessor: (m) => m.full_name ?? "—" },
-              { header: "Region", accessor: (m) => m.region ?? "—" },
-              { header: "Phone", accessor: (m) => m.phone ?? "—" },
-              { header: "National ID", accessor: (m) => m.national_id ?? "—" },
-              { header: "KYC", accessor: (m) => m.kyc },
-              { header: "Pending docs", accessor: (m) => m.pending_docs, align: "right" },
-            ]}
-            rows={data.rows}
+        }
+      >
+        {selected.size > 0 ? (
+          <SelectionToolbar
+            count={selected.size}
+            reviewers={reviewers}
+            onAssign={(assignee_id) =>
+              assignMutation.mutate({ member_ids: selectedList, assignee_id })
+            }
+            onBulk={(d) => setBulkDialog(d)}
+            onClear={() => setSelected(new Set())}
           />
-        </div>
-      }
-    >
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
-            <th className="px-6 py-3 font-medium">Member</th>
-            <th className="px-6 py-3 font-medium">Region</th>
-            <th className="px-6 py-3 font-medium">Phone</th>
-            <th className="px-6 py-3 text-right font-medium">Docs</th>
-            <th className="px-6 py-3 text-right font-medium">Last activity</th>
-            <th className="px-6 py-3 text-right font-medium">KYC</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-emerald-deep/5">
-          {data.rows.length === 0 ? (
-            <tr>
-              <td colSpan={6} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
-                No members match these filters.
-              </td>
+        ) : null}
+
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <th className="px-3 py-3">
+                <input
+                  type="checkbox"
+                  checked={allChecked}
+                  onChange={(e) => {
+                    if (e.target.checked) setSelected(new Set(data.rows.map((r) => r.member_id)));
+                    else setSelected(new Set());
+                  }}
+                />
+              </th>
+              <th className="px-4 py-3 font-medium">Member</th>
+              <th className="px-4 py-3 font-medium">Assignee</th>
+              <th className="px-4 py-3 text-right font-medium">Docs</th>
+              <th className="px-4 py-3 text-right font-medium">Last activity</th>
+              <th className="px-4 py-3 text-right font-medium">KYC</th>
             </tr>
-          ) : (
-            data.rows.map((m) => (
-              <tr key={m.member_id} className="cursor-pointer hover:bg-cream/30">
-                <td className="px-6 py-4 text-sm">
-                  <Link
-                    to="/admin/members/$id"
-                    params={{ id: m.member_id }}
-                    className="block"
-                  >
-                    <div className="font-semibold">{m.full_name ?? "—"}</div>
-                    <div className="tabular text-[11px] text-emerald-deep/50">{m.member_no ?? ""}</div>
-                  </Link>
-                </td>
-                <td className="px-6 py-4 text-sm text-emerald-deep/60">{m.region ?? "—"}</td>
-                <td className="px-6 py-4 text-sm tabular text-emerald-deep/60">{m.phone ?? "—"}</td>
-                <td className="tabular px-6 py-4 text-right text-sm">
-                  {m.pending_docs > 0 ? (
-                    <span className="rounded bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-gold">
-                      {m.pending_docs} pending
-                    </span>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="px-6 py-4 text-right text-[11px] text-emerald-deep/50">
-                  {m.last_document_at ? new Date(m.last_document_at).toLocaleDateString() : "—"}
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <StatusPill status={m.kyc as any} />
+          </thead>
+          <tbody className="divide-y divide-emerald-deep/5">
+            {data.rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
+                  No members match these filters.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              data.rows.map((m) => (
+                <tr key={m.member_id} className="hover:bg-cream/30">
+                  <td className="px-3 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(m.member_id)}
+                      onChange={(e) => {
+                        setSelected((prev) => {
+                          const n = new Set(prev);
+                          if (e.target.checked) n.add(m.member_id);
+                          else n.delete(m.member_id);
+                          return n;
+                        });
+                      }}
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <Link to="/admin/members/$id" params={{ id: m.member_id }} className="block">
+                      <div className="font-semibold">{m.full_name ?? "—"}</div>
+                      <div className="tabular text-[11px] text-emerald-deep/50">
+                        {m.member_no ?? ""} · {m.region ?? "—"}
+                      </div>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <Popover
+                      open={assignOpenFor === m.member_id}
+                      onOpenChange={(o) => setAssignOpenFor(o ? m.member_id : null)}
+                    >
+                      <PopoverTrigger asChild>
+                        <button className="rounded border border-transparent px-2 py-1 text-xs hover:border-emerald-deep/15">
+                          {m.kyc_assigned_name ?? (
+                            <span className="text-emerald-deep/40">Unassigned</span>
+                          )}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56 p-2 text-xs">
+                        <button
+                          onClick={() =>
+                            assignMutation.mutate({ member_ids: [m.member_id], assignee_id: null })
+                          }
+                          className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream"
+                        >
+                          Unassign
+                        </button>
+                        <div className="my-1 border-t border-emerald-deep/10" />
+                        {reviewers.map((r) => (
+                          <button
+                            key={r.id}
+                            onClick={() =>
+                              assignMutation.mutate({
+                                member_ids: [m.member_id],
+                                assignee_id: r.id,
+                              })
+                            }
+                            className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream"
+                          >
+                            {r.name}
+                            <span className="ml-2 text-[10px] text-emerald-deep/40">{r.role}</span>
+                          </button>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
+                  </td>
+                  <td className="tabular px-4 py-3 text-right text-sm">
+                    {m.pending_docs > 0 ? (
+                      <span className="rounded bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-gold">
+                        {m.pending_docs} pending
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right text-[11px] text-emerald-deep/50">
+                    {m.last_document_at ? new Date(m.last_document_at).toLocaleDateString() : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <StatusPill status={m.kyc as any} />
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
 
-      <div className="flex items-center justify-between border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-emerald-deep/60">
-        <span>
-          Page {s.page} of {totalPages} · {data.total} total
-        </span>
-        <div className="flex gap-1">
-          <button
-            disabled={s.page <= 1}
-            onClick={() => navigate({ search: (p: SearchInput) => ({ ...p, page: Math.max(1, p.page - 1) }) })}
-            className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream disabled:opacity-40"
-          >
-            Prev
-          </button>
-          <button
-            disabled={s.page >= totalPages}
-            onClick={() => navigate({ search: (p: SearchInput) => ({ ...p, page: p.page + 1 }) })}
-            className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream disabled:opacity-40"
-          >
-            Next
-          </button>
+        <div className="flex items-center justify-between border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-emerald-deep/60">
+          <span>
+            Page {s.page} of {totalPages} · {data.total} total
+          </span>
+          <div className="flex gap-1">
+            <button
+              disabled={s.page <= 1}
+              onClick={() =>
+                navigate({ search: (p: SearchInput) => ({ ...p, page: Math.max(1, p.page - 1) }) })
+              }
+              className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream disabled:opacity-40"
+            >
+              Prev
+            </button>
+            <button
+              disabled={s.page >= totalPages}
+              onClick={() => navigate({ search: (p: SearchInput) => ({ ...p, page: p.page + 1 }) })}
+              className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
-    </SectionCard>
+      </SectionCard>
+
+      <Dialog open={!!bulkDialog} onOpenChange={(o) => (!o ? setBulkDialog(null) : null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {bulkDialog === "approved" ? "Bulk approve" : "Bulk reject"} · {selected.size} member
+              {selected.size === 1 ? "" : "s"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-emerald-deep/70">
+              {bulkDialog === "approved"
+                ? "An optional note is stored on each member's audit log."
+                : "A shared note (at least 5 characters) is required for rejection."}
+            </p>
+            <textarea
+              value={bulkNotes}
+              onChange={(e) => setBulkNotes(e.target.value)}
+              placeholder={
+                bulkDialog === "rejected"
+                  ? "Reason shown to the member in their notification email"
+                  : "Optional note"
+              }
+              rows={4}
+              className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+            />
+          </div>
+          <DialogFooter>
+            <button
+              className="rounded border border-emerald-deep/15 px-3 py-1.5 text-xs uppercase tracking-widest"
+              onClick={() => {
+                setBulkDialog(null);
+                setBulkNotes("");
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              disabled={
+                bulkMutation.isPending ||
+                (bulkDialog === "rejected" && bulkNotes.trim().length < 5)
+              }
+              onClick={() =>
+                bulkDialog &&
+                bulkMutation.mutate({
+                  member_ids: selectedList,
+                  decision: bulkDialog,
+                  notes: bulkNotes,
+                })
+              }
+              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream disabled:opacity-40 ${
+                bulkDialog === "approved" ? "bg-emerald-deep" : "bg-red-600"
+              }`}
+            >
+              {bulkMutation.isPending
+                ? "Working…"
+                : bulkDialog === "approved"
+                  ? "Approve all"
+                  : "Reject all"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function SelectionToolbar({
+  count,
+  reviewers,
+  onAssign,
+  onBulk,
+  onClear,
+}: {
+  count: number;
+  reviewers: { id: string; name: string; role: string }[];
+  onAssign: (id: string | null) => void;
+  onBulk: (d: "approved" | "rejected") => void;
+  onClear: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 border-b border-emerald-deep/5 bg-cream/40 px-6 py-3 text-xs">
+      <span className="font-semibold text-emerald-deep">
+        {count} selected
+      </span>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs uppercase tracking-widest hover:bg-cream">
+            Assign to…
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56 p-2 text-xs">
+          <button onClick={() => onAssign(null)} className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream">
+            Unassign
+          </button>
+          <div className="my-1 border-t border-emerald-deep/10" />
+          {reviewers.map((r) => (
+            <button
+              key={r.id}
+              onClick={() => onAssign(r.id)}
+              className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream"
+            >
+              {r.name}
+              <span className="ml-2 text-[10px] text-emerald-deep/40">{r.role}</span>
+            </button>
+          ))}
+        </PopoverContent>
+      </Popover>
+      <button
+        onClick={() => onBulk("approved")}
+        className="rounded bg-emerald-deep px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+      >
+        Bulk approve
+      </button>
+      <button
+        onClick={() => onBulk("rejected")}
+        className="rounded bg-red-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-red-700"
+      >
+        Bulk reject
+      </button>
+      <button onClick={onClear} className="ml-auto text-[11px] text-emerald-deep/60 underline">
+        Clear selection
+      </button>
+    </div>
   );
 }

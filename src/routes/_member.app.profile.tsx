@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useRef, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -110,10 +110,18 @@ function KycBanner({
   return (
     <div className={`flex items-start gap-3 rounded border p-4 text-sm ${className}`}>
       <Icon className="mt-0.5 h-4 w-4 shrink-0" />
-      <div>
+      <div className="flex-1">
         <p className="text-[11px] font-bold uppercase tracking-widest">{label}</p>
         <p className="mt-1 text-xs">{hint}</p>
       </div>
+      {status !== "active" ? (
+        <Link
+          to="/app/kyc"
+          className="shrink-0 self-center rounded border border-current px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-current/10"
+        >
+          View status →
+        </Link>
+      ) : null}
     </div>
   );
 }
