@@ -77,8 +77,8 @@ function AuditContent() {
   const [selected, setSelected] = useState<LoanAuditEntry | null>(null);
 
   return (
-    <></>
-  ) && null || (
+    <>
+    <SectionCard
     <SectionCard
       title="Approval & rejection log"
       action={
