@@ -194,13 +194,13 @@ export const decideKyc = createServerFn({ method: "POST" })
     const role = await assertKycAdmin(context.supabase, context.userId);
     const sb = context.supabase;
 
-    const kyc: KycDocStatus = data.decision === "approved" ? "active" : "rejected";
+    const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const now = new Date().toISOString();
 
     const { data: profile, error: pErr } = await sb
       .from("profiles")
       .update({
-        kyc,
+        kyc: profileKyc,
         kyc_notes: data.notes || null,
         kyc_reviewed_by: context.userId,
         kyc_reviewed_at: now,
@@ -211,7 +211,7 @@ export const decideKyc = createServerFn({ method: "POST" })
     if (pErr) throw new Error(pErr.message);
     if (!profile) throw new Error("Member not found");
 
-    const docStatus: KycDocStatus = data.decision === "approved" ? "approved" : "rejected";
+    const docStatus: "approved" | "rejected" = data.decision === "approved" ? "approved" : "rejected";
     const { error: dErr } = await sb
       .from("kyc_documents")
       .update({
