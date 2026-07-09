@@ -1,12 +1,21 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { toast } from "sonner";
 import { EmptyState, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Pagination } from "@/components/table-controls";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatMoney } from "@/lib/org-config";
 import { listLoanAudit, type LoanAuditEntry } from "@/lib/admin-loans.functions";
 
