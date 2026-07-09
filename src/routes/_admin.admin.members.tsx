@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -17,10 +17,20 @@ import {
   bulkDecideKyc,
   type KycQueueRow,
 } from "@/lib/admin-kyc.functions";
+import {
+  AGING_ORDER,
+  BUCKET_META,
+  bucketFor,
+  formatCountdown,
+  hoursSince,
+  slaRemainingHours,
+  type AgingBucket,
+} from "@/lib/kyc-sla";
 
 const search = z.object({
   status: fallback(z.enum(["all", "pending", "active", "rejected"]), "pending").default("pending"),
   assignee: fallback(z.string(), "any").default("any"),
+  aging: fallback(z.enum(["any", "fresh", "due_soon", "overdue", "critical"]), "any").default("any"),
   q: fallback(z.string(), "").default(""),
   page: fallback(z.number().int().min(1), 1).default(1),
 });
@@ -30,12 +40,13 @@ const PAGE_SIZE = 25;
 
 const queueQuery = (s: SearchInput) =>
   queryOptions({
-    queryKey: ["admin", "kyc", "queue", s.status, s.assignee, s.q, s.page],
+    queryKey: ["admin", "kyc", "queue", s.status, s.assignee, s.aging, s.q, s.page],
     queryFn: () =>
       listKycQueue({
         data: {
           status: s.status,
           assignee: s.assignee || "any",
+          aging: s.aging,
           q: s.q || undefined,
           page: s.page,
           page_size: PAGE_SIZE,
