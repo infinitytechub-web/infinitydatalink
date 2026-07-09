@@ -233,7 +233,7 @@ export const decideKyc = createServerFn({ method: "POST" })
       meta: { notes: data.notes || null, member_id: data.member_id },
     });
 
-    return { member_id: data.member_id, kyc };
+    return { member_id: data.member_id, kyc: profileKyc };
   });
 
 export const signKycDocument = createServerFn({ method: "POST" })
