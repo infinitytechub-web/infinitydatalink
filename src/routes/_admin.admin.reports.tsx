@@ -1,0 +1,256 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Suspense } from "react";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+} from "recharts";
+import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primitives";
+import { ExportBar } from "@/components/export-bar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatMoney } from "@/lib/org-config";
+import { getReport, type AdminReport, type ReportBucket } from "@/lib/admin-analytics.functions";
+
+const DEFAULT_TO = new Date();
+const DEFAULT_FROM = new Date(DEFAULT_TO.getTime() - 29 * 24 * 3600 * 1000);
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+const search = z.object({
+  from: fallback(z.string(), iso(DEFAULT_FROM)).default(iso(DEFAULT_FROM)),
+  to: fallback(z.string(), iso(DEFAULT_TO)).default(iso(DEFAULT_TO)),
+  granularity: fallback(z.enum(["day", "week", "month"]), "day").default("day"),
+});
+type SearchInput = z.infer<typeof search>;
+
+const reportQuery = (s: SearchInput) =>
+  queryOptions({
+    queryKey: ["admin", "report", s.from, s.to, s.granularity],
+    queryFn: () => getReport({ data: { from: s.from, to: s.to, granularity: s.granularity } }),
+    staleTime: 30_000,
+  });
+
+export const Route = createFileRoute("/_admin/admin/reports")({
+  validateSearch: zodValidator(search),
+  component: ReportsPage,
+  errorComponent: ({ error }) => (
+    <div className="p-6 text-sm text-destructive">Reports failed to load: {error.message}</div>
+  ),
+});
+
+function ReportsPage() {
+  return (
+    <>
+      <PageHeader
+        eyebrow="Administrator"
+        title="Reports & analytics"
+        description="Date-range analytics across membership growth, savings flow, loan disbursements and repayments."
+      />
+      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+        <ReportsBody />
+      </Suspense>
+    </>
+  );
+}
+
+function ReportsBody() {
+  const s = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { data } = useSuspenseQuery(reportQuery(s));
+
+  const setSearch = (patch: Partial<SearchInput>) =>
+    navigate({ search: (prev: SearchInput) => ({ ...prev, ...patch }) });
+
+  const isEmpty =
+    data.totals.new_members === 0 &&
+    data.totals.contributions === 0 &&
+    data.totals.disbursements === 0 &&
+    data.totals.repayments === 0;
+
+  return (
+    <>
+      <SectionCard title="Filters">
+        <div className="flex flex-wrap items-end gap-3 p-4">
+          <Field label="From">
+            <input
+              type="date"
+              value={s.from}
+              onChange={(e) => setSearch({ from: e.target.value })}
+              className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
+            />
+          </Field>
+          <Field label="To">
+            <input
+              type="date"
+              value={s.to}
+              onChange={(e) => setSearch({ to: e.target.value })}
+              className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
+            />
+          </Field>
+          <Field label="Granularity">
+            <div className="inline-flex rounded border border-emerald-deep/15 bg-card p-0.5 text-[10px] uppercase tracking-widest">
+              {(["day", "week", "month"] as const).map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setSearch({ granularity: g })}
+                  className={`rounded px-3 py-1 font-bold ${
+                    s.granularity === g
+                      ? "bg-emerald-deep text-cream"
+                      : "text-emerald-deep/70 hover:bg-cream/50"
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+          </Field>
+          <button
+            onClick={() =>
+              navigate({
+                search: { from: iso(DEFAULT_FROM), to: iso(DEFAULT_TO), granularity: "day" },
+              })
+            }
+            className="ml-auto rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+          >
+            Reset
+          </button>
+        </div>
+      </SectionCard>
+
+      <section className="grid gap-6 md:grid-cols-4">
+        <KPIStat label="New members" value={<span className="tabular">{data.totals.new_members.toLocaleString()}</span>} />
+        <KPIStat label="Contributions" value={<>GH₵ <span className="tabular">{formatMoneyShort(data.totals.contributions)}</span></>} />
+        <KPIStat label="Disbursements" value={<>GH₵ <span className="tabular">{formatMoneyShort(data.totals.disbursements)}</span></>} />
+        <KPIStat label="Repayments" value={<>GH₵ <span className="tabular">{formatMoneyShort(data.totals.repayments)}</span></>} />
+      </section>
+
+      <SectionCard
+        title="Trend"
+        action={
+          <ExportBar
+            permission="export:members"
+            title="Analytics Report"
+            subtitle={`${s.from} to ${s.to} · ${s.granularity}`}
+            filename={`analytics_${s.from}_to_${s.to}_${s.granularity}`}
+            columns={[
+              { header: "Bucket", accessor: (r: ReportBucket) => r.bucket },
+              { header: "New members", accessor: (r) => r.new_members, align: "right" },
+              { header: "Contributions", accessor: (r) => formatMoney(r.contributions), align: "right" },
+              { header: "Disbursements", accessor: (r) => formatMoney(r.disbursements), align: "right" },
+              { header: "Repayments", accessor: (r) => formatMoney(r.repayments), align: "right" },
+            ]}
+            rows={data.series}
+          />
+        }
+      >
+        {isEmpty ? (
+          <div className="p-6">
+            <EmptyState title="No activity in this range" hint="Widen the date range or seed activity." />
+          </div>
+        ) : (
+          <div className="h-80 p-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data.series}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="bucket" fontSize={11} stroke="currentColor" />
+                <YAxis fontSize={11} stroke="currentColor" />
+                <Tooltip
+                  contentStyle={{ fontSize: 12, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Line type="monotone" dataKey="new_members" stroke="#0f766e" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="contributions" stroke="#2563eb" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="disbursements" stroke="#d97706" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="repayments" stroke="#16a34a" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </SectionCard>
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        <StatusMix data={data} />
+        <TopProducts data={data} />
+      </div>
+    </>
+  );
+}
+
+function StatusMix({ data }: { data: AdminReport }) {
+  const max = Math.max(1, ...data.loan_status_mix.map((s) => s.count));
+  return (
+    <SectionCard title="Loan status mix">
+      {data.loan_status_mix.length === 0 ? (
+        <div className="p-6"><EmptyState title="No loan activity in range" /></div>
+      ) : (
+        <ul className="divide-y divide-emerald-deep/5">
+          {data.loan_status_mix.map((s) => (
+            <li key={s.status} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 px-6 py-3 text-sm">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70">
+                {s.status}
+              </span>
+              <div className="h-2 rounded bg-emerald-deep/5">
+                <div
+                  className="h-2 rounded bg-emerald-deep/60"
+                  style={{ width: `${(s.count / max) * 100}%` }}
+                />
+              </div>
+              <span className="tabular text-right text-sm">{s.count}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </SectionCard>
+  );
+}
+
+function TopProducts({ data }: { data: AdminReport }) {
+  return (
+    <SectionCard title="Top loan products">
+      {data.top_products.length === 0 ? (
+        <div className="p-6"><EmptyState title="No loan activity in range" /></div>
+      ) : (
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <th className="px-6 py-3 font-medium">Product</th>
+              <th className="px-6 py-3 text-right font-medium">Loans</th>
+              <th className="px-6 py-3 text-right font-medium">Total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-emerald-deep/5">
+            {data.top_products.map((p) => (
+              <tr key={p.product}>
+                <td className="px-6 py-3 text-sm">{p.product}</td>
+                <td className="tabular px-6 py-3 text-right text-sm">{p.count}</td>
+                <td className="tabular px-6 py-3 text-right text-sm">{formatMoney(p.total)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </SectionCard>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+      {label}
+      {children}
+    </label>
+  );
+}
+
+function formatMoneyShort(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toFixed(0);
+}
