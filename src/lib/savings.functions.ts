@@ -269,7 +269,7 @@ export const submitContribution = createServerFn({ method: "POST" })
       _account_id: data.account_id,
       _amount: data.amount,
       _channel: data.channel,
-      _note: data.note ?? null,
+      _note: data.note ?? "",
     });
     if (error) throw new Error(error.message);
     return { txn_id: id as string };
@@ -283,7 +283,7 @@ export const submitWithdrawal = createServerFn({ method: "POST" })
       _account_id: data.account_id,
       _amount: data.amount,
       _channel: data.channel,
-      _note: data.note ?? null,
+      _note: data.note ?? "",
     });
     if (error) throw new Error(error.message);
     return { txn_id: id as string };
@@ -436,7 +436,7 @@ export const adminSettleTransaction = createServerFn({ method: "POST" })
     const { error } = await context.supabase.rpc("finalize_transaction", {
       _txn_id: data.txn_id,
       _status: data.status,
-      _note: data.note ?? null,
+      _note: data.note ?? "",
     });
     if (error) throw new Error(error.message);
     return { ok: true };
