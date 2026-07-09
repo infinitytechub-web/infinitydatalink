@@ -20,8 +20,8 @@ const PRODUCTS = [
 
 const Schema = z.object({
   product: z.string().min(2, "Select a product"),
-  amount: z.number({ invalid_type_error: "Enter an amount" }).positive("Amount must be greater than 0"),
-  term_months: z.number({ invalid_type_error: "Enter a term" }).int().min(1).max(360),
+  amount: z.number().positive("Amount must be greater than 0"),
+  term_months: z.number().int().min(1, "Enter a term").max(360),
   purpose: z.string().max(1000).optional(),
 });
 
