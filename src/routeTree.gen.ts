@@ -24,7 +24,6 @@ import { Route as AdminAdminIndexRouteImport } from './routes/_admin.admin.index
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
 import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
-import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
 import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
 import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
 import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
@@ -37,6 +36,7 @@ import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.pa
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
 import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
+import { Route as MemberAppSavingsIndexRouteImport } from './routes/_member.app.savings.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -117,11 +117,6 @@ const MemberAppSupportRoute = MemberAppSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => MemberAppRoute,
 } as any)
-const MemberAppSavingsRoute = MemberAppSavingsRouteImport.update({
-  id: '/savings',
-  path: '/savings',
-  getParentRoute: () => MemberAppRoute,
-} as any)
 const MemberAppProfileRoute = MemberAppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -182,6 +177,11 @@ const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const MemberAppSavingsIndexRoute = MemberAppSavingsIndexRouteImport.update({
+  id: '/savings/',
+  path: '/savings/',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -237,7 +237,6 @@ export interface FileRoutesByFullPath {
   '/app/loans': typeof MemberAppLoansRoute
   '/app/payments': typeof MemberAppPaymentsRoute
   '/app/profile': typeof MemberAppProfileRoute
-  '/app/savings': typeof MemberAppSavingsRoute
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -249,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/app/savings/': typeof MemberAppSavingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -269,7 +269,6 @@ export interface FileRoutesByTo {
   '/app/loans': typeof MemberAppLoansRoute
   '/app/payments': typeof MemberAppPaymentsRoute
   '/app/profile': typeof MemberAppProfileRoute
-  '/app/savings': typeof MemberAppSavingsRoute
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -281,6 +280,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/app/savings': typeof MemberAppSavingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -306,7 +306,6 @@ export interface FileRoutesById {
   '/_member/app/loans': typeof MemberAppLoansRoute
   '/_member/app/payments': typeof MemberAppPaymentsRoute
   '/_member/app/profile': typeof MemberAppProfileRoute
-  '/_member/app/savings': typeof MemberAppSavingsRoute
   '/_member/app/support': typeof MemberAppSupportRoute
   '/_member/app/transactions': typeof MemberAppTransactionsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -318,6 +317,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_member/app/savings/': typeof MemberAppSavingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -342,7 +342,6 @@ export interface FileRouteTypes {
     | '/app/loans'
     | '/app/payments'
     | '/app/profile'
-    | '/app/savings'
     | '/app/support'
     | '/app/transactions'
     | '/lovable/email/suppression'
@@ -354,6 +353,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/app/savings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -374,7 +374,6 @@ export interface FileRouteTypes {
     | '/app/loans'
     | '/app/payments'
     | '/app/profile'
-    | '/app/savings'
     | '/app/support'
     | '/app/transactions'
     | '/lovable/email/suppression'
@@ -386,6 +385,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/app/savings'
   id:
     | '__root__'
     | '/'
@@ -410,7 +410,6 @@ export interface FileRouteTypes {
     | '/_member/app/loans'
     | '/_member/app/payments'
     | '/_member/app/profile'
-    | '/_member/app/savings'
     | '/_member/app/support'
     | '/_member/app/transactions'
     | '/lovable/email/suppression'
@@ -422,6 +421,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_member/app/savings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -546,13 +546,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppSupportRouteImport
       parentRoute: typeof MemberAppRoute
     }
-    '/_member/app/savings': {
-      id: '/_member/app/savings'
-      path: '/savings'
-      fullPath: '/app/savings'
-      preLoaderRoute: typeof MemberAppSavingsRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
     '/_member/app/profile': {
       id: '/_member/app/profile'
       path: '/profile'
@@ -636,6 +629,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AdminAdminAuditRouteImport
       parentRoute: typeof AdminAdminRoute
+    }
+    '/_member/app/savings/': {
+      id: '/_member/app/savings/'
+      path: '/savings'
+      fullPath: '/app/savings/'
+      preLoaderRoute: typeof MemberAppSavingsIndexRouteImport
+      parentRoute: typeof MemberAppRoute
     }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
@@ -736,10 +736,10 @@ interface MemberAppRouteChildren {
   MemberAppLoansRoute: typeof MemberAppLoansRoute
   MemberAppPaymentsRoute: typeof MemberAppPaymentsRoute
   MemberAppProfileRoute: typeof MemberAppProfileRoute
-  MemberAppSavingsRoute: typeof MemberAppSavingsRoute
   MemberAppSupportRoute: typeof MemberAppSupportRoute
   MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
   MemberAppIndexRoute: typeof MemberAppIndexRoute
+  MemberAppSavingsIndexRoute: typeof MemberAppSavingsIndexRoute
 }
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
@@ -747,10 +747,10 @@ const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppLoansRoute: MemberAppLoansRoute,
   MemberAppPaymentsRoute: MemberAppPaymentsRoute,
   MemberAppProfileRoute: MemberAppProfileRoute,
-  MemberAppSavingsRoute: MemberAppSavingsRoute,
   MemberAppSupportRoute: MemberAppSupportRoute,
   MemberAppTransactionsRoute: MemberAppTransactionsRoute,
   MemberAppIndexRoute: MemberAppIndexRoute,
+  MemberAppSavingsIndexRoute: MemberAppSavingsIndexRoute,
 }
 
 const MemberAppRouteWithChildren = MemberAppRoute._addFileChildren(

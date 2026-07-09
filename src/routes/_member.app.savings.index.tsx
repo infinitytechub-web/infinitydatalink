@@ -17,7 +17,7 @@ const search = z.object({
   sortDir: fallback(z.enum(["asc", "desc"]), "desc").default("desc"),
 });
 
-export const Route = createFileRoute("/_member/app/savings")({
+export const Route = createFileRoute("/_member/app/savings/")({
   validateSearch: zodValidator(search),
   component: SavingsPage,
 });
