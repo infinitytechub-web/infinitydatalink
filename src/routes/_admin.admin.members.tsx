@@ -88,6 +88,9 @@ function MembersPage() {
         <Suspense fallback={<Skeleton className="h-24 w-full" />}>
           <SummaryCards />
         </Suspense>
+        <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+          <AgingChips />
+        </Suspense>
         <Suspense fallback={<Skeleton className="h-96 w-full" />}>
           <QueueBody />
         </Suspense>
@@ -98,14 +101,23 @@ function MembersPage() {
 
 function SummaryCards() {
   const { data } = useSuspenseQuery(summaryQuery);
+  const oldestHours = hoursSince(data.oldest_pending_at);
+  const oldestLabel =
+    oldestHours == null
+      ? "—"
+      : oldestHours >= 24
+        ? `${Math.floor(oldestHours / 24)}d ${Math.floor(oldestHours % 24)}h`
+        : `${Math.floor(oldestHours)}h`;
   const items = [
     { label: "Pending", value: data.pending, tone: "text-gold" },
     { label: "Assigned to me", value: data.assigned_to_me, tone: "text-emerald-mid" },
+    { label: "SLA breached", value: data.breached, tone: data.breached > 0 ? "text-red-600" : "text-emerald-deep/60" },
+    { label: `Oldest pending`, value: oldestLabel, tone: "text-emerald-deep" },
     { label: "Unassigned", value: data.unassigned_pending, tone: "text-red-600" },
     { label: "Decided (24h)", value: data.decided_today, tone: "text-emerald-deep" },
   ];
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
       {items.map((it) => (
         <div key={it.label} className="rounded border border-emerald-deep/10 bg-card p-4">
           <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
@@ -114,6 +126,52 @@ function SummaryCards() {
           <div className={`mt-1 text-2xl font-semibold tabular ${it.tone}`}>{it.value}</div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function AgingChips() {
+  const { data } = useSuspenseQuery(summaryQuery);
+  const s = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const setAging = (aging: "any" | AgingBucket) =>
+    navigate({
+      search: (p: SearchInput) => ({ ...p, status: "pending", aging, page: 1 }),
+    });
+  const active = s.status === "pending" ? s.aging : "any";
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded border border-emerald-deep/10 bg-card px-3 py-2">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+        Aging (pending)
+      </span>
+      <button
+        onClick={() => setAging("any")}
+        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest ${
+          active === "any"
+            ? "bg-emerald-deep text-cream"
+            : "border border-emerald-deep/15 text-emerald-deep/70 hover:bg-cream"
+        }`}
+      >
+        All · {data.pending}
+      </button>
+      {AGING_ORDER.map((b) => {
+        const meta = BUCKET_META[b];
+        const count = data.aging[b];
+        const isActive = active === b;
+        return (
+          <button
+            key={b}
+            onClick={() => setAging(b)}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${
+              isActive ? "ring-2 ring-emerald-deep ring-offset-1 ring-offset-card" : ""
+            } ${meta.tone}`}
+            title={meta.label}
+          >
+            <span className={`inline-block h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+            {meta.short} · {count}
+          </button>
+        );
+      })}
     </div>
   );
 }
