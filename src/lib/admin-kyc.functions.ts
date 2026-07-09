@@ -356,6 +356,13 @@ export const signKycDocument = createServerFn({ method: "POST" })
 // Summary + assignment + bulk decisions
 // ============================================================================
 
+export type KycAgingBuckets = {
+  fresh: number;
+  due_soon: number;
+  overdue: number;
+  critical: number;
+};
+
 export type KycSummary = {
   pending: number;
   active: number;
@@ -363,6 +370,9 @@ export type KycSummary = {
   unassigned_pending: number;
   assigned_to_me: number;
   decided_today: number;
+  breached: number; // pending & older than SLA target (72h)
+  oldest_pending_at: string | null;
+  aging: KycAgingBuckets;
 };
 
 export const getKycSummary = createServerFn({ method: "GET" })
@@ -377,9 +387,31 @@ export const getKycSummary = createServerFn({ method: "GET" })
       const { count } = await q;
       return count ?? 0;
     };
-    const todayIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const now = Date.now();
+    const H = 3_600_000;
+    const dayAgo = new Date(now - 24 * H).toISOString();
+    const t24 = new Date(now - 24 * H).toISOString();
+    const t48 = new Date(now - 48 * H).toISOString();
+    const t72 = new Date(now - 72 * H).toISOString();
+    const t120 = new Date(now - 120 * H).toISOString();
 
-    const [pending, active, rejected, unassignedPending, mine, decidedToday] = await Promise.all([
+    const pendingCount = (extra: (q: any) => any) =>
+      countBy("kyc", "pending", extra);
+
+    const [
+      pending,
+      active,
+      rejected,
+      unassignedPending,
+      mine,
+      decidedToday,
+      fresh,
+      dueSoon,
+      overdue,
+      critical,
+      breached,
+      oldest,
+    ] = await Promise.all([
       countBy("kyc", "pending"),
       countBy("kyc", "active"),
       countBy("kyc", "rejected"),
@@ -390,8 +422,22 @@ export const getKycSummary = createServerFn({ method: "GET" })
           .from("profiles")
           .select("id", { count: "exact", head: true })
           .in("kyc", ["active", "rejected"])
-          .gte("kyc_reviewed_at", todayIso);
+          .gte("kyc_reviewed_at", dayAgo);
         return count ?? 0;
+      })(),
+      pendingCount((q) => q.gt("updated_at", t24)),
+      pendingCount((q) => q.lte("updated_at", t24).gt("updated_at", t48)),
+      pendingCount((q) => q.lte("updated_at", t48).gt("updated_at", t120)),
+      pendingCount((q) => q.lte("updated_at", t120)),
+      pendingCount((q) => q.lte("updated_at", t72)),
+      (async () => {
+        const { data } = await sb
+          .from("profiles")
+          .select("updated_at")
+          .eq("kyc", "pending")
+          .order("updated_at", { ascending: true })
+          .limit(1);
+        return (data?.[0] as any)?.updated_at ?? null;
       })(),
     ]);
 
@@ -402,6 +448,9 @@ export const getKycSummary = createServerFn({ method: "GET" })
       unassigned_pending: unassignedPending,
       assigned_to_me: mine,
       decided_today: decidedToday,
+      breached,
+      oldest_pending_at: oldest,
+      aging: { fresh, due_soon: dueSoon, overdue, critical },
     };
   });
 
