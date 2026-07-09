@@ -25,7 +25,7 @@ export type AdminLoanRow = {
   amount: number;
   term_months: number;
   interest_rate: number;
-  status: "pending" | "approved" | "rejected" | "active" | "cleared";
+  status: "pending" | "approved" | "rejected" | "active" | "closed";
   purpose: string | null;
   created_at: string;
   decided_at: string | null;
