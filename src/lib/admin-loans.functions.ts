@@ -51,7 +51,7 @@ export const listAdminLoans = createServerFn({ method: "GET" })
       .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, user_id")
       .order("created_at", { ascending: false })
       .limit(data.limit);
-    if (data.status) q = q.eq("status", data.status);
+    if (data.status) q = q.eq("status", data.status as any);
     const { data: loans, error } = await q;
     if (error) throw new Error(error.message);
 
