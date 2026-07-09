@@ -47,6 +47,59 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_documents: {
+        Row: {
+          created_at: string
+          doc_type: Database["public"]["Enums"]["kyc_doc_type"]
+          id: string
+          member_id: string
+          mime_type: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number
+          status: Database["public"]["Enums"]["kyc_doc_status"]
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type: Database["public"]["Enums"]["kyc_doc_type"]
+          id?: string
+          member_id: string
+          mime_type: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes: number
+          status?: Database["public"]["Enums"]["kyc_doc_status"]
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["kyc_doc_type"]
+          id?: string
+          member_id?: string
+          mime_type?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number
+          status?: Database["public"]["Enums"]["kyc_doc_status"]
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_documents_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loans: {
         Row: {
           amount: number
@@ -98,38 +151,112 @@ export type Database = {
         }
         Relationships: []
       }
+      next_of_kin: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          member_id: string
+          national_id: string | null
+          phone: string | null
+          relationship: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          member_id: string
+          national_id?: string | null
+          phone?: string | null
+          relationship: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          member_id?: string
+          national_id?: string | null
+          phone?: string | null
+          relationship?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "next_of_kin_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          address_line: string | null
           created_at: string
+          date_of_birth: string | null
+          digital_address: string | null
+          employer: string | null
           full_name: string | null
+          gender: string | null
           id: string
           kyc: Database["public"]["Enums"]["kyc_status"]
+          kyc_notes: string | null
+          kyc_reviewed_at: string | null
+          kyc_reviewed_by: string | null
           member_no: string | null
           national_id: string | null
+          occupation: string | null
           phone: string | null
           region: string | null
           tier: Database["public"]["Enums"]["member_tier"]
           updated_at: string
         }
         Insert: {
+          address_line?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          digital_address?: string | null
+          employer?: string | null
           full_name?: string | null
+          gender?: string | null
           id: string
           kyc?: Database["public"]["Enums"]["kyc_status"]
+          kyc_notes?: string | null
+          kyc_reviewed_at?: string | null
+          kyc_reviewed_by?: string | null
           member_no?: string | null
           national_id?: string | null
+          occupation?: string | null
           phone?: string | null
           region?: string | null
           tier?: Database["public"]["Enums"]["member_tier"]
           updated_at?: string
         }
         Update: {
+          address_line?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          digital_address?: string | null
+          employer?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           kyc?: Database["public"]["Enums"]["kyc_status"]
+          kyc_notes?: string | null
+          kyc_reviewed_at?: string | null
+          kyc_reviewed_by?: string | null
           member_no?: string | null
           national_id?: string | null
+          occupation?: string | null
           phone?: string | null
           region?: string | null
           tier?: Database["public"]["Enums"]["member_tier"]
@@ -289,6 +416,13 @@ export type Database = {
         | "finance_officer"
         | "auditor"
         | "member"
+      kyc_doc_status: "pending" | "approved" | "rejected"
+      kyc_doc_type:
+        | "national_id_front"
+        | "national_id_back"
+        | "selfie"
+        | "proof_of_address"
+        | "other"
       kyc_status: "pending" | "active" | "rejected"
       loan_status: "pending" | "approved" | "rejected" | "active" | "closed"
       member_tier: "standard" | "premium"
@@ -434,6 +568,14 @@ export const Constants = {
         "finance_officer",
         "auditor",
         "member",
+      ],
+      kyc_doc_status: ["pending", "approved", "rejected"],
+      kyc_doc_type: [
+        "national_id_front",
+        "national_id_back",
+        "selfie",
+        "proof_of_address",
+        "other",
       ],
       kyc_status: ["pending", "active", "rejected"],
       loan_status: ["pending", "approved", "rejected", "active", "closed"],
