@@ -50,7 +50,7 @@ function SavingsContent() {
   const rows = data.rows;
   const totalOnPage = rows.reduce((sum: number, p: SavingsRow) => sum + p.balance, 0);
   const sort: SortState = { sortBy: s.sortBy, sortDir: s.sortDir };
-  const setSort = (next: SortState) => navigate({ search: (p) => ({ ...p, ...next, page: 1 }) });
+  const setSort = (next: SortState) => navigate({ search: (p: any) => ({ ...p, ...next, page: 1 }) });
 
   return (
     <>
@@ -108,8 +108,8 @@ function SavingsContent() {
               page={s.page}
               pageSize={s.pageSize}
               total={data.total}
-              onPage={(n) => navigate({ search: (p) => ({ ...p, page: n }) })}
-              onPageSize={(n) => navigate({ search: (p) => ({ ...p, pageSize: n, page: 1 }) })}
+              onPage={(n) => navigate({ search: (p: any) => ({ ...p, page: n }) })}
+              onPageSize={(n) => navigate({ search: (p: any) => ({ ...p, pageSize: n, page: 1 }) })}
             />
           </>
         )}
