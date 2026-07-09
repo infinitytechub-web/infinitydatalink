@@ -30,6 +30,7 @@ const CRUMBS: Record<string, string> = {
   "/app/transactions": "Transactions",
   "/app/payments": "Payments",
   "/app/profile": "Profile & KYC",
+  "/app/kyc": "Verification status",
   "/app/support": "Help Centre",
 };
 
