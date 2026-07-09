@@ -48,6 +48,7 @@ export const listKycQueue = createServerFn({ method: "GET" })
         status: z.enum(["all", "pending", "active", "rejected"]).default("pending"),
         q: z.string().trim().max(120).optional(),
         assignee: z.string().max(64).optional(), // 'any' | 'me' | 'unassigned' | uuid
+        aging: z.enum(["any", "fresh", "due_soon", "overdue", "critical"]).default("any"),
         page: z.number().int().min(1).default(1),
         page_size: z.number().int().min(5).max(100).default(25),
       })
