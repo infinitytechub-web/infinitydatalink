@@ -325,9 +325,18 @@ function QueueBody() {
               <th className="px-4 py-3 font-medium">Member</th>
               <th className="px-4 py-3 font-medium">Assignee</th>
               <th className="px-4 py-3 text-right font-medium">Docs</th>
+              <th className="px-4 py-3 text-right font-medium">SLA</th>
               <th className="px-4 py-3 text-right font-medium">Last activity</th>
               <th className="px-4 py-3 text-right font-medium">KYC</th>
             </tr>
+          </thead>
+          <tbody className="divide-y divide-emerald-deep/5">
+            {data.rows.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
+                  No members match these filters.
+                </td>
+              </tr>
           </thead>
           <tbody className="divide-y divide-emerald-deep/5">
             {data.rows.length === 0 ? (
