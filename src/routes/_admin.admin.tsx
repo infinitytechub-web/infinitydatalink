@@ -6,6 +6,7 @@ const groups: NavGroup[] = [
     label: "Overview",
     items: [
       { to: "/admin", label: "Analytics" },
+      { to: "/admin/reports", label: "Reports" },
       { to: "/admin/audit", label: "Audit & Activity" },
     ],
   },
@@ -29,6 +30,7 @@ const groups: NavGroup[] = [
 
 const CRUMBS: Record<string, string> = {
   "/admin": "Analytics",
+  "/admin/reports": "Reports",
   "/admin/audit": "Audit & Activity",
   "/admin/members": "Membership",
   "/admin/savings": "Savings",

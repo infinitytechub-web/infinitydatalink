@@ -28,6 +28,7 @@ import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
 import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
 import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
+import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.reports'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
@@ -126,6 +127,11 @@ const AdminAdminSavingsRoute = AdminAdminSavingsRouteImport.update({
   path: '/savings',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminReportsRoute = AdminAdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/admin/loans': typeof AdminAdminLoansRoute
   '/admin/members': typeof AdminAdminMembersRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/admin/loans': typeof AdminAdminLoansRoute
   '/admin/members': typeof AdminAdminMembersRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_admin/admin/loans': typeof AdminAdminLoansRoute
   '/_admin/admin/members': typeof AdminAdminMembersRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
+  '/_admin/admin/reports': typeof AdminAdminReportsRoute
   '/_admin/admin/savings': typeof AdminAdminSavingsRoute
   '/_admin/admin/security': typeof AdminAdminSecurityRoute
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/admin/loans'
     | '/admin/members'
     | '/admin/payments'
+    | '/admin/reports'
     | '/admin/savings'
     | '/admin/security'
     | '/admin/settings'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin/loans'
     | '/admin/members'
     | '/admin/payments'
+    | '/admin/reports'
     | '/admin/savings'
     | '/admin/security'
     | '/admin/settings'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/loans'
     | '/_admin/admin/members'
     | '/_admin/admin/payments'
+    | '/_admin/admin/reports'
     | '/_admin/admin/savings'
     | '/_admin/admin/security'
     | '/_admin/admin/settings'
@@ -431,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSavingsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/reports': {
+      id: '/_admin/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminAdminReportsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/payments': {
       id: '/_admin/admin/payments'
       path: '/payments'
@@ -467,6 +486,7 @@ interface AdminAdminRouteChildren {
   AdminAdminLoansRoute: typeof AdminAdminLoansRoute
   AdminAdminMembersRoute: typeof AdminAdminMembersRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
+  AdminAdminReportsRoute: typeof AdminAdminReportsRoute
   AdminAdminSavingsRoute: typeof AdminAdminSavingsRoute
   AdminAdminSecurityRoute: typeof AdminAdminSecurityRoute
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
@@ -478,6 +498,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminLoansRoute: AdminAdminLoansRoute,
   AdminAdminMembersRoute: AdminAdminMembersRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
+  AdminAdminReportsRoute: AdminAdminReportsRoute,
   AdminAdminSavingsRoute: AdminAdminSavingsRoute,
   AdminAdminSecurityRoute: AdminAdminSecurityRoute,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
