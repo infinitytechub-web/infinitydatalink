@@ -17,7 +17,20 @@ import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primi
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/org-config";
-import { getReport, type AdminReport, type ReportBucket } from "@/lib/admin-analytics.functions";
+import { getReport, type AdminReport, type ReportBucket, type LoanStatusMix, type TopProduct } from "@/lib/admin-analytics.functions";
+import { useAuth, type Permission } from "@/lib/auth";
+import { Lock } from "lucide-react";
+
+// Reports aggregates cross-domain data. Any admin role with at least one
+// domain export permission may view; members and unauthenticated users are blocked.
+const REPORT_VIEW_PERMISSIONS: Permission[] = [
+  "export:members",
+  "export:loans",
+  "export:savings",
+  "export:payments",
+  "export:audit",
+  "export:security",
+];
 
 const DEFAULT_TO = new Date();
 const DEFAULT_FROM = new Date(DEFAULT_TO.getTime() - 29 * 24 * 3600 * 1000);
@@ -46,6 +59,30 @@ export const Route = createFileRoute("/_admin/admin/reports")({
 });
 
 function ReportsPage() {
+  const { user, loading, hasAnyPermission } = useAuth();
+
+  if (loading) return <Skeleton className="h-96 w-full" />;
+
+  if (!user || !hasAnyPermission(REPORT_VIEW_PERMISSIONS)) {
+    return (
+      <>
+        <PageHeader
+          eyebrow="Administrator"
+          title="Reports & analytics"
+          description="Restricted analytics workspace."
+        />
+        <SectionCard title="Access denied">
+          <div className="flex items-center gap-3 p-6 text-sm text-emerald-deep/80">
+            <Lock className="h-4 w-4 text-gold" />
+            {user
+              ? "Your role does not include reporting privileges. Contact a Super Admin to be granted an admin role with export permissions."
+              : "Sign in with an authorised admin account to view reports."}
+          </div>
+        </SectionCard>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -176,33 +213,48 @@ function ReportsBody() {
       </SectionCard>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <StatusMix data={data} />
-        <TopProducts data={data} />
+        <StatusMix data={data} s={s} />
+        <TopProducts data={data} s={s} />
       </div>
     </>
   );
 }
 
-function StatusMix({ data }: { data: AdminReport }) {
+function StatusMix({ data, s }: { data: AdminReport; s: SearchInput }) {
   const max = Math.max(1, ...data.loan_status_mix.map((s) => s.count));
   return (
-    <SectionCard title="Loan status mix">
+    <SectionCard
+      title="Loan status mix"
+      action={
+        <ExportBar
+          permission="export:loans"
+          title="Loan status mix"
+          subtitle={`${s.from} to ${s.to} · ${s.granularity}`}
+          filename={`loan_status_mix_${s.from}_to_${s.to}`}
+          columns={[
+            { header: "Status", accessor: (r: LoanStatusMix) => r.status },
+            { header: "Loans", accessor: (r) => r.count, align: "right" },
+          ]}
+          rows={data.loan_status_mix}
+        />
+      }
+    >
       {data.loan_status_mix.length === 0 ? (
         <div className="p-6"><EmptyState title="No loan activity in range" /></div>
       ) : (
         <ul className="divide-y divide-emerald-deep/5">
-          {data.loan_status_mix.map((s) => (
-            <li key={s.status} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 px-6 py-3 text-sm">
+          {data.loan_status_mix.map((row) => (
+            <li key={row.status} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 px-6 py-3 text-sm">
               <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70">
-                {s.status}
+                {row.status}
               </span>
               <div className="h-2 rounded bg-emerald-deep/5">
                 <div
                   className="h-2 rounded bg-emerald-deep/60"
-                  style={{ width: `${(s.count / max) * 100}%` }}
+                  style={{ width: `${(row.count / max) * 100}%` }}
                 />
               </div>
-              <span className="tabular text-right text-sm">{s.count}</span>
+              <span className="tabular text-right text-sm">{row.count}</span>
             </li>
           ))}
         </ul>
@@ -211,9 +263,25 @@ function StatusMix({ data }: { data: AdminReport }) {
   );
 }
 
-function TopProducts({ data }: { data: AdminReport }) {
+function TopProducts({ data, s }: { data: AdminReport; s: SearchInput }) {
   return (
-    <SectionCard title="Top loan products">
+    <SectionCard
+      title="Top loan products"
+      action={
+        <ExportBar
+          permission="export:loans"
+          title="Top loan products"
+          subtitle={`${s.from} to ${s.to} · ${s.granularity}`}
+          filename={`top_loan_products_${s.from}_to_${s.to}`}
+          columns={[
+            { header: "Product", accessor: (r: TopProduct) => r.product },
+            { header: "Loans", accessor: (r) => r.count, align: "right" },
+            { header: "Total", accessor: (r) => formatMoney(r.total), align: "right" },
+          ]}
+          rows={data.top_products}
+        />
+      }
+    >
       {data.top_products.length === 0 ? (
         <div className="p-6"><EmptyState title="No loan activity in range" /></div>
       ) : (
