@@ -115,22 +115,35 @@ function AdminLoansContent() {
   );
 }
 
-function LoanRow({ loan, filter }: { loan: AdminLoanRow; filter: string }) {
+function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
   const qc = useQueryClient();
   const decide = useServerFn(decideLoan);
   const [note, setNote] = useState("");
-  const [showNote, setShowNote] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
+  const noteValid = note.trim().length >= 5;
   const mutation = useMutation({
     mutationFn: (decision: "approved" | "rejected") =>
-      decide({ data: { loan_id: loan.id, decision, note: note.trim() || undefined } }),
+      decide({ data: { loan_id: loan.id, decision, note: note.trim() } }),
     onSuccess: (updated) => {
       toast.success(`Loan ${updated.status}`, { description: `Reference ${updated.ref}` });
       qc.invalidateQueries({ queryKey: ["admin", "loans"] });
-      setShowNote(false);
+      qc.invalidateQueries({ queryKey: ["admin", "loan-audit"] });
+      setShowPanel(false);
       setNote("");
     },
     onError: (err: Error) => toast.error("Decision failed", { description: err.message }),
   });
+
+  const attemptDecide = (decision: "approved" | "rejected") => {
+    if (!noteValid) {
+      setShowPanel(true);
+      toast.error("Decision note required", {
+        description: "Enter at least 5 characters explaining the decision — it is written to the audit log.",
+      });
+      return;
+    }
+    mutation.mutate(decision);
+  };
 
   return (
     <>
@@ -148,21 +161,21 @@ function LoanRow({ loan, filter }: { loan: AdminLoanRow; filter: string }) {
           {loan.status === "pending" ? (
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setShowNote((v) => !v)}
+                onClick={() => setShowPanel((v) => !v)}
                 className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
               >
-                Note
+                {showPanel ? "Hide" : "Note"}
               </button>
               <button
                 disabled={mutation.isPending}
-                onClick={() => mutation.mutate("rejected")}
+                onClick={() => attemptDecide("rejected")}
                 className="rounded bg-destructive/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-destructive hover:bg-destructive/20 disabled:opacity-50"
               >
                 Reject
               </button>
               <button
                 disabled={mutation.isPending}
-                onClick={() => mutation.mutate("approved")}
+                onClick={() => attemptDecide("approved")}
                 className="rounded bg-emerald-deep px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
               >
                 Approve
@@ -175,15 +188,24 @@ function LoanRow({ loan, filter }: { loan: AdminLoanRow; filter: string }) {
           )}
         </td>
       </tr>
-      {showNote && loan.status === "pending" && (
+      {showPanel && loan.status === "pending" && (
         <tr>
           <td colSpan={7} className="bg-cream/30 px-6 py-3">
-            <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Decision note (optional, recorded in audit log)"
-              className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs outline-none focus:border-emerald-mid"
-            />
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+                Decision note <span className="text-destructive">*required, written to audit log</span>
+              </label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+                placeholder="Explain the approval or rejection (min. 5 characters)…"
+                className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-xs outline-none focus:border-emerald-mid"
+              />
+              <div className={`text-[10px] ${noteValid ? "text-emerald-deep/50" : "text-destructive"}`}>
+                {note.trim().length}/1000 — {noteValid ? "OK" : "at least 5 characters"}
+              </div>
+            </div>
           </td>
         </tr>
       )}
