@@ -145,7 +145,7 @@ function AuditContent() {
         {(s.member || s.from || s.to || s.decision !== "all") && (
           <button
             onClick={() =>
-              navigate({ search: { decision: "all", member: "", from: "", to: "", page: 1, pageSize: s.pageSize } })
+              navigate({ search: { decision: "all", member: "", from: "", to: "", page: 1, pageSize: s.pageSize, selected: "" } })
             }
             className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
           >
