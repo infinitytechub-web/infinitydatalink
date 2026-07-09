@@ -213,8 +213,8 @@ function ReportsBody() {
       </SectionCard>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <StatusMix data={data} />
-        <TopProducts data={data} />
+        <StatusMix data={data} s={s} />
+        <TopProducts data={data} s={s} />
       </div>
     </>
   );
