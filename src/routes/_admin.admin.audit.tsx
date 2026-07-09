@@ -74,8 +74,12 @@ function AuditContent() {
   const setSearch = (patch: Partial<SearchInput>) =>
     navigate({ search: (prev: SearchInput) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
 
+  const selectEntry = (id: string | null) =>
+    navigate({ search: (prev: SearchInput) => ({ ...prev, selected: id ?? "" }) });
+
   const rows = data.rows;
-  const [selected, setSelected] = useState<LoanAuditEntry | null>(null);
+  const selected = s.selected ? rows.find((r) => r.id === s.selected) ?? null : null;
+
 
   return (
     <>
