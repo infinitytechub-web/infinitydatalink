@@ -81,7 +81,11 @@ export const decideLoan = createServerFn({ method: "POST" })
       .object({
         loan_id: z.string().uuid(),
         decision: z.enum(["approved", "rejected"]),
-        note: z.string().max(1000).optional(),
+        note: z
+          .string()
+          .trim()
+          .min(5, "A decision note of at least 5 characters is required")
+          .max(1000),
       })
       .parse(data),
   )
@@ -103,7 +107,7 @@ export const decideLoan = createServerFn({ method: "POST" })
         status: data.decision,
         decided_at: new Date().toISOString(),
         decided_by: context.userId,
-        decision_note: data.note ?? null,
+        decision_note: data.note,
       })
       .eq("id", data.loan_id)
       .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, user_id")
@@ -116,7 +120,7 @@ export const decideLoan = createServerFn({ method: "POST" })
       actor_role: role,
       action: data.decision === "approved" ? "loan.approved" : "loan.rejected",
       target: updated.id,
-      meta: { ref: updated.ref, note: data.note ?? null, amount: Number(updated.amount) },
+      meta: { ref: updated.ref, note: data.note, amount: Number(updated.amount), member_id: updated.user_id },
     });
 
     return {
@@ -125,5 +129,124 @@ export const decideLoan = createServerFn({ method: "POST" })
       interest_rate: Number(updated.interest_rate),
       member_name: null,
       member_no: null,
+    };
+  });
+
+export type LoanAuditEntry = {
+  id: string;
+  created_at: string;
+  actor_id: string | null;
+  actor_email: string | null;
+  actor_role: string | null;
+  action: string;
+  target: string | null;
+  loan_ref: string | null;
+  note: string | null;
+  amount: number | null;
+  member_id: string | null;
+  member_name: string | null;
+  member_no: string | null;
+};
+
+export type LoanAuditPage = {
+  rows: LoanAuditEntry[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export const listLoanAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        decision: z.enum(["approved", "rejected", "all"]).default("all"),
+        member: z.string().trim().max(120).optional(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(5).max(100).default(25),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }): Promise<LoanAuditPage> => {
+    await assertAdmin(context.supabase, context.userId);
+
+    const actions =
+      data.decision === "approved"
+        ? ["loan.approved"]
+        : data.decision === "rejected"
+        ? ["loan.rejected"]
+        : ["loan.approved", "loan.rejected"];
+
+    const fromIdx = (data.page - 1) * data.pageSize;
+    const toIdx = fromIdx + data.pageSize - 1;
+
+    let q = context.supabase
+      .from("audit_log")
+      .select("id, created_at, actor_id, actor_email, actor_role, action, target, meta", { count: "exact" })
+      .in("action", actions)
+      .order("created_at", { ascending: false });
+
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
+
+    const { data: rows, error, count } = await q.range(fromIdx, toIdx);
+    if (error) throw new Error(error.message);
+
+    const memberIds = Array.from(
+      new Set(
+        (rows ?? [])
+          .map((r: any) => (r.meta && typeof r.meta === "object" ? r.meta.member_id : null))
+          .filter(Boolean) as string[],
+      ),
+    );
+    let profileMap = new Map<string, { full_name: string | null; member_no: string | null }>();
+    if (memberIds.length) {
+      const { data: profiles } = await context.supabase
+        .from("profiles")
+        .select("id, full_name, member_no")
+        .in("id", memberIds);
+      profileMap = new Map(
+        (profiles ?? []).map((p: any) => [p.id, { full_name: p.full_name, member_no: p.member_no }]),
+      );
+    }
+
+    let entries: LoanAuditEntry[] = (rows ?? []).map((r: any) => {
+      const meta = (r.meta && typeof r.meta === "object" ? r.meta : {}) as Record<string, any>;
+      const memberId = (meta.member_id as string | undefined) ?? null;
+      const profile = memberId ? profileMap.get(memberId) : undefined;
+      return {
+        id: r.id,
+        created_at: r.created_at,
+        actor_id: r.actor_id,
+        actor_email: r.actor_email,
+        actor_role: r.actor_role,
+        action: r.action,
+        target: r.target,
+        loan_ref: (meta.ref as string | undefined) ?? null,
+        note: (meta.note as string | undefined) ?? null,
+        amount: meta.amount != null ? Number(meta.amount) : null,
+        member_id: memberId,
+        member_name: profile?.full_name ?? null,
+        member_no: profile?.member_no ?? null,
+      };
+    });
+
+    if (data.member) {
+      const needle = data.member.toLowerCase();
+      entries = entries.filter(
+        (e) =>
+          (e.member_name ?? "").toLowerCase().includes(needle) ||
+          (e.member_no ?? "").toLowerCase().includes(needle) ||
+          (e.loan_ref ?? "").toLowerCase().includes(needle),
+      );
+    }
+
+    return {
+      rows: entries,
+      total: count ?? entries.length,
+      page: data.page,
+      pageSize: data.pageSize,
     };
   });
