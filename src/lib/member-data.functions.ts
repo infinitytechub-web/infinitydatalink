@@ -2,6 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+const PageInput = z.object({
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(5).max(100).default(10),
+  sortBy: z.string().default("created_at"),
+  sortDir: z.enum(["asc", "desc"]).default("desc"),
+});
+export type PageInput = z.infer<typeof PageInput>;
+export type Paginated<T> = { rows: T[]; total: number; page: number; pageSize: number };
+
 export type SavingsRow = {
   id: string;
   name: string;
@@ -17,7 +26,7 @@ export type LoanRow = {
   amount: number;
   term_months: number;
   interest_rate: number;
-  status: "pending" | "approved" | "rejected" | "active" | "cleared";
+  status: "pending" | "approved" | "rejected" | "active" | "closed";
   purpose: string | null;
   created_at: string;
   decided_at: string | null;
@@ -40,51 +49,93 @@ export type MemberSummary = {
   nextContribution: number | null;
 };
 
+const SAVINGS_SORT: Record<string, string> = { balance: "balance", created_at: "created_at" };
+const LOAN_SORT: Record<string, string> = {
+  created_at: "created_at",
+  amount: "amount",
+  status: "status",
+  term_months: "term_months",
+  ref: "ref",
+};
+const TXN_SORT: Record<string, string> = {
+  created_at: "created_at",
+  amount: "amount",
+  status: "status",
+  ref: "ref",
+};
+
 export const getMySavings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<SavingsRow[]> => {
-    const { data, error } = await context.supabase
+  .inputValidator((data: unknown) => PageInput.parse(data ?? {}))
+  .handler(async ({ data, context }): Promise<Paginated<SavingsRow>> => {
+    const sortCol = SAVINGS_SORT[data.sortBy] ?? "created_at";
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const { data: rows, error, count } = await context.supabase
       .from("savings_accounts")
-      .select("id, balance, savings_plans(id, name, schedule, interest_rate)")
-      .eq("user_id", context.userId);
+      .select("id, balance, created_at, savings_plans(id, name, schedule, interest_rate)", { count: "exact" })
+      .eq("user_id", context.userId)
+      .order(sortCol, { ascending: data.sortDir === "asc" })
+      .range(from, to);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((row: any) => ({
-      id: row.id,
-      balance: Number(row.balance ?? 0),
-      name: row.savings_plans?.name ?? "Savings Plan",
-      schedule: row.savings_plans?.schedule ?? "—",
-      interest_rate: Number(row.savings_plans?.interest_rate ?? 0),
-    }));
+    return {
+      rows: (rows ?? []).map((row: any) => ({
+        id: row.id,
+        balance: Number(row.balance ?? 0),
+        name: row.savings_plans?.name ?? "Savings Plan",
+        schedule: row.savings_plans?.schedule ?? "—",
+        interest_rate: Number(row.savings_plans?.interest_rate ?? 0),
+      })),
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
   });
 
 export const getMyLoans = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<LoanRow[]> => {
-    const { data, error } = await context.supabase
+  .inputValidator((data: unknown) => PageInput.parse(data ?? {}))
+  .handler(async ({ data, context }): Promise<Paginated<LoanRow>> => {
+    const sortCol = LOAN_SORT[data.sortBy] ?? "created_at";
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const { data: rows, error, count } = await context.supabase
       .from("loans")
-      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at")
+      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at", { count: "exact" })
       .eq("user_id", context.userId)
-      .order("created_at", { ascending: false });
+      .order(sortCol, { ascending: data.sortDir === "asc" })
+      .range(from, to);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r) => ({
-      ...r,
-      amount: Number(r.amount),
-      interest_rate: Number(r.interest_rate),
-    })) as LoanRow[];
+    return {
+      rows: (rows ?? []).map((r) => ({ ...r, amount: Number(r.amount), interest_rate: Number(r.interest_rate) })) as LoanRow[],
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
   });
 
 export const getMyTransactions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<TxnRow[]> => {
-    const { data, error } = await context.supabase
+  .inputValidator((data: unknown) => PageInput.parse(data ?? {}))
+  .handler(async ({ data, context }): Promise<Paginated<TxnRow>> => {
+    const sortCol = TXN_SORT[data.sortBy] ?? "created_at";
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const { data: rows, error, count } = await context.supabase
       .from("transactions")
-      .select("id, ref, kind, amount, channel, note, status, created_at")
+      .select("id, ref, kind, amount, channel, note, status, created_at", { count: "exact" })
       .eq("user_id", context.userId)
-      .order("created_at", { ascending: false })
-      .limit(200);
+      .order(sortCol, { ascending: data.sortDir === "asc" })
+      .range(from, to);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r) => ({ ...r, amount: Number(r.amount) })) as TxnRow[];
+    return {
+      rows: (rows ?? []).map((r) => ({ ...r, amount: Number(r.amount) })) as TxnRow[],
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
   });
+
 
 export const getMySummary = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
