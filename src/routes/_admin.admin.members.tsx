@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -17,10 +17,20 @@ import {
   bulkDecideKyc,
   type KycQueueRow,
 } from "@/lib/admin-kyc.functions";
+import {
+  AGING_ORDER,
+  BUCKET_META,
+  bucketFor,
+  formatCountdown,
+  hoursSince,
+  slaRemainingHours,
+  type AgingBucket,
+} from "@/lib/kyc-sla";
 
 const search = z.object({
   status: fallback(z.enum(["all", "pending", "active", "rejected"]), "pending").default("pending"),
   assignee: fallback(z.string(), "any").default("any"),
+  aging: fallback(z.enum(["any", "fresh", "due_soon", "overdue", "critical"]), "any").default("any"),
   q: fallback(z.string(), "").default(""),
   page: fallback(z.number().int().min(1), 1).default(1),
 });
@@ -30,12 +40,13 @@ const PAGE_SIZE = 25;
 
 const queueQuery = (s: SearchInput) =>
   queryOptions({
-    queryKey: ["admin", "kyc", "queue", s.status, s.assignee, s.q, s.page],
+    queryKey: ["admin", "kyc", "queue", s.status, s.assignee, s.aging, s.q, s.page],
     queryFn: () =>
       listKycQueue({
         data: {
           status: s.status,
           assignee: s.assignee || "any",
+          aging: s.aging,
           q: s.q || undefined,
           page: s.page,
           page_size: PAGE_SIZE,
@@ -77,6 +88,9 @@ function MembersPage() {
         <Suspense fallback={<Skeleton className="h-24 w-full" />}>
           <SummaryCards />
         </Suspense>
+        <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+          <AgingChips />
+        </Suspense>
         <Suspense fallback={<Skeleton className="h-96 w-full" />}>
           <QueueBody />
         </Suspense>
@@ -87,14 +101,23 @@ function MembersPage() {
 
 function SummaryCards() {
   const { data } = useSuspenseQuery(summaryQuery);
+  const oldestHours = hoursSince(data.oldest_pending_at);
+  const oldestLabel =
+    oldestHours == null
+      ? "—"
+      : oldestHours >= 24
+        ? `${Math.floor(oldestHours / 24)}d ${Math.floor(oldestHours % 24)}h`
+        : `${Math.floor(oldestHours)}h`;
   const items = [
     { label: "Pending", value: data.pending, tone: "text-gold" },
     { label: "Assigned to me", value: data.assigned_to_me, tone: "text-emerald-mid" },
+    { label: "SLA breached", value: data.breached, tone: data.breached > 0 ? "text-red-600" : "text-emerald-deep/60" },
+    { label: `Oldest pending`, value: oldestLabel, tone: "text-emerald-deep" },
     { label: "Unassigned", value: data.unassigned_pending, tone: "text-red-600" },
     { label: "Decided (24h)", value: data.decided_today, tone: "text-emerald-deep" },
   ];
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
       {items.map((it) => (
         <div key={it.label} className="rounded border border-emerald-deep/10 bg-card p-4">
           <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
@@ -107,12 +130,65 @@ function SummaryCards() {
   );
 }
 
+function AgingChips() {
+  const { data } = useSuspenseQuery(summaryQuery);
+  const s = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const setAging = (aging: "any" | AgingBucket) =>
+    navigate({
+      search: (p: SearchInput) => ({ ...p, status: "pending", aging, page: 1 }),
+    });
+  const active = s.status === "pending" ? s.aging : "any";
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded border border-emerald-deep/10 bg-card px-3 py-2">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+        Aging (pending)
+      </span>
+      <button
+        onClick={() => setAging("any")}
+        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest ${
+          active === "any"
+            ? "bg-emerald-deep text-cream"
+            : "border border-emerald-deep/15 text-emerald-deep/70 hover:bg-cream"
+        }`}
+      >
+        All · {data.pending}
+      </button>
+      {AGING_ORDER.map((b) => {
+        const meta = BUCKET_META[b];
+        const count = data.aging[b];
+        const isActive = active === b;
+        return (
+          <button
+            key={b}
+            onClick={() => setAging(b)}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${
+              isActive ? "ring-2 ring-emerald-deep ring-offset-1 ring-offset-card" : ""
+            } ${meta.tone}`}
+            title={meta.label}
+          >
+            <span className={`inline-block h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+            {meta.short} · {count}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function QueueBody() {
   const s = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const qc = useQueryClient();
   const { data } = useSuspenseQuery(queueQuery(s));
   const { data: reviewers = [] } = useQuery(reviewersQuery);
+
+  // Tick every 60s so SLA countdowns refresh live without refetching.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDialog, setBulkDialog] = useState<null | "approved" | "rejected">(null);
@@ -249,6 +325,7 @@ function QueueBody() {
               <th className="px-4 py-3 font-medium">Member</th>
               <th className="px-4 py-3 font-medium">Assignee</th>
               <th className="px-4 py-3 text-right font-medium">Docs</th>
+              <th className="px-4 py-3 text-right font-medium">SLA</th>
               <th className="px-4 py-3 text-right font-medium">Last activity</th>
               <th className="px-4 py-3 text-right font-medium">KYC</th>
             </tr>
@@ -256,7 +333,7 @@ function QueueBody() {
           <tbody className="divide-y divide-emerald-deep/5">
             {data.rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
+                <td colSpan={7} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
                   No members match these filters.
                 </td>
               </tr>
@@ -333,6 +410,9 @@ function QueueBody() {
                     ) : (
                       "—"
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <SlaCell pendingSince={m.pending_since} kyc={m.kyc} nowTick={nowTick} />
                   </td>
                   <td className="px-4 py-3 text-right text-[11px] text-emerald-deep/50">
                     {m.last_document_at ? new Date(m.last_document_at).toLocaleDateString() : "—"}
@@ -496,3 +576,38 @@ function SelectionToolbar({
     </div>
   );
 }
+
+function SlaCell({
+  pendingSince,
+  kyc,
+  nowTick,
+}: {
+  pendingSince: string | null;
+  kyc: KycQueueRow["kyc"];
+  nowTick: number;
+}) {
+  if (kyc !== "pending" || !pendingSince) {
+    return <span className="text-[11px] text-emerald-deep/40">—</span>;
+  }
+  const hours = hoursSince(pendingSince, nowTick);
+  const bucket = bucketFor(hours);
+  const remaining = slaRemainingHours(pendingSince, nowTick);
+  const { text, breached } = formatCountdown(remaining);
+  const meta = bucket ? BUCKET_META[bucket] : null;
+  return (
+    <div className="inline-flex flex-col items-end gap-0.5">
+      {meta ? (
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${meta.tone}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+          {meta.short}
+        </span>
+      ) : null}
+      <span
+        className={`tabular text-[10px] ${breached ? "font-semibold text-red-600" : "text-emerald-deep/60"}`}
+      >
+        {text}
+      </span>
+    </div>
+  );
+}
+
