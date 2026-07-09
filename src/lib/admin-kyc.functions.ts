@@ -28,6 +28,9 @@ export type KycQueueRow = {
   kyc_notes: string | null;
   pending_docs: number;
   last_document_at: string | null;
+  // Waiting-since anchor for SLA: earliest pending doc's created_at,
+  // falling back to profile.updated_at. Null when not pending.
+  pending_since: string | null;
 };
 
 export type KycQueuePage = {
