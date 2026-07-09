@@ -124,7 +124,7 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
       toast.error("A decision note of at least 5 characters is required.");
       return;
     }
-    mutation.mutate({ data: { loan_id, decision, note: note.trim() } });
+    mutation.mutate({ loan_id, decision, note: note.trim() });
   };
 
   return (
