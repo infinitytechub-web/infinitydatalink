@@ -23,6 +23,9 @@ export type KycQueueRow = {
   national_id: string | null;
   kyc: ProfileKycStatus;
   kyc_reviewed_at: string | null;
+  kyc_assigned_to: string | null;
+  kyc_assigned_name: string | null;
+  kyc_notes: string | null;
   pending_docs: number;
   last_document_at: string | null;
 };
