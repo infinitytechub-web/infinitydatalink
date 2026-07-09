@@ -1,4 +1,4 @@
-## Goal
+## Status: SHIPPED — Member profile & KYC.
 
 Turn the mocked member profile into a real KYC surface: editable personal details, next-of-kin management, ID document uploads into a private storage bucket, and an admin verification workflow that approves or rejects each member and drives `profiles.kyc`.
 
