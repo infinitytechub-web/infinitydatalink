@@ -26,8 +26,11 @@ function AdminLoanDetail() {
   const { loanId } = Route.useParams();
   return (
     <>
+      <div className="mb-2 text-[10px] uppercase tracking-widest text-emerald-deep/60">
+        <Link to="/admin/loans" className="hover:underline">← Loans pipeline</Link>
+      </div>
       <PageHeader
-        eyebrow={<Link to="/admin/loans" className="hover:underline">← Loans pipeline</Link>}
+        eyebrow="Administrator"
         title="Loan detail"
         description="Approve, disburse, and record repayments against the amortization schedule."
       />
@@ -111,7 +114,7 @@ function DetailBody({ loanId }: { loanId: string }) {
                   <td className="px-6 py-3 text-right"><Money amount={r.interest_due} /></td>
                   <td className="px-6 py-3 text-right"><Money amount={r.total_due} /></td>
                   <td className="px-6 py-3 text-right"><Money amount={r.paid_amount} /></td>
-                  <td className="px-6 py-3 text-right"><StatusPill status={r.status} /></td>
+                  <td className="px-6 py-3 text-right"><StatusPill status={r.status as any} /></td>
                 </tr>
               ))}
             </tbody>

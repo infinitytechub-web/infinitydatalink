@@ -329,7 +329,7 @@ export const disburseLoan = createServerFn({ method: "POST" })
     const { data: loan, error } = await context.supabase.rpc("disburse_loan", {
       _loan_id: data.loan_id,
       _channel: data.channel,
-      _note: data.note ?? null,
+      _note: data.note ?? "",
     });
     if (error) throw new Error(error.message);
     return loan;
@@ -350,7 +350,7 @@ export const recordLoanRepayment = createServerFn({ method: "POST" })
       _loan_id: data.loan_id,
       _amount: data.amount,
       _channel: data.channel,
-      _note: data.note ?? null,
+      _note: data.note ?? "",
     });
     if (error) throw new Error(error.message);
     return loan;
