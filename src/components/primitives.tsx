@@ -53,10 +53,11 @@ export function Money({ amount, signed }: { amount: number; signed?: boolean }) 
 export function StatusPill({
   status,
 }: {
-  status: "cleared" | "pending" | "failed" | "approved" | "rejected" | "active";
+  status: "cleared" | "closed" | "pending" | "failed" | "approved" | "rejected" | "active";
 }) {
   const map: Record<string, string> = {
     cleared: "bg-emerald-mid/10 text-emerald-mid",
+    closed: "bg-emerald-deep/10 text-emerald-deep/70",
     approved: "bg-emerald-mid/10 text-emerald-mid",
     active: "bg-emerald-mid/10 text-emerald-mid",
     pending: "bg-gold/10 text-gold",
