@@ -414,24 +414,36 @@ export type Database = {
         Row: {
           balance: number
           created_at: string
+          goal_amount: number | null
+          goal_target_date: string | null
           id: string
+          nickname: string | null
           plan_id: string
+          status: string
           updated_at: string
           user_id: string
         }
         Insert: {
           balance?: number
           created_at?: string
+          goal_amount?: number | null
+          goal_target_date?: string | null
           id?: string
+          nickname?: string | null
           plan_id: string
+          status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           balance?: number
           created_at?: string
+          goal_amount?: number | null
+          goal_target_date?: string | null
           id?: string
+          nickname?: string | null
           plan_id?: string
+          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -447,25 +459,43 @@ export type Database = {
       }
       savings_plans: {
         Row: {
+          contribution_amount: number
           created_at: string
+          description: string | null
           id: string
           interest_rate: number
+          is_active: boolean
+          lock_days: number
+          min_contribution: number
           name: string
           schedule: string
+          sort_order: number
         }
         Insert: {
+          contribution_amount?: number
           created_at?: string
+          description?: string | null
           id?: string
           interest_rate?: number
+          is_active?: boolean
+          lock_days?: number
+          min_contribution?: number
           name: string
           schedule: string
+          sort_order?: number
         }
         Update: {
+          contribution_amount?: number
           created_at?: string
+          description?: string | null
           id?: string
           interest_rate?: number
+          is_active?: boolean
+          lock_days?: number
+          min_contribution?: number
           name?: string
           schedule?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -585,6 +615,33 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      finalize_transaction: {
+        Args: {
+          _note: string
+          _status: Database["public"]["Enums"]["txn_status"]
+          _txn_id: string
+        }
+        Returns: {
+          amount: number
+          channel: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["txn_kind"]
+          loan_id: string | null
+          note: string | null
+          ref: string
+          savings_account_id: string | null
+          status: Database["public"]["Enums"]["txn_status"]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      gen_txn_ref: { Args: { _prefix: string }; Returns: string }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -593,6 +650,24 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      post_savings_contribution: {
+        Args: {
+          _account_id: string
+          _amount: number
+          _channel: string
+          _note: string
+        }
+        Returns: string
+      }
+      post_savings_withdrawal: {
+        Args: {
+          _account_id: string
+          _amount: number
+          _channel: string
+          _note: string
+        }
+        Returns: string
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
