@@ -58,14 +58,18 @@ export const listKycQueue = createServerFn({ method: "GET" })
     await assertKycAdmin(context.supabase, context.userId);
     const sb = context.supabase;
 
+    // For pending queues we sort by oldest submission first so the SLA is
+    // visible; other statuses keep the recent-decision-first order.
+    const isPending = data.status === "pending";
     let q = sb
       .from("profiles")
       .select(
-        "id, full_name, member_no, region, phone, national_id, kyc, kyc_notes, kyc_reviewed_at, kyc_assigned_to",
+        "id, full_name, member_no, region, phone, national_id, kyc, kyc_notes, kyc_reviewed_at, kyc_assigned_to, updated_at",
         { count: "exact" },
-      )
-      .order("kyc_reviewed_at", { ascending: false, nullsFirst: true })
-      .order("full_name", { ascending: true });
+      );
+    q = isPending
+      ? q.order("updated_at", { ascending: true }).order("full_name", { ascending: true })
+      : q.order("kyc_reviewed_at", { ascending: false, nullsFirst: true }).order("full_name", { ascending: true });
 
     if (data.status !== "all") q = q.eq("kyc", data.status);
     if (data.q) {
@@ -78,22 +82,52 @@ export const listKycQueue = createServerFn({ method: "GET" })
     else if (assignee === "unassigned") q = q.is("kyc_assigned_to", null);
     else if (assignee !== "any") q = q.eq("kyc_assigned_to", assignee);
 
+    // DB-side aging filter using profile.updated_at as the anchor.
+    // Only meaningful for pending members.
+    if (data.aging !== "any" && isPending) {
+      const now = Date.now();
+      const H = 3_600_000;
+      const ranges: Record<string, [number, number | null]> = {
+        fresh: [0, 24],
+        due_soon: [24, 48],
+        overdue: [48, 120],
+        critical: [120, null],
+      };
+      const [minH, maxH] = ranges[data.aging];
+      // updated_at older than minH hours ago:
+      q = q.lte("updated_at", new Date(now - minH * H).toISOString());
+      if (maxH != null) {
+        q = q.gt("updated_at", new Date(now - maxH * H).toISOString());
+      }
+    }
+
     const from = (data.page - 1) * data.page_size;
     const to = from + data.page_size - 1;
     const { data: rows, error, count } = await q.range(from, to);
     if (error) throw new Error(error.message);
 
     const ids = (rows ?? []).map((r: any) => r.id);
-    let docStats = new Map<string, { pending: number; latest: string | null }>();
+    const docStats = new Map<
+      string,
+      { pending: number; latest: string | null; earliest_pending: string | null }
+    >();
     if (ids.length) {
       const { data: docs } = await sb
         .from("kyc_documents")
         .select("member_id, status, created_at")
         .in("member_id", ids);
       for (const d of docs ?? []) {
-        const cur = docStats.get((d as any).member_id) ?? { pending: 0, latest: null };
-        if ((d as any).status === "pending") cur.pending += 1;
-        if (!cur.latest || (d as any).created_at > cur.latest) cur.latest = (d as any).created_at;
+        const cur = docStats.get((d as any).member_id) ?? {
+          pending: 0,
+          latest: null,
+          earliest_pending: null,
+        };
+        const ca = (d as any).created_at as string;
+        if ((d as any).status === "pending") {
+          cur.pending += 1;
+          if (!cur.earliest_pending || ca < cur.earliest_pending) cur.earliest_pending = ca;
+        }
+        if (!cur.latest || ca > cur.latest) cur.latest = ca;
         docStats.set((d as any).member_id, cur);
       }
     }
@@ -112,21 +146,29 @@ export const listKycQueue = createServerFn({ method: "GET" })
     }
 
     return {
-      rows: (rows ?? []).map((r: any) => ({
-        member_id: r.id,
-        full_name: r.full_name,
-        member_no: r.member_no,
-        region: r.region,
-        phone: r.phone,
-        national_id: r.national_id,
-        kyc: r.kyc,
-        kyc_reviewed_at: r.kyc_reviewed_at,
-        kyc_assigned_to: r.kyc_assigned_to ?? null,
-        kyc_assigned_name: r.kyc_assigned_to ? (nameMap.get(r.kyc_assigned_to) ?? null) : null,
-        kyc_notes: r.kyc_notes ?? null,
-        pending_docs: docStats.get(r.id)?.pending ?? 0,
-        last_document_at: docStats.get(r.id)?.latest ?? null,
-      })),
+      rows: (rows ?? []).map((r: any) => {
+        const stats = docStats.get(r.id);
+        const isPend = r.kyc === "pending";
+        const pendingSince = isPend
+          ? (stats?.earliest_pending ?? r.updated_at ?? null)
+          : null;
+        return {
+          member_id: r.id,
+          full_name: r.full_name,
+          member_no: r.member_no,
+          region: r.region,
+          phone: r.phone,
+          national_id: r.national_id,
+          kyc: r.kyc,
+          kyc_reviewed_at: r.kyc_reviewed_at,
+          kyc_assigned_to: r.kyc_assigned_to ?? null,
+          kyc_assigned_name: r.kyc_assigned_to ? (nameMap.get(r.kyc_assigned_to) ?? null) : null,
+          kyc_notes: r.kyc_notes ?? null,
+          pending_docs: stats?.pending ?? 0,
+          last_document_at: stats?.latest ?? null,
+          pending_since: pendingSince,
+        };
+      }),
       total: count ?? 0,
       page: data.page,
       page_size: data.page_size,
