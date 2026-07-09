@@ -176,7 +176,7 @@ function AuditContent() {
               {rows.map((e) => (
                 <tr
                   key={e.id}
-                  onClick={() => setSelected(e)}
+                  onClick={() => selectEntry(e.id)}
                   className="align-top cursor-pointer hover:bg-cream/40"
                 >
                   <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
