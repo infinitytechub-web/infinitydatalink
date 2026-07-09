@@ -44,6 +44,7 @@ export const listKycQueue = createServerFn({ method: "GET" })
       .object({
         status: z.enum(["all", "pending", "active", "rejected"]).default("pending"),
         q: z.string().trim().max(120).optional(),
+        assignee: z.string().max(64).optional(), // 'any' | 'me' | 'unassigned' | uuid
         page: z.number().int().min(1).default(1),
         page_size: z.number().int().min(5).max(100).default(25),
       })
@@ -55,7 +56,10 @@ export const listKycQueue = createServerFn({ method: "GET" })
 
     let q = sb
       .from("profiles")
-      .select("id, full_name, member_no, region, phone, national_id, kyc, kyc_reviewed_at", { count: "exact" })
+      .select(
+        "id, full_name, member_no, region, phone, national_id, kyc, kyc_notes, kyc_reviewed_at, kyc_assigned_to",
+        { count: "exact" },
+      )
       .order("kyc_reviewed_at", { ascending: false, nullsFirst: true })
       .order("full_name", { ascending: true });
 
@@ -64,6 +68,11 @@ export const listKycQueue = createServerFn({ method: "GET" })
       const needle = `%${data.q}%`;
       q = q.or(`full_name.ilike.${needle},member_no.ilike.${needle},national_id.ilike.${needle}`);
     }
+
+    const assignee = data.assignee ?? "any";
+    if (assignee === "me") q = q.eq("kyc_assigned_to", context.userId);
+    else if (assignee === "unassigned") q = q.is("kyc_assigned_to", null);
+    else if (assignee !== "any") q = q.eq("kyc_assigned_to", assignee);
 
     const from = (data.page - 1) * data.page_size;
     const to = from + data.page_size - 1;
@@ -85,6 +94,19 @@ export const listKycQueue = createServerFn({ method: "GET" })
       }
     }
 
+    // Resolve assignee display names
+    const assigneeIds = Array.from(
+      new Set((rows ?? []).map((r: any) => r.kyc_assigned_to).filter(Boolean)),
+    ) as string[];
+    const nameMap = new Map<string, string>();
+    if (assigneeIds.length) {
+      const { data: reviewers } = await sb
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", assigneeIds);
+      for (const r of reviewers ?? []) nameMap.set((r as any).id, (r as any).full_name ?? "—");
+    }
+
     return {
       rows: (rows ?? []).map((r: any) => ({
         member_id: r.id,
@@ -95,6 +117,9 @@ export const listKycQueue = createServerFn({ method: "GET" })
         national_id: r.national_id,
         kyc: r.kyc,
         kyc_reviewed_at: r.kyc_reviewed_at,
+        kyc_assigned_to: r.kyc_assigned_to ?? null,
+        kyc_assigned_name: r.kyc_assigned_to ? (nameMap.get(r.kyc_assigned_to) ?? null) : null,
+        kyc_notes: r.kyc_notes ?? null,
         pending_docs: docStats.get(r.id)?.pending ?? 0,
         last_document_at: docStats.get(r.id)?.latest ?? null,
       })),
