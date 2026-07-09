@@ -192,3 +192,60 @@ export const applyForLoan = createServerFn({ method: "POST" })
 
     return { ...inserted, amount: Number(inserted.amount), interest_rate: Number(inserted.interest_rate) } as LoanRow;
   });
+
+export type MemberLoanScheduleRow = {
+  id: string;
+  installment_no: number;
+  due_date: string;
+  principal_due: number;
+  interest_due: number;
+  total_due: number;
+  paid_amount: number;
+  paid_at: string | null;
+  status: "due" | "partial" | "paid" | "late";
+};
+
+export type MemberLoanDetail = LoanRow & {
+  outstanding_principal: number;
+  monthly_payment: number | null;
+  disbursed_at: string | null;
+  first_payment_at: string | null;
+  maturity_at: string | null;
+  decision_note: string | null;
+  schedule: MemberLoanScheduleRow[];
+};
+
+export const getMyLoanDetail = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ loan_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<MemberLoanDetail> => {
+    const { data: loan, error } = await context.supabase
+      .from("loans")
+      .select(
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, decision_note, outstanding_principal, monthly_payment, disbursed_at, first_payment_at, maturity_at",
+      )
+      .eq("id", data.loan_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!loan) throw new Error("Loan not found");
+    const { data: sched } = await context.supabase
+      .from("loan_repayments")
+      .select("id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, paid_at, status")
+      .eq("loan_id", loan.id)
+      .order("installment_no", { ascending: true });
+    return {
+      ...(loan as any),
+      amount: Number(loan.amount),
+      interest_rate: Number(loan.interest_rate),
+      outstanding_principal: Number(loan.outstanding_principal ?? 0),
+      monthly_payment: loan.monthly_payment != null ? Number(loan.monthly_payment) : null,
+      schedule: (sched ?? []).map((r: any) => ({
+        ...r,
+        principal_due: Number(r.principal_due),
+        interest_due: Number(r.interest_due),
+        total_due: Number(r.total_due),
+        paid_amount: Number(r.paid_amount),
+      })),
+    } as MemberLoanDetail;
+  });
