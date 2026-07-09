@@ -17,7 +17,20 @@ import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primi
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/org-config";
-import { getReport, type AdminReport, type ReportBucket } from "@/lib/admin-analytics.functions";
+import { getReport, type AdminReport, type ReportBucket, type LoanStatusMix, type TopProduct } from "@/lib/admin-analytics.functions";
+import { useAuth, type Permission } from "@/lib/auth";
+import { Lock } from "lucide-react";
+
+// Reports aggregates cross-domain data. Any admin role with at least one
+// domain export permission may view; members and unauthenticated users are blocked.
+const REPORT_VIEW_PERMISSIONS: Permission[] = [
+  "export:members",
+  "export:loans",
+  "export:savings",
+  "export:payments",
+  "export:audit",
+  "export:security",
+];
 
 const DEFAULT_TO = new Date();
 const DEFAULT_FROM = new Date(DEFAULT_TO.getTime() - 29 * 24 * 3600 * 1000);
