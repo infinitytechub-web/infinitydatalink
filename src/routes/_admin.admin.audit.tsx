@@ -74,8 +74,11 @@ function AuditContent() {
     navigate({ search: (prev: SearchInput) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
 
   const rows = data.rows;
+  const [selected, setSelected] = useState<LoanAuditEntry | null>(null);
 
   return (
+    <></>
+  ) && null || (
     <SectionCard
       title="Approval & rejection log"
       action={
