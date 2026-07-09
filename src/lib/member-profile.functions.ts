@@ -141,7 +141,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     }
     if (Object.keys(patch).length === 0) return { updated: false };
 
-    const { error } = await sb.from("profiles").update(patch).eq("id", context.userId);
+    const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { updated: true, locked_identity: isVerified };
   });
