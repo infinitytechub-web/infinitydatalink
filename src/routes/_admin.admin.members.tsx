@@ -411,6 +411,9 @@ function QueueBody() {
                       "—"
                     )}
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    <SlaCell pendingSince={m.pending_since} kyc={m.kyc} nowTick={nowTick} />
+                  </td>
                   <td className="px-4 py-3 text-right text-[11px] text-emerald-deep/50">
                     {m.last_document_at ? new Date(m.last_document_at).toLocaleDateString() : "—"}
                   </td>
