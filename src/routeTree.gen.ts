@@ -24,6 +24,7 @@ import { Route as AdminAdminIndexRouteImport } from './routes/_admin.admin.index
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
 import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
+import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
 import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
 import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
 import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
@@ -42,6 +43,8 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
+import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -117,6 +120,11 @@ const MemberAppSupportRoute = MemberAppSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => MemberAppRoute,
 } as any)
+const MemberAppSavingsRoute = MemberAppSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 const MemberAppProfileRoute = MemberAppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -178,9 +186,9 @@ const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const MemberAppSavingsIndexRoute = MemberAppSavingsIndexRouteImport.update({
-  id: '/savings/',
-  path: '/savings/',
-  getParentRoute: () => MemberAppRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => MemberAppSavingsRoute,
 } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
@@ -210,6 +218,17 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MemberAppSavingsEnrollRoute = MemberAppSavingsEnrollRouteImport.update({
+  id: '/enroll',
+  path: '/enroll',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsAccountIdRoute =
+  MemberAppSavingsAccountIdRouteImport.update({
+    id: '/$accountId',
+    path: '/$accountId',
+    getParentRoute: () => MemberAppSavingsRoute,
+  } as any)
 const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -237,12 +256,15 @@ export interface FileRoutesByFullPath {
   '/app/loans': typeof MemberAppLoansRoute
   '/app/payments': typeof MemberAppPaymentsRoute
   '/app/profile': typeof MemberAppProfileRoute
+  '/app/savings': typeof MemberAppSavingsRouteWithChildren
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
+  '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -275,6 +297,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
+  '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -306,12 +330,15 @@ export interface FileRoutesById {
   '/_member/app/loans': typeof MemberAppLoansRoute
   '/_member/app/payments': typeof MemberAppPaymentsRoute
   '/_member/app/profile': typeof MemberAppProfileRoute
+  '/_member/app/savings': typeof MemberAppSavingsRouteWithChildren
   '/_member/app/support': typeof MemberAppSupportRoute
   '/_member/app/transactions': typeof MemberAppTransactionsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/_member/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
+  '/_member/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -342,12 +369,15 @@ export interface FileRouteTypes {
     | '/app/loans'
     | '/app/payments'
     | '/app/profile'
+    | '/app/savings'
     | '/app/support'
     | '/app/transactions'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/app/'
     | '/admin/members/$id'
+    | '/app/savings/$accountId'
+    | '/app/savings/enroll'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -380,6 +410,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/admin/members/$id'
+    | '/app/savings/$accountId'
+    | '/app/savings/enroll'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -410,12 +442,15 @@ export interface FileRouteTypes {
     | '/_member/app/loans'
     | '/_member/app/payments'
     | '/_member/app/profile'
+    | '/_member/app/savings'
     | '/_member/app/support'
     | '/_member/app/transactions'
     | '/lovable/email/suppression'
     | '/_admin/admin/'
     | '/_member/app/'
     | '/_admin/admin/members/$id'
+    | '/_member/app/savings/$accountId'
+    | '/_member/app/savings/enroll'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -546,6 +581,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppSupportRouteImport
       parentRoute: typeof MemberAppRoute
     }
+    '/_member/app/savings': {
+      id: '/_member/app/savings'
+      path: '/savings'
+      fullPath: '/app/savings'
+      preLoaderRoute: typeof MemberAppSavingsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
     '/_member/app/profile': {
       id: '/_member/app/profile'
       path: '/profile'
@@ -632,10 +674,10 @@ declare module '@tanstack/react-router' {
     }
     '/_member/app/savings/': {
       id: '/_member/app/savings/'
-      path: '/savings'
+      path: '/'
       fullPath: '/app/savings/'
       preLoaderRoute: typeof MemberAppSavingsIndexRouteImport
-      parentRoute: typeof MemberAppRoute
+      parentRoute: typeof MemberAppSavingsRoute
     }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
@@ -671,6 +713,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_member/app/savings/enroll': {
+      id: '/_member/app/savings/enroll'
+      path: '/enroll'
+      fullPath: '/app/savings/enroll'
+      preLoaderRoute: typeof MemberAppSavingsEnrollRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/$accountId': {
+      id: '/_member/app/savings/$accountId'
+      path: '/$accountId'
+      fullPath: '/app/savings/$accountId'
+      preLoaderRoute: typeof MemberAppSavingsAccountIdRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
     }
     '/_admin/admin/members/$id': {
       id: '/_admin/admin/members/$id'
@@ -731,15 +787,30 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface MemberAppSavingsRouteChildren {
+  MemberAppSavingsAccountIdRoute: typeof MemberAppSavingsAccountIdRoute
+  MemberAppSavingsEnrollRoute: typeof MemberAppSavingsEnrollRoute
+  MemberAppSavingsIndexRoute: typeof MemberAppSavingsIndexRoute
+}
+
+const MemberAppSavingsRouteChildren: MemberAppSavingsRouteChildren = {
+  MemberAppSavingsAccountIdRoute: MemberAppSavingsAccountIdRoute,
+  MemberAppSavingsEnrollRoute: MemberAppSavingsEnrollRoute,
+  MemberAppSavingsIndexRoute: MemberAppSavingsIndexRoute,
+}
+
+const MemberAppSavingsRouteWithChildren =
+  MemberAppSavingsRoute._addFileChildren(MemberAppSavingsRouteChildren)
+
 interface MemberAppRouteChildren {
   MemberAppKycRoute: typeof MemberAppKycRoute
   MemberAppLoansRoute: typeof MemberAppLoansRoute
   MemberAppPaymentsRoute: typeof MemberAppPaymentsRoute
   MemberAppProfileRoute: typeof MemberAppProfileRoute
+  MemberAppSavingsRoute: typeof MemberAppSavingsRouteWithChildren
   MemberAppSupportRoute: typeof MemberAppSupportRoute
   MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
   MemberAppIndexRoute: typeof MemberAppIndexRoute
-  MemberAppSavingsIndexRoute: typeof MemberAppSavingsIndexRoute
 }
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
@@ -747,10 +818,10 @@ const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppLoansRoute: MemberAppLoansRoute,
   MemberAppPaymentsRoute: MemberAppPaymentsRoute,
   MemberAppProfileRoute: MemberAppProfileRoute,
+  MemberAppSavingsRoute: MemberAppSavingsRouteWithChildren,
   MemberAppSupportRoute: MemberAppSupportRoute,
   MemberAppTransactionsRoute: MemberAppTransactionsRoute,
   MemberAppIndexRoute: MemberAppIndexRoute,
-  MemberAppSavingsIndexRoute: MemberAppSavingsIndexRoute,
 }
 
 const MemberAppRouteWithChildren = MemberAppRoute._addFileChildren(

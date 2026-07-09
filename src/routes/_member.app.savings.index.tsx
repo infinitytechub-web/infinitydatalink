@@ -28,7 +28,7 @@ function SavingsPage() {
         eyebrow="Member portal"
         title="My Savings"
         description="Track balances, goal progress and contributions across every plan you're enrolled in."
-        actions={
+        action={
           <Link
             to="/app/savings/enroll"
             className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
