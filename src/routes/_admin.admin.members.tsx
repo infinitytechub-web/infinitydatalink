@@ -576,3 +576,38 @@ function SelectionToolbar({
     </div>
   );
 }
+
+function SlaCell({
+  pendingSince,
+  kyc,
+  nowTick,
+}: {
+  pendingSince: string | null;
+  kyc: KycQueueRow["kyc"];
+  nowTick: number;
+}) {
+  if (kyc !== "pending" || !pendingSince) {
+    return <span className="text-[11px] text-emerald-deep/40">—</span>;
+  }
+  const hours = hoursSince(pendingSince, nowTick);
+  const bucket = bucketFor(hours);
+  const remaining = slaRemainingHours(pendingSince, nowTick);
+  const { text, breached } = formatCountdown(remaining);
+  const meta = bucket ? BUCKET_META[bucket] : null;
+  return (
+    <div className="inline-flex flex-col items-end gap-0.5">
+      {meta ? (
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${meta.tone}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+          {meta.short}
+        </span>
+      ) : null}
+      <span
+        className={`tabular text-[10px] ${breached ? "font-semibold text-red-600" : "text-emerald-deep/60"}`}
+      >
+        {text}
+      </span>
+    </div>
+  );
+}
+
