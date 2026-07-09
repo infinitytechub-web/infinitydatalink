@@ -27,6 +27,7 @@ import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savin
 import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
 import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
 import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
+import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
 import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
 import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
@@ -130,6 +131,11 @@ const MemberAppLoansRoute = MemberAppLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => MemberAppRoute,
 } as any)
+const MemberAppKycRoute = MemberAppKycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 const AdminAdminSettingsRoute = AdminAdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
+  '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRoute
   '/app/payments': typeof MemberAppPaymentsRoute
   '/app/profile': typeof MemberAppProfileRoute
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
+  '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRoute
   '/app/payments': typeof MemberAppPaymentsRoute
   '/app/profile': typeof MemberAppProfileRoute
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/_admin/admin/savings': typeof AdminAdminSavingsRoute
   '/_admin/admin/security': typeof AdminAdminSecurityRoute
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
+  '/_member/app/kyc': typeof MemberAppKycRoute
   '/_member/app/loans': typeof MemberAppLoansRoute
   '/_member/app/payments': typeof MemberAppPaymentsRoute
   '/_member/app/profile': typeof MemberAppProfileRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/security'
     | '/admin/settings'
+    | '/app/kyc'
     | '/app/loans'
     | '/app/payments'
     | '/app/profile'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/security'
     | '/admin/settings'
+    | '/app/kyc'
     | '/app/loans'
     | '/app/payments'
     | '/app/profile'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/savings'
     | '/_admin/admin/security'
     | '/_admin/admin/settings'
+    | '/_member/app/kyc'
     | '/_member/app/loans'
     | '/_member/app/payments'
     | '/_member/app/profile'
@@ -542,6 +554,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppLoansRouteImport
       parentRoute: typeof MemberAppRoute
     }
+    '/_member/app/kyc': {
+      id: '/_member/app/kyc'
+      path: '/kyc'
+      fullPath: '/app/kyc'
+      preLoaderRoute: typeof MemberAppKycRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
     '/_admin/admin/settings': {
       id: '/_admin/admin/settings'
       path: '/settings'
@@ -693,6 +712,7 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface MemberAppRouteChildren {
+  MemberAppKycRoute: typeof MemberAppKycRoute
   MemberAppLoansRoute: typeof MemberAppLoansRoute
   MemberAppPaymentsRoute: typeof MemberAppPaymentsRoute
   MemberAppProfileRoute: typeof MemberAppProfileRoute
@@ -703,6 +723,7 @@ interface MemberAppRouteChildren {
 }
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
+  MemberAppKycRoute: MemberAppKycRoute,
   MemberAppLoansRoute: MemberAppLoansRoute,
   MemberAppPaymentsRoute: MemberAppPaymentsRoute,
   MemberAppProfileRoute: MemberAppProfileRoute,
