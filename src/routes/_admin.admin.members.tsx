@@ -337,14 +337,6 @@ function QueueBody() {
                   No members match these filters.
                 </td>
               </tr>
-          </thead>
-          <tbody className="divide-y divide-emerald-deep/5">
-            {data.rows.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
-                  No members match these filters.
-                </td>
-              </tr>
             ) : (
               data.rows.map((m) => (
                 <tr key={m.member_id} className="hover:bg-cream/30">
