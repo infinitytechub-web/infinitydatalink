@@ -59,6 +59,30 @@ export const Route = createFileRoute("/_admin/admin/reports")({
 });
 
 function ReportsPage() {
+  const { user, loading, hasAnyPermission } = useAuth();
+
+  if (loading) return <Skeleton className="h-96 w-full" />;
+
+  if (!user || !hasAnyPermission(REPORT_VIEW_PERMISSIONS)) {
+    return (
+      <>
+        <PageHeader
+          eyebrow="Administrator"
+          title="Reports & analytics"
+          description="Restricted analytics workspace."
+        />
+        <SectionCard title="Access denied">
+          <div className="flex items-center gap-3 p-6 text-sm text-emerald-deep/80">
+            <Lock className="h-4 w-4 text-gold" />
+            {user
+              ? "Your role does not include reporting privileges. Contact a Super Admin to be granted an admin role with export permissions."
+              : "Sign in with an authorised admin account to view reports."}
+          </div>
+        </SectionCard>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
