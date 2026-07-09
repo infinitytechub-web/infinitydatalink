@@ -1,83 +1,95 @@
-## Status: SHIPPED — Member profile & KYC.
+# KYC review workflow & notifications
 
-Turn the mocked member profile into a real KYC surface: editable personal details, next-of-kin management, ID document uploads into a private storage bucket, and an admin verification workflow that approves or rejects each member and drives `profiles.kyc`.
+Three additions on top of the existing KYC surface: an admin queue dashboard with reviewer assignment and bulk decisions, a member-facing status page, and email notifications on approval/rejection. SMS is deferred (hook in place).
 
-## Database migration
+## 1. Database migration
 
-Single migration adding structure only (no data).
+- Extend `profiles`: `kyc_assigned_to uuid references auth.users`, `kyc_assigned_at timestamptz`.
+- Extend `kyc_documents`: `assigned_to uuid` is not needed — assignment lives on `profiles`.
+- New enum `kyc_notification_channel` — `email`, `sms`.
+- New table `public.kyc_notifications` — `member_id`, `channel kyc_notification_channel`, `decision kyc_doc_status`, `recipient text`, `subject text`, `status text` (`queued|sent|failed`), `error text`, `sent_at timestamptz`, timestamps. GRANTs + RLS (member reads own; admins read all; server writes).
+- RLS additions on `profiles`: allow compliance/super_admin `UPDATE` of `kyc_assigned_to`, `kyc_assigned_at` (already covered by the existing admin update policy — verify and widen if needed).
 
-- Extend `profiles` with: `date_of_birth date`, `gender text`, `digital_address text`, `address_line text`, `occupation text`, `employer text`, `kyc_notes text`, `kyc_reviewed_by uuid references auth.users`, `kyc_reviewed_at timestamptz`.
-- New enum `kyc_doc_type` — `national_id_front`, `national_id_back`, `selfie`, `proof_of_address`, `other`.
-- New enum `kyc_doc_status` — `pending`, `approved`, `rejected`.
-- New table `public.next_of_kin` — `member_id uuid references profiles`, `full_name`, `relationship`, `phone`, `email`, `national_id`, `address`, timestamps.
-- New table `public.kyc_documents` — `member_id`, `doc_type kyc_doc_type`, `storage_path text unique`, `mime_type`, `size_bytes`, `status kyc_doc_status default 'pending'`, `reviewed_by uuid`, `reviewed_at`, `review_notes`, timestamps.
-- GRANTs (per project rule) on both tables: `authenticated` SELECT/INSERT/UPDATE/DELETE, `service_role` ALL. No `anon`.
-- RLS:
-  - `next_of_kin`: member can read/write rows where `member_id = auth.uid()`; admins (`has_role(auth.uid(),'super_admin' | 'compliance_officer')`) can read all.
-  - `kyc_documents`: member can `SELECT`/`INSERT`/`DELETE` own rows only while `status='pending'`; admins select all + update review fields.
-  - `profiles`: keep existing member self-select/update; add admin update policy for `kyc`, `kyc_notes`, `kyc_reviewed_by`, `kyc_reviewed_at`.
-- `update_updated_at_column` triggers on both new tables.
-- Storage bucket `kyc-documents` (private) created via `storage_create_bucket`; storage.objects policies (via migration): user may `INSERT`/`SELECT`/`DELETE` only under prefix `<auth.uid()>/…`; compliance/super_admin may `SELECT` all under the bucket.
+## 2. Server functions
 
-## Server functions
+### `src/lib/admin-kyc.functions.ts` (extend)
+- `getKycSummary()` → counts by status (`pending`, `active`, `rejected`) + unassigned pending + assigned-to-me + last-24h decisions. Used by dashboard summary cards.
+- `listKycQueue` — extend inputs with `assignee: 'any'|'me'|'unassigned'|<uuid>`; return rows include `kyc_assigned_to`, assignee display name, `kyc_notes`.
+- `listKycReviewers()` → admins with `super_admin`/`compliance_officer` roles for the assignment dropdown.
+- `assignKyc({ member_ids: uuid[], assignee_id: uuid | null })` — bulk set/clear `kyc_assigned_to`; audit_log entry per member.
+- `decideKyc` — after successful decision, enqueue email notification (see §4). No signature change.
+- `bulkDecideKyc({ member_ids: uuid[], decision, notes })` — same validation as `decideKyc` (rejection requires ≥5 char note); runs per member in a single handler, aggregates results `{ succeeded, failed: [{id, error}] }`, enqueues one notification per approved/rejected member, single audit_log summary + per-member entries.
 
-New client-safe modules — no top-level `client.server` import.
+Admin gate reused via `assertKycAdmin`. Reviewer-of-record enforcement: for individual `decideKyc`, if `kyc_assigned_to` is set and not equal to caller, require `super_admin` role (override).
 
-`src/lib/member-profile.functions.ts` (all `requireSupabaseAuth`):
-- `getMyProfile` → `{ profile, next_of_kin[], documents[] }`.
-- `updateMyProfile` (Zod: `full_name`, `phone`, `date_of_birth`, `gender`, `region`, `digital_address`, `address_line`, `occupation`, `employer`, `national_id`). Reject changes to `national_id`/`date_of_birth` when `profiles.kyc = 'active'`.
-- `upsertNextOfKin`, `deleteNextOfKin`.
-- `createKycUploadUrl({ doc_type, filename, mime_type, size_bytes })` — validates size ≤ 8 MB and mime in `image/jpeg|image/png|application/pdf`; returns `{ storage_path, signed_url, token }` via `supabase.storage.from('kyc-documents').createSignedUploadUrl`.
-- `registerKycDocument({ doc_type, storage_path, mime_type, size_bytes })` — inserts row, sets `profiles.kyc='pending'`, writes `audit_log`.
-- `deleteMyPendingKycDocument(id)` — deletes the storage object and row if `status='pending'` and belongs to caller.
+### `src/lib/member-kyc.functions.ts` (new, `requireSupabaseAuth`)
+- `getMyKycStatus()` → derived progress:
+  - `profile_complete` — required fields present (`full_name`, `phone`, `date_of_birth`, `gender`, `region`, `address_line`, `national_id`).
+  - `documents_submitted` — has at least `national_id_front`, `national_id_back`, `selfie` uploaded (any status ≠ deleted).
+  - `review_state` — `not_started|in_review|approved|rejected` from `profiles.kyc` + presence of docs.
+  - `latest_decision` — `{ decision, notes, reviewed_at, reviewer_name? }` (reviewer name resolved only when approved; never reveal reviewer email).
+  - `next_action` — human string + `link` (e.g. `/app/profile#documents`).
+  - `notifications` — last 5 rows from `kyc_notifications` for this member (channel, status, sent_at).
 
-`src/lib/admin-kyc.functions.ts` (admin-role guard via `has_role`):
-- `listKycQueue({ status?, q?, page?, page_size? })` → paginated members + latest submitted doc + pending doc count.
-- `getMemberKyc(member_id)` → full profile + next-of-kin + documents with short-TTL signed view URLs.
-- `decideKyc({ member_id, decision: 'approved'|'rejected', notes })` — updates `profiles.kyc`, `kyc_reviewed_*`, marks all pending docs with the same decision, writes `audit_log` (required note when rejecting).
-- `signKycDocument(document_id)` — 5-minute signed URL for admin viewing.
+## 3. Routes
 
-## Routes
+### Rewrite `src/routes/_admin.admin.members.tsx` (queue dashboard)
+- Header: `PageHeader` + 4 summary cards from `getKycSummary` (Pending, Assigned to me, Unassigned, Decided today).
+- Filters row: status (existing), assignee dropdown (`Any / Me / Unassigned / <reviewer>` from `listKycReviewers`), search, page size.
+- Table: checkbox column for selection, name/member_no, status pill, assignee cell with inline `Assign` popover (self-claim or pick reviewer), pending docs count, updated_at, link to detail.
+- Selection toolbar (visible when ≥1 row selected):
+  - `Assign to…` (dropdown of reviewers + Unassign).
+  - `Bulk approve` → confirm dialog with optional shared note.
+  - `Bulk reject` → dialog with required shared note (≥5 chars).
+  - After success: toast with `succeeded/failed` counts, invalidate queue + summary.
+- Keeps `ExportBar` (`export:members`).
 
-### Rewrite `src/routes/_member.app.profile.tsx`
-Three sections driven by `getMyProfile`:
-1. **Personal details** — editable form (fields above), inline save via `updateMyProfile` mutation, banner showing `kyc` status (`Pending review`, `Verified`, `Rejected — see notes`), locked-field notice when `kyc='active'`.
-2. **Next of kin** — table + add/edit dialog + delete, uses `upsertNextOfKin`/`deleteNextOfKin`.
-3. **KYC documents** — per-type upload slots (National ID front/back, Selfie, Proof of address, Other). Flow: user picks doc_type + file → `createKycUploadUrl` → `uploadToSignedUrl` → `registerKycDocument`. Uploaded row shows status pill, uploaded date, delete button while pending. Rejected docs surface `review_notes`.
+### New `src/routes/_member.app.kyc.tsx`
+- `PageHeader` "KYC verification".
+- Stepper (3 steps: Profile details, Upload documents, Review) using status icons from `getMyKycStatus`.
+- Current status banner using existing `StatusPill` colour scheme (Pending review / Verified / Rejected — includes `latest_decision.notes` when rejected).
+- Next action card with primary button linking to `/app/profile` at the right anchor.
+- Notification history list (Email · Sent 2h ago, etc.); "SMS coming soon" placeholder.
+- Sidebar entry added to member nav (in `_member.app.tsx`) between Profile and Support.
 
-Region preset selector stays local as it is today.
-
-### Rewrite `src/routes/_admin.admin.members.tsx`
-- Live data via `listKycQueue`; status filter (`all|pending|active|rejected`), search box (name/member_no/national_id), pagination, ExportBar (existing `export:members` permission).
-- Each row links to the new detail route.
-
-### New `src/routes/_admin.admin.members.$id.tsx`
-- Uses `getMemberKyc`. Shows profile card, next-of-kin list, documents grid with "View" button (opens signed URL in new tab), status pill, and an **Approve / Reject** action bar bound to `decideKyc`. Rejection requires a note (reuses the required-note pattern from loan decisions). Success invalidates `admin/kyc` queries and returns to the queue.
+### `src/routes/_member.app.profile.tsx`
+- Add prominent link banner "View verification status →" pointing at `/app/kyc` when `kyc` is `pending` or `rejected`.
 
 ### `_admin.admin.tsx`
-Add `/admin/members/$id` to CRUMBS map.
+- Add breadcrumb label for `/admin/members` → "KYC queue".
 
-## UI conventions
+## 4. Email notifications
 
-- Reuse `PageHeader`, `SectionCard`, `StatusPill` (extend with `pending/active/rejected` mapping already covered).
-- Forms use `react-hook-form` + Zod (present in stack).
-- KYC status pill drives banner colour on member profile.
+Uses the Lovable app-email pipeline (queued, retriable).
 
-## Query keys / invalidation
+- On first turn: call `email_domain--check_email_domain_status`. If no domain, show the standard email setup dialog and stop; resume after setup.
+- If a domain exists, ensure infra + scaffold have run (`email_domain--setup_email_infra`, `email_domain--scaffold_transactional_email`) — the scaffold is idempotent.
+- Add two React Email templates in `src/lib/email-templates/`:
+  - `kyc-approved.tsx` — congratulations, next steps (open a loan / start saving), link to `/app/kyc`. Subject: "Your KYC verification is approved".
+  - `kyc-rejected.tsx` — reviewer note (escaped via props), what to fix, link back to `/app/profile`. Subject: "Action needed on your KYC verification".
+- Register both in `src/lib/email-templates/registry.ts`.
+- New helper `src/lib/email/send-kyc-notification.server.ts` — server-only wrapper that:
+  1. Loads recipient email + name from `profiles` / `auth.users`.
+  2. Inserts `kyc_notifications` row (`status='queued'`).
+  3. POSTs internally to `/lovable/email/transactional/send` with a service token, passing an idempotency key of `kyc-<decision>-<member_id>-<reviewed_at ms>` so retries dedupe.
+  4. On failure, marks row `failed` with error, on success marks `sent` with `sent_at`.
+- `decideKyc` and `bulkDecideKyc` call this helper after the transactional DB update; failures are logged to `audit_log` but do not fail the decision.
 
-- `['member','profile']`, `['admin','kyc','queue', filters]`, `['admin','kyc','member', id]`.
-- After any mutation, invalidate the impacted key and `['admin','overview']` (KYC pending count feeds into future overview widgets).
+## 5. SMS hook (deferred)
+
+- `kyc_notifications` supports `channel='sms'` but no rows are inserted yet.
+- `send-kyc-notification.server.ts` has a TODO block for future Twilio/Africa's Talking implementation; UI on `/app/kyc` shows "SMS notifications coming soon".
 
 ## Out of scope
 
-- OCR / automated ID matching.
-- Tier promotion, biometrics, trusted devices.
-- Email/SMS notifications on decision — audit_log only for now.
-- Bulk decisioning; each member reviewed individually.
+- SMS sending, in-app notification centre, admin push notifications.
+- Reviewer performance analytics (decision count, avg time).
+- Reassignment workflow beyond bulk assign/unassign (no comments/threads).
+- Editing already-sent decisions.
 
 ## Technical notes
 
-- Storage path format: `<user_id>/<doc_id>-<safe-filename>`; enforced client-side and by the storage RLS prefix check.
-- `has_role` already exists (see `db-functions`); admin gate uses the same set as `admin-analytics.functions.ts`.
-- Ensure the migration adds an `updated_at` trigger for both new tables using the existing `public.update_updated_at_column`.
-- No changes to auth-attacher/middleware wiring; existing bearer flow covers all new server fns.
+- Bulk operations run sequentially inside one server fn handler (small batch sizes; queue capped at 50 selections in UI). Failures are collected, not thrown.
+- `kyc_notifications` writes go through the authenticated `supabase` client with a policy allowing compliance/super_admin insert; the send helper runs inside `decideKyc`/`bulkDecideKyc` which already asserts admin role.
+- Reviewer names in member-facing responses are limited to `full_name`; never expose `email` or `id`.
+- Query keys: `['admin','kyc','summary']`, `['admin','kyc','reviewers']`, `['member','kyc','status']`. Invalidate `summary` + `queue` after assign/decide/bulk-decide.
