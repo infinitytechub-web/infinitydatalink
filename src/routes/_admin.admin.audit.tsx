@@ -212,7 +212,7 @@ function AuditContent() {
                       type="button"
                       onClick={(ev) => {
                         ev.stopPropagation();
-                        setSelected(e);
+                        selectEntry(e.id);
                       }}
                       className="mt-1 text-[10px] font-bold uppercase tracking-widest text-emerald-mid hover:underline"
                     >
