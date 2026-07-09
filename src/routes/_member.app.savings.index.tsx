@@ -1,32 +1,25 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { z } from "zod";
+import { PiggyBank, Plus, TrendingUp } from "lucide-react";
 import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
-import { ExportBar } from "@/components/export-bar";
-import { Pagination, SortHeader, type SortState } from "@/components/table-controls";
-import { formatMoney } from "@/lib/org-config";
-import { getMySavings, type SavingsRow } from "@/lib/member-data.functions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { listMyAccounts, type SavingsAccount } from "@/lib/savings.functions";
 
-const search = z.object({
-  page: fallback(z.number().int(), 1).default(1),
-  pageSize: fallback(z.number().int(), 10).default(10),
-  sortBy: fallback(z.string(), "created_at").default("created_at"),
-  sortDir: fallback(z.enum(["asc", "desc"]), "desc").default("desc"),
+const accountsQuery = queryOptions({
+  queryKey: ["member", "savings", "accounts"],
+  queryFn: () => listMyAccounts(),
+  staleTime: 15_000,
 });
 
 export const Route = createFileRoute("/_member/app/savings/")({
-  validateSearch: zodValidator(search),
+  loader: ({ context }) => context.queryClient.ensureQueryData(accountsQuery),
   component: SavingsPage,
+  errorComponent: ({ error }) => (
+    <div className="p-6 text-sm text-destructive">Failed to load savings: {error.message}</div>
+  ),
+  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
 });
-
-const savingsQuery = (input: z.infer<typeof search>) =>
-  queryOptions({
-    queryKey: ["member", "savings", input],
-    queryFn: () => getMySavings({ data: input }),
-  });
 
 function SavingsPage() {
   return (
@@ -34,86 +27,108 @@ function SavingsPage() {
       <PageHeader
         eyebrow="Member portal"
         title="My Savings"
-        description="Contribution schedules, goals and interest tracking across every plan."
+        description="Track balances, goal progress and contributions across every plan you're enrolled in."
+        actions={
+          <Link
+            to="/app/savings/enroll"
+            className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+          >
+            <Plus className="h-4 w-4" /> Enroll in plan
+          </Link>
+        }
       />
       <Suspense fallback={<Skeleton className="h-64 w-full" />}>
-        <SavingsContent />
+        <Body />
       </Suspense>
     </>
   );
 }
 
-function SavingsContent() {
-  const s = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
-  const { data } = useSuspenseQuery(savingsQuery(s));
-  const rows = data.rows;
-  const totalOnPage = rows.reduce((sum: number, p: SavingsRow) => sum + p.balance, 0);
-  const sort: SortState = { sortBy: s.sortBy, sortDir: s.sortDir };
-  const setSort = (next: SortState) => navigate({ search: (p: any) => ({ ...p, ...next, page: 1 }) });
-
+function Body() {
+  const { data: accounts } = useSuspenseQuery(accountsQuery);
+  const total = accounts.reduce((s, a) => s + a.balance, 0);
+  const active = accounts.filter((a) => a.status === "active");
   return (
-    <>
+    <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-3">
-        <KPIStat label="Balance (this page)" value={<>GH₵ <span className="tabular">{formatMoney(totalOnPage).replace("GH₵ ", "")}</span></>} hint={`${rows.length} of ${data.total} plan(s)`} />
-        <KPIStat label="Total plans" value={<span className="tabular">{data.total}</span>} hint="Across all pages" />
-        <KPIStat label="Page" value={<span className="tabular">{s.page}</span>} accent hint={`Per page ${s.pageSize}`} />
+        <KPIStat label="Total balance" value={<Money amount={total} />} hint={`${active.length} active plan(s)`} />
+        <KPIStat label="Active plans" value={<span className="tabular">{active.length}</span>} hint="Enrolled and open" />
+        <KPIStat label="With savings goal" value={<span className="tabular">{active.filter((a) => a.goal_amount).length}</span>} accent />
       </section>
 
-      <SectionCard
-        title="Contribution schedules"
-        action={
-          <ExportBar
-            title="My Savings Contributions"
-            subtitle={`${rows.length} rows (page ${s.page})`}
-            filename="my_savings"
-            permission="export:own_savings"
-            columns={[
-              { header: "Plan", accessor: (p: SavingsRow) => p.name },
-              { header: "Schedule", accessor: (p) => p.schedule },
-              { header: "Interest rate", accessor: (p) => `${p.interest_rate}%`, align: "right" },
-              { header: "Balance", accessor: (p) => formatMoney(p.balance), align: "right" },
-            ]}
-            rows={rows}
-          />
-        }
-      >
-        {data.total === 0 ? (
-          <div className="p-6"><EmptyState title="No savings plans yet" hint="Enroll in a plan to start contributing." /></div>
-        ) : (
-          <>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
-                  <th className="px-6 py-3 font-medium">Plan</th>
-                  <th className="px-6 py-3 font-medium">Schedule</th>
-                  <th className="px-6 py-3 text-right font-medium">Rate</th>
-                  <SortHeader label="Balance" field="balance" sort={sort} onSort={setSort} align="right" />
-                  <SortHeader label="Added" field="created_at" sort={sort} onSort={setSort} align="right" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-emerald-deep/5">
-                {rows.map((p) => (
-                  <tr key={p.id}>
-                    <td className="px-6 py-4 text-sm font-semibold">{p.name}</td>
-                    <td className="px-6 py-4 text-sm text-emerald-deep/60">{p.schedule}</td>
-                    <td className="tabular px-6 py-4 text-right text-sm">{p.interest_rate}%</td>
-                    <td className="px-6 py-4 text-right"><Money amount={p.balance} /></td>
-                    <td className="px-6 py-4 text-right"><StatusPill status="active" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <Pagination
-              page={s.page}
-              pageSize={s.pageSize}
-              total={data.total}
-              onPage={(n) => navigate({ search: (p: any) => ({ ...p, page: n }) })}
-              onPageSize={(n) => navigate({ search: (p: any) => ({ ...p, pageSize: n, page: 1 }) })}
+      {accounts.length === 0 ? (
+        <SectionCard title="Get started">
+          <div className="p-6">
+            <EmptyState title="No savings plans yet" hint="Pick a plan to start contributing and building interest." />
+            <div className="mt-4">
+              <Link
+                to="/app/savings/enroll"
+                className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+              >
+                <Plus className="h-4 w-4" /> Browse plans
+              </Link>
+            </div>
+          </div>
+        </SectionCard>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {accounts.map((a) => (
+            <AccountCard key={a.id} a={a} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AccountCard({ a }: { a: SavingsAccount }) {
+  return (
+    <Link
+      to="/app/savings/$accountId"
+      params={{ accountId: a.id }}
+      className="group block rounded-lg border border-emerald-deep/10 bg-card p-5 transition hover:border-emerald-mid/40 hover:shadow-sm"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/40">
+            <PiggyBank className="h-3.5 w-3.5" /> {a.plan_schedule}
+          </div>
+          <div className="mt-1 text-lg font-semibold text-emerald-deep">
+            {a.nickname || a.plan_name}
+          </div>
+          {a.nickname ? <div className="text-[11px] text-emerald-deep/50">{a.plan_name}</div> : null}
+        </div>
+        <StatusPill status={a.status === "active" ? "active" : "closed"} />
+      </div>
+      <div className="mt-4 flex items-end justify-between">
+        <div>
+          <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Balance</div>
+          <div className="text-2xl font-semibold tabular text-emerald-deep">
+            <Money amount={a.balance} />
+          </div>
+        </div>
+        <div className="flex items-center gap-1 text-[11px] text-emerald-mid">
+          <TrendingUp className="h-3.5 w-3.5" /> {a.plan_interest_rate}% p.a.
+        </div>
+      </div>
+      {a.goal_amount ? (
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <span>Goal progress</span>
+            <span>{a.progress_pct ?? 0}%</span>
+          </div>
+          <div className="mt-1 h-1.5 rounded-full bg-emerald-deep/10">
+            <div
+              className="h-1.5 rounded-full bg-emerald-mid transition-all"
+              style={{ width: `${a.progress_pct ?? 0}%` }}
             />
-          </>
-        )}
-      </SectionCard>
-    </>
+          </div>
+          <div className="mt-1 text-[11px] text-emerald-deep/50">
+            <Money amount={a.balance} /> of <Money amount={a.goal_amount} />
+            {a.goal_target_date ? ` · by ${new Date(a.goal_target_date).toLocaleDateString()}` : ""}
+          </div>
+        </div>
+      ) : null}
+    </Link>
   );
 }
