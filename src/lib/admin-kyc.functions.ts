@@ -305,3 +305,224 @@ export const signKycDocument = createServerFn({ method: "POST" })
     if (sErr) throw new Error(sErr.message);
     return { signed_url: sign.signedUrl };
   });
+
+// ============================================================================
+// Summary + assignment + bulk decisions
+// ============================================================================
+
+export type KycSummary = {
+  pending: number;
+  active: number;
+  rejected: number;
+  unassigned_pending: number;
+  assigned_to_me: number;
+  decided_today: number;
+};
+
+export const getKycSummary = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<KycSummary> => {
+    await assertKycAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
+
+    const countBy = async (col: string, value: any, extra?: (q: any) => any) => {
+      let q = sb.from("profiles").select("id", { count: "exact", head: true }).eq(col, value);
+      if (extra) q = extra(q);
+      const { count } = await q;
+      return count ?? 0;
+    };
+    const todayIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    const [pending, active, rejected, unassignedPending, mine, decidedToday] = await Promise.all([
+      countBy("kyc", "pending"),
+      countBy("kyc", "active"),
+      countBy("kyc", "rejected"),
+      countBy("kyc", "pending", (q) => q.is("kyc_assigned_to", null)),
+      countBy("kyc_assigned_to", context.userId, (q) => q.eq("kyc", "pending")),
+      (async () => {
+        const { count } = await sb
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .in("kyc", ["active", "rejected"])
+          .gte("kyc_reviewed_at", todayIso);
+        return count ?? 0;
+      })(),
+    ]);
+
+    return {
+      pending,
+      active,
+      rejected,
+      unassigned_pending: unassignedPending,
+      assigned_to_me: mine,
+      decided_today: decidedToday,
+    };
+  });
+
+export type KycReviewer = { id: string; name: string; role: string };
+
+export const listKycReviewers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<KycReviewer[]> => {
+    await assertKycAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
+
+    const { data: roles, error } = await sb
+      .from("user_roles")
+      .select("user_id, role")
+      .in("role", ["super_admin", "compliance_officer"]);
+    if (error) throw new Error(error.message);
+
+    const byUser = new Map<string, string>();
+    for (const r of roles ?? []) {
+      const uid = (r as any).user_id as string;
+      const role = (r as any).role as string;
+      // Prefer compliance_officer label when both roles are present.
+      if (!byUser.has(uid) || role === "compliance_officer") byUser.set(uid, role);
+    }
+    const ids = Array.from(byUser.keys());
+    if (!ids.length) return [];
+
+    const { data: profs } = await sb.from("profiles").select("id, full_name").in("id", ids);
+    const nameMap = new Map<string, string>();
+    for (const p of profs ?? []) nameMap.set((p as any).id, (p as any).full_name ?? "—");
+
+    return ids
+      .map((id) => ({ id, name: nameMap.get(id) ?? "—", role: byUser.get(id) as string }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  });
+
+export const assignKyc = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        member_ids: z.array(z.string().uuid()).min(1).max(100),
+        assignee_id: z.string().uuid().nullable(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const role = await assertKycAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
+    const now = new Date().toISOString();
+
+    const { error } = await sb
+      .from("profiles")
+      .update({
+        kyc_assigned_to: data.assignee_id,
+        kyc_assigned_at: data.assignee_id ? now : null,
+      })
+      .in("id", data.member_ids);
+    if (error) throw new Error(error.message);
+
+    const auditRows = data.member_ids.map((id) => ({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: role,
+      action: data.assignee_id ? "kyc.assigned" : "kyc.unassigned",
+      target: id,
+      meta: { assignee_id: data.assignee_id },
+    }));
+    await sb.from("audit_log").insert(auditRows);
+
+    return { updated: data.member_ids.length };
+  });
+
+const bulkDecideInput = z
+  .object({
+    member_ids: z.array(z.string().uuid()).min(1).max(50),
+    decision: z.enum(["approved", "rejected"]),
+    notes: z.string().trim().max(1000).optional().default(""),
+  })
+  .superRefine((v, ctx) => {
+    if (v.decision === "rejected" && v.notes.trim().length < 5) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["notes"],
+        message: "Rejection notes must be at least 5 characters.",
+      });
+    }
+  });
+
+export const bulkDecideKyc = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => bulkDecideInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const role = await assertKycAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
+    const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
+    const docStatus: "approved" | "rejected" = data.decision === "approved" ? "approved" : "rejected";
+    const now = new Date().toISOString();
+
+    const succeeded: string[] = [];
+    const failed: { id: string; error: string }[] = [];
+
+    const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
+
+    for (const memberId of data.member_ids) {
+      try {
+        const { data: prof, error: pErr } = await sb
+          .from("profiles")
+          .update({
+            kyc: profileKyc,
+            kyc_notes: data.notes || null,
+            kyc_reviewed_by: context.userId,
+            kyc_reviewed_at: now,
+          })
+          .eq("id", memberId)
+          .select("id")
+          .maybeSingle();
+        if (pErr || !prof) throw new Error(pErr?.message ?? "Member not found");
+
+        await sb
+          .from("kyc_documents")
+          .update({
+            status: docStatus,
+            review_notes: data.notes || null,
+            reviewed_by: context.userId,
+            reviewed_at: now,
+          })
+          .eq("member_id", memberId)
+          .eq("status", "pending");
+
+        await sb.from("audit_log").insert({
+          actor_id: context.userId,
+          actor_email: (context.claims as any)?.email ?? null,
+          actor_role: role,
+          action: `kyc.bulk_${data.decision}`,
+          target: memberId,
+          meta: { notes: data.notes || null, member_id: memberId },
+        });
+
+        // Enqueue notification
+        try {
+          const res = await sendKycDecisionEmail(sb, {
+            memberId,
+            decision: data.decision,
+            reviewerNote: data.notes || null,
+            reviewedAt: now,
+          });
+          if (!res.ok) {
+            await sb.from("audit_log").insert({
+              actor_id: context.userId,
+              actor_email: (context.claims as any)?.email ?? null,
+              actor_role: role,
+              action: "kyc.notification_failed",
+              target: memberId,
+              meta: { error: res.error ?? res.skipped ?? "unknown" },
+            });
+          }
+        } catch (err: any) {
+          console.error("kyc bulk notification error", err);
+        }
+
+        succeeded.push(memberId);
+      } catch (err: any) {
+        failed.push({ id: memberId, error: err?.message ?? String(err) });
+      }
+    }
+
+    return { succeeded: succeeded.length, failed };
+  });
+
