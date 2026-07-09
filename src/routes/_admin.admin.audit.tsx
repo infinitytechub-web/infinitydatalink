@@ -79,7 +79,6 @@ function AuditContent() {
   return (
     <>
     <SectionCard
-    <SectionCard
       title="Approval & rejection log"
       action={
         <ExportBar
