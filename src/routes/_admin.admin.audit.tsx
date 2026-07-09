@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -26,6 +26,7 @@ const search = z.object({
   to: fallback(z.string(), "").default(""),
   page: fallback(z.number().int(), 1).default(1),
   pageSize: fallback(z.number().int(), 25).default(25),
+  selected: fallback(z.string(), "").default(""),
 });
 type SearchInput = z.infer<typeof search>;
 
@@ -73,8 +74,12 @@ function AuditContent() {
   const setSearch = (patch: Partial<SearchInput>) =>
     navigate({ search: (prev: SearchInput) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
 
+  const selectEntry = (id: string | null) =>
+    navigate({ search: (prev: SearchInput) => ({ ...prev, selected: id ?? "" }) });
+
   const rows = data.rows;
-  const [selected, setSelected] = useState<LoanAuditEntry | null>(null);
+  const selected = s.selected ? rows.find((r) => r.id === s.selected) ?? null : null;
+
 
   return (
     <>
@@ -140,7 +145,7 @@ function AuditContent() {
         {(s.member || s.from || s.to || s.decision !== "all") && (
           <button
             onClick={() =>
-              navigate({ search: { decision: "all", member: "", from: "", to: "", page: 1, pageSize: s.pageSize } })
+              navigate({ search: { decision: "all", member: "", from: "", to: "", page: 1, pageSize: s.pageSize, selected: "" } })
             }
             className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
           >
@@ -171,7 +176,7 @@ function AuditContent() {
               {rows.map((e) => (
                 <tr
                   key={e.id}
-                  onClick={() => setSelected(e)}
+                  onClick={() => selectEntry(e.id)}
                   className="align-top cursor-pointer hover:bg-cream/40"
                 >
                   <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
@@ -207,7 +212,7 @@ function AuditContent() {
                       type="button"
                       onClick={(ev) => {
                         ev.stopPropagation();
-                        setSelected(e);
+                        selectEntry(e.id);
                       }}
                       className="mt-1 text-[10px] font-bold uppercase tracking-widest text-emerald-mid hover:underline"
                     >
@@ -228,7 +233,7 @@ function AuditContent() {
         </>
       )}
     </SectionCard>
-    <AuditDetailsDialog entry={selected} onClose={() => setSelected(null)} />
+    <AuditDetailsDialog entry={selected} onClose={() => selectEntry(null)} />
     </>
   );
 }
