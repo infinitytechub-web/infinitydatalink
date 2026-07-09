@@ -240,6 +240,59 @@ export type Database = {
           },
         ]
       }
+      loan_repayments: {
+        Row: {
+          created_at: string
+          due_date: string
+          id: string
+          installment_no: number
+          interest_due: number
+          loan_id: string
+          paid_amount: number
+          paid_at: string | null
+          principal_due: number
+          status: string
+          total_due: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          id?: string
+          installment_no: number
+          interest_due: number
+          loan_id: string
+          paid_amount?: number
+          paid_at?: string | null
+          principal_due: number
+          status?: string
+          total_due: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          id?: string
+          installment_no?: number
+          interest_due?: number
+          loan_id?: string
+          paid_amount?: number
+          paid_at?: string | null
+          principal_due?: number
+          status?: string
+          total_due?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_repayments_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loans: {
         Row: {
           amount: number
@@ -247,8 +300,14 @@ export type Database = {
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          first_payment_at: string | null
           id: string
           interest_rate: number
+          maturity_at: string | null
+          monthly_payment: number | null
+          outstanding_principal: number
           product: string
           purpose: string | null
           ref: string
@@ -263,8 +322,14 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          first_payment_at?: string | null
           id?: string
           interest_rate?: number
+          maturity_at?: string | null
+          monthly_payment?: number | null
+          outstanding_principal?: number
           product: string
           purpose?: string | null
           ref: string
@@ -279,8 +344,14 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          first_payment_at?: string | null
           id?: string
           interest_rate?: number
+          maturity_at?: string | null
+          monthly_payment?: number | null
+          outstanding_principal?: number
           product?: string
           purpose?: string | null
           ref?: string
@@ -610,6 +681,37 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      disburse_loan: {
+        Args: { _channel: string; _loan_id: string; _note: string }
+        Returns: {
+          amount: number
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          first_payment_at: string | null
+          id: string
+          interest_rate: number
+          maturity_at: string | null
+          monthly_payment: number | null
+          outstanding_principal: number
+          product: string
+          purpose: string | null
+          ref: string
+          status: Database["public"]["Enums"]["loan_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
@@ -676,6 +778,42 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      record_loan_repayment: {
+        Args: {
+          _amount: number
+          _channel: string
+          _loan_id: string
+          _note: string
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          first_payment_at: string | null
+          id: string
+          interest_rate: number
+          maturity_at: string | null
+          monthly_payment: number | null
+          outstanding_principal: number
+          product: string
+          purpose: string | null
+          ref: string
+          status: Database["public"]["Enums"]["loan_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {

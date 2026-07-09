@@ -250,3 +250,108 @@ export const listLoanAudit = createServerFn({ method: "GET" })
       pageSize: data.pageSize,
     };
   });
+
+// ================= Disbursement & repayments =================
+export type LoanScheduleRow = {
+  id: string;
+  installment_no: number;
+  due_date: string;
+  principal_due: number;
+  interest_due: number;
+  total_due: number;
+  paid_amount: number;
+  paid_at: string | null;
+  status: "due" | "partial" | "paid" | "late";
+};
+
+export type LoanDetail = AdminLoanRow & {
+  disbursed_at: string | null;
+  disbursed_by: string | null;
+  outstanding_principal: number;
+  monthly_payment: number | null;
+  first_payment_at: string | null;
+  maturity_at: string | null;
+  decision_note: string | null;
+  schedule: LoanScheduleRow[];
+};
+
+export const getAdminLoanDetail = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ loan_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<LoanDetail> => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: loan, error } = await context.supabase
+      .from("loans")
+      .select(
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, decision_note, user_id, disbursed_at, disbursed_by, outstanding_principal, monthly_payment, first_payment_at, maturity_at",
+      )
+      .eq("id", data.loan_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!loan) throw new Error("Loan not found");
+
+    const { data: profile } = await context.supabase
+      .from("profiles").select("full_name, member_no").eq("id", loan.user_id).maybeSingle();
+    const { data: sched } = await context.supabase
+      .from("loan_repayments")
+      .select("id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, paid_at, status")
+      .eq("loan_id", loan.id)
+      .order("installment_no", { ascending: true });
+
+    return {
+      ...(loan as any),
+      amount: Number(loan.amount),
+      interest_rate: Number(loan.interest_rate),
+      outstanding_principal: Number(loan.outstanding_principal ?? 0),
+      monthly_payment: loan.monthly_payment != null ? Number(loan.monthly_payment) : null,
+      member_name: profile?.full_name ?? null,
+      member_no: profile?.member_no ?? null,
+      schedule: (sched ?? []).map((r: any) => ({
+        ...r,
+        principal_due: Number(r.principal_due),
+        interest_due: Number(r.interest_due),
+        total_due: Number(r.total_due),
+        paid_amount: Number(r.paid_amount),
+      })),
+    } as LoanDetail;
+  });
+
+export const disburseLoan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      loan_id: z.string().uuid(),
+      channel: z.string().trim().min(2).max(40),
+      note: z.string().trim().max(500).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: loan, error } = await context.supabase.rpc("disburse_loan", {
+      _loan_id: data.loan_id,
+      _channel: data.channel,
+      _note: data.note ?? "",
+    });
+    if (error) throw new Error(error.message);
+    return loan;
+  });
+
+export const recordLoanRepayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      loan_id: z.string().uuid(),
+      amount: z.number().positive().max(100_000_000),
+      channel: z.string().trim().min(2).max(40),
+      note: z.string().trim().max(500).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: loan, error } = await context.supabase.rpc("record_loan_repayment", {
+      _loan_id: data.loan_id,
+      _amount: data.amount,
+      _channel: data.channel,
+      _note: data.note ?? "",
+    });
+    if (error) throw new Error(error.message);
+    return loan;
+  });

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -158,6 +158,13 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
         <td className="tabular px-6 py-4 text-right text-sm">{loan.term_months} mo</td>
         <td className="px-6 py-4 text-right"><StatusPill status={loan.status} /></td>
         <td className="px-6 py-4 text-right">
+          <Link
+            to="/admin/loans/$loanId"
+            params={{ loanId: loan.id }}
+            className="mr-2 rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+          >
+            View
+          </Link>
           {loan.status === "pending" ? (
             <div className="flex justify-end gap-2">
               <button

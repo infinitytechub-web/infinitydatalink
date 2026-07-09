@@ -46,6 +46,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
 import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
+import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -234,6 +235,11 @@ const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminAdminMembersRoute,
 } as any)
+const AdminAdminLoansLoanIdRoute = AdminAdminLoansLoanIdRouteImport.update({
+  id: '/$loanId',
+  path: '/$loanId',
+  getParentRoute: () => AdminAdminLoansRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -245,7 +251,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/audit': typeof AdminAdminAuditRoute
-  '/admin/loans': typeof AdminAdminLoansRoute
+  '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
+  '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -280,7 +287,7 @@ export interface FileRoutesByTo {
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/audit': typeof AdminAdminAuditRoute
-  '/admin/loans': typeof AdminAdminLoansRoute
+  '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
@@ -296,6 +303,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
+  '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -319,7 +327,7 @@ export interface FileRoutesById {
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_admin/admin/audit': typeof AdminAdminAuditRoute
-  '/_admin/admin/loans': typeof AdminAdminLoansRoute
+  '/_admin/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/reports': typeof AdminAdminReportsRoute
@@ -336,6 +344,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
+  '/_admin/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/_member/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/_member/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -375,6 +384,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin/'
     | '/app/'
+    | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/app/savings/$accountId'
     | '/app/savings/enroll'
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin'
     | '/app'
+    | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/app/savings/$accountId'
     | '/app/savings/enroll'
@@ -448,6 +459,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_admin/admin/'
     | '/_member/app/'
+    | '/_admin/admin/loans/$loanId'
     | '/_admin/admin/members/$id'
     | '/_member/app/savings/$accountId'
     | '/_member/app/savings/enroll'
@@ -735,8 +747,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminMembersIdRouteImport
       parentRoute: typeof AdminAdminMembersRoute
     }
+    '/_admin/admin/loans/$loanId': {
+      id: '/_admin/admin/loans/$loanId'
+      path: '/$loanId'
+      fullPath: '/admin/loans/$loanId'
+      preLoaderRoute: typeof AdminAdminLoansLoanIdRouteImport
+      parentRoute: typeof AdminAdminLoansRoute
+    }
   }
 }
+
+interface AdminAdminLoansRouteChildren {
+  AdminAdminLoansLoanIdRoute: typeof AdminAdminLoansLoanIdRoute
+}
+
+const AdminAdminLoansRouteChildren: AdminAdminLoansRouteChildren = {
+  AdminAdminLoansLoanIdRoute: AdminAdminLoansLoanIdRoute,
+}
+
+const AdminAdminLoansRouteWithChildren = AdminAdminLoansRoute._addFileChildren(
+  AdminAdminLoansRouteChildren,
+)
 
 interface AdminAdminMembersRouteChildren {
   AdminAdminMembersIdRoute: typeof AdminAdminMembersIdRoute
@@ -751,7 +782,7 @@ const AdminAdminMembersRouteWithChildren =
 
 interface AdminAdminRouteChildren {
   AdminAdminAuditRoute: typeof AdminAdminAuditRoute
-  AdminAdminLoansRoute: typeof AdminAdminLoansRoute
+  AdminAdminLoansRoute: typeof AdminAdminLoansRouteWithChildren
   AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminReportsRoute: typeof AdminAdminReportsRoute
@@ -763,7 +794,7 @@ interface AdminAdminRouteChildren {
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminAuditRoute: AdminAdminAuditRoute,
-  AdminAdminLoansRoute: AdminAdminLoansRoute,
+  AdminAdminLoansRoute: AdminAdminLoansRouteWithChildren,
   AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminReportsRoute: AdminAdminReportsRoute,
@@ -868,13 +899,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
