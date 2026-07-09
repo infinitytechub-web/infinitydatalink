@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -328,7 +328,62 @@ function AuditDetailsDialog({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="flex flex-wrap items-center justify-between gap-2 sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/admin/members"
+              onClick={onClose}
+              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 hover:bg-cream/50"
+            >
+              View member →
+            </Link>
+            <Link
+              to="/admin/loans"
+              onClick={onClose}
+              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 hover:bg-cream/50"
+            >
+              View loan →
+            </Link>
+            <button
+              onClick={() => {
+                if (!entry) return;
+                const payload = {
+                  audit_entry: {
+                    id: entry.id,
+                    created_at: entry.created_at,
+                    action: entry.action,
+                    target: entry.target,
+                  },
+                  decision: entry.action === "loan.approved" ? "approved" : "rejected",
+                  officer: {
+                    actor_id: entry.actor_id,
+                    actor_email: entry.actor_email,
+                    actor_role: entry.actor_role,
+                  },
+                  member: {
+                    member_id: entry.member_id,
+                    member_no: entry.member_no,
+                    member_name: entry.member_name,
+                  },
+                  loan: {
+                    loan_ref: entry.loan_ref,
+                    loan_id: entry.target,
+                    amount: entry.amount,
+                  },
+                  meta: {
+                    ref: entry.loan_ref,
+                    note: entry.note,
+                    amount: entry.amount,
+                    member_id: entry.member_id,
+                  },
+                };
+                copy(JSON.stringify(payload, null, 2), "Full metadata");
+              }}
+              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 hover:bg-cream/50"
+            >
+              Copy full metadata
+            </button>
+          </div>
           <button
             onClick={onClose}
             className="rounded border border-emerald-deep/15 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
