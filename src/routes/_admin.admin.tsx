@@ -54,7 +54,7 @@ export const Route = createFileRoute("/_admin/admin")({
 
 function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const breadcrumb = CRUMBS[pathname] ?? "Administration";
+  const breadcrumb = crumbFor(pathname);
   return (
     <PortalShell
       brand="Infinity Admin"
