@@ -437,10 +437,12 @@ export const adminSettleTransaction = createServerFn({ method: "POST" })
     if (data.status === "failed" && !data.note?.trim()) {
       throw new Error("note_required_for_rejection");
     }
-    const { error } = await context.supabase.rpc("finalize_transaction", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("finalize_transaction", {
       _txn_id: data.txn_id,
       _status: data.status,
       _note: data.note ?? "",
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
