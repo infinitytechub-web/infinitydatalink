@@ -103,13 +103,19 @@ export const getMyLoans = createServerFn({ method: "GET" })
     const to = from + data.pageSize - 1;
     const { data: rows, error, count } = await context.supabase
       .from("loans")
-      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at", { count: "exact" })
+      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, outstanding_principal, monthly_payment", { count: "exact" })
       .eq("user_id", context.userId)
       .order(sortCol, { ascending: data.sortDir === "asc" })
       .range(from, to);
     if (error) throw new Error(error.message);
     return {
-      rows: (rows ?? []).map((r) => ({ ...r, amount: Number(r.amount), interest_rate: Number(r.interest_rate) })) as LoanRow[],
+      rows: (rows ?? []).map((r) => ({
+        ...r,
+        amount: Number(r.amount),
+        interest_rate: Number(r.interest_rate),
+        outstanding_principal: Number(r.outstanding_principal ?? 0),
+        monthly_payment: r.monthly_payment == null ? null : Number(r.monthly_payment),
+      })) as LoanRow[],
       total: count ?? 0,
       page: data.page,
       pageSize: data.pageSize,
