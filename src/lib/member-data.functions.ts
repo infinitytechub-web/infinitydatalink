@@ -30,6 +30,8 @@ export type LoanRow = {
   purpose: string | null;
   created_at: string;
   decided_at: string | null;
+  outstanding_principal: number;
+  monthly_payment: number | null;
 };
 
 export type TxnRow = {
