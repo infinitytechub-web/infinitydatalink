@@ -682,7 +682,12 @@ export type Database = {
         Returns: boolean
       }
       disburse_loan: {
-        Args: { _channel: string; _loan_id: string; _note: string }
+        Args: {
+          _actor_id: string
+          _channel: string
+          _loan_id: string
+          _note: string
+        }
         Returns: {
           amount: number
           created_at: string
@@ -719,6 +724,7 @@ export type Database = {
       }
       finalize_transaction: {
         Args: {
+          _actor_id: string
           _note: string
           _status: Database["public"]["Enums"]["txn_status"]
           _txn_id: string
@@ -756,6 +762,7 @@ export type Database = {
       post_savings_contribution: {
         Args: {
           _account_id: string
+          _actor_id: string
           _amount: number
           _channel: string
           _note: string
@@ -765,6 +772,7 @@ export type Database = {
       post_savings_withdrawal: {
         Args: {
           _account_id: string
+          _actor_id: string
           _amount: number
           _channel: string
           _note: string
@@ -781,6 +789,7 @@ export type Database = {
       }
       record_loan_repayment: {
         Args: {
+          _actor_id: string
           _amount: number
           _channel: string
           _loan_id: string

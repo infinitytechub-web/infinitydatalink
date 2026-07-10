@@ -265,11 +265,13 @@ export const submitContribution = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => MoveSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ txn_id: string }> => {
-    const { data: id, error } = await context.supabase.rpc("post_savings_contribution", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: id, error } = await supabaseAdmin.rpc("post_savings_contribution", {
       _account_id: data.account_id,
       _amount: data.amount,
       _channel: data.channel,
       _note: data.note ?? "",
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
     return { txn_id: id as string };
@@ -279,11 +281,13 @@ export const submitWithdrawal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => MoveSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ txn_id: string }> => {
-    const { data: id, error } = await context.supabase.rpc("post_savings_withdrawal", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: id, error } = await supabaseAdmin.rpc("post_savings_withdrawal", {
       _account_id: data.account_id,
       _amount: data.amount,
       _channel: data.channel,
       _note: data.note ?? "",
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
     return { txn_id: id as string };
@@ -433,10 +437,12 @@ export const adminSettleTransaction = createServerFn({ method: "POST" })
     if (data.status === "failed" && !data.note?.trim()) {
       throw new Error("note_required_for_rejection");
     }
-    const { error } = await context.supabase.rpc("finalize_transaction", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("finalize_transaction", {
       _txn_id: data.txn_id,
       _status: data.status,
       _note: data.note ?? "",
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
