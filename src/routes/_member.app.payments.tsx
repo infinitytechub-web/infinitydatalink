@@ -12,11 +12,11 @@ export const Route = createFileRoute("/_member/app/payments")({
 
 const activeLoansQuery = queryOptions({
   queryKey: ["member", "loans", "active"],
-  queryFn: () => getMyLoans({ data: { page: 1, pageSize: 20, sort: { field: "created_at", dir: "desc" } } }),
+  queryFn: () => getMyLoans({ data: { page: 1, pageSize: 20, sortBy: "created_at", sortDir: "desc" } }),
 });
 const recentTxnsQuery = queryOptions({
   queryKey: ["member", "transactions", "recent"],
-  queryFn: () => getMyTransactions({ data: { page: 1, pageSize: 8, sort: { field: "created_at", dir: "desc" } } }),
+  queryFn: () => getMyTransactions({ data: { page: 1, pageSize: 8, sortBy: "created_at", sortDir: "desc" } }),
 });
 
 function PaymentsPage() {
