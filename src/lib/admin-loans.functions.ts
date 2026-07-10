@@ -348,11 +348,13 @@ export const recordLoanRepayment = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { data: loan, error } = await context.supabase.rpc("record_loan_repayment", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: loan, error } = await supabaseAdmin.rpc("record_loan_repayment", {
       _loan_id: data.loan_id,
       _amount: data.amount,
       _channel: data.channel,
       _note: data.note ?? "",
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
     return loan;
