@@ -30,6 +30,8 @@ export type LoanRow = {
   purpose: string | null;
   created_at: string;
   decided_at: string | null;
+  outstanding_principal: number;
+  monthly_payment: number | null;
 };
 
 export type TxnRow = {
@@ -101,13 +103,19 @@ export const getMyLoans = createServerFn({ method: "GET" })
     const to = from + data.pageSize - 1;
     const { data: rows, error, count } = await context.supabase
       .from("loans")
-      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at", { count: "exact" })
+      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, outstanding_principal, monthly_payment", { count: "exact" })
       .eq("user_id", context.userId)
       .order(sortCol, { ascending: data.sortDir === "asc" })
       .range(from, to);
     if (error) throw new Error(error.message);
     return {
-      rows: (rows ?? []).map((r) => ({ ...r, amount: Number(r.amount), interest_rate: Number(r.interest_rate) })) as LoanRow[],
+      rows: (rows ?? []).map((r) => ({
+        ...r,
+        amount: Number(r.amount),
+        interest_rate: Number(r.interest_rate),
+        outstanding_principal: Number(r.outstanding_principal ?? 0),
+        monthly_payment: r.monthly_payment == null ? null : Number(r.monthly_payment),
+      })) as LoanRow[],
       total: count ?? 0,
       page: data.page,
       pageSize: data.pageSize,
@@ -248,4 +256,59 @@ export const getMyLoanDetail = createServerFn({ method: "GET" })
         paid_amount: Number(r.paid_amount),
       })),
     } as MemberLoanDetail;
+  });
+
+const SubmitRepaymentSchema = z.object({
+  loan_id: z.string().uuid(),
+  amount: z.number().positive().max(100_000_000),
+  channel: z.string().trim().min(2).max(40),
+  note: z.string().trim().max(500).optional().nullable(),
+});
+
+export const submitLoanRepayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => SubmitRepaymentSchema.parse(d))
+  .handler(async ({ data, context }): Promise<{ txn_id: string; ref: string }> => {
+    // Confirm loan ownership & active status (RLS-scoped)
+    const { data: loan, error: lerr } = await context.supabase
+      .from("loans")
+      .select("id, ref, status, outstanding_principal")
+      .eq("id", data.loan_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (lerr) throw new Error(lerr.message);
+    if (!loan) throw new Error("Loan not found");
+    if (loan.status !== "active") throw new Error("Loan is not active");
+    const outstanding = Number(loan.outstanding_principal ?? 0);
+    if (data.amount > outstanding * 1.1 + 0.01) {
+      throw new Error("Amount exceeds outstanding balance");
+    }
+
+    const ref = `REPAY-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const { data: inserted, error } = await context.supabase
+      .from("transactions")
+      .insert({
+        user_id: context.userId,
+        ref,
+        kind: "loan_repayment",
+        amount: data.amount,
+        status: "pending",
+        channel: data.channel,
+        loan_id: data.loan_id,
+        note: data.note ?? null,
+      })
+      .select("id, ref")
+      .single();
+    if (error) throw new Error(error.message);
+
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: "member",
+      action: "loan.repayment.submitted",
+      target: inserted.id,
+      meta: { ref: inserted.ref, loan_ref: loan.ref, amount: data.amount, channel: data.channel },
+    });
+
+    return { txn_id: inserted.id, ref: inserted.ref };
   });

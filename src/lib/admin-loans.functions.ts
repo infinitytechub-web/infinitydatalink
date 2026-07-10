@@ -359,3 +359,184 @@ export const recordLoanRepayment = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return loan;
   });
+
+// ============================================================================
+// Payments reconciliation (all pending transactions)
+// ============================================================================
+
+export type AdminPendingPayment = {
+  id: string;
+  ref: string;
+  kind: string;
+  amount: number;
+  channel: string | null;
+  note: string | null;
+  created_at: string;
+  user_id: string;
+  member_name: string | null;
+  member_no: string | null;
+  loan_id: string | null;
+  loan_ref: string | null;
+  savings_account_id: string | null;
+  plan_name: string | null;
+};
+
+async function assertFinanceOrAdmin(supabase: any, userId: string) {
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const roles = new Set((data ?? []).map((r: any) => r.role as string));
+  if (!roles.has("super_admin") && !roles.has("finance_officer")) {
+    throw new Error("Forbidden: finance role required");
+  }
+}
+
+export const adminListPendingPayments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        kind: z.enum(["deposit", "withdrawal", "loan_repayment", "all"]).default("all"),
+        limit: z.number().int().min(1).max(200).default(50),
+      })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<AdminPendingPayment[]> => {
+    await assertFinanceOrAdmin(context.supabase, context.userId);
+    let q = context.supabase
+      .from("transactions")
+      .select(
+        "id, ref, kind, amount, channel, note, created_at, user_id, loan_id, savings_account_id, profiles!transactions_user_id_fkey(full_name, member_no), savings_accounts(savings_plans(name)), loans(ref)",
+      )
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(data.limit);
+    if (data.kind !== "all") q = q.eq("kind", data.kind);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((t: any) => ({
+      id: t.id,
+      ref: t.ref,
+      kind: t.kind,
+      amount: Number(t.amount),
+      channel: t.channel,
+      note: t.note,
+      created_at: t.created_at,
+      user_id: t.user_id,
+      member_name: t.profiles?.full_name ?? null,
+      member_no: t.profiles?.member_no ?? null,
+      loan_id: t.loan_id,
+      loan_ref: t.loans?.ref ?? null,
+      savings_account_id: t.savings_account_id,
+      plan_name: t.savings_accounts?.savings_plans?.name ?? null,
+    }));
+  });
+
+export type AdminPaymentsSummary = {
+  pending_count: number;
+  pending_savings: number;
+  pending_repayments: number;
+  cleared_24h_volume: number;
+  failed_24h: number;
+};
+
+export const adminGetPaymentsSummary = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminPaymentsSummary> => {
+    await assertFinanceOrAdmin(context.supabase, context.userId);
+    const since24h = new Date(Date.now() - 24 * 3600_000).toISOString();
+    const [{ data: pend }, { data: cleared }, { count: failed }] = await Promise.all([
+      context.supabase.from("transactions").select("kind").eq("status", "pending"),
+      context.supabase.from("transactions").select("amount").eq("status", "cleared").gte("created_at", since24h),
+      context.supabase.from("transactions").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", since24h),
+    ]);
+    const p = pend ?? [];
+    return {
+      pending_count: p.length,
+      pending_savings: p.filter((r: any) => r.kind === "deposit" || r.kind === "withdrawal").length,
+      pending_repayments: p.filter((r: any) => r.kind === "loan_repayment").length,
+      cleared_24h_volume: (cleared ?? []).reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0),
+      failed_24h: failed ?? 0,
+    };
+  });
+
+const ReconcileSchema = z.object({
+  txn_id: z.string().uuid(),
+  decision: z.enum(["approve", "reject"]),
+  note: z.string().max(500).optional().nullable(),
+});
+
+export const adminReconcilePayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ReconcileSchema.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertFinanceOrAdmin(context.supabase, context.userId);
+    if (data.decision === "reject" && !data.note?.trim()) {
+      throw new Error("A note is required when rejecting a payment.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Fetch the pending transaction (bypass RLS via admin)
+    const { data: txn, error: terr } = await supabaseAdmin
+      .from("transactions")
+      .select("id, kind, status, amount, loan_id, note, channel")
+      .eq("id", data.txn_id)
+      .maybeSingle();
+    if (terr) throw new Error(terr.message);
+    if (!txn) throw new Error("Transaction not found");
+    if (txn.status !== "pending") throw new Error("Transaction is not pending");
+
+    if (data.decision === "reject") {
+      const { error } = await supabaseAdmin
+        .from("transactions")
+        .update({ status: "failed", note: data.note ?? txn.note })
+        .eq("id", txn.id);
+      if (error) throw new Error(error.message);
+      await supabaseAdmin.from("audit_log").insert({
+        actor_id: context.userId,
+        actor_email: (context.claims as any)?.email ?? null,
+        actor_role: "finance_officer",
+        action: "payment.rejected",
+        target: txn.id,
+        meta: { kind: txn.kind, amount: Number(txn.amount), note: data.note },
+      });
+      return { ok: true };
+    }
+
+    // Approve
+    if (txn.kind === "loan_repayment") {
+      if (!txn.loan_id) throw new Error("Loan reference missing on transaction");
+      const { error: rpcErr } = await supabaseAdmin.rpc("record_loan_repayment", {
+        _loan_id: txn.loan_id,
+        _amount: Number(txn.amount),
+        _channel: txn.channel ?? "manual",
+        _note: data.note ?? txn.note ?? "",
+        _actor_id: context.userId,
+      });
+      if (rpcErr) throw new Error(rpcErr.message);
+      // Mark the member's pending marker as cleared (RPC created its own cleared REPAY txn)
+      const { error: uerr } = await supabaseAdmin
+        .from("transactions")
+        .update({ status: "cleared", note: data.note ?? txn.note })
+        .eq("id", txn.id);
+      if (uerr) throw new Error(uerr.message);
+    } else if (txn.kind === "deposit" || txn.kind === "withdrawal") {
+      const { error: rpcErr } = await supabaseAdmin.rpc("finalize_transaction", {
+        _txn_id: txn.id,
+        _status: "cleared",
+        _note: data.note ?? "",
+        _actor_id: context.userId,
+      });
+      if (rpcErr) throw new Error(rpcErr.message);
+    } else {
+      throw new Error(`Unsupported transaction kind: ${txn.kind}`);
+    }
+
+    await supabaseAdmin.from("audit_log").insert({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: "finance_officer",
+      action: "payment.approved",
+      target: txn.id,
+      meta: { kind: txn.kind, amount: Number(txn.amount), note: data.note },
+    });
+    return { ok: true };
+  });
