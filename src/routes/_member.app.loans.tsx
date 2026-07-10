@@ -105,6 +105,7 @@ function LoansContent() {
                   <SortHeader label="Term" field="term_months" sort={sort} onSort={setSort} align="right" />
                   <th className="px-6 py-3 text-right font-medium">Rate</th>
                   <SortHeader label="Status" field="status" sort={sort} onSort={setSort} align="right" />
+                  <th className="px-6 py-3 text-right font-medium"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-emerald-deep/5">
@@ -116,6 +117,15 @@ function LoansContent() {
                     <td className="tabular px-6 py-4 text-right text-sm">{l.term_months} mo</td>
                     <td className="tabular px-6 py-4 text-right text-sm">{l.interest_rate}%</td>
                     <td className="px-6 py-4 text-right"><StatusPill status={l.status} /></td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        to="/app/loans/$loanId"
+                        params={{ loanId: l.id }}
+                        className="text-[11px] font-semibold uppercase tracking-widest text-emerald-mid hover:underline"
+                      >
+                        View →
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>
