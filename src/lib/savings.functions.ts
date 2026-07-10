@@ -281,11 +281,13 @@ export const submitWithdrawal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => MoveSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ txn_id: string }> => {
-    const { data: id, error } = await context.supabase.rpc("post_savings_withdrawal", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: id, error } = await supabaseAdmin.rpc("post_savings_withdrawal", {
       _account_id: data.account_id,
       _amount: data.amount,
       _channel: data.channel,
       _note: data.note ?? "",
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
     return { txn_id: id as string };
