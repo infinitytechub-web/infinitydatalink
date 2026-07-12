@@ -1,19 +1,13 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, X, LogOut, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SIDEBAR_GROUP_CHIPS } from "@/lib/theme-tokens";
 
-const GROUP_ACCENTS: string[] = [
-  "from-teal-400 to-cyan-500",
-  "from-indigo-400 to-violet-500",
-  "from-amber-400 to-orange-500",
-  "from-emerald-400 to-teal-500",
-  "from-rose-400 to-pink-500",
-  "from-sky-400 to-blue-500",
-];
+const GROUP_ACCENTS = SIDEBAR_GROUP_CHIPS;
 
 export type NavItem = { to: string; label: string; icon?: ReactNode };
 export type NavGroup = { label: string; items: NavItem[] };
@@ -36,12 +30,34 @@ export function PortalShell({
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  // Close mobile drawer when the route changes.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Close on Escape for keyboard users; lock body scroll while drawer open.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
   const handleSignOut = async () => {
     await qc.cancelQueries();
     qc.clear();
     await signOut();
     navigate({ to: "/auth", replace: true });
   };
+
 
   return (
     <div className="flex min-h-dvh bg-background font-sans text-foreground">
@@ -55,14 +71,16 @@ export function PortalShell({
         />
       ) : null}
 
-      {/* Sidebar — 3D teal navigation */}
+      {/* Sidebar — colorful navigation drawer (offcanvas < lg, fixed ≥ lg) */}
       <aside
         aria-label="Primary navigation"
+        aria-modal={open ? true : undefined}
+        role={open ? "dialog" : undefined}
         className={cn(
-          "fixed left-0 top-0 z-30 h-full w-64 flex-col text-white transition-transform duration-300 lg:flex lg:translate-x-0",
+          "fixed left-0 top-0 z-30 h-full w-[min(88vw,17rem)] flex-col text-white transition-transform duration-300 lg:flex lg:w-64 lg:translate-x-0",
           "bg-linear-to-b from-[#083344] via-[#0e7490] to-[#083344]",
           "shadow-[var(--shadow-nav)] ring-1 ring-inset ring-white/5",
-          open ? "flex translate-x-0" : "hidden -translate-x-full",
+          open ? "flex translate-x-0" : "flex -translate-x-full lg:translate-x-0",
         )}
       >
         <div className="flex items-center justify-between border-b border-white/10 p-6">
@@ -111,18 +129,18 @@ export function PortalShell({
                       onClick={() => setOpen(false)}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-all duration-200",
+                        "group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm transition-all duration-200 lg:py-2",
                         active
                           ? "bg-white/15 text-white ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_24px_-12px_rgba(255,255,255,0.35)]"
-                          : "text-white/75 hover:bg-white/10 hover:text-white",
+                          : "text-white/80 hover:bg-white/10 hover:text-white",
                       )}
                     >
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "grid size-8 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/20 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br",
+                          "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br lg:size-8",
                           accent,
-                          active ? "scale-105" : "opacity-90 group-hover:opacity-100",
+                          active ? "scale-105" : "opacity-95 group-hover:opacity-100",
                         )}
                       >
                         <span className="size-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
