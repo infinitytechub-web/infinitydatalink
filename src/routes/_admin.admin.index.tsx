@@ -97,24 +97,27 @@ function DashboardBody() {
     <>
       <section className="grid gap-6 md:grid-cols-4">
         <KPIStat
+          tone="indigo"
           label="Members"
           value={<span className="tabular">{o.members_total.toLocaleString()}</span>}
           hint={`+${o.members_new_30d} in last 30 days`}
         />
         <KPIStat
+          tone="teal"
           label="Assets under management"
           value={<>GH₵ <span className="tabular">{formatCompact(o.savings_aum)}</span></>}
           hint={`${pctFmt(o.savings_delta_mom)} MoM net contributions`}
         />
         <KPIStat
+          tone="emerald"
           label="Active loans"
           value={<>GH₵ <span className="tabular">{formatCompact(o.loans_active_principal)}</span></>}
           hint={`${(o.loans_on_time_rate * 100).toFixed(1)}% approved`}
         />
         <KPIStat
+          tone="amber"
           label="Pending approvals"
           value={<span className="tabular">{o.pending_loans + o.pending_withdrawals}</span>}
-          accent
           hint={`${o.pending_loans} loans · ${o.pending_withdrawals} withdrawals`}
         />
       </section>
