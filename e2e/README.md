@@ -2,10 +2,12 @@
 
 Playwright specs covering RBAC and the transfer lifecycle.
 
+The RBAC specs (`rbac.spec.ts`, `rbac-api.spec.ts`) verify Super Admin-only
+routes and endpoints reject non-staff callers and accept Super Admins across
+navigation flows. The transfer specs (`transfers.spec.ts`,
+`transfers-api.spec.ts`) verify the member↔member and account↔account
+request → approval / rejection lifecycle end-to-end.
 
-
-Playwright specs that verify Super Admin-only routes and endpoints reject
-non-staff callers and accept Super Admins across full navigation flows.
 
 ## Running
 
