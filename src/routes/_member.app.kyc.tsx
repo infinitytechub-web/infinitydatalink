@@ -107,10 +107,11 @@ function Body() {
           <div className="space-y-3 p-6 text-sm text-emerald-deep/80">
             <div className="flex items-center gap-2">
               {data.latest_decision.decision === "approved" ? (
-                <ShieldCheck className="h-4 w-4 text-emerald-mid" />
+                <ShieldCheck className="h-4 w-4 text-success" />
               ) : (
-                <ShieldAlert className="h-4 w-4 text-red-600" />
+                <ShieldAlert className="h-4 w-4 text-destructive" />
               )}
+
               <span className="font-semibold uppercase tracking-widest text-[11px]">
                 {data.latest_decision.decision === "approved" ? "Approved" : "Rejected"}
               </span>
