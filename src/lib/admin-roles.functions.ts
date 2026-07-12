@@ -218,6 +218,37 @@ export const listSuperAdminRoleHistory = createServerFn({ method: "POST" })
     return { rows: out, total: count ?? out.length };
   });
 
+/**
+ * Export up to 10,000 rows matching the given filters. Keeps the paginated
+ * listing bounded (200) while still supporting bulk CSV downloads.
+ */
+export const exportSuperAdminRoleHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        event: z.enum(["all", "grant", "revoke"]).default("all"),
+        emailContains: z.string().trim().max(320).optional(),
+        from: z.string().datetime().optional(),
+        to: z.string().datetime().optional(),
+        sortBy: z.enum(["occurred_at", "actor_email", "action"]).default("occurred_at"),
+        sortDir: z.enum(["asc", "desc"]).default("desc"),
+      })
+      .parse(data ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<{ rows: RoleHistoryRow[] }> => {
+    let all: RoleHistoryRow[] = [];
+    const pageSize = 200;
+    for (let offset = 0; offset < 10_000; offset += pageSize) {
+      const res = await listSuperAdminRoleHistory({
+        data: { ...data, limit: pageSize, offset },
+      });
+      all = all.concat(res.rows);
+      if (res.rows.length < pageSize) break;
+    }
+    return { rows: all };
+  });
+
 export type WhoAmI = { user_id: string; email: string | null; roles: string[] };
 
 /** Small helper used by e2e tests to introspect the caller's role set. */
