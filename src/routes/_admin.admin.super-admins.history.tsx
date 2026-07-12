@@ -251,6 +251,35 @@ function HistoryBody() {
           </Field>
         </div>
 
+        <div className="flex flex-wrap items-center gap-3 border-b border-emerald-deep/5 px-6 py-3 text-xs">
+          <label className="flex items-center gap-2 text-emerald-deep/60">
+            Rows per page
+            <select
+              value={search.pageSize}
+              onChange={(e) =>
+                navigate({
+                  search: (s: any) => ({ ...s, pageSize: Number(e.target.value), page: 1 }),
+                })
+              }
+              className="rounded border border-emerald-deep/15 bg-transparent px-2 py-1"
+            >
+              {[25, 50, 100, 200].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={doExportCsv}
+              className="rounded border border-emerald-deep/15 px-3 py-1 uppercase tracking-widest hover:bg-emerald-deep/5"
+            >
+              Export CSV
+            </button>
+          </div>
+        </div>
+
         {rows.length === 0 ? (
           <EmptyState title="No events" hint="Adjust the filters or wait for role changes." />
         ) : (
@@ -258,10 +287,25 @@ function HistoryBody() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
-                  <th className="px-6 py-3 font-medium">When</th>
-                  <th className="px-6 py-3 font-medium">Event</th>
+                  <SortableTh
+                    label="When"
+                    active={search.sortBy === "occurred_at"}
+                    dir={search.sortDir}
+                    onClick={() => toggleSort("occurred_at")}
+                  />
+                  <SortableTh
+                    label="Event"
+                    active={search.sortBy === "action"}
+                    dir={search.sortDir}
+                    onClick={() => toggleSort("action")}
+                  />
                   <th className="px-6 py-3 font-medium">Target</th>
-                  <th className="px-6 py-3 font-medium">Actor</th>
+                  <SortableTh
+                    label="Actor"
+                    active={search.sortBy === "actor_email"}
+                    dir={search.sortDir}
+                    onClick={() => toggleSort("actor_email")}
+                  />
                   <th className="px-6 py-3 font-medium">Note / Reason</th>
                   <th className="px-6 py-3 font-medium">Current</th>
                 </tr>
