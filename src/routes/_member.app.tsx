@@ -11,6 +11,7 @@ const groups: NavGroup[] = [
       { to: "/app/loans", label: "Active Loans" },
       { to: "/app/transactions", label: "Transactions" },
       { to: "/app/payments", label: "Payments" },
+      { to: "/app/transfers", label: "Transfers" },
       { to: "/app/profile", label: "Profile & KYC" },
       { to: "/app/kyc", label: "Verification status" },
       { to: "/app/entities/register", label: "Register organization" },
