@@ -8,7 +8,6 @@ import {
   ErrorState,
   KPIGridSkeleton,
   KPIStat,
-  KPIStat,
   Money,
   PageHeader,
   SectionCard,
