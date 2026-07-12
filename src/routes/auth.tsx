@@ -10,9 +10,21 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Infinity Wealth" },
-      { name: "description", content: "Sign in or create your Infinity Wealth account." },
+      {
+        name: "description",
+        content:
+          "Sign in or create your Infinity Wealth account to access savings, loans, and payments in your member or administrator portal.",
+      },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Sign in — Infinity Wealth" },
+      {
+        property: "og:description",
+        content:
+          "Access your Infinity Wealth member or administrator portal to manage savings, loans, and payments.",
+      },
+      { property: "og:url", content: "https://infinity-wealth360.lovable.app/auth" },
     ],
+    links: [{ rel: "canonical", href: "https://infinity-wealth360.lovable.app/auth" }],
   }),
   component: AuthPage,
 });
@@ -52,9 +64,9 @@ function AuthPage() {
               <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">
                 Member & Administrator portal
               </p>
-              <h2 className="mt-1 font-serif text-2xl text-emerald-deep">
+              <h1 className="mt-1 font-serif text-2xl text-emerald-deep">
                 {mode === "signin" ? "Sign in to your account" : "Create your account"}
-              </h2>
+              </h1>
             </div>
             <button
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}

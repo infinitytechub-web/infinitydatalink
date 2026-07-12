@@ -1,0 +1,13 @@
+# Infinity Wealth
+
+> Enterprise financial management platform for cooperatives, SACCOs, savings & loans companies, and membership organisations — one place for savings, loans, payments, and investment.
+
+Infinity Wealth provides two portals (member and administrator) over a single source of truth, with modules for savings accounts, loan origination and servicing, payments and reconciliation, KYC and compliance, and reporting.
+
+## Pages
+
+- [Home](/): Overview of the platform, modules, and who it is built for.
+
+## Optional
+
+- [Sign in](/auth): Member and administrator sign-in and account creation.
