@@ -75,26 +75,19 @@ export function StatusPill({
 }: {
   status: "cleared" | "closed" | "pending" | "failed" | "approved" | "rejected" | "active";
 }) {
-  const map: Record<string, string> = {
-    cleared: "bg-primary/10 text-primary ring-1 ring-primary/20",
-    closed: "bg-muted text-muted-foreground ring-1 ring-border",
-    approved: "bg-primary/10 text-primary ring-1 ring-primary/20",
-    active: "bg-primary/10 text-primary ring-1 ring-primary/20",
-    pending: "bg-warning/10 text-warning ring-1 ring-warning/20",
-    failed: "bg-destructive/10 text-destructive ring-1 ring-destructive/20",
-    rejected: "bg-destructive/10 text-destructive ring-1 ring-destructive/20",
-  };
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
-        map[status],
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+        STATUS_PILL[status],
       )}
     >
       {status}
     </span>
   );
 }
+
+export type SectionAccent = ToneName | "none";
 
 export function SectionCard({
   title,
@@ -107,18 +100,8 @@ export function SectionCard({
   action?: ReactNode;
   children: ReactNode;
   className?: string;
-  accent?: "teal" | "indigo" | "amber" | "rose" | "emerald" | "violet" | "sky" | "none";
+  accent?: SectionAccent;
 }) {
-  const accents: Record<string, string> = {
-    teal:    "bg-linear-to-r from-teal-500 via-cyan-500 to-sky-500",
-    indigo:  "bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500",
-    amber:   "bg-linear-to-r from-amber-400 via-orange-500 to-rose-500",
-    rose:    "bg-linear-to-r from-rose-500 via-pink-500 to-fuchsia-500",
-    emerald: "bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500",
-    violet:  "bg-linear-to-r from-violet-500 via-purple-500 to-fuchsia-500",
-    sky:     "bg-linear-to-r from-sky-500 via-blue-500 to-indigo-500",
-    none:    "hidden",
-  };
   return (
     <section
       className={cn(
@@ -127,7 +110,7 @@ export function SectionCard({
         className,
       )}
     >
-      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-1", accents[accent])} />
+      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-1", SECTION_ACCENT(accent))} />
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-linear-to-b from-muted/60 to-transparent p-6 pt-7">
         <h3 className="font-serif text-lg font-semibold text-foreground">{title}</h3>
         {action}
@@ -136,6 +119,7 @@ export function SectionCard({
     </section>
   );
 }
+
 
 export function PageHeader({
   eyebrow,
