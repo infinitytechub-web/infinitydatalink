@@ -112,6 +112,9 @@ function HistoryBody() {
       from: search.from,
       to: search.to,
       page: search.page,
+      pageSize: search.pageSize,
+      sortBy: search.sortBy,
+      sortDir: search.sortDir,
     }),
   ).data;
 
@@ -119,7 +122,57 @@ function HistoryBody() {
     ? rows.find((r) => r.id === search.selected) ?? null
     : null;
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / search.pageSize));
+
+  const toggleSort = (key: SortKey) => {
+    navigate({
+      search: (s: any) => ({
+        ...s,
+        sortBy: key,
+        sortDir: s.sortBy === key && s.sortDir === "desc" ? "asc" : "desc",
+        page: 1,
+      }),
+    });
+  };
+
+  const doExportCsv = async () => {
+    try {
+      toast.loading("Preparing CSV export…", { id: "hist-csv" });
+      const { rows: all } = await exportSuperAdminRoleHistory({
+        data: {
+          event: search.event,
+          emailContains: search.emailContains?.trim() || undefined,
+          from: search.from || undefined,
+          to: search.to || undefined,
+          sortBy: search.sortBy,
+          sortDir: search.sortDir,
+        },
+      });
+      exportCsv({
+        filename: `super-admin-history-${new Date().toISOString().slice(0, 10)}.csv`,
+        rows: all,
+        columns: [
+          { header: "Occurred At", accessor: (r) => r.occurred_at },
+          { header: "Event", accessor: (r) => r.event },
+          { header: "Target Email", accessor: (r) => r.target_email ?? "" },
+          { header: "Target User ID", accessor: (r) => r.target_user_id },
+          { header: "Actor Email", accessor: (r) => r.actor_email ?? "" },
+          { header: "Actor Role", accessor: (r) => r.actor_role ?? "" },
+          { header: "Note", accessor: (r) => r.note ?? "" },
+          { header: "Reason", accessor: (r) => r.reason ?? "" },
+          {
+            header: "Currently super_admin",
+            accessor: (r) => (r.currently_super_admin ? "yes" : "no"),
+          },
+        ],
+      });
+      toast.success(`Exported ${all.length} row${all.length === 1 ? "" : "s"}`, {
+        id: "hist-csv",
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Export failed", { id: "hist-csv" });
+    }
+  };
 
   return (
     <>
