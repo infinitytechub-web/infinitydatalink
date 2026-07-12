@@ -80,7 +80,7 @@ export const postExpense = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     await assertFinance(context.supabase, context.userId);
-    const { data: row, error } = await (context.supabase as any).rpc("post_expense", {
+    const { data: row, error } = await sbAdmin.rpc("post_expense", {
       _category_code: data.category_code,
       _vendor: data.vendor,
       _amount: data.amount,
@@ -127,7 +127,7 @@ export const decideExpense = createServerFn({ method: "POST" })
         _actor_id: context.userId,
       };
     }
-    const { error } = await (context.supabase as any).rpc(rpc, args);
+    const { error } = await sbAdmin.rpc(rpc, args);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -175,7 +175,7 @@ export const postTransfer = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const { data: id, error } = await (context.supabase as any).rpc("post_transfer", {
+    const { data: id, error } = await sbAdmin.rpc("post_transfer", {
       _from: data.from_account_id,
       _to: data.to_account_id,
       _amount: data.amount,
@@ -192,7 +192,7 @@ export const clearTransfer = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const { error } = await (context.supabase as any).rpc("clear_transfer", {
+    const { error } = await sbAdmin.rpc("clear_transfer", {
       _transfer_id: data.id,
       _actor_id: context.userId,
     });
@@ -207,7 +207,7 @@ export const rejectTransfer = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const { error } = await (context.supabase as any).rpc("reject_transfer", {
+    const { error } = await sbAdmin.rpc("reject_transfer", {
       _transfer_id: data.id,
       _reason: data.reason,
       _actor_id: context.userId,
@@ -256,7 +256,7 @@ export const postAdjustment = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const { data: id, error } = await (context.supabase as any).rpc("post_balance_adjustment", {
+    const { data: id, error } = await sbAdmin.rpc("post_balance_adjustment", {
       _account_id: data.savings_account_id,
       _direction: data.direction,
       _amount: data.amount,
