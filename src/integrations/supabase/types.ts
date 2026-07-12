@@ -1094,35 +1094,65 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      approve_entity: {
-        Args: { _entity_id: string; _note: string }
-        Returns: {
-          address_line: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string
-          created_by: string | null
-          digital_address: string | null
-          id: string
-          kyc_notes: string | null
-          name: string
-          parent_entity_id: string | null
-          region: string | null
-          registration_no: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: Database["public"]["Enums"]["entity_status"]
-          tax_id: string | null
-          type: Database["public"]["Enums"]["entity_type"]
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "entities"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      approve_entity:
+        | {
+            Args: { _entity_id: string; _note: string }
+            Returns: {
+              address_line: string | null
+              contact_email: string | null
+              contact_phone: string | null
+              created_at: string
+              created_by: string | null
+              digital_address: string | null
+              id: string
+              kyc_notes: string | null
+              name: string
+              parent_entity_id: string | null
+              region: string | null
+              registration_no: string | null
+              reviewed_at: string | null
+              reviewed_by: string | null
+              status: Database["public"]["Enums"]["entity_status"]
+              tax_id: string | null
+              type: Database["public"]["Enums"]["entity_type"]
+              updated_at: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "entities"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { _actor_id?: string; _entity_id: string; _note: string }
+            Returns: {
+              address_line: string | null
+              contact_email: string | null
+              contact_phone: string | null
+              created_at: string
+              created_by: string | null
+              digital_address: string | null
+              id: string
+              kyc_notes: string | null
+              name: string
+              parent_entity_id: string | null
+              region: string | null
+              registration_no: string | null
+              reviewed_at: string | null
+              reviewed_by: string | null
+              status: Database["public"]["Enums"]["entity_status"]
+              tax_id: string | null
+              type: Database["public"]["Enums"]["entity_type"]
+              updated_at: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "entities"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       approve_expense: {
         Args: { _actor_id: string; _expense_id: string }
         Returns: {
@@ -1251,27 +1281,50 @@ export type Database = {
         }
       }
       gen_txn_ref: { Args: { _prefix: string }; Returns: string }
-      grant_super_admin_by_email: {
-        Args: { _email: string; _note?: string }
-        Returns: {
-          email: string
-          granted_at: string
-          user_id: string
-        }[]
-      }
-      list_super_admins: {
-        Args: never
-        Returns: {
-          email: string
-          full_name: string
-          granted_at: string
-          granted_by: string
-          granted_by_email: string
-          member_no: string
-          seeded: boolean
-          user_id: string
-        }[]
-      }
+      grant_super_admin_by_email:
+        | {
+            Args: { _email: string; _note?: string }
+            Returns: {
+              email: string
+              granted_at: string
+              user_id: string
+            }[]
+          }
+        | {
+            Args: { _actor_id?: string; _email: string; _note?: string }
+            Returns: {
+              email: string
+              granted_at: string
+              user_id: string
+            }[]
+          }
+      list_super_admins:
+        | {
+            Args: never
+            Returns: {
+              email: string
+              full_name: string
+              granted_at: string
+              granted_by: string
+              granted_by_email: string
+              member_no: string
+              seeded: boolean
+              user_id: string
+            }[]
+          }
+        | {
+            Args: { _actor_id?: string }
+            Returns: {
+              email: string
+              full_name: string
+              granted_at: string
+              granted_by: string
+              granted_by_email: string
+              member_no: string
+              seeded: boolean
+              user_id: string
+            }[]
+          }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -1605,39 +1658,71 @@ export type Database = {
         }
       }
       reset_own_kyc_pending: { Args: never; Returns: undefined }
-      revoke_super_admin: {
-        Args: { _reason?: string; _user_id: string }
-        Returns: undefined
-      }
-      suspend_entity: {
-        Args: { _entity_id: string; _reason: string }
-        Returns: {
-          address_line: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string
-          created_by: string | null
-          digital_address: string | null
-          id: string
-          kyc_notes: string | null
-          name: string
-          parent_entity_id: string | null
-          region: string | null
-          registration_no: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: Database["public"]["Enums"]["entity_status"]
-          tax_id: string | null
-          type: Database["public"]["Enums"]["entity_type"]
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "entities"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      revoke_super_admin:
+        | { Args: { _reason?: string; _user_id: string }; Returns: undefined }
+        | {
+            Args: { _actor_id?: string; _reason?: string; _user_id: string }
+            Returns: undefined
+          }
+      suspend_entity:
+        | {
+            Args: { _entity_id: string; _reason: string }
+            Returns: {
+              address_line: string | null
+              contact_email: string | null
+              contact_phone: string | null
+              created_at: string
+              created_by: string | null
+              digital_address: string | null
+              id: string
+              kyc_notes: string | null
+              name: string
+              parent_entity_id: string | null
+              region: string | null
+              registration_no: string | null
+              reviewed_at: string | null
+              reviewed_by: string | null
+              status: Database["public"]["Enums"]["entity_status"]
+              tax_id: string | null
+              type: Database["public"]["Enums"]["entity_type"]
+              updated_at: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "entities"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { _actor_id?: string; _entity_id: string; _reason: string }
+            Returns: {
+              address_line: string | null
+              contact_email: string | null
+              contact_phone: string | null
+              created_at: string
+              created_by: string | null
+              digital_address: string | null
+              id: string
+              kyc_notes: string | null
+              name: string
+              parent_entity_id: string | null
+              region: string | null
+              registration_no: string | null
+              reviewed_at: string | null
+              reviewed_by: string | null
+              status: Database["public"]["Enums"]["entity_status"]
+              tax_id: string | null
+              type: Database["public"]["Enums"]["entity_type"]
+              updated_at: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "entities"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
     }
     Enums: {
       adjustment_direction: "credit" | "debit"
