@@ -146,11 +146,182 @@ export function PageHeader({
   );
 }
 
-export function EmptyState({ title, hint }: { title: string; hint?: string }) {
+export function EmptyState({
+  title,
+  hint,
+  icon,
+  action,
+  className,
+}: {
+  title: string;
+  hint?: ReactNode;
+  icon?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-muted/40 p-12 text-center">
+    <div
+      className={cn(
+        "flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/40 p-10 text-center",
+        className,
+      )}
+      role="status"
+    >
+      <div className="grid size-11 place-items-center rounded-full bg-background text-muted-foreground shadow-sm ring-1 ring-border">
+        {icon ?? <Inbox className="size-5" aria-hidden="true" />}
+      </div>
       <p className="font-serif text-lg text-foreground">{title}</p>
-      {hint ? <p className="mt-2 text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="max-w-sm text-xs text-muted-foreground">{hint}</p> : null}
+      {action ? <div className="mt-1">{action}</div> : null}
     </div>
   );
 }
+
+/**
+ * Consistent error surface for `errorComponent` and inline failures.
+ * Pairs a red iconography accent with a retry affordance.
+ */
+export function ErrorState({
+  title = "Something went wrong",
+  message,
+  onRetry,
+  className,
+}: {
+  title?: string;
+  message?: string;
+  onRetry?: () => void;
+  className?: string;
+}) {
+  return (
+    <div
+      role="alert"
+      className={cn(
+        "flex flex-col items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center",
+        className,
+      )}
+    >
+      <div className="grid size-11 place-items-center rounded-full bg-background text-destructive shadow-sm ring-1 ring-destructive/30">
+        <AlertTriangle className="size-5" aria-hidden="true" />
+      </div>
+      <p className="font-serif text-lg text-foreground">{title}</p>
+      {message ? (
+        <p className="max-w-md text-xs text-muted-foreground">{message}</p>
+      ) : null}
+      {onRetry ? (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-1 inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm motion-safe:transition-colors hover:bg-muted"
+        >
+          <RefreshCw className="size-3.5" aria-hidden="true" />
+          Try again
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** Skeleton shaped to match `KPIStat`. */
+export function KPIStatSkeleton({ accent }: { accent?: boolean } = {}) {
+  return (
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className={cn(
+        "relative overflow-hidden rounded-xl border p-6",
+        "shadow-[var(--shadow-elevated)]",
+        accent ? "border-primary/30 bg-linear-to-br from-primary/5 via-card to-card" : "border-border bg-card",
+      )}
+    >
+      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
+      <Skeleton className="mb-3 h-3 w-24" />
+      <Skeleton className="h-8 w-32" />
+      <Skeleton className="mt-4 h-3 w-40" />
+    </div>
+  );
+}
+
+/** Grid of KPI skeletons matching a typical 2/4-col dashboard row. */
+export function KPIGridSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <section
+      aria-label="Loading key figures"
+      className={cn(
+        "grid gap-6",
+        count === 2 ? "md:grid-cols-2" : count === 3 ? "md:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-4",
+      )}
+    >
+      {Array.from({ length: count }).map((_, i) => (
+        <KPIStatSkeleton key={i} accent={i === count - 1} />
+      ))}
+    </section>
+  );
+}
+
+/** Shape-matched skeleton for tables inside a `SectionCard`. */
+export function TableSkeleton({
+  rows = 6,
+  cols = 4,
+  showHeader = true,
+}: {
+  rows?: number;
+  cols?: number;
+  showHeader?: boolean;
+}) {
+  return (
+    <div aria-busy="true" aria-live="polite" className="w-full">
+      {showHeader ? (
+        <div
+          className="grid gap-3 border-b border-border px-6 py-3"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))` }}
+        >
+          {Array.from({ length: cols }).map((_, i) => (
+            <Skeleton key={i} className="h-3 w-20" />
+          ))}
+        </div>
+      ) : null}
+      <div className="divide-y divide-border">
+        {Array.from({ length: rows }).map((_, r) => (
+          <div
+            key={r}
+            className="grid gap-3 px-6 py-4"
+            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))` }}
+          >
+            {Array.from({ length: cols }).map((_, c) => (
+              <Skeleton
+                key={c}
+                className={cn("h-4", c === 0 ? "w-36" : c === cols - 1 ? "w-16 justify-self-end" : "w-24")}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Whole SectionCard skeleton — mirrors the real card's frame. */
+export function SectionCardSkeleton({
+  title,
+  rows = 5,
+  cols = 4,
+}: {
+  title?: string;
+  rows?: number;
+  cols?: number;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-elevated)]">
+      <header className="flex items-center justify-between border-b border-border p-6">
+        {title ? (
+          <h3 className="font-serif text-lg text-foreground">{title}</h3>
+        ) : (
+          <Skeleton className="h-5 w-40" />
+        )}
+        <Skeleton className="h-8 w-24" />
+      </header>
+      <TableSkeleton rows={rows} cols={cols} />
+    </section>
+  );
+}
+
