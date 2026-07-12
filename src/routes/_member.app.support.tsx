@@ -61,20 +61,13 @@ function SupportPage() {
 
       <SectionCard title="Frequently asked questions">
         <div className="divide-y divide-emerald-deep/5">
-          {[
-            "How do I change my savings schedule?",
-            "How long does a loan application take?",
-            "How do I link a mobile money account?",
-            "How is interest calculated on my savings?",
-          ].map((q) => (
+          {FAQS.map(([q, a]) => (
             <details key={q} className="group p-4">
               <summary className="cursor-pointer list-none text-sm font-semibold marker:hidden">
                 <span className="mr-2 text-gold">＋</span>
                 {q}
               </summary>
-              <p className="mt-2 pl-6 text-sm text-emerald-deep/60">
-                We'll answer this once support content is wired to Lovable Cloud.
-              </p>
+              <p className="mt-2 pl-6 text-sm text-emerald-deep/60">{a}</p>
             </details>
           ))}
         </div>
