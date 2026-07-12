@@ -381,6 +381,33 @@ function HistoryBody() {
   );
 }
 
+function SortableTh({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: "asc" | "desc";
+  onClick: () => void;
+}) {
+  return (
+    <th className="px-6 py-3 font-medium">
+      <button
+        type="button"
+        onClick={onClick}
+        className={`flex items-center gap-1 uppercase tracking-widest ${active ? "text-emerald-deep" : ""}`}
+      >
+        {label}
+        <span aria-hidden className="text-[8px]">
+          {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block text-xs">
