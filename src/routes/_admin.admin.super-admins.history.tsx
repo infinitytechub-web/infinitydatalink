@@ -53,6 +53,9 @@ function historyQuery(input: {
   from?: string;
   to?: string;
   page: number;
+  pageSize: number;
+  sortBy: SortKey;
+  sortDir: "asc" | "desc";
 }) {
   return queryOptions({
     queryKey: ["admin", "super-admins", "history", input],
@@ -63,8 +66,10 @@ function historyQuery(input: {
           emailContains: input.emailContains?.trim() || undefined,
           from: input.from || undefined,
           to: input.to || undefined,
-          limit: PAGE_SIZE,
-          offset: (input.page - 1) * PAGE_SIZE,
+          limit: input.pageSize,
+          offset: (input.page - 1) * input.pageSize,
+          sortBy: input.sortBy,
+          sortDir: input.sortDir,
         },
       }),
     staleTime: 30_000,
