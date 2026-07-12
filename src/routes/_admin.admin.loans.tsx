@@ -1,13 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { KPIStat, Money, PageHeader, SectionCard, StatusPill, EmptyState } from "@/components/primitives";
+import {
+  EmptyState,
+  ErrorState,
+  KPIGridSkeleton,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
 import { listAdminLoans, decideLoan, type AdminLoanRow } from "@/lib/admin-loans.functions";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_admin/admin/loans")({
   component: AdminLoans,
