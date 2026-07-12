@@ -30,12 +30,34 @@ export function PortalShell({
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  // Close mobile drawer when the route changes.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Close on Escape for keyboard users; lock body scroll while drawer open.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
   const handleSignOut = async () => {
     await qc.cancelQueries();
     qc.clear();
     await signOut();
     navigate({ to: "/auth", replace: true });
   };
+
 
   return (
     <div className="flex min-h-dvh bg-background font-sans text-foreground">
