@@ -46,9 +46,11 @@ const groups: NavGroup[] = [
     label: "Governance",
     items: [
       { to: "/admin/security", label: "Security Centre" },
+      { to: "/admin/health", label: "Integration Health" },
       { to: "/admin/super-admins", label: "Super Admins" },
       { to: "/admin/super-admins/history", label: "Grant history" },
       { to: "/admin/settings", label: "Settings" },
+
     ],
   },
 ];
