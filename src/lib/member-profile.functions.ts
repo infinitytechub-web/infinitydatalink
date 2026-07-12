@@ -264,11 +264,10 @@ export const registerKycDocument = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    // Move profile back to pending review when a fresh document is uploaded.
-    await sb
-      .from("profiles")
-      .update({ kyc: "pending", kyc_notes: null, kyc_reviewed_at: null, kyc_reviewed_by: null })
-      .eq("id", context.userId);
+    // Reset the caller's KYC review status via a SECURITY DEFINER helper.
+    // Direct updates to kyc* columns are blocked by the profiles trigger for
+    // non-staff callers.
+    await sb.rpc("reset_own_kyc_pending");
 
     await sb.from("audit_log").insert({
       actor_id: context.userId,

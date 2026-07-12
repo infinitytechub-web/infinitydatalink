@@ -824,6 +824,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reset_own_kyc_pending: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role:

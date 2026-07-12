@@ -163,6 +163,15 @@ export async function exportPdf<T>(opts: ExportOptions<T>) {
   doc.save(filename);
 }
 
+// Neutralize spreadsheet formula-injection payloads in exported cells.
+// Prefixes a leading `'` when the value begins with a character spreadsheets
+// interpret as a formula/DDE (=, +, -, @, tab, CR, LF).
+function sanitizeCell(v: unknown): string {
+  const s = v == null ? "" : String(v);
+  if (s.length === 0) return s;
+  return /^[=+\-@\t\r\n]/.test(s) ? "'" + s : s;
+}
+
 // ----------------------- Excel -----------------------
 export function exportExcel<T>(opts: ExportOptions<T>) {
   const cfg = getOrgConfig();
@@ -177,7 +186,7 @@ export function exportExcel<T>(opts: ExportOptions<T>) {
     [`Generated: ${new Date().toLocaleString(cfg.currency.locale)}`],
     [],
     opts.columns.map((c) => c.header),
-    ...opts.rows.map((r) => opts.columns.map((c) => c.accessor(r))),
+    ...opts.rows.map((r) => opts.columns.map((c) => sanitizeCell(c.accessor(r)))),
     [],
     [BRAND.address],
   ];
@@ -193,7 +202,7 @@ export function exportCsv<T>(opts: ExportOptions<T>) {
   const cfg = getOrgConfig();
   const docId = opts.docId || generateDocId();
   const escape = (v: string | number) => {
-    const s = String(v ?? "");
+    const s = sanitizeCell(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines: string[] = [];
