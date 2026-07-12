@@ -23,6 +23,7 @@ import { Route as AdminAdminRouteImport } from './routes/_admin.admin'
 import { Route as MemberAppIndexRouteImport } from './routes/_member.app.index'
 import { Route as AdminAdminIndexRouteImport } from './routes/_admin.admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as MemberAppTransfersRouteImport } from './routes/_member.app.transfers'
 import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
 import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
 import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
@@ -132,6 +133,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
+} as any)
+const MemberAppTransfersRoute = MemberAppTransfersRouteImport.update({
+  id: '/transfers',
+  path: '/transfers',
+  getParentRoute: () => MemberAppRoute,
 } as any)
 const MemberAppTransactionsRoute = MemberAppTransactionsRouteImport.update({
   id: '/transactions',
@@ -380,6 +386,7 @@ export interface FileRoutesByFullPath {
   '/app/savings': typeof MemberAppSavingsRouteWithChildren
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
+  '/app/transfers': typeof MemberAppTransfersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
@@ -430,6 +437,7 @@ export interface FileRoutesByTo {
   '/app/profile': typeof MemberAppProfileRoute
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
+  '/app/transfers': typeof MemberAppTransfersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
@@ -488,6 +496,7 @@ export interface FileRoutesById {
   '/_member/app/savings': typeof MemberAppSavingsRouteWithChildren
   '/_member/app/support': typeof MemberAppSupportRoute
   '/_member/app/transactions': typeof MemberAppTransactionsRoute
+  '/_member/app/transfers': typeof MemberAppTransfersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
@@ -545,6 +554,7 @@ export interface FileRouteTypes {
     | '/app/savings'
     | '/app/support'
     | '/app/transactions'
+    | '/app/transfers'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/app/'
@@ -595,6 +605,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/support'
     | '/app/transactions'
+    | '/app/transfers'
     | '/lovable/email/suppression'
     | '/admin'
     | '/app'
@@ -652,6 +663,7 @@ export interface FileRouteTypes {
     | '/_member/app/savings'
     | '/_member/app/support'
     | '/_member/app/transactions'
+    | '/_member/app/transfers'
     | '/lovable/email/suppression'
     | '/_admin/admin/'
     | '/_member/app/'
@@ -795,6 +807,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_member/app/transfers': {
+      id: '/_member/app/transfers'
+      path: '/transfers'
+      fullPath: '/app/transfers'
+      preLoaderRoute: typeof MemberAppTransfersRouteImport
+      parentRoute: typeof MemberAppRoute
     }
     '/_member/app/transactions': {
       id: '/_member/app/transactions'
@@ -1239,6 +1258,7 @@ interface MemberAppRouteChildren {
   MemberAppSavingsRoute: typeof MemberAppSavingsRouteWithChildren
   MemberAppSupportRoute: typeof MemberAppSupportRoute
   MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
+  MemberAppTransfersRoute: typeof MemberAppTransfersRoute
   MemberAppIndexRoute: typeof MemberAppIndexRoute
   MemberAppEntitiesRegisterRoute: typeof MemberAppEntitiesRegisterRoute
 }
@@ -1251,6 +1271,7 @@ const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppSavingsRoute: MemberAppSavingsRouteWithChildren,
   MemberAppSupportRoute: MemberAppSupportRoute,
   MemberAppTransactionsRoute: MemberAppTransactionsRoute,
+  MemberAppTransfersRoute: MemberAppTransfersRoute,
   MemberAppIndexRoute: MemberAppIndexRoute,
   MemberAppEntitiesRegisterRoute: MemberAppEntitiesRegisterRoute,
 }
