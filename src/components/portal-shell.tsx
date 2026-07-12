@@ -1,19 +1,13 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, X, LogOut, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SIDEBAR_GROUP_CHIPS } from "@/lib/theme-tokens";
 
-const GROUP_ACCENTS: string[] = [
-  "from-teal-400 to-cyan-500",
-  "from-indigo-400 to-violet-500",
-  "from-amber-400 to-orange-500",
-  "from-emerald-400 to-teal-500",
-  "from-rose-400 to-pink-500",
-  "from-sky-400 to-blue-500",
-];
+const GROUP_ACCENTS = SIDEBAR_GROUP_CHIPS;
 
 export type NavItem = { to: string; label: string; icon?: ReactNode };
 export type NavGroup = { label: string; items: NavItem[] };
