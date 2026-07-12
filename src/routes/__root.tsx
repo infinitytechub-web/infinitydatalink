@@ -77,30 +77,38 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#064e3b" },
-      { title: "Infinity Wealth — Enterprise Financial Management Platform" },
-      {
-        name: "description",
-        content:
-          "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations.",
-      },
-      { property: "og:title", content: "Infinity Wealth — Enterprise Financial Management Platform" },
-      {
-        property: "og:description",
-        content:
-          "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations.",
-      },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Infinity Wealth" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Infinity Wealth — Enterprise Financial Management Platform" },
-      { name: "twitter:description", content: "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Infinity Wealth",
+          url: "https://infinity-wealth360.lovable.app",
+          logo: "https://infinity-wealth360.lovable.app/icon-512.png",
+          description:
+            "Enterprise financial management platform for cooperatives, SACCOs, and membership organisations.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Infinity Wealth",
+          url: "https://infinity-wealth360.lovable.app",
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,
