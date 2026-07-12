@@ -144,12 +144,26 @@ function ContribBody({
 
   return (
     <div className="mt-6 space-y-8">
+      <section className="flex items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">Period: <span className="tabular">{from}</span> → <span className="tabular">{to}</span></p>
+        <button
+          type="button"
+          onClick={() => {
+            try { exportDashboardCsv(from, to, data); toast.success("Dashboard CSV ready"); }
+            catch (e: any) { toast.error(e?.message ?? "Export failed"); }
+          }}
+          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs hover:bg-muted"
+        >
+          Export dashboard CSV
+        </button>
+      </section>
       <section className="grid gap-6 md:grid-cols-4">
         <KPIStat label="Cleared (period)" value={<Money amount={data.cleared_total} />} accent hint={<>{data.cleared_count} deposits</>} />
         <KPIStat label="Pending" value={<Money amount={data.pending_total} />} hint={<>{data.pending_count} awaiting settlement</>} />
         <KPIStat label="Top plan" value={data.by_plan[0]?.plan ?? "—"} hint={data.by_plan[0] ? <Money amount={data.by_plan[0].amount} /> : null} />
         <KPIStat label="Active plans" value={<span className="tabular">{data.by_plan.length}</span>} />
       </section>
+
 
       <SectionCard title="Contributions trend">
         <div className="p-4 sm:p-6">
