@@ -75,6 +75,8 @@ const CRUMBS: Record<string, string> = {
   "/admin/loans": "Loans & Approvals",
   "/admin/payments": "Payments",
   "/admin/security": "Security Centre",
+  "/admin/health": "Integration Health",
+
   "/admin/super-admins": "Super Admins",
   "/admin/super-admins/history": "Grant history",
   "/admin/settings": "Settings",
