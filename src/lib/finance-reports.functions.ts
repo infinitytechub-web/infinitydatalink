@@ -245,7 +245,7 @@ export const getIncomeBreakdown = createServerFn({ method: "GET" })
     const { data: rows, error } = await context.supabase
       .from("transactions")
       .select("kind,amount,channel,created_at,status")
-      .in("kind", Array.from(INCOME_KINDS))
+      .in("kind", Array.from(INCOME_KINDS) as any)
       .eq("status", "cleared")
       .gte("created_at", data.from)
       .lte("created_at", data.to);
