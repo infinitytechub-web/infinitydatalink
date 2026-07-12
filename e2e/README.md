@@ -65,3 +65,27 @@ their own even if a caller bypasses the client entirely):
 
 Optional env for the API suite: `E2E_TEST_TARGET_EMAIL` (defaults to the
 member email; used only for negative grant/revoke attempts).
+
+`transfers.spec.ts` — UI smoke:
+
+1. **Unauthenticated** callers hitting `/app/transfers` and
+   `/admin/finance/transfers` are redirected to `/auth`.
+2. **Member** lands on the Transfers portal with the request affordance and
+   history table visible.
+3. **Finance staff** land on the admin Transfer Ledger with the status
+   vocabulary visible for row actions.
+
+`transfers-api.spec.ts` — direct RPC lifecycle:
+
+1. **Anonymous** callers cannot invoke `request_transfer`, `clear_transfer`,
+   or `reject_transfer`, and cannot read the `transfers` ledger.
+2. **Member** RPC guards fire: `same_account`, `invalid_amount`,
+   `source_not_owned`; and members are rejected by `clear_transfer` /
+   `reject_transfer`.
+3. **Pending → cleared** for both account↔account (self-owned) and
+   member↔member requests moves balances by the transfer amount, stamps
+   `cleared_at` + `out_txn_id` + `in_txn_id`, and rejects any repeat
+   settlement with `transfer_not_pending`.
+4. **Pending → failed (rejected)** records the reason in the transfer note,
+   leaves balances untouched, and rejects any repeat action.
+
