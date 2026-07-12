@@ -181,6 +181,163 @@ export type Database = {
         }
         Relationships: []
       }
+      entities: {
+        Row: {
+          address_line: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          digital_address: string | null
+          id: string
+          kyc_notes: string | null
+          name: string
+          parent_entity_id: string | null
+          region: string | null
+          registration_no: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          tax_id: string | null
+          type: Database["public"]["Enums"]["entity_type"]
+          updated_at: string
+        }
+        Insert: {
+          address_line?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          digital_address?: string | null
+          id?: string
+          kyc_notes?: string | null
+          name: string
+          parent_entity_id?: string | null
+          region?: string | null
+          registration_no?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          tax_id?: string | null
+          type: Database["public"]["Enums"]["entity_type"]
+          updated_at?: string
+        }
+        Update: {
+          address_line?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          digital_address?: string | null
+          id?: string
+          kyc_notes?: string | null
+          name?: string
+          parent_entity_id?: string | null
+          region?: string | null
+          registration_no?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          tax_id?: string | null
+          type?: Database["public"]["Enums"]["entity_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entities_parent_entity_id_fkey"
+            columns: ["parent_entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          entity_id: string
+          id: string
+          mime_type: string | null
+          original_name: string | null
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          entity_id: string
+          id?: string
+          mime_type?: string | null
+          original_name?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          entity_id?: string
+          id?: string
+          mime_type?: string | null
+          original_name?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_documents_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_memberships: {
+        Row: {
+          entity_id: string
+          id: string
+          joined_at: string
+          profile_id: string
+          role: Database["public"]["Enums"]["entity_role"]
+          status: string
+        }
+        Insert: {
+          entity_id: string
+          id?: string
+          joined_at?: string
+          profile_id: string
+          role?: Database["public"]["Enums"]["entity_role"]
+          status?: string
+        }
+        Update: {
+          entity_id?: string
+          id?: string
+          joined_at?: string
+          profile_id?: string
+          role?: Database["public"]["Enums"]["entity_role"]
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_memberships_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_memberships_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expense_categories: {
         Row: {
           active: boolean
@@ -915,6 +1072,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_entity: {
+        Args: { _entity_id: string; _note: string }
+        Returns: {
+          address_line: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          digital_address: string | null
+          id: string
+          kyc_notes: string | null
+          name: string
+          parent_entity_id: string | null
+          region: string | null
+          registration_no: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          tax_id: string | null
+          type: Database["public"]["Enums"]["entity_type"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "entities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_expense: {
         Args: { _actor_id: string; _expense_id: string }
         Returns: {
@@ -1270,6 +1456,46 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      register_entity: {
+        Args: {
+          _address_line: string
+          _contact_email: string
+          _contact_phone: string
+          _digital_address: string
+          _name: string
+          _parent_entity_id: string
+          _region: string
+          _registration_no: string
+          _tax_id: string
+          _type: Database["public"]["Enums"]["entity_type"]
+        }
+        Returns: {
+          address_line: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          digital_address: string | null
+          id: string
+          kyc_notes: string | null
+          name: string
+          parent_entity_id: string | null
+          region: string | null
+          registration_no: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          tax_id: string | null
+          type: Database["public"]["Enums"]["entity_type"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "entities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reject_expense: {
         Args: { _actor_id: string; _expense_id: string; _reason: string }
         Returns: {
@@ -1304,6 +1530,35 @@ export type Database = {
         Args: { _reason?: string; _user_id: string }
         Returns: undefined
       }
+      suspend_entity: {
+        Args: { _entity_id: string; _reason: string }
+        Returns: {
+          address_line: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          digital_address: string | null
+          id: string
+          kyc_notes: string | null
+          name: string
+          parent_entity_id: string | null
+          region: string | null
+          registration_no: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          tax_id: string | null
+          type: Database["public"]["Enums"]["entity_type"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "entities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       adjustment_direction: "credit" | "debit"
@@ -1314,6 +1569,9 @@ export type Database = {
         | "finance_officer"
         | "auditor"
         | "member"
+      entity_role: "owner" | "admin" | "member"
+      entity_status: "pending" | "active" | "suspended" | "closed"
+      entity_type: "group" | "department" | "institution"
       expense_status: "pending" | "approved" | "paid" | "rejected"
       kyc_doc_status: "pending" | "approved" | "rejected"
       kyc_doc_type:
@@ -1475,6 +1733,9 @@ export const Constants = {
         "auditor",
         "member",
       ],
+      entity_role: ["owner", "admin", "member"],
+      entity_status: ["pending", "active", "suspended", "closed"],
+      entity_type: ["group", "department", "institution"],
       expense_status: ["pending", "approved", "paid", "rejected"],
       kyc_doc_status: ["pending", "approved", "rejected"],
       kyc_doc_type: [
