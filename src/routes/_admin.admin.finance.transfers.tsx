@@ -67,6 +67,7 @@ function TransfersBody() {
   const qc = useQueryClient();
   const postFn = useServerFn(postTransfer);
   const clearFn = useServerFn(clearTransfer);
+  const rejectFn = useServerFn(rejectTransfer);
 
   const [form, setForm] = useState({ from: "", to: "", amount: "", note: "" });
 
@@ -92,6 +93,15 @@ function TransfersBody() {
     mutationFn: (id: string) => clearFn({ data: { id } }),
     onSuccess: () => {
       toast.success("Transfer cleared");
+      qc.invalidateQueries({ queryKey: ["admin", "transfers"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Failed"),
+  });
+
+  const reject = useMutation({
+    mutationFn: (v: { id: string; reason: string }) => rejectFn({ data: v }),
+    onSuccess: () => {
+      toast.success("Transfer rejected");
       qc.invalidateQueries({ queryKey: ["admin", "transfers"] });
     },
     onError: (e: any) => toast.error(e.message || "Failed"),
