@@ -509,9 +509,10 @@ function QueueBody() {
                   notes: bulkNotes,
                 })
               }
-              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream disabled:opacity-40 ${
-                bulkDialog === "approved" ? "bg-emerald-deep" : "bg-red-600"
+              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${
+                bulkDialog === "approved" ? BUTTON_TONE.success : BUTTON_TONE.danger
               }`}
+
             >
               {bulkMutation.isPending
                 ? "Working…"
