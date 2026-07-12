@@ -357,7 +357,7 @@ export const listSavingsForFinance = createServerFn({ method: "GET" })
     await assertView(context.supabase, context.userId);
     const { data, error } = await (context.supabase as any)
       .from("savings_accounts")
-      .select("id,user_id,balance,savings_plans(name),profiles!inner(full_name,member_no)")
+      .select("id,user_id,balance,savings_plans(name),profiles!savings_accounts_user_id_profiles_fkey!inner(full_name,member_no)")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw new Error(error.message);

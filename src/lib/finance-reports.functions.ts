@@ -170,7 +170,7 @@ export const getContributionsReport = createServerFn({ method: "GET" })
     const { data: rows, error } = await (context.supabase as any)
       .from("transactions")
       .select(
-        "id, ref, amount, status, channel, created_at, savings_account_id, profiles!transactions_user_id_fkey(full_name, member_no), savings_accounts(savings_plans(name))",
+        "id, ref, amount, status, channel, created_at, savings_account_id, profiles!transactions_user_id_profiles_fkey(full_name, member_no), savings_accounts(savings_plans(name))",
       )
       .eq("kind", "deposit")
       .gte("created_at", data.from)

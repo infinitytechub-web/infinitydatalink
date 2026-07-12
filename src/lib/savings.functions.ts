@@ -375,7 +375,7 @@ export const adminListPendingTransactions = createServerFn({ method: "GET" })
     let q = context.supabase
       .from("transactions")
       .select(
-        "id, ref, kind, amount, channel, note, created_at, user_id, savings_account_id, profiles!transactions_user_id_fkey(full_name, member_no), savings_accounts(savings_plans(name))",
+        "id, ref, kind, amount, channel, note, created_at, user_id, savings_account_id, profiles!transactions_user_id_profiles_fkey(full_name, member_no), savings_accounts(savings_plans(name))",
       )
       .eq("status", "pending")
       .in("kind", ["deposit", "withdrawal"])
