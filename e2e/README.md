@@ -26,16 +26,30 @@ bunx playwright test -c e2e/playwright.config.ts
 
 ## What is covered
 
-`rbac.spec.ts` verifies:
+`rbac.spec.ts` — UI/navigation coverage:
 
 1. **Unauthenticated** users hitting `/admin/**` are redirected to `/auth`.
-2. **Members** who sign in and navigate to `/admin` are redirected out (no
-   admin shell renders).
-3. **Members** are blocked from Super Admin routes (`/admin/super-admins`,
-   `/admin/super-admins/history`) and receive no data.
-4. **Super Admins** signing in are routed to the Admin dashboard (not the
-   member portal), can open `/admin/super-admins` and the new grant/revoke
-   history page, and see the events table.
-5. Server functions `listSuperAdmins`, `listSuperAdminRoleHistory`,
-   `grantSuperAdminByEmail`, and `revokeSuperAdmin` reject non-super_admin
-   callers with a `forbidden` error.
+2. **Members** signing in land on `/app`, not `/admin`; navigating to Super
+   Admin routes shows no data.
+3. **Super Admins** are routed to `/admin`, can open the directory + grant
+   history, sort and paginate history via URL, and download the CSV.
+
+`rbac-api.spec.ts` — direct API/RPC coverage (no UI, no server-function
+wrapper — hits Supabase/PostgREST with real user JWTs, so it proves the
+database policies, guard triggers, and `SECURITY DEFINER` RPCs stand on
+their own even if a caller bypasses the client entirely):
+
+1. **Anonymous** callers cannot invoke `list_super_admins`,
+   `grant_super_admin_by_email`, `revoke_super_admin`, cannot read
+   `audit_log`, and cannot write `user_roles` or `super_admin_seed_emails`.
+2. **Authenticated non-staff members** are rejected by the same RPCs with a
+   `forbidden` error; direct `INSERT`/`DELETE` on `user_roles.super_admin`
+   is blocked by the `guard_super_admin_role` trigger; a spoofed
+   `audit_log` row with `actor_role='super_admin'` is rejected by the
+   `WITH CHECK` policy.
+3. **Super Admin** callers can invoke `list_super_admins`, read
+   `audit_log`, and are still prevented from revoking themselves
+   (`cannot_revoke_self` / `last_super_admin`).
+
+Optional env for the API suite: `E2E_TEST_TARGET_EMAIL` (defaults to the
+member email; used only for negative grant/revoke attempts).
