@@ -47,6 +47,53 @@ export type Database = {
         }
         Relationships: []
       }
+      balance_adjustments: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          created_at: string
+          direction: Database["public"]["Enums"]["adjustment_direction"]
+          id: string
+          reason: string
+          ref: string
+          reference_txn_id: string | null
+          savings_account_id: string
+          txn_id: string | null
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          created_at?: string
+          direction: Database["public"]["Enums"]["adjustment_direction"]
+          id?: string
+          reason: string
+          ref?: string
+          reference_txn_id?: string | null
+          savings_account_id: string
+          txn_id?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          created_at?: string
+          direction?: Database["public"]["Enums"]["adjustment_direction"]
+          id?: string
+          reason?: string
+          ref?: string
+          reference_txn_id?: string | null
+          savings_account_id?: string
+          txn_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "balance_adjustments_savings_account_id_fkey"
+            columns: ["savings_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -133,6 +180,101 @@ export type Database = {
           used_at?: string | null
         }
         Relationships: []
+      }
+      expense_categories: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          id: string
+          label: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          id?: string
+          label: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          id?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category_code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          incurred_on: string
+          notes: string | null
+          paid_on: string | null
+          paid_txn_id: string | null
+          payment_channel: string | null
+          ref: string
+          reference: string | null
+          status: Database["public"]["Enums"]["expense_status"]
+          updated_at: string
+          vendor: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category_code: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          incurred_on?: string
+          notes?: string | null
+          paid_on?: string | null
+          paid_txn_id?: string | null
+          payment_channel?: string | null
+          ref?: string
+          reference?: string | null
+          status?: Database["public"]["Enums"]["expense_status"]
+          updated_at?: string
+          vendor: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category_code?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          incurred_on?: string
+          notes?: string | null
+          paid_on?: string | null
+          paid_txn_id?: string | null
+          payment_channel?: string | null
+          ref?: string
+          reference?: string | null
+          status?: Database["public"]["Enums"]["expense_status"]
+          updated_at?: string
+          vendor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       kyc_documents: {
         Row: {
@@ -672,6 +814,75 @@ export type Database = {
           },
         ]
       }
+      transfers: {
+        Row: {
+          amount: number
+          channel: string | null
+          cleared_at: string | null
+          cleared_by: string | null
+          created_at: string
+          created_by: string | null
+          from_account_id: string
+          id: string
+          in_txn_id: string | null
+          note: string | null
+          out_txn_id: string | null
+          ref: string
+          status: Database["public"]["Enums"]["transfer_status"]
+          to_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          channel?: string | null
+          cleared_at?: string | null
+          cleared_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          from_account_id: string
+          id?: string
+          in_txn_id?: string | null
+          note?: string | null
+          out_txn_id?: string | null
+          ref?: string
+          status?: Database["public"]["Enums"]["transfer_status"]
+          to_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          channel?: string | null
+          cleared_at?: string | null
+          cleared_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          from_account_id?: string
+          id?: string
+          in_txn_id?: string | null
+          note?: string | null
+          out_txn_id?: string | null
+          ref?: string
+          status?: Database["public"]["Enums"]["transfer_status"]
+          to_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfers_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfers_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -704,6 +915,61 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_expense: {
+        Args: { _actor_id: string; _expense_id: string }
+        Returns: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category_code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          incurred_on: string
+          notes: string | null
+          paid_on: string | null
+          paid_txn_id: string | null
+          payment_channel: string | null
+          ref: string
+          reference: string | null
+          status: Database["public"]["Enums"]["expense_status"]
+          updated_at: string
+          vendor: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "expenses"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      clear_transfer: {
+        Args: { _actor_id: string; _transfer_id: string }
+        Returns: {
+          amount: number
+          channel: string | null
+          cleared_at: string | null
+          cleared_by: string | null
+          created_at: string
+          created_by: string | null
+          from_account_id: string
+          id: string
+          in_txn_id: string | null
+          note: string | null
+          out_txn_id: string | null
+          ref: string
+          status: Database["public"]["Enums"]["transfer_status"]
+          to_account_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -807,6 +1073,105 @@ export type Database = {
         }
         Returns: number
       }
+      pay_expense: {
+        Args: {
+          _actor_id: string
+          _channel: string
+          _expense_id: string
+          _reference: string
+        }
+        Returns: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category_code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          incurred_on: string
+          notes: string | null
+          paid_on: string | null
+          paid_txn_id: string | null
+          payment_channel: string | null
+          ref: string
+          reference: string | null
+          status: Database["public"]["Enums"]["expense_status"]
+          updated_at: string
+          vendor: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "expenses"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      post_balance_adjustment: {
+        Args: {
+          _account_id: string
+          _actor_id: string
+          _amount: number
+          _direction: Database["public"]["Enums"]["adjustment_direction"]
+          _reason: string
+        }
+        Returns: {
+          amount: number
+          approved_by: string | null
+          created_at: string
+          direction: Database["public"]["Enums"]["adjustment_direction"]
+          id: string
+          reason: string
+          ref: string
+          reference_txn_id: string | null
+          savings_account_id: string
+          txn_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "balance_adjustments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      post_expense: {
+        Args: {
+          _actor_id: string
+          _amount: number
+          _category_code: string
+          _incurred_on: string
+          _notes: string
+          _payment_channel: string
+          _reference: string
+          _vendor: string
+        }
+        Returns: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category_code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          incurred_on: string
+          notes: string | null
+          paid_on: string | null
+          paid_txn_id: string | null
+          payment_channel: string | null
+          ref: string
+          reference: string | null
+          status: Database["public"]["Enums"]["expense_status"]
+          updated_at: string
+          vendor: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "expenses"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       post_savings_contribution: {
         Args: {
           _account_id: string
@@ -826,6 +1191,39 @@ export type Database = {
           _note: string
         }
         Returns: string
+      }
+      post_transfer: {
+        Args: {
+          _actor_id: string
+          _amount: number
+          _channel: string
+          _from: string
+          _note: string
+          _to: string
+        }
+        Returns: {
+          amount: number
+          channel: string | null
+          cleared_at: string | null
+          cleared_by: string | null
+          created_at: string
+          created_by: string | null
+          from_account_id: string
+          id: string
+          in_txn_id: string | null
+          note: string | null
+          out_txn_id: string | null
+          ref: string
+          status: Database["public"]["Enums"]["transfer_status"]
+          to_account_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
@@ -872,6 +1270,35 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reject_expense: {
+        Args: { _actor_id: string; _expense_id: string; _reason: string }
+        Returns: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category_code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          incurred_on: string
+          notes: string | null
+          paid_on: string | null
+          paid_txn_id: string | null
+          payment_channel: string | null
+          ref: string
+          reference: string | null
+          status: Database["public"]["Enums"]["expense_status"]
+          updated_at: string
+          vendor: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "expenses"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reset_own_kyc_pending: { Args: never; Returns: undefined }
       revoke_super_admin: {
         Args: { _reason?: string; _user_id: string }
@@ -879,6 +1306,7 @@ export type Database = {
       }
     }
     Enums: {
+      adjustment_direction: "credit" | "debit"
       app_role:
         | "super_admin"
         | "compliance_officer"
@@ -886,6 +1314,7 @@ export type Database = {
         | "finance_officer"
         | "auditor"
         | "member"
+      expense_status: "pending" | "approved" | "paid" | "rejected"
       kyc_doc_status: "pending" | "approved" | "rejected"
       kyc_doc_type:
         | "national_id_front"
@@ -897,6 +1326,7 @@ export type Database = {
       kyc_status: "pending" | "active" | "rejected"
       loan_status: "pending" | "approved" | "rejected" | "active" | "closed"
       member_tier: "standard" | "premium"
+      transfer_status: "pending" | "cleared" | "failed" | "reversed"
       txn_kind:
         | "deposit"
         | "withdrawal"
@@ -904,6 +1334,10 @@ export type Database = {
         | "loan_repayment"
         | "fee"
         | "interest"
+        | "transfer_out"
+        | "transfer_in"
+        | "adjustment"
+        | "expense"
       txn_status: "cleared" | "pending" | "failed"
     }
     CompositeTypes: {
@@ -1032,6 +1466,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      adjustment_direction: ["credit", "debit"],
       app_role: [
         "super_admin",
         "compliance_officer",
@@ -1040,6 +1475,7 @@ export const Constants = {
         "auditor",
         "member",
       ],
+      expense_status: ["pending", "approved", "paid", "rejected"],
       kyc_doc_status: ["pending", "approved", "rejected"],
       kyc_doc_type: [
         "national_id_front",
@@ -1052,6 +1488,7 @@ export const Constants = {
       kyc_status: ["pending", "active", "rejected"],
       loan_status: ["pending", "approved", "rejected", "active", "closed"],
       member_tier: ["standard", "premium"],
+      transfer_status: ["pending", "cleared", "failed", "reversed"],
       txn_kind: [
         "deposit",
         "withdrawal",
@@ -1059,6 +1496,10 @@ export const Constants = {
         "loan_repayment",
         "fee",
         "interest",
+        "transfer_out",
+        "transfer_in",
+        "adjustment",
+        "expense",
       ],
       txn_status: ["cleared", "pending", "failed"],
     },
