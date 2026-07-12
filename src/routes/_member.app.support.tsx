@@ -1,7 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, SectionCard } from "@/components/primitives";
 
+const FAQS: Array<[string, string]> = [
+  ["How do I change my savings schedule?", "Open your savings account and update the contribution frequency or amount; changes take effect on the next scheduled run."],
+  ["How long does a loan application take?", "Most complete applications receive a decision within 2–3 business days after KYC and required documents are verified."],
+  ["How do I link a mobile money account?", "Go to Payments, choose Add method, select your mobile money provider, and confirm the one-time verification code."],
+  ["How is interest calculated on my savings?", "Interest accrues daily on your cleared balance and is credited monthly based on your plan's published rate."],
+];
+
 export const Route = createFileRoute("/_member/app/support")({
+  head: () => ({
+    meta: [
+      { title: "Help & Support — Infinity Wealth" },
+      {
+        name: "description",
+        content:
+          "Get help with your Infinity Wealth account: live chat, WhatsApp, tickets, and answers to common savings, loans, and payments questions.",
+      },
+      { name: "robots", content: "noindex" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQS.map(([q, a]) => ({
+            "@type": "Question",
+            name: q,
+            acceptedAnswer: { "@type": "Answer", text: a },
+          })),
+        }),
+      },
+    ],
+  }),
   component: SupportPage,
 });
 
