@@ -1,7 +1,13 @@
-# RBAC End-to-End Tests
+# End-to-End Tests
 
-Playwright specs that verify Super Admin-only routes and endpoints reject
-non-staff callers and accept Super Admins across full navigation flows.
+Playwright specs covering RBAC and the transfer lifecycle.
+
+The RBAC specs (`rbac.spec.ts`, `rbac-api.spec.ts`) verify Super Admin-only
+routes and endpoints reject non-staff callers and accept Super Admins across
+navigation flows. The transfer specs (`transfers.spec.ts`,
+`transfers-api.spec.ts`) verify the member↔member and account↔account
+request → approval / rejection lifecycle end-to-end.
+
 
 ## Running
 
@@ -15,8 +21,14 @@ bunx playwright install --with-deps chromium
 Environment variables required (do NOT commit real credentials):
 
 - `E2E_BASE_URL` — e.g. `http://localhost:8080`
-- `E2E_MEMBER_EMAIL`, `E2E_MEMBER_PASSWORD` — a member-only account
+- `E2E_MEMBER_EMAIL`, `E2E_MEMBER_PASSWORD` — a member-only account (funded
+  savings account preferred so the transfer lifecycle test can run)
 - `E2E_SUPER_ADMIN_EMAIL`, `E2E_SUPER_ADMIN_PASSWORD` — a Super Admin account
+- `E2E_FINANCE_EMAIL`, `E2E_FINANCE_PASSWORD` — optional; `finance_officer`
+  or `super_admin` used to clear/reject transfers in the lifecycle spec
+- `E2E_MEMBER2_EMAIL`, `E2E_MEMBER2_PASSWORD` — optional second member for
+  the member↔member transfer lifecycle test
+
 
 Then:
 
@@ -53,3 +65,27 @@ their own even if a caller bypasses the client entirely):
 
 Optional env for the API suite: `E2E_TEST_TARGET_EMAIL` (defaults to the
 member email; used only for negative grant/revoke attempts).
+
+`transfers.spec.ts` — UI smoke:
+
+1. **Unauthenticated** callers hitting `/app/transfers` and
+   `/admin/finance/transfers` are redirected to `/auth`.
+2. **Member** lands on the Transfers portal with the request affordance and
+   history table visible.
+3. **Finance staff** land on the admin Transfer Ledger with the status
+   vocabulary visible for row actions.
+
+`transfers-api.spec.ts` — direct RPC lifecycle:
+
+1. **Anonymous** callers cannot invoke `request_transfer`, `clear_transfer`,
+   or `reject_transfer`, and cannot read the `transfers` ledger.
+2. **Member** RPC guards fire: `same_account`, `invalid_amount`,
+   `source_not_owned`; and members are rejected by `clear_transfer` /
+   `reject_transfer`.
+3. **Pending → cleared** for both account↔account (self-owned) and
+   member↔member requests moves balances by the transfer amount, stamps
+   `cleared_at` + `out_txn_id` + `in_txn_id`, and rejects any repeat
+   settlement with `transfer_not_pending`.
+4. **Pending → failed (rejected)** records the reason in the transfer note,
+   leaves balances untouched, and rejects any repeat action.
+
