@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { z } from "zod";
 import { EmptyState, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,9 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
 import {
+  exportSuperAdminRoleHistory,
   listSuperAdminRoleHistory,
   type RoleHistoryRow,
 } from "@/lib/admin-roles.functions";
+import { exportCsv } from "@/lib/exports";
+
+const SORT_KEYS = ["occurred_at", "actor_email", "action"] as const;
+type SortKey = (typeof SORT_KEYS)[number];
 
 const searchSchema = z.object({
   event: z.enum(["all", "grant", "revoke"]).default("all"),
@@ -23,10 +29,12 @@ const searchSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
   page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(10).max(200).default(50),
+  sortBy: z.enum(SORT_KEYS).default("occurred_at"),
+  sortDir: z.enum(["asc", "desc"]).default("desc"),
   selected: z.string().optional(),
 });
 
-const PAGE_SIZE = 50;
 
 export const Route = createFileRoute("/_admin/admin/super-admins/history")({
   head: () => ({
