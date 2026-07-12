@@ -117,7 +117,7 @@ export type RoleHistoryRow = {
   target_email: string | null;
   note: string | null;
   reason: string | null;
-  meta: Record<string, unknown>;
+  meta: Record<string, string | number | boolean | null>;
   currently_super_admin: boolean;
 };
 
