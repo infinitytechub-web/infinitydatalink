@@ -1,6 +1,6 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
-import { useRouterState } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth";
 
 const groups: NavGroup[] = [
   {
@@ -42,7 +42,12 @@ export const Route = createFileRoute("/_member/app")({
 });
 
 function MemberLayout() {
+  const { user, loading, isAdmin } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (loading) return null;
+  if (!user) return <Navigate to="/auth" />;
+  // Staff land on the admin dashboard; the member shell is for members only.
+  if (isAdmin) return <Navigate to="/admin" replace />;
   const breadcrumb = CRUMBS[pathname] ?? "Overview";
   return (
     <PortalShell
