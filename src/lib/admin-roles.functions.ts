@@ -62,7 +62,7 @@ export const grantSuperAdmin = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase.rpc(
       "grant_super_admin_by_email",
-      { _email: data.email, _note: data.note ?? null },
+      { _email: data.email, _note: data.note ?? undefined },
     );
     if (error) throw new Error(friendlyRoleError(error.message));
     return (rows ?? [])[0] as { user_id: string; email: string; granted_at: string } | undefined;
