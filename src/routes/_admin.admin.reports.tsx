@@ -3,16 +3,7 @@ import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-} from "recharts";
+import { TrendChart, BarList } from "@/components/charts";
 import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
