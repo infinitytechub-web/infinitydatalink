@@ -614,7 +614,7 @@ function SlaCell({
         </span>
       ) : null}
       <span
-        className={`tabular text-[10px] ${breached ? "font-semibold text-red-600" : "text-emerald-deep/60"}`}
+        className={`tabular text-[10px] ${breached ? "font-semibold text-destructive" : "text-muted-foreground"}`}
       >
         {text}
       </span>
