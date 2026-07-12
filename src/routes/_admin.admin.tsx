@@ -8,6 +8,8 @@ const groups: NavGroup[] = [
       { to: "/admin", label: "Analytics" },
       { to: "/admin/reports", label: "Reports" },
       { to: "/admin/audit", label: "Audit & Activity" },
+      { to: "/admin/audit/transfers", label: "Transfer Audit" },
+
     ],
   },
   {
