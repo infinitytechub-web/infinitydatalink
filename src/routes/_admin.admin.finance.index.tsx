@@ -90,12 +90,10 @@ function FinanceBody() {
       <SectionCard title="Cash flow — last 30 days">
         <div className="grid gap-6 p-6 md:grid-cols-2">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-primary">Income</p>
-            <TrendChart data={s.income_series} xKey="day" yKey="amount" label="Income" color="hsl(var(--primary))" height={180} />
+            <TrendChart data={s.income_series} xKey="day" title="Income" series={[{ key: "amount", label: "Income" }]} height={200} />
           </div>
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Expenses & payouts</p>
-            <TrendChart data={s.expense_series} xKey="day" yKey="amount" label="Cash out" color="hsl(var(--destructive))" height={180} />
+            <TrendChart data={s.expense_series} xKey="day" title="Expenses & payouts" series={[{ key: "amount", label: "Cash out", color: "var(--destructive)" }]} height={200} />
           </div>
         </div>
       </SectionCard>

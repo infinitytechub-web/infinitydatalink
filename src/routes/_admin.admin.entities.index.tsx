@@ -14,7 +14,7 @@ import {
 } from "@/components/primitives";
 import { listEntities, type EntityRow, type EntityType } from "@/lib/admin-entities.functions";
 
-const TYPE_LABEL: Record<EntityType | "all", string> = {
+const TYPE_LABEL: Record<string, string> = {
   all: "All entities",
   group: "Groups",
   department: "Departments",
