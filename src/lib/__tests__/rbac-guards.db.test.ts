@@ -62,22 +62,28 @@ function evalAuditPolicy(args: {
   actorEmail: string | null;
   actorRole: string | null;
 }): string {
+  // Sandbox role cannot USAGE the `auth` schema, so inline the same
+  // expressions that `auth.uid()` / `auth.jwt()` compute from
+  // `request.jwt.claims`. Equivalent to running the policy under RLS.
   const actorEmailSql = args.actorEmail === null ? "NULL" : `'${args.actorEmail}'`;
   const actorRoleSql = args.actorRole === null ? "NULL" : `'${args.actorRole}'`;
   return q(`
     BEGIN;
     ${setJwt(args.jwtUserId, args.jwtEmail)}
+    WITH j AS (
+      SELECT nullif(current_setting('request.jwt.claims', true), '')::jsonb AS c
+    )
     SELECT (
-      '${args.actorId}'::uuid = auth.uid()
+      '${args.actorId}'::uuid = ((SELECT c FROM j) ->> 'sub')::uuid
       AND (
         ${actorEmailSql}::text IS NULL
-        OR lower(${actorEmailSql}::text) = lower(coalesce(auth.jwt() ->> 'email', ''))
+        OR lower(${actorEmailSql}::text) = lower(coalesce((SELECT c FROM j) ->> 'email', ''))
       )
       AND (
         ${actorRoleSql}::text IS NULL
         OR EXISTS (
           SELECT 1 FROM public.user_roles ur
-          WHERE ur.user_id = auth.uid()
+          WHERE ur.user_id = ((SELECT c FROM j) ->> 'sub')::uuid
             AND ur.role::text = ${actorRoleSql}::text
         )
       )
