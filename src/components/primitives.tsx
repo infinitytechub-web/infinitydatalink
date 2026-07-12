@@ -3,7 +3,7 @@ import { AlertTriangle, Inbox, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/org-config";
 import { Skeleton } from "@/components/ui/skeleton";
-import { KPI_TONES, pickTone, type ToneName } from "@/lib/theme-tokens";
+import { KPI_TONES, SECTION_ACCENT, STATUS_PILL, pickTone, type ToneName } from "@/lib/theme-tokens";
 
 /** Backwards-compat alias; tone names now live in the shared token module. */
 export type KPITone = ToneName;
