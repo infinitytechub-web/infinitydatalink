@@ -7,7 +7,49 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "One platform for savings, loans, payments, and investment - built for cooperatives, SACCOs, and membership organisations.",
+          "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations.",
+      },
+      { property: "og:title", content: "Infinity Wealth — Enterprise Financial Management Platform" },
+      {
+        property: "og:description",
+        content:
+          "Savings, loans, payments, and investment for cooperatives, SACCOs, and membership organisations.",
+      },
+      { property: "og:url", content: "https://infinity-wealth360.lovable.app/" },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp",
+      },
+    ],
+    links: [{ rel: "canonical", href: "https://infinity-wealth360.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          serviceType: "Financial management platform",
+          provider: { "@type": "Organization", name: "Infinity Wealth" },
+          areaServed: "Africa",
+          description:
+            "Savings, loans, payments, and investment management for cooperatives, SACCOs, and membership organisations.",
+          hasOfferCatalog: {
+            "@type": "OfferCatalog",
+            name: "Infinity Wealth modules",
+            itemListElement: [
+              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Savings accounts & plans" } },
+              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Loan origination & servicing" } },
+              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Payments & reconciliation" } },
+              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Member KYC & compliance" } },
+            ],
+          },
+        }),
       },
     ],
   }),
