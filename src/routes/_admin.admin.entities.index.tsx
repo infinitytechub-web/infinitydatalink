@@ -40,7 +40,7 @@ const entitiesQuery = (s: SearchInput) =>
       }),
   });
 
-export const Route = createFileRoute("/_admin/admin/entities")({
+export const Route = createFileRoute("/_admin/admin/entities/")({
   validateSearch: zodValidator(search),
   component: EntitiesPage,
   errorComponent: ({ error }) => {
