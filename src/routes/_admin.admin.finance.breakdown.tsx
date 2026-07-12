@@ -1,6 +1,8 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import {
   ErrorState,
   KPIGridSkeleton,
@@ -20,6 +22,12 @@ function defaultRange() {
   return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
 }
 
+const dr = defaultRange();
+const searchSchema = z.object({
+  from: fallback(z.string(), dr.from).default(dr.from),
+  to: fallback(z.string(), dr.to).default(dr.to),
+});
+
 const expenseQuery = (from: string, to: string) =>
   queryOptions({
     queryKey: ["admin", "expenses-breakdown", from, to],
@@ -28,6 +36,7 @@ const expenseQuery = (from: string, to: string) =>
   });
 
 export const Route = createFileRoute("/_admin/admin/finance/breakdown")({
+  validateSearch: zodValidator(searchSchema),
   component: BreakdownPage,
   errorComponent: ({ error }) => {
     const router = useRouter();
@@ -40,7 +49,10 @@ export const Route = createFileRoute("/_admin/admin/finance/breakdown")({
 });
 
 function BreakdownPage() {
-  const [range, setRange] = useState(defaultRange());
+  const { from, to } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const setField = (k: "from" | "to", v: string) =>
+    navigate({ search: (prev: { from: string; to: string }) => ({ ...prev, [k]: v }) });
   return (
     <>
       <PageHeader
@@ -51,11 +63,11 @@ function BreakdownPage() {
           <div className="flex flex-wrap items-end gap-2">
             <label className="text-[11px] uppercase tracking-widest text-muted-foreground">
               From
-              <input type="date" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
+              <input type="date" value={from} onChange={(e) => setField("from", e.target.value)} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
             </label>
             <label className="text-[11px] uppercase tracking-widest text-muted-foreground">
               To
-              <input type="date" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
+              <input type="date" value={to} onChange={(e) => setField("to", e.target.value)} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
             </label>
           </div>
         }
@@ -68,11 +80,12 @@ function BreakdownPage() {
           </div>
         }
       >
-        <BreakdownBody from={range.from} to={range.to} />
+        <BreakdownBody from={from} to={to} />
       </Suspense>
     </>
   );
 }
+
 
 function BreakdownBody({ from, to }: { from: string; to: string }) {
   const { data } = useSuspenseQuery(expenseQuery(from, to));
