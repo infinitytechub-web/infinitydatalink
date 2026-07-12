@@ -18,8 +18,10 @@ export function KPIStat({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-xl border p-6 transition-all duration-300",
-        "shadow-[var(--shadow-elevated)] hover:-translate-y-0.5",
+        "group relative overflow-hidden rounded-xl border p-6",
+        "shadow-[var(--shadow-elevated)]",
+        "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out",
+        "motion-safe:hover:-translate-y-0.5",
         accent
           ? "border-primary/30 bg-linear-to-br from-primary/10 via-card to-card"
           : "border-border bg-card",
