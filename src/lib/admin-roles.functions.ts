@@ -183,7 +183,7 @@ export const listSuperAdminRoleHistory = createServerFn({ method: "POST" })
     }
 
     let out: RoleHistoryRow[] = rows.map((r) => {
-      const meta = (r.meta ?? {}) as Record<string, unknown>;
+      const meta = (r.meta ?? {}) as Record<string, string | number | boolean | null>;
       const target_user_id = r.target ?? "";
       return {
         id: r.id,

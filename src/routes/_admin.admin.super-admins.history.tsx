@@ -117,7 +117,7 @@ function HistoryBody() {
               value={search.event}
               onChange={(e) =>
                 navigate({
-                  search: (s) => ({
+                  search: (s: any) => ({
                     ...s,
                     event: e.target.value as "all" | "grant" | "revoke",
                     page: 1,
@@ -137,7 +137,7 @@ function HistoryBody() {
               onChange={(e) => setEmailDraft(e.target.value)}
               onBlur={() =>
                 navigate({
-                  search: (s) => ({
+                  search: (s: any) => ({
                     ...s,
                     emailContains: emailDraft.trim() || undefined,
                     page: 1,
@@ -154,7 +154,7 @@ function HistoryBody() {
               value={search.from?.slice(0, 10) ?? ""}
               onChange={(e) =>
                 navigate({
-                  search: (s) => ({
+                  search: (s: any) => ({
                     ...s,
                     from: e.target.value ? new Date(e.target.value).toISOString() : undefined,
                     page: 1,
@@ -170,7 +170,7 @@ function HistoryBody() {
               value={search.to?.slice(0, 10) ?? ""}
               onChange={(e) =>
                 navigate({
-                  search: (s) => ({
+                  search: (s: any) => ({
                     ...s,
                     to: e.target.value
                       ? new Date(e.target.value + "T23:59:59.999Z").toISOString()
@@ -204,7 +204,7 @@ function HistoryBody() {
                   <tr
                     key={r.id}
                     onClick={() =>
-                      navigate({ search: (s) => ({ ...s, selected: r.id }) })
+                      navigate({ search: (s: any) => ({ ...s, selected: r.id }) })
                     }
                     className="cursor-pointer border-b border-emerald-deep/5 hover:bg-emerald-deep/[0.02]"
                   >
@@ -243,7 +243,7 @@ function HistoryBody() {
             <button
               disabled={search.page <= 1}
               onClick={() =>
-                navigate({ search: (s) => ({ ...s, page: Math.max(1, search.page - 1) }) })
+                navigate({ search: (s: any) => ({ ...s, page: Math.max(1, search.page - 1) }) })
               }
               className="rounded border border-emerald-deep/15 px-3 py-1 uppercase tracking-widest disabled:opacity-40"
             >
@@ -252,7 +252,7 @@ function HistoryBody() {
             <button
               disabled={search.page >= totalPages}
               onClick={() =>
-                navigate({ search: (s) => ({ ...s, page: search.page + 1 }) })
+                navigate({ search: (s: any) => ({ ...s, page: search.page + 1 }) })
               }
               className="rounded border border-emerald-deep/15 px-3 py-1 uppercase tracking-widest disabled:opacity-40"
             >
@@ -264,7 +264,7 @@ function HistoryBody() {
 
       <DetailsDialog
         entry={selected}
-        onClose={() => navigate({ search: (s) => ({ ...s, selected: undefined }) })}
+        onClose={() => navigate({ search: (s: any) => ({ ...s, selected: undefined }) })}
       />
     </>
   );
