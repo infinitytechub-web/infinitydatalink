@@ -13,18 +13,14 @@ import {
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
+import { CHART_PALETTE } from "@/lib/theme-tokens";
+
 /**
- * Shared chart palette — pulls from CSS variables so charts respect the
- * active light/dark theme instead of hard-coding hex values.
+ * Shared chart palette — sourced from the centralized tone tokens so chart
+ * series match KPI tiles, section accents, and status pills app-wide.
  */
-export const chartPalette = [
-  "var(--primary)",
-  "var(--accent)",
-  "var(--warning)",
-  "var(--success)",
-  "#2563eb",
-  "#a855f7",
-];
+export const chartPalette = CHART_PALETTE;
+
 
 export type ChartSeries = {
   key: string;
