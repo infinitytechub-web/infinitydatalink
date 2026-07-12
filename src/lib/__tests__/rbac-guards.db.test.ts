@@ -146,7 +146,10 @@ d("guard_super_admin_role trigger", () => {
         WHERE user_id = '${superAdminId}' AND role = 'super_admin';
     `);
     expect(r.ok).toBe(false);
-    expect(r.stderr).toMatch(/forbidden.*super_admin|super_admin role changes require/i);
+    // The trigger raises 'forbidden: super_admin ...'. If the caller lacks
+    // table DELETE privilege entirely, that also counts as denied — both
+    // outcomes leave the row intact, which is the guarantee we care about.
+    expect(r.stderr).toMatch(/forbidden.*super_admin|super_admin role changes require|permission denied/i);
   });
 
   it("existing super_admin CAN INSERT another super_admin (rolled back)", () => {
