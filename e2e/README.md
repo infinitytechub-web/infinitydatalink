@@ -21,8 +21,14 @@ bunx playwright install --with-deps chromium
 Environment variables required (do NOT commit real credentials):
 
 - `E2E_BASE_URL` — e.g. `http://localhost:8080`
-- `E2E_MEMBER_EMAIL`, `E2E_MEMBER_PASSWORD` — a member-only account
+- `E2E_MEMBER_EMAIL`, `E2E_MEMBER_PASSWORD` — a member-only account (funded
+  savings account preferred so the transfer lifecycle test can run)
 - `E2E_SUPER_ADMIN_EMAIL`, `E2E_SUPER_ADMIN_PASSWORD` — a Super Admin account
+- `E2E_FINANCE_EMAIL`, `E2E_FINANCE_PASSWORD` — optional; `finance_officer`
+  or `super_admin` used to clear/reject transfers in the lifecycle spec
+- `E2E_MEMBER2_EMAIL`, `E2E_MEMBER2_PASSWORD` — optional second member for
+  the member↔member transfer lifecycle test
+
 
 Then:
 
