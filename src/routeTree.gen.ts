@@ -65,6 +65,7 @@ import { Route as AdminAdminFinanceContributionsRouteImport } from './routes/_ad
 import { Route as AdminAdminFinanceBreakdownRouteImport } from './routes/_admin.admin.finance.breakdown'
 import { Route as AdminAdminFinanceAdjustmentsRouteImport } from './routes/_admin.admin.finance.adjustments'
 import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
+import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -357,6 +358,12 @@ const AdminAdminEntitiesEntityIdRoute =
     path: '/$entityId',
     getParentRoute: () => AdminAdminEntitiesRoute,
   } as any)
+const AdminAdminAuditTransfersRoute =
+  AdminAdminAuditTransfersRouteImport.update({
+    id: '/transfers',
+    path: '/transfers',
+    getParentRoute: () => AdminAdminAuditRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -368,7 +375,7 @@ export interface FileRoutesByFullPath {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/admin/audit': typeof AdminAdminAuditRoute
+  '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
@@ -390,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
+  '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
   '/admin/finance/breakdown': typeof AdminAdminFinanceBreakdownRoute
@@ -422,7 +430,7 @@ export interface FileRoutesByTo {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/admin/audit': typeof AdminAdminAuditRoute
+  '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/payments': typeof AdminAdminPaymentsRoute
@@ -441,6 +449,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
+  '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
   '/admin/finance/breakdown': typeof AdminAdminFinanceBreakdownRoute
@@ -478,7 +487,7 @@ export interface FileRoutesById {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/_admin/admin/audit': typeof AdminAdminAuditRoute
+  '/_admin/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/_admin/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/_admin/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/_admin/admin/loans': typeof AdminAdminLoansRouteWithChildren
@@ -500,6 +509,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
+  '/_admin/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/_admin/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/_admin/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
   '/_admin/admin/finance/breakdown': typeof AdminAdminFinanceBreakdownRoute
@@ -558,6 +568,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin/'
     | '/app/'
+    | '/admin/audit/transfers'
     | '/admin/entities/$entityId'
     | '/admin/finance/adjustments'
     | '/admin/finance/breakdown'
@@ -609,6 +620,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin'
     | '/app'
+    | '/admin/audit/transfers'
     | '/admin/entities/$entityId'
     | '/admin/finance/adjustments'
     | '/admin/finance/breakdown'
@@ -667,6 +679,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_admin/admin/'
     | '/_member/app/'
+    | '/_admin/admin/audit/transfers'
     | '/_admin/admin/entities/$entityId'
     | '/_admin/admin/finance/adjustments'
     | '/_admin/admin/finance/breakdown'
@@ -1102,8 +1115,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminEntitiesEntityIdRouteImport
       parentRoute: typeof AdminAdminEntitiesRoute
     }
+    '/_admin/admin/audit/transfers': {
+      id: '/_admin/admin/audit/transfers'
+      path: '/transfers'
+      fullPath: '/admin/audit/transfers'
+      preLoaderRoute: typeof AdminAdminAuditTransfersRouteImport
+      parentRoute: typeof AdminAdminAuditRoute
+    }
   }
 }
+
+interface AdminAdminAuditRouteChildren {
+  AdminAdminAuditTransfersRoute: typeof AdminAdminAuditTransfersRoute
+}
+
+const AdminAdminAuditRouteChildren: AdminAdminAuditRouteChildren = {
+  AdminAdminAuditTransfersRoute: AdminAdminAuditTransfersRoute,
+}
+
+const AdminAdminAuditRouteWithChildren = AdminAdminAuditRoute._addFileChildren(
+  AdminAdminAuditRouteChildren,
+)
 
 interface AdminAdminEntitiesRouteChildren {
   AdminAdminEntitiesEntityIdRoute: typeof AdminAdminEntitiesEntityIdRoute
@@ -1180,7 +1212,7 @@ const AdminAdminSuperAdminsRouteWithChildren =
   )
 
 interface AdminAdminRouteChildren {
-  AdminAdminAuditRoute: typeof AdminAdminAuditRoute
+  AdminAdminAuditRoute: typeof AdminAdminAuditRouteWithChildren
   AdminAdminEntitiesRoute: typeof AdminAdminEntitiesRouteWithChildren
   AdminAdminFinanceRoute: typeof AdminAdminFinanceRouteWithChildren
   AdminAdminLoansRoute: typeof AdminAdminLoansRouteWithChildren
@@ -1195,7 +1227,7 @@ interface AdminAdminRouteChildren {
 }
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
-  AdminAdminAuditRoute: AdminAdminAuditRoute,
+  AdminAdminAuditRoute: AdminAdminAuditRouteWithChildren,
   AdminAdminEntitiesRoute: AdminAdminEntitiesRouteWithChildren,
   AdminAdminFinanceRoute: AdminAdminFinanceRouteWithChildren,
   AdminAdminLoansRoute: AdminAdminLoansRouteWithChildren,

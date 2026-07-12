@@ -370,3 +370,182 @@ export const listSavingsForFinance = createServerFn({ method: "GET" })
       member_no: r.profiles?.member_no ?? null,
     }));
   });
+
+// ============ Transfer Audit ============
+export type TransferAuditEntry = {
+  id: string;
+  created_at: string;
+  action: "transfer.requested" | "transfer.created" | "transfer.cleared" | "transfer.rejected";
+  actor_id: string | null;
+  actor_email: string | null;
+  actor_role: string | null;
+  transfer_id: string | null;
+  transfer_ref: string | null;
+  amount: number | null;
+  reason: string | null;
+  from_account_id: string | null;
+  to_account_id: string | null;
+  from_member_name: string | null;
+  from_member_no: string | null;
+  to_member_name: string | null;
+  to_member_no: string | null;
+  out_txn_ref: string | null;
+  in_txn_ref: string | null;
+  meta: Record<string, any>;
+};
+
+export type TransferAuditPage = {
+  rows: TransferAuditEntry[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export const listTransferAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        action: z
+          .enum(["all", "cleared", "rejected", "requested"])
+          .default("all"),
+        search: z.string().trim().max(120).optional(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(5).max(100).default(25),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<TransferAuditPage> => {
+    await assertView(context.supabase, context.userId);
+
+    const actions =
+      data.action === "cleared"
+        ? ["transfer.cleared"]
+        : data.action === "rejected"
+        ? ["transfer.rejected"]
+        : data.action === "requested"
+        ? ["transfer.requested", "transfer.created"]
+        : ["transfer.requested", "transfer.created", "transfer.cleared", "transfer.rejected"];
+
+    const fromIdx = (data.page - 1) * data.pageSize;
+    const toIdx = fromIdx + data.pageSize - 1;
+
+    let q: any = context.supabase
+      .from("audit_log")
+      .select("id, created_at, actor_id, actor_email, actor_role, action, target, meta", {
+        count: "exact",
+      })
+      .in("action", actions)
+      .order("created_at", { ascending: false });
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
+
+    const { data: rows, error, count } = await q.range(fromIdx, toIdx);
+    if (error) throw new Error(error.message);
+
+    // Enrich with transfers table (from/to accounts) using transfer id (target).
+    const transferIds = Array.from(
+      new Set(((rows ?? []) as any[]).map((r) => r.target).filter(Boolean)),
+    ) as string[];
+    const transferMap = new Map<
+      string,
+      { from_account_id: string; to_account_id: string }
+    >();
+    if (transferIds.length) {
+      const { data: trs } = await (context.supabase as any)
+        .from("transfers")
+        .select("id, from_account_id, to_account_id")
+        .in("id", transferIds);
+      for (const t of (trs ?? []) as any[]) {
+        transferMap.set(t.id, {
+          from_account_id: t.from_account_id,
+          to_account_id: t.to_account_id,
+        });
+      }
+    }
+
+    // Collect account ids from meta and transfers table to resolve members.
+    const acctIds = new Set<string>();
+    for (const r of (rows ?? []) as any[]) {
+      const meta = (r.meta ?? {}) as Record<string, any>;
+      if (typeof meta.from === "string") acctIds.add(meta.from);
+      if (typeof meta.to === "string") acctIds.add(meta.to);
+      const t = transferMap.get(r.target);
+      if (t) {
+        acctIds.add(t.from_account_id);
+        acctIds.add(t.to_account_id);
+      }
+    }
+
+    const acctMap = new Map<
+      string,
+      { member_name: string | null; member_no: string | null }
+    >();
+    if (acctIds.size) {
+      const { data: accts } = await (context.supabase as any)
+        .from("savings_accounts")
+        .select("id, profiles(full_name, member_no)")
+        .in("id", Array.from(acctIds));
+      for (const a of (accts ?? []) as any[]) {
+        acctMap.set(a.id, {
+          member_name: a.profiles?.full_name ?? null,
+          member_no: a.profiles?.member_no ?? null,
+        });
+      }
+    }
+
+    let entries: TransferAuditEntry[] = ((rows ?? []) as any[]).map((r) => {
+      const meta = (r.meta ?? {}) as Record<string, any>;
+      const tr = r.target ? transferMap.get(r.target) : undefined;
+      const fromAcct =
+        (typeof meta.from === "string" && meta.from) || tr?.from_account_id || null;
+      const toAcct =
+        (typeof meta.to === "string" && meta.to) || tr?.to_account_id || null;
+      const fromInfo = fromAcct ? acctMap.get(fromAcct) : undefined;
+      const toInfo = toAcct ? acctMap.get(toAcct) : undefined;
+      return {
+        id: r.id,
+        created_at: r.created_at,
+        action: r.action,
+        actor_id: r.actor_id,
+        actor_email: r.actor_email,
+        actor_role: r.actor_role,
+        transfer_id: r.target,
+        transfer_ref: (meta.ref as string | undefined) ?? null,
+        amount: meta.amount != null ? Number(meta.amount) : null,
+        reason: (meta.reason as string | undefined) ?? null,
+        from_account_id: fromAcct,
+        to_account_id: toAcct,
+        from_member_name: fromInfo?.member_name ?? null,
+        from_member_no: fromInfo?.member_no ?? null,
+        to_member_name: toInfo?.member_name ?? null,
+        to_member_no: toInfo?.member_no ?? null,
+        out_txn_ref: (meta.out_txn as string | undefined) ?? null,
+        in_txn_ref: (meta.in_txn as string | undefined) ?? null,
+        meta,
+      } satisfies TransferAuditEntry;
+    });
+
+    if (data.search) {
+      const needle = data.search.toLowerCase();
+      entries = entries.filter(
+        (e) =>
+          (e.transfer_ref ?? "").toLowerCase().includes(needle) ||
+          (e.actor_email ?? "").toLowerCase().includes(needle) ||
+          (e.from_member_name ?? "").toLowerCase().includes(needle) ||
+          (e.from_member_no ?? "").toLowerCase().includes(needle) ||
+          (e.to_member_name ?? "").toLowerCase().includes(needle) ||
+          (e.to_member_no ?? "").toLowerCase().includes(needle) ||
+          (e.reason ?? "").toLowerCase().includes(needle),
+      );
+    }
+
+    return {
+      rows: entries,
+      total: count ?? entries.length,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
+  });
