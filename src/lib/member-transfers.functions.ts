@@ -124,7 +124,7 @@ export const listTransferableAccounts = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<MemberDirectoryAccount[]> => {
     let q: any = (context.supabase as any)
       .from("savings_accounts")
-      .select("id, user_id, profiles!inner(full_name, member_no), savings_plans(name)")
+      .select("id, user_id, profiles!savings_accounts_user_id_profiles_fkey!inner(full_name, member_no), savings_plans(name)")
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(200);

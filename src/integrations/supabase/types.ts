@@ -659,7 +659,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "loans_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       next_of_kin: {
         Row: {
@@ -825,6 +833,13 @@ export type Database = {
             referencedRelation: "savings_plans"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "savings_accounts_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       savings_plans: {
@@ -967,6 +982,13 @@ export type Database = {
             columns: ["savings_account_id"]
             isOneToOne: false
             referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
