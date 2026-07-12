@@ -179,6 +179,13 @@
   will-change: opacity, transform;
 }
 
+/* Shimmer sweep for skeleton loaders. */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+
 /* Respect user reduced-motion preference. */
 @media (prefers-reduced-motion: reduce) {
   *,

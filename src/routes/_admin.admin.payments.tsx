@@ -4,7 +4,7 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { EmptyState, KPIStat, Money, PageHeader, SectionCard } from "@/components/primitives";
+import { EmptyState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton, TableSkeleton } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -45,7 +45,7 @@ function AdminPayments() {
         title="Payments reconciliation"
         description="Clear or reject pending savings and loan-repayment transactions across every rail."
       />
-      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+      <Suspense fallback={<SectionCardSkeleton title="Reconciliation queue" rows={6} cols={5} />}>
         <Body />
       </Suspense>
     </>
@@ -85,7 +85,7 @@ function Body() {
           </div>
         }
       >
-        <Suspense fallback={<div className="p-6"><Skeleton className="h-32 w-full" /></div>}>
+        <Suspense fallback={<TableSkeleton rows={5} cols={5} />}>
           <Queue kind={kind} />
         </Suspense>
       </SectionCard>

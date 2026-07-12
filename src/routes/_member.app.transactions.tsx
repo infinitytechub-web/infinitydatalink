@@ -3,12 +3,11 @@ import { Suspense, useState } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { EmptyState, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { EmptyState, Money, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Pagination, SortHeader, type SortState } from "@/components/table-controls";
 import { formatMoney } from "@/lib/org-config";
 import { getMyTransactions, type TxnRow } from "@/lib/member-data.functions";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const search = z.object({
   page: fallback(z.number().int(), 1).default(1),
@@ -36,7 +35,7 @@ function TxPage() {
         title="Transactions"
         description="Search, filter and export your full ledger of deposits, withdrawals and transfers."
       />
-      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+      <Suspense fallback={<SectionCardSkeleton title="Your ledger" rows={8} cols={5} />}>
         <TxContent />
       </Suspense>
     </>

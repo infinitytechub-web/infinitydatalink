@@ -1,11 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import {
+  EmptyState,
+  ErrorState,
+  KPIGridSkeleton,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/org-config";
 import { generateBusinessInsights } from "@/lib/ai-insights.functions";
 import { getAdminOverview, type ActivityEntry, type PendingApproval } from "@/lib/admin-analytics.functions";
@@ -20,10 +29,34 @@ const overviewQuery = queryOptions({
 
 export const Route = createFileRoute("/_admin/admin/")({
   component: AdminDashboard,
-  errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Dashboard failed to load: {error.message}</div>
-  ),
+  errorComponent: DashboardError,
 });
+
+function DashboardError({ error }: { error: Error }) {
+  const router = useRouter();
+  return (
+    <div className="p-6">
+      <ErrorState
+        title="Dashboard failed to load"
+        message={error.message}
+        onRetry={() => router.invalidate()}
+      />
+    </div>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <div className="space-y-8">
+      <KPIGridSkeleton count={4} />
+      <div className="grid gap-8 lg:grid-cols-3">
+        <SectionCardSkeleton title="Pending approvals" rows={5} cols={4} />
+        <SectionCardSkeleton title="Latest activity" rows={5} cols={3} />
+        <SectionCardSkeleton title="Security" rows={4} cols={2} />
+      </div>
+    </div>
+  );
+}
 
 function AdminDashboard() {
   return (
@@ -33,7 +66,7 @@ function AdminDashboard() {
         title="Institutional analytics"
         description="Real-time posture across membership, savings, loans, payments and security."
       />
-      <Suspense fallback={<Skeleton className="h-32 w-full" />}>
+      <Suspense fallback={<DashboardFallback />}>
         <DashboardBody />
       </Suspense>
       <AiBusinessIntelligencePanel />

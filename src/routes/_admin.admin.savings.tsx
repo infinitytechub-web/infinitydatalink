@@ -4,7 +4,7 @@ import { useSuspenseQuery, queryOptions, useMutation, useQueryClient } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { KPIStat, Money, PageHeader, SectionCard } from "@/components/primitives";
+import { ErrorState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_admin/admin/savings")({
   },
   component: AdminSavings,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Failed to load savings: {error.message}</div>
+    <div className="p-6"><ErrorState title="Failed to load savings" message={error.message} /></div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
 });
@@ -47,7 +47,7 @@ function AdminSavings() {
   return (
     <>
       <PageHeader eyebrow="Administrator" title="Savings" description="Institution-wide savings positions, plans and pending settlements." />
-      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+      <Suspense fallback={<SectionCardSkeleton title="Savings positions" rows={6} cols={5} />}>
         <Body />
       </Suspense>
     </>

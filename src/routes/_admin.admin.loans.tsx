@@ -1,17 +1,36 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { KPIStat, Money, PageHeader, SectionCard, StatusPill, EmptyState } from "@/components/primitives";
+import {
+  EmptyState,
+  ErrorState,
+  KPIGridSkeleton,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
 import { listAdminLoans, decideLoan, type AdminLoanRow } from "@/lib/admin-loans.functions";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_admin/admin/loans")({
   component: AdminLoans,
+  errorComponent: LoansError,
 });
+
+function LoansError({ error }: { error: Error }) {
+  const router = useRouter();
+  return (
+    <div className="p-6">
+      <ErrorState title="Loans failed to load" message={error.message} onRetry={() => router.invalidate()} />
+    </div>
+  );
+}
 
 const loansQuery = (status?: string) =>
   queryOptions({
@@ -27,7 +46,14 @@ function AdminLoans() {
         title="Loans & Approvals"
         description="Portfolio health, multi-level approval workflow and default prediction."
       />
-      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+      <Suspense
+        fallback={
+          <div className="space-y-8">
+            <KPIGridSkeleton count={4} />
+            <SectionCardSkeleton title="Loan pipeline" rows={6} cols={5} />
+          </div>
+        }
+      >
         <AdminLoansContent />
       </Suspense>
     </>
