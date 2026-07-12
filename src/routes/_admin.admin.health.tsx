@@ -55,9 +55,9 @@ function Body() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KPIStat label="Probes run" value={String(data.total)} sub={`As of ${ranAt}`} />
-        <KPIStat label="Passed" value={String(data.passed)} sub="Reachable through PostgREST" />
-        <KPIStat label="Failed" value={String(data.failed)} sub={data.failed === 0 ? "All green" : "Needs attention"} tone={data.failed === 0 ? "positive" : "critical"} />
+        <KPIStat label="Probes run" value={String(data.total)} hint={`As of ${ranAt}`} />
+        <KPIStat label="Passed" value={String(data.passed)} hint="Reachable through PostgREST" />
+        <KPIStat label="Failed" value={String(data.failed)} hint={data.failed === 0 ? "All green" : "Needs attention"} accent={data.failed > 0} />
       </div>
 
       <div className="flex justify-end">
@@ -71,10 +71,12 @@ function Body() {
       </div>
 
       {(["relationship", "table", "rpc"] as const).map((cat) => (
-        <SectionCard key={cat} title={LABELS[cat]} description={DESCRIPTIONS[cat]}>
+        <SectionCard key={cat} title={LABELS[cat]}>
+          <p className="mb-3 text-xs text-emerald-deep/60">{DESCRIPTIONS[cat]}</p>
           <ProbeTable results={groups[cat] ?? []} />
         </SectionCard>
       ))}
+
     </div>
   );
 }
