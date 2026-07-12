@@ -1,74 +1,113 @@
-## Goal
+## Audit vs. your checklist
 
-Three related changes:
+I inspected `src/styles.css`, `src/routes/__root.tsx`, `src/components/portal-shell.tsx`, and the admin route tree. Current state against each item:
 
-1. **Route staff to the admin dashboard on login** — when a user with any admin role visits `/app` or lands post-auth, land them on `/admin` instead of the member overview.
-2. **Add a Super Admin role-history audit page** — dedicated page showing every `role.super_admin.grant` / `role.super_admin.revoke` event with target user, actor, timestamps, seeded/manual status, and reason/note.
-3. **Add Playwright e2e tests** covering the RBAC boundaries around `/admin/*` and the super-admin-only surfaces.
+| Requirement | Status | Notes |
+|---|---|---|
+| Professional typography | Pass | Libre Baskerville + IBM Plex Sans/Mono via `@fontsource`. |
+| Teal & White admin theme | **Fail** | Current palette is "Emerald Prestige" — deep green `#064e3b` + gold `#c9a84c` on cream `#f5f0e0`. No teal, no white surface. |
+| Premium color palette | Partial | Cohesive, but not the teal/white brief. |
+| Light mode | Pass | Default `:root` tokens are wired. |
+| Dark mode | **Fail** | `.dark` tokens exist in CSS, but no `ThemeProvider`, no toggle, no `class="dark"` is ever applied. |
+| Accessibility (WCAG AA) | Partial | Tokens use `text-foreground` etc.; not audited for contrast in the new palette, icon-only button labels, or focus rings. |
+| Beautiful dashboard cards | Partial | Cards exist; no elevation system, gradient trims, or KPI treatment. |
+| Modern charts | Partial | `recharts` is used on `/admin/reports`; styling is default. |
+| Responsive tables | Partial | `table-controls.tsx` handles pagination/sort; tables don't collapse gracefully on mobile. |
+| Professional icons | Pass | `lucide-react` throughout. |
+| Glassmorphism where appropriate | **Fail** | No `backdrop-blur` / translucent surfaces anywhere. |
+| 3D left navigation | **Fail** | Sidebar is flat solid green; no depth, gradient, inset shadow, or icon-tile treatment. |
+| Mobile-first | Partial | Sidebar collapses; header + tables not fully tuned for < 640 px. |
+| Consistent spacing | Partial | Ad-hoc `p-4 / gap-3` values; no spacing scale doc. |
+| Visual hierarchy | Partial | Serif headings help, but weights/sizes are inconsistent across admin pages. |
+| Smooth animations | **Fail** | `tw-animate-css` imported but unused; no page/route or hover motion. |
+| Fast loading | Pass | Suspense + `ensureQueryData` loader pattern already in place. |
 
-## 1. Redirect staff to admin dashboard
+Six items fail outright and seven are partial. Recommend a focused polish pass, not a rewrite.
 
-- In `src/routes/_member.app.tsx` (the member portal shell), add a client-side gate: if the signed-in user has any admin role, `<Navigate to="/admin" replace />` before rendering member UI. This preserves the two shells (member vs admin) and only changes which one loads by default.
-- In `src/routes/auth.tsx` post-login redirect logic, if the user has any admin role and no explicit `redirect` search param, push to `/admin` instead of `/app`. (Verify current behaviour, adjust only if needed.)
-- Home-page "Sign in" affordance and any post-signup landing already flow through `/auth`; no change needed there.
-- Non-goal: do NOT delete `_member.app.index.tsx`; members without admin roles still see it.
+## Plan — Teal & White fintech polish
 
-## 2. Super Admin role-history page
+### 1. Retheme to Teal & White (design tokens only)
 
-New route `src/routes/_admin.admin.super-admins.history.tsx` (child of the existing Super Admins area).
+Rewrite the token block in `src/styles.css`. Keep every semantic name; only values change so every existing component picks up the new theme with no code edits.
 
-- Server function `listSuperAdminRoleHistory` in `src/lib/admin-roles.functions.ts`:
-  - Guards with existing `assertSuperAdmin`.
-  - Reads `audit_log` where `action IN ('role.super_admin.grant','role.super_admin.revoke')`.
-  - Joins target email + name from `profiles` / `user_roles` (target user id = `target` column).
-  - Returns `{ id, occurred_at, event: 'grant'|'revoke', actor_id, actor_email, target_user_id, target_email, note, reason, seeded }` sorted newest-first with pagination (`limit`, `offset`, filters: event type, date range, target email substring).
-- Page UI (matches the existing audit page pattern in `_admin.admin.audit.tsx`):
-  - Filter bar: event type (grant/revoke/all), date range, target email search.
-  - Table columns: When (exact timestamp), Event, Target user (email + link to `/admin/members/$id`), Actor (email + role), Note/Reason, Seeded badge.
-  - Row-click opens a details drawer showing the full audit metadata (JSON), the target user's *current* super_admin status (still active vs revoked), and — for the current super_admins — the original grant timestamp + granting actor's email from `user_roles.granted_at` / `granted_by`.
-- Wire nav in `src/routes/_admin.admin.tsx` under Governance:
-  - Keep "Super Admins" → `/admin/super-admins` (directory).
-  - Add "Grant history" → `/admin/super-admins/history`.
-- Also enrich the existing directory page (`_admin.admin.super-admins.tsx`) row to render a compact "Granted <relative> by <email>" line beneath each name (data already returned by `list_super_admins`).
+Light (default):
+- `--background` `#ffffff`, page surface `--muted` `#f1f5f7`
+- `--foreground` `#0b2b31` (deep teal ink)
+- `--primary` `#0d9488` (teal-600), `--primary-foreground` `#ffffff`
+- `--accent` `#14b8a6` (teal-500) for highlights; `--ring` matches
+- `--card` `#ffffff`, `--border` `rgba(13, 148, 136, 0.12)`
+- `--success` `#0d9488`, `--warning` `#d97706`, `--destructive` `#b91c1c`
+- Sidebar: gradient `#083344 → #0e7490` (see step 4), gold accent removed
 
-## 3. Playwright RBAC e2e tests
+Dark:
+- `--background` `#04181c`, `--card` `#0b2b31`
+- `--foreground` `#e6fbf8`, `--muted-foreground` `rgba(230,251,248,0.66)`
+- `--primary` `#2dd4bf` on `#04181c`, `--accent` `#5eead4`
+- Verify each pair hits WCAG AA (4.5:1 body, 3:1 large) with a contrast pass.
 
-Install dev deps: `@playwright/test`. Add `playwright.config.ts` targeting `http://localhost:8080`. Store scripts under `e2e/`.
+Replace the Emerald Prestige comment block. Remove now-unused `--gold` / `--cream` tokens (or repoint to teal neutrals) so nothing in the codebase can drift back.
 
-Session strategy: the Lovable browser knowledge card documents `LOVABLE_BROWSER_SUPABASE_*` env injection for one signed-in identity per run. Since we need three identities (unauthenticated, member, super_admin), the tests will:
+### 2. Ship dark mode end-to-end
 
-- Read the injected session from env once (whichever identity the user provides via Lovable preview) and treat that as the "primary" identity. Determine whether it is `member` or `super_admin` by querying `/api/...` or a small helper server function `whoAmI` that returns role names.
-- Branch each `test.describe` on the primary identity so the suite runs meaningfully with either fixture:
-  - **Unauthenticated** (fresh context, no session restore): `/admin`, `/admin/super-admins`, `/admin/super-admins/history` all redirect to `/auth`.
-  - **Member primary** (has member role only): those same routes redirect to `/app` (via `_admin.tsx` gate), and `/admin` UI never renders. Also asserts `POST` to protected server fns (`listSuperAdmins`) returns 401/403.
-  - **Super admin primary**: `/admin` loads dashboard, `/admin/super-admins` loads directory, `/admin/super-admins/history` loads audit table with ≥1 row (the seed grant). Also verifies the redirect from `/app` → `/admin` from item 1.
+- Add `src/components/theme-provider.tsx`: React context + `localStorage` persistence + `prefers-color-scheme` fallback; toggles `class="dark"` on `<html>`. Read in a `useEffect` (never in `useState` initializer) to avoid hydration mismatch.
+- Wrap `<RootLayout>` in `__root.tsx`.
+- Add a `ThemeToggle` (sun/moon `lucide` icon-only Button with `aria-label`) in `portal-shell.tsx` header, visible in both admin and member shells.
+- Update the `theme-color` meta tag to update dynamically.
 
-Add `bun run test:e2e` script. Document in `docs/security-controls.md` that the suite needs a super_admin session for full coverage; a member session runs the negative-path subset.
+### 3. 3D left navigation
+
+In `portal-shell.tsx` sidebar:
+- Background: `bg-linear-to-b from-[#083344] via-[#0e7490] to-[#083344]`, plus a subtle inner-shadow ring (`shadow-[inset_-1px_0_0_rgba(255,255,255,0.06)]`) and a soft right-edge drop shadow.
+- Each nav item becomes a "tile": rounded `rounded-xl`, translucent surface `bg-white/5`, `hover:bg-white/10`, active state adds a teal-glow ring + inset highlight + 1px raised top border to fake bevel.
+- Icon container: 36×36 rounded square with `bg-linear-to-br from-white/15 to-white/0` and `shadow-inner` — this reads as "3D" without heavy skeuomorphism.
+- Collapsed state keeps the tile look at icon-only 44×44 (meets tap target).
+
+### 4. Glassmorphism where appropriate
+
+- Sticky top header in `portal-shell.tsx`: `bg-background/70 backdrop-blur-xl border-b border-border/60`.
+- Dialog overlays (`super-admin-*` modals, `loan-application-dialog`, audit details): overlay uses `bg-background/40 backdrop-blur-md`.
+- KPI cards on `/admin` dashboard: optional accent card variant `bg-card/70 backdrop-blur-xl` over a soft teal radial in the page background.
+- Do NOT hand-write `-webkit-backdrop-filter` — Tailwind's `backdrop-*` utilities handle prefixing.
+
+### 5. Dashboard cards + charts
+
+- Introduce `<StatCard>` primitive in `src/components/primitives.tsx`: label (uppercase 11px tracking-wide muted), value (serif 32px), delta chip (teal-500 / rose-600), sparkline slot. Elevation via `shadow-[0_1px_2px_rgba(11,43,49,0.06),0_8px_24px_-12px_rgba(13,148,136,0.25)]`.
+- Retrofit `/admin` (KPIs), `/admin/reports`, `/app` dashboards to use it.
+- Chart theming: pass teal palette (`#0d9488`, `#5eead4`, `#0891b2`, `#f59e0b` for warnings) into every `recharts` component; grid `stroke="var(--border)"`, tooltip uses `bg-popover text-popover-foreground rounded-md shadow-lg`.
+
+### 6. Responsive tables + mobile-first
+
+- Wrap every admin table (`_admin.admin.loans`, `.super-admins.history`, `.audit`, `.members`, savings, transactions) in a `<div className="overflow-x-auto -mx-4 sm:mx-0">` and give the `<table>` `min-w-[640px]`.
+- Apply the grid header pattern from the responsive-layout guide to page headers: `grid grid-cols-[minmax(0,1fr)_auto] gap-4 sm:flex` + `min-w-0` + `truncate`.
+- Confirm sidebar `offcanvas` on mobile with a persistent `SidebarTrigger` in the sticky header.
+- Set the preview viewport to mobile to visually verify.
+
+### 7. Smooth animations
+
+- Use existing `tw-animate-css` utilities: `animate-fade-in` for route bodies, `animate-scale-in` on Dialog content, `hover-scale` on nav tiles + KPI cards.
+- Add `transition-colors duration-200` to interactive tokens on Button/Card variants that don't already have it.
+- Respect `prefers-reduced-motion` via a single `@media (prefers-reduced-motion: reduce)` block in `styles.css` that disables non-essential transitions.
+
+### 8. Accessibility sweep
+
+- Audit every `size="icon"` Button; add `aria-label` where missing (theme toggle, sidebar trigger, table row action menus, close buttons).
+- Ensure exactly one `<main>` per route (currently rendered inside `portal-shell.tsx`).
+- Verify focus rings visible on teal background: `focus-visible:ring-2 ring-ring ring-offset-2 ring-offset-background`.
+- Contrast-check each new token pair in both modes.
+
+### 9. Verification
+
+- `bunx tsgo` and `bunx vitest run` to keep the existing 66-test suite green.
+- Playwright script that visits `/`, `/admin`, `/admin/loans`, `/admin/reports`, `/admin/super-admins`, and `/app` in both light and dark mode at desktop (1280) and mobile (390) widths and saves screenshots to `/tmp/browser/ui-audit/` for a visual diff.
 
 ## Technical details
 
-- `_admin.tsx` gate stays unchanged (already redirects non-admins to `/app`). The new `_member.app.tsx` gate is the mirror of it and prevents redirect loops because it only redirects when `isAdmin` is true (admin gate only redirects when not admin).
-- Role history uses `audit_log` — no schema migration needed (grant/revoke already write events with `action = 'role.super_admin.grant' | 'role.super_admin.revoke'`).
-- The details drawer's "current status" enrichment queries `user_roles` for the target: if the row still exists and role = `super_admin`, show "Currently active — granted <granted_at> by <granted_by_email>"; otherwise "Revoked".
-- Playwright tests run against the sandbox's `localhost:8080` dev server (per browser-use knowledge). No auto-start; the dev server is already running.
+- Files touched: `src/styles.css` (tokens), `src/routes/__root.tsx` (theme provider + dynamic meta), `src/components/portal-shell.tsx` (sidebar, header, glass, mobile), `src/components/primitives.tsx` (`StatCard`, badge tweaks), `src/components/theme-provider.tsx` (new), `src/components/theme-toggle.tsx` (new), each admin route file for table wrappers and KPI adoption, chart usage sites for palette props.
+- No schema / server-function / RBAC changes.
+- No new npm packages required — `lucide-react`, `tailwindcss`, `tw-animate-css`, `recharts`, and shadcn primitives are already installed.
 
-## Files touched
+## Out of scope (call out if you want them)
 
-Edit:
-- `src/routes/_member.app.tsx` — admin redirect gate.
-- `src/routes/auth.tsx` — post-login redirect target for admins.
-- `src/routes/_admin.admin.tsx` — nav item for Grant history.
-- `src/routes/_admin.admin.super-admins.tsx` — compact grant-metadata line per row.
-- `src/lib/admin-roles.functions.ts` — new `listSuperAdminRoleHistory` server fn (+ small `whoAmI` helper for e2e).
-- `package.json` — `test:e2e` script + Playwright dev dep.
-- `docs/security-controls.md` — note the e2e coverage matrix.
-
-Create:
-- `src/routes/_admin.admin.super-admins.history.tsx`
-- `playwright.config.ts`
-- `e2e/rbac.spec.ts`
-
-## Out of scope
-
-- Multi-identity Playwright orchestration that programmatically mints extra sessions (requires service-role keys we don't hand out in Lovable Cloud). The suite adapts to whichever session Lovable injects.
-- Redesign of the existing audit page — the new page is separate and role-history-specific.
+- Redesign of auth screens.
+- Chart type changes (bar → area etc.) — this plan only re-themes existing charts.
+- Storybook / visual regression harness.
