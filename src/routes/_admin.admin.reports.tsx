@@ -208,7 +208,6 @@ function ReportsBody() {
 }
 
 function StatusMix({ data, s }: { data: AdminReport; s: SearchInput }) {
-  const max = Math.max(1, ...data.loan_status_mix.map((s) => s.count));
   return (
     <SectionCard
       title="Loan status mix"
@@ -229,22 +228,9 @@ function StatusMix({ data, s }: { data: AdminReport; s: SearchInput }) {
       {data.loan_status_mix.length === 0 ? (
         <div className="p-6"><EmptyState title="No loan activity in range" /></div>
       ) : (
-        <ul className="divide-y divide-emerald-deep/5">
-          {data.loan_status_mix.map((row) => (
-            <li key={row.status} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 px-6 py-3 text-sm">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70">
-                {row.status}
-              </span>
-              <div className="h-2 rounded bg-emerald-deep/5">
-                <div
-                  className="h-2 rounded bg-emerald-deep/60"
-                  style={{ width: `${(row.count / max) * 100}%` }}
-                />
-              </div>
-              <span className="tabular text-right text-sm">{row.count}</span>
-            </li>
-          ))}
-        </ul>
+        <BarList
+          rows={data.loan_status_mix.map((row) => ({ label: row.status, value: row.count }))}
+        />
       )}
     </SectionCard>
   );
