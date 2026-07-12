@@ -18,23 +18,33 @@ export function KPIStat({
   return (
     <div
       className={cn(
-        "rounded-sm border p-6 shadow-sm",
+        "group relative overflow-hidden rounded-xl border p-6 transition-all duration-300",
+        "shadow-[var(--shadow-elevated)] hover:-translate-y-0.5",
         accent
-          ? "border-gold/30 bg-gold/5"
-          : "border-emerald-deep/5 bg-card",
+          ? "border-primary/30 bg-linear-to-br from-primary/10 via-card to-card"
+          : "border-border bg-card",
         className,
       )}
     >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "absolute inset-x-0 top-0 h-px",
+          accent
+            ? "bg-linear-to-r from-transparent via-primary to-transparent"
+            : "bg-linear-to-r from-transparent via-border to-transparent",
+        )}
+      />
       <p
         className={cn(
-          "mb-1 text-[11px] font-semibold uppercase tracking-widest",
-          accent ? "text-gold" : "text-emerald-deep/50",
+          "mb-2 text-[11px] font-semibold uppercase tracking-widest",
+          accent ? "text-primary" : "text-muted-foreground",
         )}
       >
         {label}
       </p>
-      <h2 className="font-serif text-3xl text-emerald-deep">{value}</h2>
-      {hint ? <div className="mt-4 text-[11px] text-emerald-deep/60">{hint}</div> : null}
+      <h2 className="font-serif text-3xl text-foreground">{value}</h2>
+      {hint ? <div className="mt-4 text-[11px] text-muted-foreground">{hint}</div> : null}
     </div>
   );
 }
@@ -56,13 +66,13 @@ export function StatusPill({
   status: "cleared" | "closed" | "pending" | "failed" | "approved" | "rejected" | "active";
 }) {
   const map: Record<string, string> = {
-    cleared: "bg-emerald-mid/10 text-emerald-mid",
-    closed: "bg-emerald-deep/10 text-emerald-deep/70",
-    approved: "bg-emerald-mid/10 text-emerald-mid",
-    active: "bg-emerald-mid/10 text-emerald-mid",
-    pending: "bg-gold/10 text-gold",
-    failed: "bg-destructive/10 text-destructive",
-    rejected: "bg-destructive/10 text-destructive",
+    cleared: "bg-primary/10 text-primary ring-1 ring-primary/20",
+    closed: "bg-muted text-muted-foreground ring-1 ring-border",
+    approved: "bg-primary/10 text-primary ring-1 ring-primary/20",
+    active: "bg-primary/10 text-primary ring-1 ring-primary/20",
+    pending: "bg-warning/10 text-warning ring-1 ring-warning/20",
+    failed: "bg-destructive/10 text-destructive ring-1 ring-destructive/20",
+    rejected: "bg-destructive/10 text-destructive ring-1 ring-destructive/20",
   };
   return (
     <span
@@ -90,12 +100,12 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        "overflow-hidden border border-emerald-deep/5 bg-card shadow-sm",
+        "overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-elevated)]",
         className,
       )}
     >
-      <header className="flex items-center justify-between border-b border-emerald-deep/5 p-6">
-        <h3 className="font-serif text-lg">{title}</h3>
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-6">
+        <h3 className="font-serif text-lg text-foreground">{title}</h3>
         {action}
       </header>
       {children}
@@ -115,16 +125,16 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex items-end justify-between gap-6">
-      <div>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
+      <div className="min-w-0">
         {eyebrow ? (
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="font-serif text-3xl text-emerald-deep">{title}</h1>
+        <h1 className="truncate font-serif text-2xl text-foreground sm:text-3xl">{title}</h1>
         {description ? (
-          <p className="mt-2 max-w-2xl text-sm text-emerald-deep/60">{description}</p>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {action}
@@ -134,9 +144,9 @@ export function PageHeader({
 
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
-    <div className="border border-dashed border-emerald-deep/15 bg-cream/40 p-12 text-center">
-      <p className="font-serif text-lg text-emerald-deep">{title}</p>
-      {hint ? <p className="mt-2 text-xs text-emerald-deep/50">{hint}</p> : null}
+    <div className="rounded-xl border border-dashed border-border bg-muted/40 p-12 text-center">
+      <p className="font-serif text-lg text-foreground">{title}</p>
+      {hint ? <p className="mt-2 text-xs text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }
