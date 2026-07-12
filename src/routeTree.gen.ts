@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MemberRouteImport } from './routes/_member'
 import { Route as AdminRouteImport } from './routes/_admin'
@@ -52,6 +53,11 @@ import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -250,6 +256,7 @@ const AdminAdminLoansLoanIdRoute = AdminAdminLoansLoanIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/app': typeof MemberAppRouteWithChildren
@@ -289,6 +296,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteWithChildren
   '/_member': typeof MemberRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_member/app': typeof MemberAppRouteWithChildren
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/sitemap.xml'
     | '/unsubscribe'
     | '/admin'
     | '/app'
@@ -408,6 +418,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/sitemap.xml'
     | '/unsubscribe'
     | '/auth/forgot'
     | '/auth/reset'
@@ -446,6 +457,7 @@ export interface FileRouteTypes {
     | '/_admin'
     | '/_member'
     | '/auth'
+    | '/sitemap.xml'
     | '/unsubscribe'
     | '/_admin/admin'
     | '/_member/app'
@@ -488,6 +500,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   MemberRoute: typeof MemberRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -505,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/unsubscribe'
       fullPath: '/unsubscribe'
       preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -918,6 +938,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   MemberRoute: MemberRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
