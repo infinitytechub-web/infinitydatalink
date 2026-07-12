@@ -129,18 +129,18 @@ export function PortalShell({
                       onClick={() => setOpen(false)}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-all duration-200",
+                        "group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm transition-all duration-200 lg:py-2",
                         active
                           ? "bg-white/15 text-white ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_24px_-12px_rgba(255,255,255,0.35)]"
-                          : "text-white/75 hover:bg-white/10 hover:text-white",
+                          : "text-white/80 hover:bg-white/10 hover:text-white",
                       )}
                     >
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "grid size-8 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/20 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br",
+                          "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br lg:size-8",
                           accent,
-                          active ? "scale-105" : "opacity-90 group-hover:opacity-100",
+                          active ? "scale-105" : "opacity-95 group-hover:opacity-100",
                         )}
                       >
                         <span className="size-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
