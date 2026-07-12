@@ -71,14 +71,16 @@ export function PortalShell({
         />
       ) : null}
 
-      {/* Sidebar — 3D teal navigation */}
+      {/* Sidebar — colorful navigation drawer (offcanvas < lg, fixed ≥ lg) */}
       <aside
         aria-label="Primary navigation"
+        aria-modal={open ? true : undefined}
+        role={open ? "dialog" : undefined}
         className={cn(
-          "fixed left-0 top-0 z-30 h-full w-64 flex-col text-white transition-transform duration-300 lg:flex lg:translate-x-0",
+          "fixed left-0 top-0 z-30 h-full w-[min(88vw,17rem)] flex-col text-white transition-transform duration-300 lg:flex lg:w-64 lg:translate-x-0",
           "bg-linear-to-b from-[#083344] via-[#0e7490] to-[#083344]",
           "shadow-[var(--shadow-nav)] ring-1 ring-inset ring-white/5",
-          open ? "flex translate-x-0" : "hidden -translate-x-full",
+          open ? "flex translate-x-0" : "flex -translate-x-full lg:translate-x-0",
         )}
       >
         <div className="flex items-center justify-between border-b border-white/10 p-6">
