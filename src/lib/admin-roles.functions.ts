@@ -132,6 +132,8 @@ export const listSuperAdminRoleHistory = createServerFn({ method: "POST" })
         to: z.string().datetime().optional(),
         limit: z.number().int().min(1).max(200).default(50),
         offset: z.number().int().min(0).default(0),
+        sortBy: z.enum(["occurred_at", "actor_email", "action"]).default("occurred_at"),
+        sortDir: z.enum(["asc", "desc"]).default("desc"),
       })
       .parse(data ?? {}),
   )
@@ -144,13 +146,20 @@ export const listSuperAdminRoleHistory = createServerFn({ method: "POST" })
           ? ["role.super_admin.revoke"]
           : ["role.super_admin.grant", "role.super_admin.revoke"];
 
+    const sortColumn =
+      data.sortBy === "occurred_at"
+        ? "created_at"
+        : data.sortBy === "actor_email"
+          ? "actor_email"
+          : "action";
+
     let q = context.supabase
       .from("audit_log")
       .select("id, created_at, actor_id, actor_email, actor_role, action, target, meta", {
         count: "exact",
       })
       .in("action", actions)
-      .order("created_at", { ascending: false })
+      .order(sortColumn, { ascending: data.sortDir === "asc", nullsFirst: false })
       .range(data.offset, data.offset + data.limit - 1);
 
     if (data.from) q = q.gte("created_at", data.from);
