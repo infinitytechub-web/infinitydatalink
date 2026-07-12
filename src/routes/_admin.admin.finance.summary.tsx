@@ -1,6 +1,8 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import {
   ErrorState,
   KPIGridSkeleton,
@@ -20,6 +22,12 @@ function defaultRange() {
   return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
 }
 
+const dr = defaultRange();
+const searchSchema = z.object({
+  from: fallback(z.string(), dr.from).default(dr.from),
+  to: fallback(z.string(), dr.to).default(dr.to),
+});
+
 const summaryQuery = (from: string, to: string) =>
   queryOptions({
     queryKey: ["admin", "finance-summary", from, to],
@@ -28,6 +36,7 @@ const summaryQuery = (from: string, to: string) =>
   });
 
 export const Route = createFileRoute("/_admin/admin/finance/summary")({
+  validateSearch: zodValidator(searchSchema),
   component: SummaryPage,
   errorComponent: ({ error }) => {
     const router = useRouter();
@@ -40,7 +49,10 @@ export const Route = createFileRoute("/_admin/admin/finance/summary")({
 });
 
 function SummaryPage() {
-  const [range, setRange] = useState(defaultRange());
+  const { from, to } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const setField = (k: "from" | "to", v: string) =>
+    navigate({ search: (prev: { from: string; to: string }) => ({ ...prev, [k]: v }) });
   return (
     <>
       <PageHeader
@@ -53,8 +65,8 @@ function SummaryPage() {
               From
               <input
                 type="date"
-                value={range.from}
-                onChange={(e) => setRange({ ...range, from: e.target.value })}
+                value={from}
+                onChange={(e) => setField("from", e.target.value)}
                 className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm"
               />
             </label>
@@ -62,8 +74,8 @@ function SummaryPage() {
               To
               <input
                 type="date"
-                value={range.to}
-                onChange={(e) => setRange({ ...range, to: e.target.value })}
+                value={to}
+                onChange={(e) => setField("to", e.target.value)}
                 className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm"
               />
             </label>
@@ -78,7 +90,7 @@ function SummaryPage() {
           </div>
         }
       >
-        <SummaryBody from={range.from} to={range.to} />
+        <SummaryBody from={from} to={to} />
       </Suspense>
     </>
   );
@@ -86,6 +98,7 @@ function SummaryPage() {
 
 function SummaryBody({ from, to }: { from: string; to: string }) {
   const { data: s } = useSuspenseQuery(summaryQuery(from, to));
+  const range = { from, to };
   return (
     <div className="mt-6 space-y-8">
       <section className="grid gap-6 md:grid-cols-4">
@@ -93,16 +106,17 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
           label="Income (period)"
           value={<Money amount={s.income_total} />}
           accent
-          hint={<Link to="/admin/finance/income" className="text-primary underline-offset-2 hover:underline">Income breakdown →</Link>}
+          hint={<Link to="/admin/finance/income" search={range} className="text-primary underline-offset-2 hover:underline">Income breakdown ({from} → {to}) →</Link>}
         />
         <KPIStat
           label="Expenses (period)"
           value={<Money amount={s.expense_total} />}
-          hint={<Link to="/admin/finance/breakdown" className="text-primary underline-offset-2 hover:underline">Expenses breakdown →</Link>}
+          hint={<Link to="/admin/finance/breakdown" search={range} className="text-primary underline-offset-2 hover:underline">Expenses breakdown ({from} → {to}) →</Link>}
         />
         <KPIStat
           label="Net (P&L)"
           value={<Money amount={s.net} signed />}
+          hint={<Link to="/admin/reports" search={{ ...range, granularity: "day" }} className="text-primary underline-offset-2 hover:underline">Analytics ({from} → {to}) →</Link>}
         />
         <KPIStat
           label="AUM (snapshot)"
@@ -111,7 +125,7 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
             <>
               Outstanding loans: <Money amount={s.balance_snapshot.outstanding_loans} />
               <br />
-              <Link to="/admin/reports" className="text-primary underline-offset-2 hover:underline">Full reports →</Link>
+              <Link to="/admin/reports" search={{ ...range, granularity: "day" }} className="text-primary underline-offset-2 hover:underline">Full reports →</Link>
             </>
           }
         />
@@ -131,7 +145,7 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
         <KPIStat
           label="Active loans / accounts"
           value={<span className="tabular">{s.balance_snapshot.active_loans} / {s.balance_snapshot.active_savings_accounts}</span>}
-          hint={<Link to="/admin/finance/contributions" className="text-primary underline-offset-2 hover:underline">Contributions →</Link>}
+          hint={<Link to="/admin/finance/contributions" search={range} className="text-primary underline-offset-2 hover:underline">Contributions ({from} → {to}) →</Link>}
         />
       </section>
 
@@ -170,3 +184,4 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
     </div>
   );
 }
+
