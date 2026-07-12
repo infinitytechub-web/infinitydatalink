@@ -59,6 +59,7 @@ import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin
 import { Route as AdminAdminFinanceTransfersRouteImport } from './routes/_admin.admin.finance.transfers'
 import { Route as AdminAdminFinanceSummaryRouteImport } from './routes/_admin.admin.finance.summary'
 import { Route as AdminAdminFinanceExpensesRouteImport } from './routes/_admin.admin.finance.expenses'
+import { Route as AdminAdminFinanceContributionsRouteImport } from './routes/_admin.admin.finance.contributions'
 import { Route as AdminAdminFinanceAdjustmentsRouteImport } from './routes/_admin.admin.finance.adjustments'
 import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
 
@@ -319,6 +320,12 @@ const AdminAdminFinanceExpensesRoute =
     path: '/expenses',
     getParentRoute: () => AdminAdminFinanceRoute,
   } as any)
+const AdminAdminFinanceContributionsRoute =
+  AdminAdminFinanceContributionsRouteImport.update({
+    id: '/contributions',
+    path: '/contributions',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
 const AdminAdminFinanceAdjustmentsRoute =
   AdminAdminFinanceAdjustmentsRouteImport.update({
     id: '/adjustments',
@@ -365,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof MemberAppIndexRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
+  '/admin/finance/contributions': typeof AdminAdminFinanceContributionsRoute
   '/admin/finance/expenses': typeof AdminAdminFinanceExpensesRoute
   '/admin/finance/summary': typeof AdminAdminFinanceSummaryRoute
   '/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
@@ -412,6 +420,7 @@ export interface FileRoutesByTo {
   '/app': typeof MemberAppIndexRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
+  '/admin/finance/contributions': typeof AdminAdminFinanceContributionsRoute
   '/admin/finance/expenses': typeof AdminAdminFinanceExpensesRoute
   '/admin/finance/summary': typeof AdminAdminFinanceSummaryRoute
   '/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
@@ -467,6 +476,7 @@ export interface FileRoutesById {
   '/_member/app/': typeof MemberAppIndexRoute
   '/_admin/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/_admin/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
+  '/_admin/admin/finance/contributions': typeof AdminAdminFinanceContributionsRoute
   '/_admin/admin/finance/expenses': typeof AdminAdminFinanceExpensesRoute
   '/_admin/admin/finance/summary': typeof AdminAdminFinanceSummaryRoute
   '/_admin/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
@@ -521,6 +531,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/entities/$entityId'
     | '/admin/finance/adjustments'
+    | '/admin/finance/contributions'
     | '/admin/finance/expenses'
     | '/admin/finance/summary'
     | '/admin/finance/transfers'
@@ -568,6 +579,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/admin/entities/$entityId'
     | '/admin/finance/adjustments'
+    | '/admin/finance/contributions'
     | '/admin/finance/expenses'
     | '/admin/finance/summary'
     | '/admin/finance/transfers'
@@ -622,6 +634,7 @@ export interface FileRouteTypes {
     | '/_member/app/'
     | '/_admin/admin/entities/$entityId'
     | '/_admin/admin/finance/adjustments'
+    | '/_admin/admin/finance/contributions'
     | '/_admin/admin/finance/expenses'
     | '/_admin/admin/finance/summary'
     | '/_admin/admin/finance/transfers'
@@ -1010,6 +1023,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminFinanceExpensesRouteImport
       parentRoute: typeof AdminAdminFinanceRoute
     }
+    '/_admin/admin/finance/contributions': {
+      id: '/_admin/admin/finance/contributions'
+      path: '/contributions'
+      fullPath: '/admin/finance/contributions'
+      preLoaderRoute: typeof AdminAdminFinanceContributionsRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
     '/_admin/admin/finance/adjustments': {
       id: '/_admin/admin/finance/adjustments'
       path: '/adjustments'
@@ -1042,6 +1062,7 @@ const AdminAdminEntitiesRouteWithChildren =
 
 interface AdminAdminFinanceRouteChildren {
   AdminAdminFinanceAdjustmentsRoute: typeof AdminAdminFinanceAdjustmentsRoute
+  AdminAdminFinanceContributionsRoute: typeof AdminAdminFinanceContributionsRoute
   AdminAdminFinanceExpensesRoute: typeof AdminAdminFinanceExpensesRoute
   AdminAdminFinanceSummaryRoute: typeof AdminAdminFinanceSummaryRoute
   AdminAdminFinanceTransfersRoute: typeof AdminAdminFinanceTransfersRoute
@@ -1050,6 +1071,7 @@ interface AdminAdminFinanceRouteChildren {
 
 const AdminAdminFinanceRouteChildren: AdminAdminFinanceRouteChildren = {
   AdminAdminFinanceAdjustmentsRoute: AdminAdminFinanceAdjustmentsRoute,
+  AdminAdminFinanceContributionsRoute: AdminAdminFinanceContributionsRoute,
   AdminAdminFinanceExpensesRoute: AdminAdminFinanceExpensesRoute,
   AdminAdminFinanceSummaryRoute: AdminAdminFinanceSummaryRoute,
   AdminAdminFinanceTransfersRoute: AdminAdminFinanceTransfersRoute,
