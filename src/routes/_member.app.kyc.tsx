@@ -157,17 +157,16 @@ function Body() {
                       : `Queued ${new Date(n.created_at).toLocaleString()}`}
                   </div>
                 </div>
-                <span
-                  className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+                <StatusPill
+                  status={
                     n.status === "sent"
-                      ? "bg-emerald-mid/15 text-emerald-mid"
+                      ? "approved"
                       : n.status === "failed"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-gold/10 text-gold"
-                  }`}
-                >
-                  {n.status}
-                </span>
+                        ? "failed"
+                        : "pending"
+                  }
+                />
+
               </li>
             ))}
           </ul>
