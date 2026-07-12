@@ -108,21 +108,35 @@ export function SectionCard({
   action,
   children,
   className,
+  accent = "teal",
 }: {
   title: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  accent?: "teal" | "indigo" | "amber" | "rose" | "emerald" | "violet" | "sky" | "none";
 }) {
+  const accents: Record<string, string> = {
+    teal:    "bg-linear-to-r from-teal-500 via-cyan-500 to-sky-500",
+    indigo:  "bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500",
+    amber:   "bg-linear-to-r from-amber-400 via-orange-500 to-rose-500",
+    rose:    "bg-linear-to-r from-rose-500 via-pink-500 to-fuchsia-500",
+    emerald: "bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500",
+    violet:  "bg-linear-to-r from-violet-500 via-purple-500 to-fuchsia-500",
+    sky:     "bg-linear-to-r from-sky-500 via-blue-500 to-indigo-500",
+    none:    "hidden",
+  };
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-elevated)]",
+        "relative overflow-hidden rounded-2xl border border-border bg-card",
+        "shadow-[0_12px_30px_-12px_rgba(2,24,30,0.35)]",
         className,
       )}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-6">
-        <h3 className="font-serif text-lg text-foreground">{title}</h3>
+      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-1", accents[accent])} />
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-linear-to-b from-muted/60 to-transparent p-6 pt-7">
+        <h3 className="font-serif text-lg font-semibold text-foreground">{title}</h3>
         {action}
       </header>
       {children}
