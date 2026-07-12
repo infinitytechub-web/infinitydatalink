@@ -131,7 +131,7 @@ export const registerEntity = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ id: string }> => {
-    const { data: row, error } = await context.supabase.rpc("register_entity", {
+    const { data: row, error } = await (context.supabase as any).rpc("register_entity", {
       _type: data.type,
       _name: data.name,
       _registration_no: data.registration_no ?? null,
