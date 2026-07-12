@@ -64,9 +64,9 @@ function AuthPage() {
               <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">
                 Member & Administrator portal
               </p>
-              <h2 className="mt-1 font-serif text-2xl text-emerald-deep">
+              <h1 className="mt-1 font-serif text-2xl text-emerald-deep">
                 {mode === "signin" ? "Sign in to your account" : "Create your account"}
-              </h2>
+              </h1>
             </div>
             <button
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
