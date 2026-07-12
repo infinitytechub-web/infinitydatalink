@@ -1,4 +1,8 @@
-# RBAC End-to-End Tests
+# End-to-End Tests
+
+Playwright specs covering RBAC and the transfer lifecycle.
+
+
 
 Playwright specs that verify Super Admin-only routes and endpoints reject
 non-staff callers and accept Super Admins across full navigation flows.
