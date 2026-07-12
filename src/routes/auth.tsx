@@ -10,9 +10,21 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Infinity Wealth" },
-      { name: "description", content: "Sign in or create your Infinity Wealth account." },
+      {
+        name: "description",
+        content:
+          "Sign in or create your Infinity Wealth account to access savings, loans, and payments in your member or administrator portal.",
+      },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Sign in — Infinity Wealth" },
+      {
+        property: "og:description",
+        content:
+          "Access your Infinity Wealth member or administrator portal to manage savings, loans, and payments.",
+      },
+      { property: "og:url", content: "https://infinity-wealth360.lovable.app/auth" },
     ],
+    links: [{ rel: "canonical", href: "https://infinity-wealth360.lovable.app/auth" }],
   }),
   component: AuthPage,
 });
