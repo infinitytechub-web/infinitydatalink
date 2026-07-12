@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { z } from "zod";
 import { EmptyState, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,9 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
 import {
+  exportSuperAdminRoleHistory,
   listSuperAdminRoleHistory,
   type RoleHistoryRow,
 } from "@/lib/admin-roles.functions";
+import { exportCsv } from "@/lib/exports";
+
+const SORT_KEYS = ["occurred_at", "actor_email", "action"] as const;
+type SortKey = (typeof SORT_KEYS)[number];
 
 const searchSchema = z.object({
   event: z.enum(["all", "grant", "revoke"]).default("all"),
@@ -23,10 +29,12 @@ const searchSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
   page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(10).max(200).default(50),
+  sortBy: z.enum(SORT_KEYS).default("occurred_at"),
+  sortDir: z.enum(["asc", "desc"]).default("desc"),
   selected: z.string().optional(),
 });
 
-const PAGE_SIZE = 50;
 
 export const Route = createFileRoute("/_admin/admin/super-admins/history")({
   head: () => ({
@@ -45,6 +53,9 @@ function historyQuery(input: {
   from?: string;
   to?: string;
   page: number;
+  pageSize: number;
+  sortBy: SortKey;
+  sortDir: "asc" | "desc";
 }) {
   return queryOptions({
     queryKey: ["admin", "super-admins", "history", input],
@@ -55,8 +66,10 @@ function historyQuery(input: {
           emailContains: input.emailContains?.trim() || undefined,
           from: input.from || undefined,
           to: input.to || undefined,
-          limit: PAGE_SIZE,
-          offset: (input.page - 1) * PAGE_SIZE,
+          limit: input.pageSize,
+          offset: (input.page - 1) * input.pageSize,
+          sortBy: input.sortBy,
+          sortDir: input.sortDir,
         },
       }),
     staleTime: 30_000,
@@ -99,6 +112,9 @@ function HistoryBody() {
       from: search.from,
       to: search.to,
       page: search.page,
+      pageSize: search.pageSize,
+      sortBy: search.sortBy,
+      sortDir: search.sortDir,
     }),
   ).data;
 
@@ -106,7 +122,58 @@ function HistoryBody() {
     ? rows.find((r) => r.id === search.selected) ?? null
     : null;
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / search.pageSize));
+
+  const toggleSort = (key: SortKey) => {
+    navigate({
+      search: (s: any) => ({
+        ...s,
+        sortBy: key,
+        sortDir: s.sortBy === key && s.sortDir === "desc" ? "asc" : "desc",
+        page: 1,
+      }),
+    });
+  };
+
+  const doExportCsv = async () => {
+    try {
+      toast.loading("Preparing CSV export…", { id: "hist-csv" });
+      const { rows: all } = await exportSuperAdminRoleHistory({
+        data: {
+          event: search.event,
+          emailContains: search.emailContains?.trim() || undefined,
+          from: search.from || undefined,
+          to: search.to || undefined,
+          sortBy: search.sortBy,
+          sortDir: search.sortDir,
+        },
+      });
+      exportCsv({
+        title: "Super Admin grant history",
+        filename: `super-admin-history-${new Date().toISOString().slice(0, 10)}.csv`,
+        rows: all,
+        columns: [
+          { header: "Occurred At", accessor: (r) => r.occurred_at },
+          { header: "Event", accessor: (r) => r.event },
+          { header: "Target Email", accessor: (r) => r.target_email ?? "" },
+          { header: "Target User ID", accessor: (r) => r.target_user_id },
+          { header: "Actor Email", accessor: (r) => r.actor_email ?? "" },
+          { header: "Actor Role", accessor: (r) => r.actor_role ?? "" },
+          { header: "Note", accessor: (r) => r.note ?? "" },
+          { header: "Reason", accessor: (r) => r.reason ?? "" },
+          {
+            header: "Currently super_admin",
+            accessor: (r) => (r.currently_super_admin ? "yes" : "no"),
+          },
+        ],
+      });
+      toast.success(`Exported ${all.length} row${all.length === 1 ? "" : "s"}`, {
+        id: "hist-csv",
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Export failed", { id: "hist-csv" });
+    }
+  };
 
   return (
     <>
@@ -184,6 +251,35 @@ function HistoryBody() {
           </Field>
         </div>
 
+        <div className="flex flex-wrap items-center gap-3 border-b border-emerald-deep/5 px-6 py-3 text-xs">
+          <label className="flex items-center gap-2 text-emerald-deep/60">
+            Rows per page
+            <select
+              value={search.pageSize}
+              onChange={(e) =>
+                navigate({
+                  search: (s: any) => ({ ...s, pageSize: Number(e.target.value), page: 1 }),
+                })
+              }
+              className="rounded border border-emerald-deep/15 bg-transparent px-2 py-1"
+            >
+              {[25, 50, 100, 200].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={doExportCsv}
+              className="rounded border border-emerald-deep/15 px-3 py-1 uppercase tracking-widest hover:bg-emerald-deep/5"
+            >
+              Export CSV
+            </button>
+          </div>
+        </div>
+
         {rows.length === 0 ? (
           <EmptyState title="No events" hint="Adjust the filters or wait for role changes." />
         ) : (
@@ -191,10 +287,25 @@ function HistoryBody() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
-                  <th className="px-6 py-3 font-medium">When</th>
-                  <th className="px-6 py-3 font-medium">Event</th>
+                  <SortableTh
+                    label="When"
+                    active={search.sortBy === "occurred_at"}
+                    dir={search.sortDir}
+                    onClick={() => toggleSort("occurred_at")}
+                  />
+                  <SortableTh
+                    label="Event"
+                    active={search.sortBy === "action"}
+                    dir={search.sortDir}
+                    onClick={() => toggleSort("action")}
+                  />
                   <th className="px-6 py-3 font-medium">Target</th>
-                  <th className="px-6 py-3 font-medium">Actor</th>
+                  <SortableTh
+                    label="Actor"
+                    active={search.sortBy === "actor_email"}
+                    dir={search.sortDir}
+                    onClick={() => toggleSort("actor_email")}
+                  />
                   <th className="px-6 py-3 font-medium">Note / Reason</th>
                   <th className="px-6 py-3 font-medium">Current</th>
                 </tr>
@@ -267,6 +378,33 @@ function HistoryBody() {
         onClose={() => navigate({ search: (s: any) => ({ ...s, selected: undefined }) })}
       />
     </>
+  );
+}
+
+function SortableTh({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: "asc" | "desc";
+  onClick: () => void;
+}) {
+  return (
+    <th className="px-6 py-3 font-medium">
+      <button
+        type="button"
+        onClick={onClick}
+        className={`flex items-center gap-1 uppercase tracking-widest ${active ? "text-emerald-deep" : ""}`}
+      >
+        {label}
+        <span aria-hidden className="text-[8px]">
+          {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
+        </span>
+      </button>
+    </th>
   );
 }
 
