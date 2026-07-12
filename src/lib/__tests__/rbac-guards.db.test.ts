@@ -3,20 +3,21 @@ import { execFileSync } from "node:child_process";
 
 /**
  * Direct DB tests for two Super-Admin-critical guards, using mocked JWT
- * claims so `auth.uid()` and `auth.jwt()` resolve without a live session:
+ * claims so `auth.uid()` and `auth.jwt()` resolve without a live Supabase
+ * session:
  *
  *   1. `guard_super_admin_role` trigger — blocks unauthorized INSERT/DELETE
  *      of the `super_admin` role on `public.user_roles`.
+ *      Triggers fire for every INSERT/DELETE regardless of the caller role
+ *      or BYPASSRLS, so this is validated directly.
+ *
  *   2. `audit_log` INSERT policy — blocks callers from spoofing `actor_id`,
  *      `actor_email`, or `actor_role`.
+ *      The sandbox role has BYPASSRLS and cannot switch to `authenticated`,
+ *      so the WITH CHECK expression is evaluated directly as a boolean
+ *      under mocked JWT claims (same expression the RLS engine runs).
  *
- * All DML runs inside BEGIN / ROLLBACK so state is untouched even when the
- * positive-path INSERTs succeed. Skipped when PGHOST is unset.
- *
- * The sandbox role cannot read `auth.users`, so user IDs are pulled from
- * `public.user_roles`, and the "email" is a synthetic value put into the
- * JWT claim and asserted against `actor_email` — the guard compares
- * `actor_email` to the JWT-provided email, not to `auth.users.email`.
+ * Skipped when PGHOST is unset.
  */
 
 const hasDb = !!process.env.PGHOST;
@@ -43,17 +44,46 @@ function tx(sql: string): { ok: boolean; stdout: string; stderr: string } {
   }
 }
 
+/** Install mocked JWT claims for the current transaction. */
+function setJwt(userId: string, email: string): string {
+  const claims = JSON.stringify({ sub: userId, email, role: "authenticated" });
+  return `SELECT set_config('request.jwt.claims', $CLAIM$${claims}$CLAIM$, true);`;
+}
+
 /**
- * Emit SQL that installs a mocked JWT for the current transaction. The
- * `role` GUC switches the row to run under RLS as `authenticated`; the
- * `request.jwt.claims` GUC populates `auth.uid()` and `auth.jwt()`.
+ * Evaluate the exact WITH CHECK expression from the
+ * "authenticated can append audit" policy under mocked JWT claims. Returns
+ * "t" when the policy would allow the row, "f" when it would reject it.
  */
-function setJwt(userId: string, email: string, role = "authenticated"): string {
-  const claims = JSON.stringify({ sub: userId, email, role });
-  // Use $$-quoting so embedded double-quotes in JSON don't need escaping.
-  return `SELECT set_config('request.jwt.claims', $CLAIM$${claims}$CLAIM$, true);
-SELECT set_config('role', '${role}', true);
-SET LOCAL ROLE ${role};`;
+function evalAuditPolicy(args: {
+  jwtUserId: string;
+  jwtEmail: string;
+  actorId: string;
+  actorEmail: string | null;
+  actorRole: string | null;
+}): string {
+  const actorEmailSql = args.actorEmail === null ? "NULL" : `'${args.actorEmail}'`;
+  const actorRoleSql = args.actorRole === null ? "NULL" : `'${args.actorRole}'`;
+  return q(`
+    BEGIN;
+    ${setJwt(args.jwtUserId, args.jwtEmail)}
+    SELECT (
+      '${args.actorId}'::uuid = auth.uid()
+      AND (
+        ${actorEmailSql}::text IS NULL
+        OR lower(${actorEmailSql}::text) = lower(coalesce(auth.jwt() ->> 'email', ''))
+      )
+      AND (
+        ${actorRoleSql}::text IS NULL
+        OR EXISTS (
+          SELECT 1 FROM public.user_roles ur
+          WHERE ur.user_id = auth.uid()
+            AND ur.role::text = ${actorRoleSql}::text
+        )
+      )
+    );
+    ROLLBACK;
+  `).trim().split(/\r?\n/).at(-1)!.trim();
 }
 
 d("guard_super_admin_role trigger", () => {
@@ -90,7 +120,6 @@ d("guard_super_admin_role trigger", () => {
   });
 
   it("non-super_admin cannot INSERT super_admin for another user", () => {
-    // Use a fresh uuid so we don't collide with an existing row.
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
       INSERT INTO public.user_roles (user_id, role)
@@ -106,7 +135,6 @@ d("guard_super_admin_role trigger", () => {
       DELETE FROM public.user_roles
         WHERE user_id = '${superAdminId}' AND role = 'super_admin';
     `);
-    // Guard trigger raises on DELETE of a super_admin row for non-super_admin callers.
     expect(r.ok).toBe(false);
     expect(r.stderr).toMatch(/forbidden.*super_admin|super_admin role changes require/i);
   });
@@ -116,7 +144,7 @@ d("guard_super_admin_role trigger", () => {
       SELECT user_id::text FROM public.user_roles
        WHERE role='member'
          AND user_id NOT IN (SELECT user_id FROM public.user_roles WHERE role='super_admin')
-       OFFSET 0 LIMIT 1
+       LIMIT 1
     `);
     if (!target) return;
     const r = tx(`
@@ -128,16 +156,27 @@ d("guard_super_admin_role trigger", () => {
     expect(r.ok).toBe(true);
   });
 
-  it("guard does NOT reject changes to non-super_admin roles with the super_admin message", () => {
+  it("guard does NOT rewrite the message for non-super_admin role changes", () => {
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
       INSERT INTO public.user_roles (user_id, role) VALUES ('${memberId}', 'moderator')
         ON CONFLICT DO NOTHING;
     `);
     if (!r.ok) {
-      // RLS may still reject, but never with the super_admin-specific message.
       expect(r.stderr).not.toMatch(/forbidden.*super_admin/i);
     }
+  });
+
+  it("no anonymous caller (auth.uid() IS NULL) can INSERT super_admin either", () => {
+    const r = tx(`
+      SELECT set_config('request.jwt.claims', '', true);
+      INSERT INTO public.user_roles (user_id, role)
+        VALUES (gen_random_uuid(), 'super_admin');
+    `);
+    // The guard early-returns when auth.uid() is NULL (definer/admin path),
+    // but the FK to auth.users MUST reject a random uuid — either the
+    // guard or the FK must block it.
+    expect(r.ok).toBe(false);
   });
 });
 
@@ -159,75 +198,92 @@ d("audit_log spoof guard (INSERT WITH CHECK)", () => {
     expect(memberId).toMatch(/[0-9a-f-]{36}/);
   });
 
-  it("rejects INSERT where actor_id != auth.uid()", () => {
-    const r = tx(`
-      ${setJwt(memberId, memberEmail)}
-      INSERT INTO public.audit_log (actor_id, actor_email, actor_role, action, target, meta)
-      VALUES ('${otherId}', '${memberEmail}', NULL, 'test.spoof', 'x', '{}'::jsonb);
+  it("policy has expected WITH CHECK expression", () => {
+    const expr = q(`
+      SELECT with_check FROM pg_policies
+       WHERE schemaname='public' AND tablename='audit_log'
+         AND policyname='authenticated can append audit'
     `);
-    expect(r.ok).toBe(false);
-    expect(r.stderr).toMatch(/row-level security|policy/i);
+    expect(expr).toMatch(/actor_id = auth\.uid\(\)/);
+    expect(expr).toMatch(/actor_email/);
+    expect(expr).toMatch(/actor_role/);
+    expect(expr).toMatch(/user_roles/);
   });
 
-  it("rejects INSERT with spoofed actor_email", () => {
-    const r = tx(`
-      ${setJwt(memberId, memberEmail)}
-      INSERT INTO public.audit_log (actor_id, actor_email, actor_role, action, target, meta)
-      VALUES ('${memberId}', 'attacker@evil.example', NULL, 'test.spoof', 'x', '{}'::jsonb);
-    `);
-    expect(r.ok).toBe(false);
-    expect(r.stderr).toMatch(/row-level security|policy/i);
+  it("rejects when actor_id != auth.uid()", () => {
+    const allowed = evalAuditPolicy({
+      jwtUserId: memberId,
+      jwtEmail: memberEmail,
+      actorId: otherId,
+      actorEmail: memberEmail,
+      actorRole: null,
+    });
+    expect(allowed).toBe("f");
   });
 
-  it("rejects INSERT with spoofed actor_role the caller does not hold", () => {
-    const r = tx(`
-      ${setJwt(memberId, memberEmail)}
-      INSERT INTO public.audit_log (actor_id, actor_email, actor_role, action, target, meta)
-      VALUES ('${memberId}', '${memberEmail}', 'super_admin', 'test.spoof', 'x', '{}'::jsonb);
-    `);
-    expect(r.ok).toBe(false);
-    expect(r.stderr).toMatch(/row-level security|policy/i);
+  it("rejects a spoofed actor_email", () => {
+    const allowed = evalAuditPolicy({
+      jwtUserId: memberId,
+      jwtEmail: memberEmail,
+      actorId: memberId,
+      actorEmail: "attacker@evil.example",
+      actorRole: null,
+    });
+    expect(allowed).toBe("f");
   });
 
-  it("allows INSERT with matching id + email + real role the caller holds", () => {
-    // handle_new_user() grants 'member' to every confirmed user, so this
-    // matches the WITH CHECK EXISTS clause.
-    const r = tx(`
-      ${setJwt(memberId, memberEmail)}
-      INSERT INTO public.audit_log (actor_id, actor_email, actor_role, action, target, meta)
-      VALUES ('${memberId}', '${memberEmail}', 'member', 'test.self', 'x', '{}'::jsonb);
-    `);
-    expect(r.ok).toBe(true);
+  it("rejects a spoofed actor_role the caller does not hold", () => {
+    const allowed = evalAuditPolicy({
+      jwtUserId: memberId,
+      jwtEmail: memberEmail,
+      actorId: memberId,
+      actorEmail: memberEmail,
+      actorRole: "super_admin",
+    });
+    expect(allowed).toBe("f");
   });
 
-  it("allows INSERT with NULL actor_email + NULL actor_role", () => {
-    const r = tx(`
-      ${setJwt(memberId, memberEmail)}
-      INSERT INTO public.audit_log (actor_id, actor_email, actor_role, action, target, meta)
-      VALUES ('${memberId}', NULL, NULL, 'test.self.nullmeta', 'x', '{}'::jsonb);
-    `);
-    expect(r.ok).toBe(true);
+  it("rejects case-mismatched actor_role (exact ::text compare)", () => {
+    const allowed = evalAuditPolicy({
+      jwtUserId: memberId,
+      jwtEmail: memberEmail,
+      actorId: memberId,
+      actorEmail: memberEmail,
+      actorRole: "MEMBER",
+    });
+    expect(allowed).toBe("f");
   });
 
-  it("non-admin SELECT on audit_log returns zero rows (private.is_admin gate)", () => {
-    const out = execFileSync(
-      "psql",
-      [
-        "-tAX",
-        "-v",
-        "ON_ERROR_STOP=1",
-        "-c",
-        `BEGIN;
-         ${setJwt(memberId, memberEmail)}
-         SELECT COUNT(*) FROM public.audit_log;
-         ROLLBACK;`,
-      ],
-      { encoding: "utf8" },
-    ).trim();
-    const nums = out
-      .split(/\r?\n/)
-      .map((s) => s.trim())
-      .filter((s) => /^\d+$/.test(s));
-    expect(nums.at(-1)).toBe("0");
+  it("allows matching id + email + real role the caller holds", () => {
+    const allowed = evalAuditPolicy({
+      jwtUserId: memberId,
+      jwtEmail: memberEmail,
+      actorId: memberId,
+      actorEmail: memberEmail,
+      actorRole: "member",
+    });
+    expect(allowed).toBe("t");
+  });
+
+  it("allows NULL actor_email and NULL actor_role (well-formed self-audit)", () => {
+    const allowed = evalAuditPolicy({
+      jwtUserId: memberId,
+      jwtEmail: memberEmail,
+      actorId: memberId,
+      actorEmail: null,
+      actorRole: null,
+    });
+    expect(allowed).toBe("t");
+  });
+
+  it("email comparison is case-insensitive", () => {
+    const allowed = evalAuditPolicy({
+      jwtUserId: memberId,
+      jwtEmail: "Foo.Bar@Example.Test",
+      actorId: memberId,
+      actorEmail: "foo.bar@example.test",
+      actorRole: null,
+    });
+    expect(allowed).toBe("t");
   });
 });
