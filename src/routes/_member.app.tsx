@@ -13,6 +13,7 @@ const groups: NavGroup[] = [
       { to: "/app/payments", label: "Payments" },
       { to: "/app/profile", label: "Profile & KYC" },
       { to: "/app/kyc", label: "Verification status" },
+      { to: "/app/entities/register", label: "Register organization" },
     ],
   },
   {
@@ -31,6 +32,7 @@ const CRUMBS: Record<string, string> = {
   "/app/payments": "Payments",
   "/app/profile": "Profile & KYC",
   "/app/kyc": "Verification status",
+  "/app/entities/register": "Register organization",
   "/app/support": "Help Centre",
 };
 

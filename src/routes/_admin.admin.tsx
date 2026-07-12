@@ -11,9 +11,26 @@ const groups: NavGroup[] = [
     ],
   },
   {
+    label: "Finance",
+    items: [
+      { to: "/admin/finance", label: "Financial Dashboard" },
+      { to: "/admin/finance/expenses", label: "Expenses" },
+      { to: "/admin/finance/transfers", label: "Transfers" },
+      { to: "/admin/finance/adjustments", label: "Balance Mgmt" },
+    ],
+  },
+  {
+    label: "Membership",
+    items: [
+      { to: "/admin/members", label: "Individuals (KYC)" },
+      { to: "/admin/entities?type=group", label: "Groups" },
+      { to: "/admin/entities?type=department", label: "Departments" },
+      { to: "/admin/entities?type=institution", label: "Institutions" },
+    ],
+  },
+  {
     label: "Operations",
     items: [
-      { to: "/admin/members", label: "Membership" },
       { to: "/admin/savings", label: "Savings" },
       { to: "/admin/loans", label: "Loans & Approvals" },
       { to: "/admin/payments", label: "Payments" },
@@ -34,7 +51,12 @@ const CRUMBS: Record<string, string> = {
   "/admin": "Analytics",
   "/admin/reports": "Reports",
   "/admin/audit": "Audit & Activity",
+  "/admin/finance": "Financial Dashboard",
+  "/admin/finance/expenses": "Expenses",
+  "/admin/finance/transfers": "Transfers",
+  "/admin/finance/adjustments": "Balance Management",
   "/admin/members": "KYC queue",
+  "/admin/entities": "Entities",
   "/admin/savings": "Savings",
   "/admin/loans": "Loans & Approvals",
   "/admin/payments": "Payments",
@@ -46,6 +68,7 @@ const CRUMBS: Record<string, string> = {
 
 function crumbFor(pathname: string) {
   if (pathname.startsWith("/admin/members/")) return "Member review";
+  if (pathname.startsWith("/admin/entities/")) return "Entity details";
   return CRUMBS[pathname] ?? "Administration";
 }
 

@@ -38,8 +38,12 @@ import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.rep
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
+import { Route as AdminAdminFinanceRouteImport } from './routes/_admin.admin.finance'
+import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.entities'
 import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
 import { Route as MemberAppSavingsIndexRouteImport } from './routes/_member.app.savings.index'
+import { Route as AdminAdminFinanceIndexRouteImport } from './routes/_admin.admin.finance.index'
+import { Route as AdminAdminEntitiesIndexRouteImport } from './routes/_admin.admin.entities.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -48,9 +52,14 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
 import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
 import { Route as MemberAppLoansLoanIdRouteImport } from './routes/_member.app.loans.$loanId'
+import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.app.entities.register'
 import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
 import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
+import { Route as AdminAdminFinanceTransfersRouteImport } from './routes/_admin.admin.finance.transfers'
+import { Route as AdminAdminFinanceExpensesRouteImport } from './routes/_admin.admin.finance.expenses'
+import { Route as AdminAdminFinanceAdjustmentsRouteImport } from './routes/_admin.admin.finance.adjustments'
+import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -195,6 +204,16 @@ const AdminAdminLoansRoute = AdminAdminLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminFinanceRoute = AdminAdminFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminEntitiesRoute = AdminAdminEntitiesRouteImport.update({
+  id: '/entities',
+  path: '/entities',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -204,6 +223,16 @@ const MemberAppSavingsIndexRoute = MemberAppSavingsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const AdminAdminFinanceIndexRoute = AdminAdminFinanceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminFinanceRoute,
+} as any)
+const AdminAdminEntitiesIndexRoute = AdminAdminEntitiesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminEntitiesRoute,
 } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
@@ -249,6 +278,12 @@ const MemberAppLoansLoanIdRoute = MemberAppLoansLoanIdRouteImport.update({
   path: '/$loanId',
   getParentRoute: () => MemberAppLoansRoute,
 } as any)
+const MemberAppEntitiesRegisterRoute =
+  MemberAppEntitiesRegisterRouteImport.update({
+    id: '/entities/register',
+    path: '/entities/register',
+    getParentRoute: () => MemberAppRoute,
+  } as any)
 const AdminAdminSuperAdminsHistoryRoute =
   AdminAdminSuperAdminsHistoryRouteImport.update({
     id: '/history',
@@ -265,6 +300,30 @@ const AdminAdminLoansLoanIdRoute = AdminAdminLoansLoanIdRouteImport.update({
   path: '/$loanId',
   getParentRoute: () => AdminAdminLoansRoute,
 } as any)
+const AdminAdminFinanceTransfersRoute =
+  AdminAdminFinanceTransfersRouteImport.update({
+    id: '/transfers',
+    path: '/transfers',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminFinanceExpensesRoute =
+  AdminAdminFinanceExpensesRouteImport.update({
+    id: '/expenses',
+    path: '/expenses',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminFinanceAdjustmentsRoute =
+  AdminAdminFinanceAdjustmentsRouteImport.update({
+    id: '/adjustments',
+    path: '/adjustments',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminEntitiesEntityIdRoute =
+  AdminAdminEntitiesEntityIdRouteImport.update({
+    id: '/$entityId',
+    path: '/$entityId',
+    getParentRoute: () => AdminAdminEntitiesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -277,6 +336,8 @@ export interface FileRoutesByFullPath {
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/audit': typeof AdminAdminAuditRoute
+  '/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
+  '/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/payments': typeof AdminAdminPaymentsRoute
@@ -295,9 +356,14 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
+  '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
+  '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
+  '/admin/finance/expenses': typeof AdminAdminFinanceExpensesRoute
+  '/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
+  '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -306,6 +372,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/entities/': typeof AdminAdminEntitiesIndexRoute
+  '/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/app/savings/': typeof MemberAppSavingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -334,9 +402,14 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
+  '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
+  '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
+  '/admin/finance/expenses': typeof AdminAdminFinanceExpensesRoute
+  '/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
+  '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -345,6 +418,8 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/entities': typeof AdminAdminEntitiesIndexRoute
+  '/admin/finance': typeof AdminAdminFinanceIndexRoute
   '/app/savings': typeof MemberAppSavingsIndexRoute
 }
 export interface FileRoutesById {
@@ -361,6 +436,8 @@ export interface FileRoutesById {
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_admin/admin/audit': typeof AdminAdminAuditRoute
+  '/_admin/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
+  '/_admin/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/_admin/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
@@ -379,9 +456,14 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
+  '/_admin/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
+  '/_admin/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
+  '/_admin/admin/finance/expenses': typeof AdminAdminFinanceExpensesRoute
+  '/_admin/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
   '/_admin/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/_admin/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
+  '/_member/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/_member/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/_member/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/_member/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -390,6 +472,8 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_admin/admin/entities/': typeof AdminAdminEntitiesIndexRoute
+  '/_admin/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/_member/app/savings/': typeof MemberAppSavingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -405,6 +489,8 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/email/unsubscribe'
     | '/admin/audit'
+    | '/admin/entities'
+    | '/admin/finance'
     | '/admin/loans'
     | '/admin/members'
     | '/admin/payments'
@@ -423,9 +509,14 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin/'
     | '/app/'
+    | '/admin/entities/$entityId'
+    | '/admin/finance/adjustments'
+    | '/admin/finance/expenses'
+    | '/admin/finance/transfers'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/admin/super-admins/history'
+    | '/app/entities/register'
     | '/app/loans/$loanId'
     | '/app/savings/$accountId'
     | '/app/savings/enroll'
@@ -434,6 +525,8 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/entities/'
+    | '/admin/finance/'
     | '/app/savings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -462,9 +555,14 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin'
     | '/app'
+    | '/admin/entities/$entityId'
+    | '/admin/finance/adjustments'
+    | '/admin/finance/expenses'
+    | '/admin/finance/transfers'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/admin/super-admins/history'
+    | '/app/entities/register'
     | '/app/loans/$loanId'
     | '/app/savings/$accountId'
     | '/app/savings/enroll'
@@ -473,6 +571,8 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/entities'
+    | '/admin/finance'
     | '/app/savings'
   id:
     | '__root__'
@@ -488,6 +588,8 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/email/unsubscribe'
     | '/_admin/admin/audit'
+    | '/_admin/admin/entities'
+    | '/_admin/admin/finance'
     | '/_admin/admin/loans'
     | '/_admin/admin/members'
     | '/_admin/admin/payments'
@@ -506,9 +608,14 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_admin/admin/'
     | '/_member/app/'
+    | '/_admin/admin/entities/$entityId'
+    | '/_admin/admin/finance/adjustments'
+    | '/_admin/admin/finance/expenses'
+    | '/_admin/admin/finance/transfers'
     | '/_admin/admin/loans/$loanId'
     | '/_admin/admin/members/$id'
     | '/_admin/admin/super-admins/history'
+    | '/_member/app/entities/register'
     | '/_member/app/loans/$loanId'
     | '/_member/app/savings/$accountId'
     | '/_member/app/savings/enroll'
@@ -517,6 +624,8 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_admin/admin/entities/'
+    | '/_admin/admin/finance/'
     | '/_member/app/savings/'
   fileRoutesById: FileRoutesById
 }
@@ -741,6 +850,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLoansRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/finance': {
+      id: '/_admin/admin/finance'
+      path: '/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminAdminFinanceRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/entities': {
+      id: '/_admin/admin/entities'
+      path: '/entities'
+      fullPath: '/admin/entities'
+      preLoaderRoute: typeof AdminAdminEntitiesRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/audit': {
       id: '/_admin/admin/audit'
       path: '/audit'
@@ -754,6 +877,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/savings/'
       preLoaderRoute: typeof MemberAppSavingsIndexRouteImport
       parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_admin/admin/finance/': {
+      id: '/_admin/admin/finance/'
+      path: '/'
+      fullPath: '/admin/finance/'
+      preLoaderRoute: typeof AdminAdminFinanceIndexRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/entities/': {
+      id: '/_admin/admin/entities/'
+      path: '/'
+      fullPath: '/admin/entities/'
+      preLoaderRoute: typeof AdminAdminEntitiesIndexRouteImport
+      parentRoute: typeof AdminAdminEntitiesRoute
     }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
@@ -811,6 +948,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppLoansLoanIdRouteImport
       parentRoute: typeof MemberAppLoansRoute
     }
+    '/_member/app/entities/register': {
+      id: '/_member/app/entities/register'
+      path: '/entities/register'
+      fullPath: '/app/entities/register'
+      preLoaderRoute: typeof MemberAppEntitiesRegisterRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
     '/_admin/admin/super-admins/history': {
       id: '/_admin/admin/super-admins/history'
       path: '/history'
@@ -832,8 +976,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLoansLoanIdRouteImport
       parentRoute: typeof AdminAdminLoansRoute
     }
+    '/_admin/admin/finance/transfers': {
+      id: '/_admin/admin/finance/transfers'
+      path: '/transfers'
+      fullPath: '/admin/finance/transfers'
+      preLoaderRoute: typeof AdminAdminFinanceTransfersRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/expenses': {
+      id: '/_admin/admin/finance/expenses'
+      path: '/expenses'
+      fullPath: '/admin/finance/expenses'
+      preLoaderRoute: typeof AdminAdminFinanceExpensesRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/adjustments': {
+      id: '/_admin/admin/finance/adjustments'
+      path: '/adjustments'
+      fullPath: '/admin/finance/adjustments'
+      preLoaderRoute: typeof AdminAdminFinanceAdjustmentsRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/entities/$entityId': {
+      id: '/_admin/admin/entities/$entityId'
+      path: '/$entityId'
+      fullPath: '/admin/entities/$entityId'
+      preLoaderRoute: typeof AdminAdminEntitiesEntityIdRouteImport
+      parentRoute: typeof AdminAdminEntitiesRoute
+    }
   }
 }
+
+interface AdminAdminEntitiesRouteChildren {
+  AdminAdminEntitiesEntityIdRoute: typeof AdminAdminEntitiesEntityIdRoute
+  AdminAdminEntitiesIndexRoute: typeof AdminAdminEntitiesIndexRoute
+}
+
+const AdminAdminEntitiesRouteChildren: AdminAdminEntitiesRouteChildren = {
+  AdminAdminEntitiesEntityIdRoute: AdminAdminEntitiesEntityIdRoute,
+  AdminAdminEntitiesIndexRoute: AdminAdminEntitiesIndexRoute,
+}
+
+const AdminAdminEntitiesRouteWithChildren =
+  AdminAdminEntitiesRoute._addFileChildren(AdminAdminEntitiesRouteChildren)
+
+interface AdminAdminFinanceRouteChildren {
+  AdminAdminFinanceAdjustmentsRoute: typeof AdminAdminFinanceAdjustmentsRoute
+  AdminAdminFinanceExpensesRoute: typeof AdminAdminFinanceExpensesRoute
+  AdminAdminFinanceTransfersRoute: typeof AdminAdminFinanceTransfersRoute
+  AdminAdminFinanceIndexRoute: typeof AdminAdminFinanceIndexRoute
+}
+
+const AdminAdminFinanceRouteChildren: AdminAdminFinanceRouteChildren = {
+  AdminAdminFinanceAdjustmentsRoute: AdminAdminFinanceAdjustmentsRoute,
+  AdminAdminFinanceExpensesRoute: AdminAdminFinanceExpensesRoute,
+  AdminAdminFinanceTransfersRoute: AdminAdminFinanceTransfersRoute,
+  AdminAdminFinanceIndexRoute: AdminAdminFinanceIndexRoute,
+}
+
+const AdminAdminFinanceRouteWithChildren =
+  AdminAdminFinanceRoute._addFileChildren(AdminAdminFinanceRouteChildren)
 
 interface AdminAdminLoansRouteChildren {
   AdminAdminLoansLoanIdRoute: typeof AdminAdminLoansLoanIdRoute
@@ -873,6 +1075,8 @@ const AdminAdminSuperAdminsRouteWithChildren =
 
 interface AdminAdminRouteChildren {
   AdminAdminAuditRoute: typeof AdminAdminAuditRoute
+  AdminAdminEntitiesRoute: typeof AdminAdminEntitiesRouteWithChildren
+  AdminAdminFinanceRoute: typeof AdminAdminFinanceRouteWithChildren
   AdminAdminLoansRoute: typeof AdminAdminLoansRouteWithChildren
   AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
@@ -886,6 +1090,8 @@ interface AdminAdminRouteChildren {
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminAuditRoute: AdminAdminAuditRoute,
+  AdminAdminEntitiesRoute: AdminAdminEntitiesRouteWithChildren,
+  AdminAdminFinanceRoute: AdminAdminFinanceRouteWithChildren,
   AdminAdminLoansRoute: AdminAdminLoansRouteWithChildren,
   AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
@@ -947,6 +1153,7 @@ interface MemberAppRouteChildren {
   MemberAppSupportRoute: typeof MemberAppSupportRoute
   MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
   MemberAppIndexRoute: typeof MemberAppIndexRoute
+  MemberAppEntitiesRegisterRoute: typeof MemberAppEntitiesRegisterRoute
 }
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
@@ -958,6 +1165,7 @@ const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppSupportRoute: MemberAppSupportRoute,
   MemberAppTransactionsRoute: MemberAppTransactionsRoute,
   MemberAppIndexRoute: MemberAppIndexRoute,
+  MemberAppEntitiesRegisterRoute: MemberAppEntitiesRegisterRoute,
 }
 
 const MemberAppRouteWithChildren = MemberAppRoute._addFileChildren(
