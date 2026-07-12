@@ -48,6 +48,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
 import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
 import { Route as MemberAppLoansLoanIdRouteImport } from './routes/_member.app.loans.$loanId'
+import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
 import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
 
@@ -248,6 +249,12 @@ const MemberAppLoansLoanIdRoute = MemberAppLoansLoanIdRouteImport.update({
   path: '/$loanId',
   getParentRoute: () => MemberAppLoansRoute,
 } as any)
+const AdminAdminSuperAdminsHistoryRoute =
+  AdminAdminSuperAdminsHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AdminAdminSuperAdminsRoute,
+  } as any)
 const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -277,7 +284,7 @@ export interface FileRoutesByFullPath {
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
-  '/admin/super-admins': typeof AdminAdminSuperAdminsRoute
+  '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
   '/app/payments': typeof MemberAppPaymentsRoute
@@ -290,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof MemberAppIndexRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -316,7 +324,7 @@ export interface FileRoutesByTo {
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
-  '/admin/super-admins': typeof AdminAdminSuperAdminsRoute
+  '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
   '/app/payments': typeof MemberAppPaymentsRoute
@@ -328,6 +336,7 @@ export interface FileRoutesByTo {
   '/app': typeof MemberAppIndexRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -359,7 +368,7 @@ export interface FileRoutesById {
   '/_admin/admin/savings': typeof AdminAdminSavingsRoute
   '/_admin/admin/security': typeof AdminAdminSecurityRoute
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
-  '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRoute
+  '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/_member/app/kyc': typeof MemberAppKycRoute
   '/_member/app/loans': typeof MemberAppLoansRouteWithChildren
   '/_member/app/payments': typeof MemberAppPaymentsRoute
@@ -372,6 +381,7 @@ export interface FileRoutesById {
   '/_member/app/': typeof MemberAppIndexRoute
   '/_admin/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/_admin/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/_member/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/_member/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/_member/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
+    | '/admin/super-admins/history'
     | '/app/loans/$loanId'
     | '/app/savings/$accountId'
     | '/app/savings/enroll'
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
+    | '/admin/super-admins/history'
     | '/app/loans/$loanId'
     | '/app/savings/$accountId'
     | '/app/savings/enroll'
@@ -496,6 +508,7 @@ export interface FileRouteTypes {
     | '/_member/app/'
     | '/_admin/admin/loans/$loanId'
     | '/_admin/admin/members/$id'
+    | '/_admin/admin/super-admins/history'
     | '/_member/app/loans/$loanId'
     | '/_member/app/savings/$accountId'
     | '/_member/app/savings/enroll'
@@ -798,6 +811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppLoansLoanIdRouteImport
       parentRoute: typeof MemberAppLoansRoute
     }
+    '/_admin/admin/super-admins/history': {
+      id: '/_admin/admin/super-admins/history'
+      path: '/history'
+      fullPath: '/admin/super-admins/history'
+      preLoaderRoute: typeof AdminAdminSuperAdminsHistoryRouteImport
+      parentRoute: typeof AdminAdminSuperAdminsRoute
+    }
     '/_admin/admin/members/$id': {
       id: '/_admin/admin/members/$id'
       path: '/$id'
@@ -838,6 +858,19 @@ const AdminAdminMembersRouteChildren: AdminAdminMembersRouteChildren = {
 const AdminAdminMembersRouteWithChildren =
   AdminAdminMembersRoute._addFileChildren(AdminAdminMembersRouteChildren)
 
+interface AdminAdminSuperAdminsRouteChildren {
+  AdminAdminSuperAdminsHistoryRoute: typeof AdminAdminSuperAdminsHistoryRoute
+}
+
+const AdminAdminSuperAdminsRouteChildren: AdminAdminSuperAdminsRouteChildren = {
+  AdminAdminSuperAdminsHistoryRoute: AdminAdminSuperAdminsHistoryRoute,
+}
+
+const AdminAdminSuperAdminsRouteWithChildren =
+  AdminAdminSuperAdminsRoute._addFileChildren(
+    AdminAdminSuperAdminsRouteChildren,
+  )
+
 interface AdminAdminRouteChildren {
   AdminAdminAuditRoute: typeof AdminAdminAuditRoute
   AdminAdminLoansRoute: typeof AdminAdminLoansRouteWithChildren
@@ -847,7 +880,7 @@ interface AdminAdminRouteChildren {
   AdminAdminSavingsRoute: typeof AdminAdminSavingsRoute
   AdminAdminSecurityRoute: typeof AdminAdminSecurityRoute
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
-  AdminAdminSuperAdminsRoute: typeof AdminAdminSuperAdminsRoute
+  AdminAdminSuperAdminsRoute: typeof AdminAdminSuperAdminsRouteWithChildren
   AdminAdminIndexRoute: typeof AdminAdminIndexRoute
 }
 
@@ -860,7 +893,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminSavingsRoute: AdminAdminSavingsRoute,
   AdminAdminSecurityRoute: AdminAdminSecurityRoute,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
-  AdminAdminSuperAdminsRoute: AdminAdminSuperAdminsRoute,
+  AdminAdminSuperAdminsRoute: AdminAdminSuperAdminsRouteWithChildren,
   AdminAdminIndexRoute: AdminAdminIndexRoute,
 }
 

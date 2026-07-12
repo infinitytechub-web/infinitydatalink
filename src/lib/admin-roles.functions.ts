@@ -106,6 +106,127 @@ export const listSeedEmails = createServerFn({ method: "GET" })
     return (data ?? []) as SeedEmailRow[];
   });
 
+export type RoleHistoryRow = {
+  id: string;
+  occurred_at: string;
+  event: "grant" | "revoke";
+  actor_id: string | null;
+  actor_email: string | null;
+  actor_role: string | null;
+  target_user_id: string;
+  target_email: string | null;
+  note: string | null;
+  reason: string | null;
+  meta: Record<string, string | number | boolean | null>;
+  currently_super_admin: boolean;
+};
+
+export const listSuperAdminRoleHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        event: z.enum(["all", "grant", "revoke"]).default("all"),
+        emailContains: z.string().trim().max(320).optional(),
+        from: z.string().datetime().optional(),
+        to: z.string().datetime().optional(),
+        limit: z.number().int().min(1).max(200).default(50),
+        offset: z.number().int().min(0).default(0),
+      })
+      .parse(data ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<{ rows: RoleHistoryRow[]; total: number }> => {
+    await assertSuperAdmin(context.supabase, context.userId);
+    const actions =
+      data.event === "grant"
+        ? ["role.super_admin.grant"]
+        : data.event === "revoke"
+          ? ["role.super_admin.revoke"]
+          : ["role.super_admin.grant", "role.super_admin.revoke"];
+
+    let q = context.supabase
+      .from("audit_log")
+      .select("id, created_at, actor_id, actor_email, actor_role, action, target, meta", {
+        count: "exact",
+      })
+      .in("action", actions)
+      .order("created_at", { ascending: false })
+      .range(data.offset, data.offset + data.limit - 1);
+
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
+
+    const { data: entries, error, count } = await q;
+    if (error) throw new Error(error.message);
+
+    const rows = (entries ?? []) as Array<{
+      id: string;
+      created_at: string;
+      actor_id: string | null;
+      actor_email: string | null;
+      actor_role: string | null;
+      action: string;
+      target: string | null;
+      meta: Record<string, unknown> | null;
+    }>;
+
+    // Enrich with current super_admin status per target.
+    const targetIds = Array.from(new Set(rows.map((r) => r.target).filter(Boolean))) as string[];
+    let stillSA = new Set<string>();
+    if (targetIds.length > 0) {
+      const { data: cur } = await context.supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "super_admin")
+        .in("user_id", targetIds);
+      stillSA = new Set(((cur ?? []) as Array<{ user_id: string }>).map((r) => r.user_id));
+    }
+
+    let out: RoleHistoryRow[] = rows.map((r) => {
+      const meta = (r.meta ?? {}) as Record<string, string | number | boolean | null>;
+      const target_user_id = r.target ?? "";
+      return {
+        id: r.id,
+        occurred_at: r.created_at,
+        event: r.action === "role.super_admin.grant" ? "grant" : "revoke",
+        actor_id: r.actor_id,
+        actor_email: r.actor_email,
+        actor_role: r.actor_role,
+        target_user_id,
+        target_email: (meta.email as string | undefined) ?? null,
+        note: (meta.note as string | undefined) ?? null,
+        reason: (meta.reason as string | undefined) ?? null,
+        meta,
+        currently_super_admin: target_user_id ? stillSA.has(target_user_id) : false,
+      };
+    });
+
+    if (data.emailContains) {
+      const q = data.emailContains.toLowerCase();
+      out = out.filter((r) => (r.target_email ?? "").toLowerCase().includes(q));
+    }
+
+    return { rows: out, total: count ?? out.length };
+  });
+
+export type WhoAmI = { user_id: string; email: string | null; roles: string[] };
+
+/** Small helper used by e2e tests to introspect the caller's role set. */
+export const whoAmI = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<WhoAmI> => {
+    const { data: roleRows } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    const roles = ((roleRows ?? []) as Array<{ role: string }>).map((r) => r.role);
+    return {
+      user_id: context.userId,
+      email: (context.claims?.email as string | undefined) ?? null,
+      roles,
+    };
+  });
+
 export function friendlyRoleError(raw: string): string {
   if (/last_super_admin/i.test(raw)) return "Cannot revoke the last Super Admin.";
   if (/cannot_revoke_self/i.test(raw)) return "You cannot revoke your own Super Admin role.";
