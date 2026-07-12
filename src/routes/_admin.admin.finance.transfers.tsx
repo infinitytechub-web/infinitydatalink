@@ -16,6 +16,7 @@ import {
   listTransfers,
   postTransfer,
   clearTransfer,
+  rejectTransfer,
   listSavingsForFinance,
   type TransferRow,
 } from "@/lib/admin-finance.functions";
@@ -66,6 +67,7 @@ function TransfersBody() {
   const qc = useQueryClient();
   const postFn = useServerFn(postTransfer);
   const clearFn = useServerFn(clearTransfer);
+  const rejectFn = useServerFn(rejectTransfer);
 
   const [form, setForm] = useState({ from: "", to: "", amount: "", note: "" });
 
@@ -91,6 +93,15 @@ function TransfersBody() {
     mutationFn: (id: string) => clearFn({ data: { id } }),
     onSuccess: () => {
       toast.success("Transfer cleared");
+      qc.invalidateQueries({ queryKey: ["admin", "transfers"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Failed"),
+  });
+
+  const reject = useMutation({
+    mutationFn: (v: { id: string; reason: string }) => rejectFn({ data: v }),
+    onSuccess: () => {
+      toast.success("Transfer rejected");
       qc.invalidateQueries({ queryKey: ["admin", "transfers"] });
     },
     onError: (e: any) => toast.error(e.message || "Failed"),
@@ -171,12 +182,32 @@ function TransfersBody() {
                     <td className="px-6 py-3"><StatusPill status={t.status as any} /></td>
                     <td className="px-6 py-3 text-right">
                       {t.status === "pending" ? (
-                        <button
-                          className="rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/20"
-                          onClick={() => clear.mutate(t.id)}
-                        >
-                          Clear
-                        </button>
+                        <div className="flex justify-end gap-1.5">
+                          <button
+                            type="button"
+                            aria-label={`Clear transfer ${t.ref}`}
+                            className="rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                            onClick={() => clear.mutate(t.id)}
+                          >
+                            Clear
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Reject transfer ${t.ref}`}
+                            className="rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1 text-[11px] font-medium text-destructive hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50"
+                            onClick={() => {
+                              const reason = window.prompt("Reason for rejection?");
+                              if (!reason || reason.trim().length < 3) return;
+                              reject.mutate({ id: t.id, reason: reason.trim() });
+                            }}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : t.cleared_at ? (
+                        <span className="text-[11px] text-muted-foreground">
+                          {new Date(t.cleared_at).toLocaleString()}
+                        </span>
                       ) : (
                         <span className="text-[11px] text-muted-foreground">—</span>
                       )}
