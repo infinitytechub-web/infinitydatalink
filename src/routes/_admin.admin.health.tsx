@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
 import { useSuspenseQuery, queryOptions, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
-import { ErrorState, PageHeader, KPIStat, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import { ErrorState, PageHeader, KPIStat, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { adminRunHealthCheck, type ProbeResult, type HealthReport } from "@/lib/admin-health.functions";
 
 const healthQuery = queryOptions({
@@ -117,19 +117,22 @@ function ProbeTable({ results }: { results: ProbeResult[] }) {
             <tr key={r.id}>
               <td className="py-2 pr-4">
                 {r.status === "pass" ? (
-                  <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
-                    <CheckCircle2 className="mr-1 h-3 w-3" /> Pass
-                  </Badge>
+                  <span className="inline-flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-success" aria-hidden="true" />
+                    <StatusPill status="approved" />
+                  </span>
                 ) : (
-                  <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-                    <XCircle className="mr-1 h-3 w-3" /> Fail
-                  </Badge>
+                  <span className="inline-flex items-center gap-1">
+                    <XCircle className="h-3 w-3 text-destructive" aria-hidden="true" />
+                    <StatusPill status="failed" />
+                  </span>
                 )}
               </td>
               <td className="py-2 pr-4 font-medium">{r.name}</td>
               <td className="py-2 pr-4 text-emerald-deep/70">{r.detail}</td>
               <td className="py-2 pr-4 text-emerald-deep/60 tabular-nums">{r.duration_ms} ms</td>
-              <td className="py-2 text-red-700 font-mono text-xs break-all">{r.error ?? ""}</td>
+              <td className="py-2 text-destructive font-mono text-xs break-all">{r.error ?? ""}</td>
+
             </tr>
           ))}
         </tbody>

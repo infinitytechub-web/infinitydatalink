@@ -13,6 +13,7 @@ import {
   StatusPill,
 } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
+import { BUTTON_TONE } from "@/lib/theme-tokens";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -116,12 +117,13 @@ function SummaryCards() {
         ? `${Math.floor(oldestHours / 24)}d ${Math.floor(oldestHours % 24)}h`
         : `${Math.floor(oldestHours)}h`;
   const items = [
-    { label: "Pending", value: data.pending, tone: "text-gold" },
-    { label: "Assigned to me", value: data.assigned_to_me, tone: "text-emerald-mid" },
-    { label: "SLA breached", value: data.breached, tone: data.breached > 0 ? "text-red-600" : "text-emerald-deep/60" },
-    { label: `Oldest pending`, value: oldestLabel, tone: "text-emerald-deep" },
-    { label: "Unassigned", value: data.unassigned_pending, tone: "text-red-600" },
-    { label: "Decided (24h)", value: data.decided_today, tone: "text-emerald-deep" },
+    { label: "Pending", value: data.pending, tone: "text-warning" },
+    { label: "Assigned to me", value: data.assigned_to_me, tone: "text-success" },
+    { label: "SLA breached", value: data.breached, tone: data.breached > 0 ? "text-destructive" : "text-muted-foreground" },
+    { label: `Oldest pending`, value: oldestLabel, tone: "text-foreground" },
+    { label: "Unassigned", value: data.unassigned_pending, tone: "text-destructive" },
+    { label: "Decided (24h)", value: data.decided_today, tone: "text-foreground" },
+
   ];
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
@@ -507,9 +509,10 @@ function QueueBody() {
                   notes: bulkNotes,
                 })
               }
-              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream disabled:opacity-40 ${
-                bulkDialog === "approved" ? "bg-emerald-deep" : "bg-red-600"
+              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${
+                bulkDialog === "approved" ? BUTTON_TONE.success : BUTTON_TONE.danger
               }`}
+
             >
               {bulkMutation.isPending
                 ? "Working…"
@@ -567,16 +570,17 @@ function SelectionToolbar({
       </Popover>
       <button
         onClick={() => onBulk("approved")}
-        className="rounded bg-emerald-deep px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+        className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest ${BUTTON_TONE.success}`}
       >
         Bulk approve
       </button>
       <button
         onClick={() => onBulk("rejected")}
-        className="rounded bg-red-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-red-700"
+        className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest ${BUTTON_TONE.danger}`}
       >
         Bulk reject
       </button>
+
       <button onClick={onClear} className="ml-auto text-[11px] text-emerald-deep/60 underline">
         Clear selection
       </button>
@@ -610,7 +614,7 @@ function SlaCell({
         </span>
       ) : null}
       <span
-        className={`tabular text-[10px] ${breached ? "font-semibold text-red-600" : "text-emerald-deep/60"}`}
+        className={`tabular text-[10px] ${breached ? "font-semibold text-destructive" : "text-muted-foreground"}`}
       >
         {text}
       </span>

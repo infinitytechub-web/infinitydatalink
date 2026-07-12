@@ -4,6 +4,7 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EmptyState, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { BUTTON_TONE } from "@/lib/theme-tokens";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -331,7 +332,7 @@ function RevokeDialog({
           <button
             disabled={pending || reason.trim().length < 3}
             onClick={() => onSubmit(reason.trim())}
-            className="rounded bg-red-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream disabled:opacity-40"
+            className={`rounded px-4 py-2 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${BUTTON_TONE.danger}`}
           >
             {pending ? "Revoking…" : "Revoke"}
           </button>

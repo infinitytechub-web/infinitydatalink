@@ -147,3 +147,44 @@ export const STATUS_PILL: Record<StatusName, string> = {
   closed:
     "bg-linear-to-r from-slate-500 to-slate-600 text-white ring-1 ring-slate-300/40",
 };
+
+/**
+ * Semantic text tone tokens for inline numbers / labels (e.g. KPI counts,
+ * SLA text). Prefer these over hardcoded `text-red-*` / `text-emerald-*`.
+ */
+export const TEXT_TONE = {
+  success: "text-success",
+  warning: "text-warning",
+  danger: "text-destructive",
+  muted: "text-muted-foreground",
+  neutral: "text-foreground",
+} as const;
+
+/**
+ * Semantic button token classes — bright fintech gradients that match the
+ * status pill family so destructive/confirm buttons feel like the badges.
+ */
+export const BUTTON_TONE = {
+  danger:
+    "bg-linear-to-r from-rose-500 to-red-600 text-white ring-1 ring-rose-300/50 shadow-[0_4px_10px_-4px_rgba(244,63,94,0.6)] hover:brightness-110",
+  success:
+    "bg-linear-to-r from-emerald-500 to-teal-500 text-white ring-1 ring-emerald-300/50 shadow-[0_4px_10px_-4px_rgba(16,185,129,0.6)] hover:brightness-110",
+  primary:
+    "bg-linear-to-r from-teal-500 to-cyan-500 text-white ring-1 ring-teal-300/50 shadow-[0_4px_10px_-4px_rgba(20,184,166,0.6)] hover:brightness-110",
+} as const;
+
+/**
+ * Chart palette derived from the bright tone system so recharts series
+ * match the KPI tiles and section accents. Consumed by `chartPalette` in
+ * `src/components/charts.tsx`.
+ */
+export const CHART_PALETTE: string[] = [
+  "#14b8a6", // teal-500
+  "#6366f1", // indigo-500
+  "#f59e0b", // amber-500
+  "#f43f5e", // rose-500
+  "#10b981", // emerald-500
+  "#8b5cf6", // violet-500
+  "#0ea5e9", // sky-500
+];
+
