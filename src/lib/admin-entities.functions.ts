@@ -163,10 +163,11 @@ export const decideEntity = createServerFn({ method: "POST" })
     await assertReviewer(context.supabase, context.userId);
     const args: Record<string, any> =
       data.action === "approve"
-        ? { _entity_id: data.id, _note: data.note }
-        : { _entity_id: data.id, _reason: data.note };
+        ? { _entity_id: data.id, _note: data.note, _actor_id: context.userId }
+        : { _entity_id: data.id, _reason: data.note, _actor_id: context.userId };
     const rpc = data.action === "approve" ? "approve_entity" : "suspend_entity";
-    const { error } = await (context.supabase as any).rpc(rpc, args);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await (supabaseAdmin as any).rpc(rpc, args);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
