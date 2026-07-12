@@ -570,16 +570,17 @@ function SelectionToolbar({
       </Popover>
       <button
         onClick={() => onBulk("approved")}
-        className="rounded bg-emerald-deep px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+        className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest ${BUTTON_TONE.success}`}
       >
         Bulk approve
       </button>
       <button
         onClick={() => onBulk("rejected")}
-        className="rounded bg-red-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-red-700"
+        className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest ${BUTTON_TONE.danger}`}
       >
         Bulk reject
       </button>
+
       <button onClick={onClear} className="ml-auto text-[11px] text-emerald-deep/60 underline">
         Clear selection
       </button>
