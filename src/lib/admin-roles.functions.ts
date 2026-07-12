@@ -43,7 +43,10 @@ export const listSuperAdmins = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<SuperAdminRow[]> => {
     await assertSuperAdmin(context.supabase, context.userId);
-    const { data, error } = await context.supabase.rpc("list_super_admins");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.rpc("list_super_admins", {
+      _actor_id: context.userId,
+    });
     if (error) throw new Error(error.message);
     return (data ?? []) as SuperAdminRow[];
   });
@@ -60,10 +63,12 @@ export const grantSuperAdmin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.supabase, context.userId);
-    const { data: rows, error } = await context.supabase.rpc(
-      "grant_super_admin_by_email",
-      { _email: data.email, _note: data.note ?? undefined },
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin.rpc("grant_super_admin_by_email", {
+      _email: data.email,
+      _note: data.note ?? undefined,
+      _actor_id: context.userId,
+    });
     if (error) throw new Error(friendlyRoleError(error.message));
     return (rows ?? [])[0] as { user_id: string; email: string; granted_at: string } | undefined;
   });
@@ -80,9 +85,11 @@ export const revokeSuperAdmin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("revoke_super_admin", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("revoke_super_admin", {
       _user_id: data.user_id,
       _reason: data.reason,
+      _actor_id: context.userId,
     });
     if (error) throw new Error(friendlyRoleError(error.message));
     return { ok: true as const };
