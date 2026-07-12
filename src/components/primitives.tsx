@@ -4,51 +4,64 @@ import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/org-config";
 import { Skeleton } from "@/components/ui/skeleton";
 
+export type KPITone = "teal" | "indigo" | "amber" | "rose" | "emerald" | "violet" | "sky";
+
+const TONE_STYLES: Record<KPITone, { bg: string; ring: string; label: string; value: string; hint: string; bar: string }> = {
+  teal:    { bg: "bg-linear-to-br from-teal-500 via-teal-600 to-cyan-700",       ring: "ring-teal-400/40",    label: "text-teal-50/90",    value: "text-white", hint: "text-teal-50/80",    bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
+  indigo:  { bg: "bg-linear-to-br from-indigo-500 via-indigo-600 to-violet-700", ring: "ring-indigo-400/40",  label: "text-indigo-50/90",  value: "text-white", hint: "text-indigo-50/80",  bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
+  amber:   { bg: "bg-linear-to-br from-amber-400 via-orange-500 to-rose-500",    ring: "ring-amber-300/50",   label: "text-amber-50/95",   value: "text-white", hint: "text-amber-50/85",   bar: "bg-linear-to-r from-white/0 via-white/80 to-white/0" },
+  rose:    { bg: "bg-linear-to-br from-rose-500 via-pink-600 to-fuchsia-700",    ring: "ring-rose-400/40",    label: "text-rose-50/90",    value: "text-white", hint: "text-rose-50/80",    bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
+  emerald: { bg: "bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-700", ring: "ring-emerald-400/40", label: "text-emerald-50/90", value: "text-white", hint: "text-emerald-50/80", bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
+  violet:  { bg: "bg-linear-to-br from-violet-500 via-purple-600 to-fuchsia-700",ring: "ring-violet-400/40",  label: "text-violet-50/90",  value: "text-white", hint: "text-violet-50/80",  bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
+  sky:     { bg: "bg-linear-to-br from-sky-500 via-blue-600 to-indigo-700",      ring: "ring-sky-400/40",     label: "text-sky-50/90",     value: "text-white", hint: "text-sky-50/80",     bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
+};
+
+const TONE_CYCLE: KPITone[] = ["teal", "indigo", "emerald", "amber", "rose", "violet", "sky"];
+export const kpiTone = (i: number): KPITone => TONE_CYCLE[i % TONE_CYCLE.length];
+
 export function KPIStat({
   label,
   value,
   hint,
   accent,
+  tone,
   className,
 }: {
   label: string;
   value: ReactNode;
   hint?: ReactNode;
   accent?: boolean;
+  tone?: KPITone;
   className?: string;
 }) {
+  const resolvedTone: KPITone = tone ?? (accent ? "amber" : "teal");
+  const t = TONE_STYLES[resolvedTone];
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-xl border p-6",
-        "shadow-[var(--shadow-elevated)]",
+        "group relative overflow-hidden rounded-2xl p-6 ring-1",
+        "shadow-[0_18px_40px_-18px_rgba(2,24,30,0.45)]",
         "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out",
-        "motion-safe:hover:-translate-y-0.5",
-        accent
-          ? "border-primary/30 bg-linear-to-br from-primary/10 via-card to-card"
-          : "border-border bg-card",
+        "motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-[0_28px_60px_-20px_rgba(2,24,30,0.55)]",
+        t.bg,
+        t.ring,
         className,
       )}
     >
       <span
         aria-hidden="true"
-        className={cn(
-          "absolute inset-x-0 top-0 h-px",
-          accent
-            ? "bg-linear-to-r from-transparent via-primary to-transparent"
-            : "bg-linear-to-r from-transparent via-border to-transparent",
-        )}
+        className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-white/20 blur-2xl"
       />
-      <p
-        className={cn(
-          "mb-2 text-[11px] font-semibold uppercase tracking-widest",
-          accent ? "text-primary" : "text-muted-foreground",
-        )}
-      >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-16 -left-10 size-40 rounded-full bg-black/15 blur-2xl"
+      />
+      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-0.5", t.bar)} />
+      <p className={cn("mb-2 text-[11px] font-semibold uppercase tracking-widest", t.label)}>
         {label}
       </p>
-      <h2 className="font-serif text-3xl text-foreground">{value}</h2>
-      {hint ? <div className="mt-4 text-[11px] text-muted-foreground">{hint}</div> : null}
+      <h2 className={cn("font-serif text-3xl drop-shadow-[0_1px_0_rgba(0,0,0,0.15)]", t.value)}>{value}</h2>
+      {hint ? <div className={cn("mt-4 text-[11px]", t.hint)}>{hint}</div> : null}
     </div>
   );
 }
@@ -95,21 +108,35 @@ export function SectionCard({
   action,
   children,
   className,
+  accent = "teal",
 }: {
   title: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  accent?: "teal" | "indigo" | "amber" | "rose" | "emerald" | "violet" | "sky" | "none";
 }) {
+  const accents: Record<string, string> = {
+    teal:    "bg-linear-to-r from-teal-500 via-cyan-500 to-sky-500",
+    indigo:  "bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500",
+    amber:   "bg-linear-to-r from-amber-400 via-orange-500 to-rose-500",
+    rose:    "bg-linear-to-r from-rose-500 via-pink-500 to-fuchsia-500",
+    emerald: "bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500",
+    violet:  "bg-linear-to-r from-violet-500 via-purple-500 to-fuchsia-500",
+    sky:     "bg-linear-to-r from-sky-500 via-blue-500 to-indigo-500",
+    none:    "hidden",
+  };
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-elevated)]",
+        "relative overflow-hidden rounded-2xl border border-border bg-card",
+        "shadow-[0_12px_30px_-12px_rgba(2,24,30,0.35)]",
         className,
       )}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-6">
-        <h3 className="font-serif text-lg text-foreground">{title}</h3>
+      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-1", accents[accent])} />
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-linear-to-b from-muted/60 to-transparent p-6 pt-7">
+        <h3 className="font-serif text-lg font-semibold text-foreground">{title}</h3>
         {action}
       </header>
       {children}
