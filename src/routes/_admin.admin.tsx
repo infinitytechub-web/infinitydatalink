@@ -14,7 +14,11 @@ const groups: NavGroup[] = [
     label: "Finance",
     items: [
       { to: "/admin/finance", label: "Financial Dashboard" },
-      { to: "/admin/finance/expenses", label: "Expenses" },
+      { to: "/admin/finance/summary", label: "Financial Summary" },
+      { to: "/admin/finance/contributions", label: "Contributions" },
+      { to: "/admin/finance/income", label: "Income" },
+      { to: "/admin/finance/breakdown", label: "Expenses Breakdown" },
+      { to: "/admin/finance/expenses", label: "Expense Ledger" },
       { to: "/admin/finance/transfers", label: "Transfers" },
       { to: "/admin/finance/adjustments", label: "Balance Mgmt" },
     ],
