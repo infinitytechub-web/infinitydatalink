@@ -200,6 +200,22 @@ export const clearTransfer = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const rejectTransfer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), reason: z.string().min(3).max(500) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertFinance(context.supabase, context.userId);
+    const { error } = await (context.supabase as any).rpc("reject_transfer", {
+      _transfer_id: data.id,
+      _reason: data.reason,
+      _actor_id: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 // ============ Adjustments ============
 export type AdjustmentRow = {
   id: string;
