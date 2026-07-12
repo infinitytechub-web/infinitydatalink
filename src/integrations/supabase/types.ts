@@ -1525,6 +1525,63 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reject_transfer: {
+        Args: { _actor_id: string; _reason: string; _transfer_id: string }
+        Returns: {
+          amount: number
+          channel: string | null
+          cleared_at: string | null
+          cleared_by: string | null
+          created_at: string
+          created_by: string | null
+          from_account_id: string
+          id: string
+          in_txn_id: string | null
+          note: string | null
+          out_txn_id: string | null
+          ref: string
+          status: Database["public"]["Enums"]["transfer_status"]
+          to_account_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      request_transfer: {
+        Args: {
+          _amount: number
+          _from_account_id: string
+          _note: string
+          _to_account_id: string
+        }
+        Returns: {
+          amount: number
+          channel: string | null
+          cleared_at: string | null
+          cleared_by: string | null
+          created_at: string
+          created_by: string | null
+          from_account_id: string
+          id: string
+          in_txn_id: string | null
+          note: string | null
+          out_txn_id: string | null
+          ref: string
+          status: Database["public"]["Enums"]["transfer_status"]
+          to_account_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reset_own_kyc_pending: { Args: never; Returns: undefined }
       revoke_super_admin: {
         Args: { _reason?: string; _user_id: string }
