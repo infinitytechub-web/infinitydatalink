@@ -570,6 +570,27 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admin_seed_emails: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          note: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          note?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -654,18 +675,24 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string
+          granted_at: string
+          granted_by: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          granted_at?: string
+          granted_by?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string
+          granted_at?: string
+          granted_by?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -750,6 +777,27 @@ export type Database = {
         }
       }
       gen_txn_ref: { Args: { _prefix: string }; Returns: string }
+      grant_super_admin_by_email: {
+        Args: { _email: string; _note?: string }
+        Returns: {
+          email: string
+          granted_at: string
+          user_id: string
+        }[]
+      }
+      list_super_admins: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          granted_at: string
+          granted_by: string
+          granted_by_email: string
+          member_no: string
+          seeded: boolean
+          user_id: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -825,6 +873,10 @@ export type Database = {
         }
       }
       reset_own_kyc_pending: { Args: never; Returns: undefined }
+      revoke_super_admin: {
+        Args: { _reason?: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:

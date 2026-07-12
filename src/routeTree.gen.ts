@@ -30,6 +30,7 @@ import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profi
 import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
 import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
 import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
+import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
 import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
 import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
@@ -153,6 +154,11 @@ const MemberAppKycRoute = MemberAppKycRouteImport.update({
   path: '/kyc',
   getParentRoute: () => MemberAppRoute,
 } as any)
+const AdminAdminSuperAdminsRoute = AdminAdminSuperAdminsRouteImport.update({
+  id: '/super-admins',
+  path: '/super-admins',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AdminAdminSettingsRoute = AdminAdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
+  '/admin/super-admins': typeof AdminAdminSuperAdminsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
   '/app/payments': typeof MemberAppPaymentsRoute
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/admin/savings': typeof AdminAdminSavingsRoute
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
+  '/admin/super-admins': typeof AdminAdminSuperAdminsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
   '/app/payments': typeof MemberAppPaymentsRoute
@@ -351,6 +359,7 @@ export interface FileRoutesById {
   '/_admin/admin/savings': typeof AdminAdminSavingsRoute
   '/_admin/admin/security': typeof AdminAdminSecurityRoute
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
+  '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRoute
   '/_member/app/kyc': typeof MemberAppKycRoute
   '/_member/app/loans': typeof MemberAppLoansRouteWithChildren
   '/_member/app/payments': typeof MemberAppPaymentsRoute
@@ -393,6 +402,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/super-admins'
     | '/app/kyc'
     | '/app/loans'
     | '/app/payments'
@@ -431,6 +441,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/super-admins'
     | '/app/kyc'
     | '/app/loans'
     | '/app/payments'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/savings'
     | '/_admin/admin/security'
     | '/_admin/admin/settings'
+    | '/_admin/admin/super-admins'
     | '/_member/app/kyc'
     | '/_member/app/loans'
     | '/_member/app/payments'
@@ -660,6 +672,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppKycRouteImport
       parentRoute: typeof MemberAppRoute
     }
+    '/_admin/admin/super-admins': {
+      id: '/_admin/admin/super-admins'
+      path: '/super-admins'
+      fullPath: '/admin/super-admins'
+      preLoaderRoute: typeof AdminAdminSuperAdminsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/settings': {
       id: '/_admin/admin/settings'
       path: '/settings'
@@ -828,6 +847,7 @@ interface AdminAdminRouteChildren {
   AdminAdminSavingsRoute: typeof AdminAdminSavingsRoute
   AdminAdminSecurityRoute: typeof AdminAdminSecurityRoute
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
+  AdminAdminSuperAdminsRoute: typeof AdminAdminSuperAdminsRoute
   AdminAdminIndexRoute: typeof AdminAdminIndexRoute
 }
 
@@ -840,6 +860,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminSavingsRoute: AdminAdminSavingsRoute,
   AdminAdminSecurityRoute: AdminAdminSecurityRoute,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
+  AdminAdminSuperAdminsRoute: AdminAdminSuperAdminsRoute,
   AdminAdminIndexRoute: AdminAdminIndexRoute,
 }
 
