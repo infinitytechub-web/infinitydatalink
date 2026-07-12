@@ -404,7 +404,7 @@ export const adminListPendingPayments = createServerFn({ method: "GET" })
     let q = context.supabase
       .from("transactions")
       .select(
-        "id, ref, kind, amount, channel, note, created_at, user_id, loan_id, savings_account_id, profiles!transactions_user_id_fkey(full_name, member_no), savings_accounts(savings_plans(name)), loans(ref)",
+        "id, ref, kind, amount, channel, note, created_at, user_id, loan_id, savings_account_id, savings_accounts(savings_plans(name)), loans(ref)",
       )
       .eq("status", "pending")
       .order("created_at", { ascending: true })
@@ -412,6 +412,15 @@ export const adminListPendingPayments = createServerFn({ method: "GET" })
     if (data.kind !== "all") q = q.eq("kind", data.kind);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
+    const userIds = Array.from(new Set((rows ?? []).map((t: any) => t.user_id).filter(Boolean)));
+    const profilesMap = new Map<string, { full_name: string | null; member_no: string | null }>();
+    if (userIds.length > 0) {
+      const { data: profs } = await context.supabase
+        .from("profiles")
+        .select("id, full_name, member_no")
+        .in("id", userIds);
+      for (const p of profs ?? []) profilesMap.set(p.id, { full_name: p.full_name, member_no: p.member_no });
+    }
     return (rows ?? []).map((t: any) => ({
       id: t.id,
       ref: t.ref,
@@ -421,13 +430,14 @@ export const adminListPendingPayments = createServerFn({ method: "GET" })
       note: t.note,
       created_at: t.created_at,
       user_id: t.user_id,
-      member_name: t.profiles?.full_name ?? null,
-      member_no: t.profiles?.member_no ?? null,
+      member_name: profilesMap.get(t.user_id)?.full_name ?? null,
+      member_no: profilesMap.get(t.user_id)?.member_no ?? null,
       loan_id: t.loan_id,
       loan_ref: t.loans?.ref ?? null,
       savings_account_id: t.savings_account_id,
       plan_name: t.savings_accounts?.savings_plans?.name ?? null,
     }));
+
   });
 
 export type AdminPaymentsSummary = {
