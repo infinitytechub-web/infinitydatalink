@@ -56,7 +56,7 @@ export const listEntities = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }): Promise<EntityRow[]> => {
     await assertStaff(context.supabase, context.userId);
-    let q = context.supabase.from("entities").select("*").order("created_at", { ascending: false }).limit(data.limit);
+    let q: any = context.supabase.from("entities").select("*").order("created_at", { ascending: false }).limit(data.limit);
     if (data.type) q = q.eq("type", data.type);
     if (data.status && data.status !== "all") q = q.eq("status", data.status);
     const { data: rows, error } = await q;
@@ -161,9 +161,12 @@ export const decideEntity = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertReviewer(context.supabase, context.userId);
+    const args: Record<string, any> =
+      data.action === "approve"
+        ? { _entity_id: data.id, _note: data.note }
+        : { _entity_id: data.id, _reason: data.note };
     const rpc = data.action === "approve" ? "approve_entity" : "suspend_entity";
-    const argName = data.action === "approve" ? "_note" : "_reason";
-    const { error } = await context.supabase.rpc(rpc, { _entity_id: data.id, [argName]: data.note });
+    const { error } = await (context.supabase as any).rpc(rpc, args);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

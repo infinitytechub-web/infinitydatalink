@@ -22,16 +22,18 @@ async function assertView(supabase: any, userId: string) {
 export type ExpenseRow = {
   id: string;
   ref: string;
-  category: string | null;
+  category_code: string;
+  vendor: string;
   amount: number;
-  status: "pending" | "approved" | "rejected" | "paid" | "void";
-  note: string | null;
-  vendor: string | null;
+  currency: string;
+  status: "pending" | "approved" | "rejected" | "paid";
   incurred_on: string;
-  created_at: string;
-  posted_by: string;
+  paid_on: string | null;
+  notes: string | null;
+  created_by: string | null;
   approved_by: string | null;
-  paid_at: string | null;
+  approved_at: string | null;
+  created_at: string;
 };
 
 export const listExpenses = createServerFn({ method: "GET" })
@@ -41,7 +43,7 @@ export const listExpenses = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }): Promise<ExpenseRow[]> => {
     await assertView(context.supabase, context.userId);
-    let q = context.supabase.from("expenses").select("*").order("created_at", { ascending: false }).limit(data.limit);
+    let q: any = context.supabase.from("expenses").select("*").order("created_at", { ascending: false }).limit(data.limit);
     if (data.status && data.status !== "all") q = q.eq("status", data.status);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -50,11 +52,15 @@ export const listExpenses = createServerFn({ method: "GET" })
 
 export const listExpenseCategories = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<Array<{ id: string; name: string }>> => {
+  .handler(async ({ context }): Promise<Array<{ code: string; label: string }>> => {
     await assertView(context.supabase, context.userId);
-    const { data, error } = await context.supabase.from("expense_categories").select("id,name").order("name");
+    const { data, error } = await (context.supabase as any)
+      .from("expense_categories")
+      .select("code,label")
+      .eq("active", true)
+      .order("label");
     if (error) throw new Error(error.message);
-    return (data ?? []) as Array<{ id: string; name: string }>;
+    return (data ?? []) as Array<{ code: string; label: string }>;
   });
 
 export const postExpense = createServerFn({ method: "POST" })
@@ -62,25 +68,30 @@ export const postExpense = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
       .object({
-        category_id: z.string().uuid().nullable().optional(),
+        category_code: z.string().min(1),
+        vendor: z.string().min(1).max(200),
         amount: z.number().positive(),
-        vendor: z.string().max(200).nullable().optional(),
-        note: z.string().max(1000).nullable().optional(),
         incurred_on: z.string().optional(),
+        payment_channel: z.string().max(50).nullable().optional(),
+        reference: z.string().max(100).nullable().optional(),
+        notes: z.string().max(1000).nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     await assertFinance(context.supabase, context.userId);
-    const { data: row, error } = await context.supabase.rpc("post_expense", {
-      _category_id: data.category_id ?? null,
+    const { data: row, error } = await (context.supabase as any).rpc("post_expense", {
+      _category_code: data.category_code,
+      _vendor: data.vendor,
       _amount: data.amount,
-      _vendor: data.vendor ?? null,
-      _note: data.note ?? null,
       _incurred_on: data.incurred_on ?? new Date().toISOString().slice(0, 10),
+      _payment_channel: data.payment_channel ?? null,
+      _reference: data.reference ?? null,
+      _notes: data.notes ?? null,
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
-    return { id: row as string };
+    return { id: (row as any)?.id ?? (row as any) };
   });
 
 export const decideExpense = createServerFn({ method: "POST" })
@@ -90,14 +101,33 @@ export const decideExpense = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         action: z.enum(["approve", "reject", "pay"]),
-        note: z.string().max(500).nullable().optional(),
+        reason: z.string().max(500).nullable().optional(),
+        channel: z.string().max(50).nullable().optional(),
+        reference: z.string().max(100).nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const rpc = data.action === "approve" ? "approve_expense" : data.action === "reject" ? "reject_expense" : "pay_expense";
-    const { error } = await context.supabase.rpc(rpc, { _expense_id: data.id, _note: data.note ?? null });
+    let args: Record<string, any>;
+    let rpc: string;
+    if (data.action === "approve") {
+      rpc = "approve_expense";
+      args = { _expense_id: data.id, _actor_id: context.userId };
+    } else if (data.action === "reject") {
+      if (!data.reason || data.reason.trim().length < 3) throw new Error("Rejection reason required");
+      rpc = "reject_expense";
+      args = { _expense_id: data.id, _reason: data.reason, _actor_id: context.userId };
+    } else {
+      rpc = "pay_expense";
+      args = {
+        _expense_id: data.id,
+        _channel: data.channel ?? "manual",
+        _reference: data.reference ?? "",
+        _actor_id: context.userId,
+      };
+    }
+    const { error } = await (context.supabase as any).rpc(rpc, args);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -106,10 +136,11 @@ export const decideExpense = createServerFn({ method: "POST" })
 export type TransferRow = {
   id: string;
   ref: string;
-  from_account_id: string | null;
-  to_account_id: string | null;
+  from_account_id: string;
+  to_account_id: string;
   amount: number;
-  status: "pending" | "cleared" | "failed";
+  status: "pending" | "cleared" | "failed" | "reversed";
+  channel: string | null;
   note: string | null;
   created_at: string;
   cleared_at: string | null;
@@ -122,7 +153,7 @@ export const listTransfers = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }): Promise<TransferRow[]> => {
     await assertView(context.supabase, context.userId);
-    let q = context.supabase.from("transfers").select("*").order("created_at", { ascending: false }).limit(data.limit);
+    let q: any = context.supabase.from("transfers").select("*").order("created_at", { ascending: false }).limit(data.limit);
     if (data.status && data.status !== "all") q = q.eq("status", data.status);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -137,30 +168,34 @@ export const postTransfer = createServerFn({ method: "POST" })
         from_account_id: z.string().uuid(),
         to_account_id: z.string().uuid(),
         amount: z.number().positive(),
+        channel: z.string().max(50).nullable().optional(),
         note: z.string().max(500).nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const { data: id, error } = await context.supabase.rpc("post_transfer", {
-      _from_account_id: data.from_account_id,
-      _to_account_id: data.to_account_id,
+    const { data: id, error } = await (context.supabase as any).rpc("post_transfer", {
+      _from: data.from_account_id,
+      _to: data.to_account_id,
       _amount: data.amount,
+      _channel: data.channel ?? "internal",
       _note: data.note ?? null,
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
-    return { id: id as string };
+    return { id: (id as any)?.id ?? (id as any) };
   });
 
 export const clearTransfer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), note: z.string().max(500).nullable().optional() }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("clear_transfer", { _transfer_id: data.id, _note: data.note ?? null });
+    const { error } = await (context.supabase as any).rpc("clear_transfer", {
+      _transfer_id: data.id,
+      _actor_id: context.userId,
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -174,7 +209,7 @@ export type AdjustmentRow = {
   amount: number;
   reason: string;
   created_at: string;
-  posted_by: string;
+  approved_by: string | null;
 };
 
 export const listAdjustments = createServerFn({ method: "GET" })
@@ -205,14 +240,15 @@ export const postAdjustment = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertFinance(context.supabase, context.userId);
-    const { data: id, error } = await context.supabase.rpc("post_balance_adjustment", {
-      _savings_account_id: data.savings_account_id,
+    const { data: id, error } = await (context.supabase as any).rpc("post_balance_adjustment", {
+      _account_id: data.savings_account_id,
       _direction: data.direction,
       _amount: data.amount,
       _reason: data.reason,
+      _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
-    return { id: id as string };
+    return { id: (id as any)?.id ?? (id as any) };
   });
 
 // ============ Dashboard summary ============
@@ -239,20 +275,17 @@ export const getFinanceSummary = createServerFn({ method: "GET" })
 
     const [txnRes, expRes, transRes, savingsRes, loansRes] = await Promise.all([
       sb.from("transactions").select("kind,amount,status,created_at").gte("created_at", from),
-      sb.from("expenses").select("status,amount,created_at"),
+      sb.from("expenses").select("status,amount"),
       sb.from("transfers").select("status,amount"),
       sb.from("savings_accounts").select("balance"),
       sb.from("loans").select("outstanding_principal,status"),
     ]);
     const txns = (txnRes.data ?? []) as Array<{ kind: string; amount: number; status: string; created_at: string }>;
-    const cash_in_30d = txns
-      .filter((t) => t.status === "cleared" && (t.kind === "deposit" || t.kind === "loan_repayment"))
-      .reduce((s, t) => s + Number(t.amount), 0);
-    const cash_out_30d = txns
-      .filter((t) => t.status === "cleared" && (t.kind === "withdrawal" || t.kind === "loan_disbursement" || t.kind === "expense"))
-      .reduce((s, t) => s + Number(t.amount), 0);
+    const isIn = (k: string) => k === "deposit" || k === "loan_repayment";
+    const isOut = (k: string) => k === "withdrawal" || k === "loan_disbursement" || k === "expense";
+    const cash_in_30d = txns.filter((t) => t.status === "cleared" && isIn(t.kind)).reduce((s, t) => s + Number(t.amount), 0);
+    const cash_out_30d = txns.filter((t) => t.status === "cleared" && isOut(t.kind)).reduce((s, t) => s + Number(t.amount), 0);
 
-    // Build daily series (last 30 days)
     const buckets = new Map<string, { inc: number; out: number }>();
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 3600 * 1000).toISOString().slice(0, 10);
@@ -263,8 +296,8 @@ export const getFinanceSummary = createServerFn({ method: "GET" })
       const day = t.created_at.slice(0, 10);
       const b = buckets.get(day);
       if (!b) continue;
-      if (t.kind === "deposit" || t.kind === "loan_repayment") b.inc += Number(t.amount);
-      else if (t.kind === "withdrawal" || t.kind === "loan_disbursement" || t.kind === "expense") b.out += Number(t.amount);
+      if (isIn(t.kind)) b.inc += Number(t.amount);
+      else if (isOut(t.kind)) b.out += Number(t.amount);
     }
     const income_series = Array.from(buckets.entries()).map(([day, b]) => ({ day, amount: b.inc }));
     const expense_series = Array.from(buckets.entries()).map(([day, b]) => ({ day, amount: b.out }));
@@ -293,13 +326,20 @@ export const getFinanceSummary = createServerFn({ method: "GET" })
     };
   });
 
-// Helper: list savings accounts for the finance transfer/adjustment pickers.
-export type SavingsPick = { id: string; user_id: string; balance: number; plan_name: string | null; member_name: string | null; member_no: string | null };
+export type SavingsPick = {
+  id: string;
+  user_id: string;
+  balance: number;
+  plan_name: string | null;
+  member_name: string | null;
+  member_no: string | null;
+};
+
 export const listSavingsForFinance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<SavingsPick[]> => {
     await assertView(context.supabase, context.userId);
-    const { data, error } = await context.supabase
+    const { data, error } = await (context.supabase as any)
       .from("savings_accounts")
       .select("id,user_id,balance,savings_plans(name),profiles!inner(full_name,member_no)")
       .order("created_at", { ascending: false })
