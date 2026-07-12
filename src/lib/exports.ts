@@ -297,7 +297,7 @@ export async function exportPrint<T>(opts: ExportOptions<T>) {
         ${opts.subtitle ? `<p>${opts.subtitle}</p>` : ""}
         <p>Doc ID: ${docId}</p>
         <p>Generated: ${new Date().toLocaleString(cfg.currency.locale)}</p>
-        <div class="qr"><img src="${qr}" alt="QR"/></div>
+        <div class="qr"><img src="${qr}" alt="Document verification QR code"/></div>
       </div>
     </div>
     <div class="body">
