@@ -79,6 +79,29 @@ function ContributionsPage() {
   );
 }
 
+type DashRow = { section: string; label: string; value: string; count: string };
+
+function exportDashboardCsv(from: string, to: string, data: Awaited<ReturnType<typeof getContributionsReport>>) {
+  const rows: DashRow[] = [
+    { section: "Summary", label: "Cleared total", value: Number(data.cleared_total).toFixed(2), count: String(data.cleared_count) },
+    { section: "Summary", label: "Pending total", value: Number(data.pending_total).toFixed(2), count: String(data.pending_count) },
+    ...data.by_plan.map((p) => ({ section: "By plan", label: p.plan, value: Number(p.amount).toFixed(2), count: String(p.count) })),
+    ...data.daily.map((d: any) => ({ section: "Daily trend", label: d.day, value: Number(d.amount ?? 0).toFixed(2), count: "" })),
+  ];
+  exportCsv<DashRow>({
+    title: `Contributions dashboard ${from} – ${to}`,
+    filename: `contributions_dashboard_${from}_${to}`,
+    columns: [
+      { header: "Section", accessor: (r) => r.section },
+      { header: "Label", accessor: (r) => r.label },
+      { header: "Amount", accessor: (r) => r.value, align: "right" },
+      { header: "Count", accessor: (r) => r.count, align: "right" },
+    ],
+    rows,
+  });
+}
+
+
 function ContribBody({
   from,
   to,
