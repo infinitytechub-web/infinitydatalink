@@ -3,21 +3,11 @@ import { AlertTriangle, Inbox, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/org-config";
 import { Skeleton } from "@/components/ui/skeleton";
+import { KPI_TONES, pickTone, type ToneName } from "@/lib/theme-tokens";
 
-export type KPITone = "teal" | "indigo" | "amber" | "rose" | "emerald" | "violet" | "sky";
-
-const TONE_STYLES: Record<KPITone, { bg: string; ring: string; label: string; value: string; hint: string; bar: string }> = {
-  teal:    { bg: "bg-linear-to-br from-teal-500 via-teal-600 to-cyan-700",       ring: "ring-teal-400/40",    label: "text-teal-50/90",    value: "text-white", hint: "text-teal-50/80",    bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
-  indigo:  { bg: "bg-linear-to-br from-indigo-500 via-indigo-600 to-violet-700", ring: "ring-indigo-400/40",  label: "text-indigo-50/90",  value: "text-white", hint: "text-indigo-50/80",  bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
-  amber:   { bg: "bg-linear-to-br from-amber-400 via-orange-500 to-rose-500",    ring: "ring-amber-300/50",   label: "text-amber-50/95",   value: "text-white", hint: "text-amber-50/85",   bar: "bg-linear-to-r from-white/0 via-white/80 to-white/0" },
-  rose:    { bg: "bg-linear-to-br from-rose-500 via-pink-600 to-fuchsia-700",    ring: "ring-rose-400/40",    label: "text-rose-50/90",    value: "text-white", hint: "text-rose-50/80",    bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
-  emerald: { bg: "bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-700", ring: "ring-emerald-400/40", label: "text-emerald-50/90", value: "text-white", hint: "text-emerald-50/80", bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
-  violet:  { bg: "bg-linear-to-br from-violet-500 via-purple-600 to-fuchsia-700",ring: "ring-violet-400/40",  label: "text-violet-50/90",  value: "text-white", hint: "text-violet-50/80",  bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
-  sky:     { bg: "bg-linear-to-br from-sky-500 via-blue-600 to-indigo-700",      ring: "ring-sky-400/40",     label: "text-sky-50/90",     value: "text-white", hint: "text-sky-50/80",     bar: "bg-linear-to-r from-white/0 via-white/70 to-white/0" },
-};
-
-const TONE_CYCLE: KPITone[] = ["teal", "indigo", "emerald", "amber", "rose", "violet", "sky"];
-export const kpiTone = (i: number): KPITone => TONE_CYCLE[i % TONE_CYCLE.length];
+/** Backwards-compat alias; tone names now live in the shared token module. */
+export type KPITone = ToneName;
+export const kpiTone = pickTone;
 
 export function KPIStat({
   label,
@@ -35,7 +25,7 @@ export function KPIStat({
   className?: string;
 }) {
   const resolvedTone: KPITone = tone ?? (accent ? "amber" : "teal");
-  const t = TONE_STYLES[resolvedTone];
+  const t = KPI_TONES[resolvedTone];
   return (
     <div
       className={cn(
@@ -60,11 +50,14 @@ export function KPIStat({
       <p className={cn("mb-2 text-[11px] font-semibold uppercase tracking-widest", t.label)}>
         {label}
       </p>
-      <h2 className={cn("font-serif text-3xl drop-shadow-[0_1px_0_rgba(0,0,0,0.15)]", t.value)}>{value}</h2>
+      <h2 className={cn("font-serif text-3xl drop-shadow-[0_1px_0_rgba(0,0,0,0.15)]", t.value)}>
+        {value}
+      </h2>
       {hint ? <div className={cn("mt-4 text-[11px]", t.hint)}>{hint}</div> : null}
     </div>
   );
 }
+
 
 export function Money({ amount, signed }: { amount: number; signed?: boolean }) {
   const sign = signed ? (amount > 0 ? "+ " : amount < 0 ? "- " : "") : "";
