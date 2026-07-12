@@ -391,7 +391,7 @@ export type TransferAuditEntry = {
   to_member_no: string | null;
   out_txn_ref: string | null;
   in_txn_ref: string | null;
-  meta: Record<string, unknown>;
+  meta: Record<string, any>;
 };
 
 export type TransferAuditPage = {
