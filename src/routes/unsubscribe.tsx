@@ -71,7 +71,7 @@ function UnsubscribePage() {
         <div className="mt-6 text-sm text-emerald-deep/80">
           {state === "loading" && "Validating your link…"}
           {state === "invalid" && (
-            <p className="text-red-600">This unsubscribe link is invalid or has expired.</p>
+            <p className="text-destructive">This unsubscribe link is invalid or has expired.</p>
           )}
           {state === "already" && <p>You've already been unsubscribed. No further emails will be sent.</p>}
           {state === "confirm" && (
@@ -88,7 +88,7 @@ function UnsubscribePage() {
           {state === "done" && (
             <p className="text-emerald-mid">You've been unsubscribed. We're sorry to see you go.</p>
           )}
-          {state === "error" && <p className="text-red-600">{error}</p>}
+          {state === "error" && <p className="text-destructive">{error}</p>}
         </div>
       </div>
     </main>
