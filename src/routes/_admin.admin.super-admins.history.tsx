@@ -149,6 +149,7 @@ function HistoryBody() {
         },
       });
       exportCsv({
+        title: "Super Admin grant history",
         filename: `super-admin-history-${new Date().toISOString().slice(0, 10)}.csv`,
         rows: all,
         columns: [
