@@ -2,6 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { KPIStat, Money, StatusPill } from "@/components/primitives";
 
 export const Route = createFileRoute("/_member/app/")({
+  head: () => ({
+    meta: [
+      { title: "Member Dashboard — Infinity Wealth" },
+      {
+        name: "description",
+        content:
+          "Your Infinity Wealth member dashboard: net worth, savings, loans, and recent transactions at a glance.",
+      },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Dashboard,
 });
 
