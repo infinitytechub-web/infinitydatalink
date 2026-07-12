@@ -52,7 +52,7 @@ function IncomePage() {
   const { from, to } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const setField = (k: "from" | "to", v: string) =>
-    navigate({ search: (prev) => ({ ...prev, [k]: v }) });
+    navigate({ search: (prev: { from: string; to: string }) => ({ ...prev, [k]: v }) });
   return (
     <>
       <PageHeader
