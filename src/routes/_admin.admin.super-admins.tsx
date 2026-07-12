@@ -129,7 +129,7 @@ function Directory({ currentUserId }: { currentUserId: string }) {
         }
       >
         {rows.length === 0 ? (
-          <EmptyState title="No Super Admins" description="This should never happen — contact support." />
+          <EmptyState title="No Super Admins" hint="This should never happen — contact support." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -156,9 +156,8 @@ function Directory({ currentUserId }: { currentUserId: string }) {
                       <td className="px-6 py-3 tabular">{fmtDate(r.granted_at)}</td>
                       <td className="px-6 py-3 tabular">{r.granted_by_email ?? "system"}</td>
                       <td className="px-6 py-3">
-                        <StatusPill status={r.seeded ? "cleared" : "pending"}>
-                          {r.seeded ? "Seeded" : "Manual"}
-                        </StatusPill>
+                        <StatusPill status={r.seeded ? "cleared" : "pending"} />
+
                       </td>
                       <td className="px-6 py-3 text-right">
                         <button
@@ -202,12 +201,12 @@ function Directory({ currentUserId }: { currentUserId: string }) {
 
 function SeedList({ seed }: { seed: SeedEmailRow[] }) {
   return (
-    <SectionCard
-      title={`Seeded emails (${seed.length})`}
-      subtitle="Emails on this allow-list may self-provision Super Admin on first confirmed sign-in. Managed automatically when granting or revoking."
-    >
+    <SectionCard title={`Seeded emails (${seed.length})`}>
+      <div className="border-b border-emerald-deep/5 px-6 py-3 text-xs text-emerald-deep/60">
+        Emails on this allow-list may self-provision Super Admin on first confirmed sign-in. Managed automatically when granting or revoking.
+      </div>
       {seed.length === 0 ? (
-        <EmptyState title="No seeded emails" description="Every Super Admin was granted manually." />
+        <EmptyState title="No seeded emails" hint="Every Super Admin was granted manually." />
       ) : (
         <ul className="divide-y divide-emerald-deep/5">
           {seed.map((s) => (
