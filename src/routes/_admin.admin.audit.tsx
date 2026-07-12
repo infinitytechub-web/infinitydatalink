@@ -4,7 +4,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { toast } from "sonner";
-import { EmptyState, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { EmptyState, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Pagination } from "@/components/table-controls";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,7 +59,7 @@ function AuditPage() {
         title="Loan Decision Audit"
         description="Immutable record of every loan approval and rejection, with the deciding officer's justification."
       />
-      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+      <Suspense fallback={<SectionCardSkeleton title="Decisions" rows={8} cols={5} />}>
         <AuditContent />
       </Suspense>
     </>

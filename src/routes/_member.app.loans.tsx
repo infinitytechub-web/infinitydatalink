@@ -3,13 +3,12 @@ import { Suspense } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { EmptyState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Pagination, SortHeader, type SortState } from "@/components/table-controls";
 import { formatMoney } from "@/lib/org-config";
 import { getMyLoans, type LoanRow } from "@/lib/member-data.functions";
 import { LoanApplicationDialog } from "@/components/loan-application-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const search = z.object({
   page: fallback(z.number().int(), 1).default(1),
@@ -46,7 +45,7 @@ function LoansPage() {
           />
         }
       />
-      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+      <Suspense fallback={<SectionCardSkeleton title="Your loans" rows={5} cols={5} />}>
         <LoansContent />
       </Suspense>
     </>

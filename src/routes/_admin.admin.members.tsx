@@ -4,7 +4,14 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery }
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
-import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import {
+  ErrorState,
+  KPIGridSkeleton,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -72,7 +79,7 @@ export const Route = createFileRoute("/_admin/admin/members")({
   head: () => ({ meta: [{ title: "KYC queue — Admin" }, { name: "robots", content: "noindex" }] }),
   component: MembersPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Queue failed to load: {error.message}</div>
+    <div className="p-6"><ErrorState title="Queue failed to load" message={error.message} /></div>
   ),
 });
 
@@ -85,13 +92,13 @@ function MembersPage() {
         description="Assign reviewers, take decisions individually, or approve and reject in bulk."
       />
       <div className="space-y-6">
-        <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+        <Suspense fallback={<KPIGridSkeleton count={4} />}>
           <SummaryCards />
         </Suspense>
-        <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+        <Suspense fallback={<Skeleton className="h-10 w-full" />}>
           <AgingChips />
         </Suspense>
-        <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+        <Suspense fallback={<SectionCardSkeleton title="Queue" rows={8} cols={6} />}>
           <QueueBody />
         </Suspense>
       </div>
