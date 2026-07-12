@@ -2,14 +2,21 @@ import { describe, expect, it, beforeAll } from "vitest";
 import { execFileSync } from "node:child_process";
 
 /**
- * Direct database RBAC tests with mocked JWT claims.
+ * Direct DB tests for two Super-Admin-critical guards, using mocked JWT
+ * claims so `auth.uid()` and `auth.jwt()` resolve without a live session:
  *
- * Uses psql to SET LOCAL role authenticated + request.jwt.claims so
- * `auth.uid()` and `auth.jwt()` resolve to specific users. Everything runs
- * inside a transaction that is ROLLED BACK, so the database state is
- * unchanged even when a positive-path INSERT succeeds.
+ *   1. `guard_super_admin_role` trigger — blocks unauthorized INSERT/DELETE
+ *      of the `super_admin` role on `public.user_roles`.
+ *   2. `audit_log` INSERT policy — blocks callers from spoofing `actor_id`,
+ *      `actor_email`, or `actor_role`.
  *
- * Skipped automatically when PGHOST is not set.
+ * All DML runs inside BEGIN / ROLLBACK so state is untouched even when the
+ * positive-path INSERTs succeed. Skipped when PGHOST is unset.
+ *
+ * The sandbox role cannot read `auth.users`, so user IDs are pulled from
+ * `public.user_roles`, and the "email" is a synthetic value put into the
+ * JWT claim and asserted against `actor_email` — the guard compares
+ * `actor_email` to the JWT-provided email, not to `auth.users.email`.
  */
 
 const hasDb = !!process.env.PGHOST;
@@ -19,11 +26,6 @@ function q(sql: string): string {
   return execFileSync("psql", ["-tAX", "-c", sql], { encoding: "utf8" }).trim();
 }
 
-/**
- * Run a block of SQL wrapped in BEGIN/ROLLBACK.  Any DML executed inside is
- * discarded.  Returns stdout so we can grep for error messages when
- * PL/pgSQL exceptions are expected.
- */
 function tx(sql: string): { ok: boolean; stdout: string; stderr: string } {
   try {
     const out = execFileSync(
@@ -41,136 +43,120 @@ function tx(sql: string): { ok: boolean; stdout: string; stderr: string } {
   }
 }
 
+/**
+ * Emit SQL that installs a mocked JWT for the current transaction. The
+ * `role` GUC switches the row to run under RLS as `authenticated`; the
+ * `request.jwt.claims` GUC populates `auth.uid()` and `auth.jwt()`.
+ */
 function setJwt(userId: string, email: string, role = "authenticated"): string {
   const claims = JSON.stringify({ sub: userId, email, role });
-  // Use set_config so single quotes inside the JSON don't break the SQL parse.
-  return `SELECT set_config('role','${role}',true);
-SELECT set_config('request.jwt.claims', ${JSON.stringify(claims).replace(/'/g, "''")}, true);`;
+  // Use $$-quoting so embedded double-quotes in JSON don't need escaping.
+  return `SELECT set_config('request.jwt.claims', $CLAIM$${claims}$CLAIM$, true);
+SELECT set_config('role', '${role}', true);
+SET LOCAL ROLE ${role};`;
 }
 
 d("guard_super_admin_role trigger", () => {
   let memberId = "";
-  let memberEmail = "";
   let superAdminId = "";
-  let superAdminEmail = "";
+  const memberEmail = "member.mock@example.test";
+  const superAdminEmail = "sa.mock@example.test";
 
   beforeAll(() => {
-    // Any confirmed non-super_admin user.
+    superAdminId = q(
+      `SELECT user_id::text FROM public.user_roles WHERE role='super_admin' ORDER BY granted_at LIMIT 1`,
+    );
     memberId = q(`
-      SELECT u.id FROM auth.users u
-        WHERE u.email_confirmed_at IS NOT NULL
-          AND NOT EXISTS (
-            SELECT 1 FROM public.user_roles ur
-            WHERE ur.user_id = u.id AND ur.role = 'super_admin'
-          )
-        ORDER BY u.created_at ASC LIMIT 1
+      SELECT user_id::text FROM public.user_roles
+       WHERE role='member'
+         AND user_id NOT IN (SELECT user_id FROM public.user_roles WHERE role='super_admin')
+       LIMIT 1
     `);
-    memberEmail = q(`SELECT email FROM auth.users WHERE id = '${memberId}'`);
-
-    superAdminId = q(`
-      SELECT ur.user_id FROM public.user_roles ur
-        WHERE ur.role = 'super_admin' LIMIT 1
-    `);
-    superAdminEmail = q(`SELECT email FROM auth.users WHERE id = '${superAdminId}'`);
   });
 
   it("has fixture users", () => {
-    expect(memberId).toMatch(/[0-9a-f-]{36}/);
     expect(superAdminId).toMatch(/[0-9a-f-]{36}/);
+    expect(memberId).toMatch(/[0-9a-f-]{36}/);
     expect(memberId).not.toBe(superAdminId);
   });
 
-  it("rejects a non-super_admin trying to grant themselves super_admin", () => {
+  it("non-super_admin cannot INSERT super_admin for themselves", () => {
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
       INSERT INTO public.user_roles (user_id, role) VALUES ('${memberId}', 'super_admin');
     `);
     expect(r.ok).toBe(false);
-    expect(r.stderr).toMatch(/forbidden|super_admin/i);
+    expect(r.stderr).toMatch(/forbidden.*super_admin|super_admin role changes require/i);
   });
 
-  it("rejects a non-super_admin trying to grant super_admin to someone else", () => {
+  it("non-super_admin cannot INSERT super_admin for another user", () => {
+    // Use a fresh uuid so we don't collide with an existing row.
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
-      INSERT INTO public.user_roles (user_id, role) VALUES ('${superAdminId}', 'super_admin')
-      ON CONFLICT (user_id, role) DO NOTHING;
-      -- If the row already exists, the trigger still fires for the INSERT
-      -- attempt; force a distinct write to guarantee the trigger runs.
-      DELETE FROM public.user_roles
-        WHERE user_id = '${superAdminId}' AND role = 'super_admin';
+      INSERT INTO public.user_roles (user_id, role)
+        VALUES (gen_random_uuid(), 'super_admin');
     `);
-    // Either the INSERT is rejected OR the DELETE (also guarded) is rejected.
     expect(r.ok).toBe(false);
-    expect(r.stderr).toMatch(/forbidden|super_admin/i);
+    expect(r.stderr).toMatch(/forbidden.*super_admin|super_admin role changes require/i);
   });
 
-  it("rejects a non-super_admin trying to REVOKE an existing super_admin", () => {
+  it("non-super_admin cannot DELETE an existing super_admin row", () => {
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
       DELETE FROM public.user_roles
         WHERE user_id = '${superAdminId}' AND role = 'super_admin';
     `);
+    // Guard trigger raises on DELETE of a super_admin row for non-super_admin callers.
     expect(r.ok).toBe(false);
-    expect(r.stderr).toMatch(/forbidden|super_admin/i);
+    expect(r.stderr).toMatch(/forbidden.*super_admin|super_admin role changes require/i);
   });
 
-  it("allows an existing super_admin to grant super_admin (rolled back)", () => {
-    // Pick a second confirmed user not currently super_admin.
+  it("existing super_admin CAN INSERT another super_admin (rolled back)", () => {
     const target = q(`
-      SELECT u.id FROM auth.users u
-        WHERE u.email_confirmed_at IS NOT NULL
-          AND u.id <> '${superAdminId}'
-          AND NOT EXISTS (
-            SELECT 1 FROM public.user_roles ur
-            WHERE ur.user_id = u.id AND ur.role = 'super_admin'
-          )
-        ORDER BY u.created_at ASC LIMIT 1
+      SELECT user_id::text FROM public.user_roles
+       WHERE role='member'
+         AND user_id NOT IN (SELECT user_id FROM public.user_roles WHERE role='super_admin')
+       OFFSET 0 LIMIT 1
     `);
-    if (!target) return; // no second user in this env; skip silently
+    if (!target) return;
     const r = tx(`
       ${setJwt(superAdminId, superAdminEmail)}
       INSERT INTO public.user_roles (user_id, role, granted_by)
-        VALUES ('${target}', 'super_admin', '${superAdminId}');
+        VALUES ('${target}', 'super_admin', '${superAdminId}')
+        ON CONFLICT (user_id, role) DO NOTHING;
     `);
     expect(r.ok).toBe(true);
   });
 
-  it("non-super_admin roles are unaffected by the guard (member insert still blocked by RLS but not by trigger message)", () => {
-    // The guard only fires for role='super_admin'; a non-super_admin role
-    // change may still be rejected by RLS, but never with the
-    // 'forbidden: super_admin role changes' message.
+  it("guard does NOT reject changes to non-super_admin roles with the super_admin message", () => {
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
       INSERT INTO public.user_roles (user_id, role) VALUES ('${memberId}', 'moderator')
         ON CONFLICT DO NOTHING;
     `);
     if (!r.ok) {
-      expect(r.stderr).not.toMatch(/forbidden: super_admin role changes/i);
+      // RLS may still reject, but never with the super_admin-specific message.
+      expect(r.stderr).not.toMatch(/forbidden.*super_admin/i);
     }
   });
 });
 
 d("audit_log spoof guard (INSERT WITH CHECK)", () => {
   let memberId = "";
-  let memberEmail = "";
-  let otherId = "";
+  const memberEmail = "member.mock@example.test";
+  const otherId = "00000000-0000-0000-0000-000000000042";
 
   beforeAll(() => {
     memberId = q(`
-      SELECT u.id FROM auth.users u
-        WHERE u.email_confirmed_at IS NOT NULL
-          AND NOT EXISTS (
-            SELECT 1 FROM public.user_roles ur
-            WHERE ur.user_id = u.id AND ur.role = 'super_admin'
-          )
-        ORDER BY u.created_at ASC LIMIT 1
+      SELECT user_id::text FROM public.user_roles
+       WHERE role='member'
+         AND user_id NOT IN (SELECT user_id FROM public.user_roles WHERE role='super_admin')
+       LIMIT 1
     `);
-    memberEmail = q(`SELECT email FROM auth.users WHERE id = '${memberId}'`);
-    otherId = q(`
-      SELECT u.id FROM auth.users u
-        WHERE u.id <> '${memberId}' AND u.email_confirmed_at IS NOT NULL
-        ORDER BY u.created_at ASC LIMIT 1
-    `);
+  });
+
+  it("has fixture user", () => {
+    expect(memberId).toMatch(/[0-9a-f-]{36}/);
   });
 
   it("rejects INSERT where actor_id != auth.uid()", () => {
@@ -203,8 +189,9 @@ d("audit_log spoof guard (INSERT WITH CHECK)", () => {
     expect(r.stderr).toMatch(/row-level security|policy/i);
   });
 
-  it("allows INSERT with matching actor_id + actor_email + a role the caller actually holds", () => {
-    // 'member' is granted by handle_new_user() to every confirmed user.
+  it("allows INSERT with matching id + email + real role the caller holds", () => {
+    // handle_new_user() grants 'member' to every confirmed user, so this
+    // matches the WITH CHECK EXISTS clause.
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
       INSERT INTO public.audit_log (actor_id, actor_email, actor_role, action, target, meta)
@@ -213,7 +200,7 @@ d("audit_log spoof guard (INSERT WITH CHECK)", () => {
     expect(r.ok).toBe(true);
   });
 
-  it("allows INSERT with NULL actor_email and NULL actor_role", () => {
+  it("allows INSERT with NULL actor_email + NULL actor_role", () => {
     const r = tx(`
       ${setJwt(memberId, memberEmail)}
       INSERT INTO public.audit_log (actor_id, actor_email, actor_role, action, target, meta)
@@ -222,13 +209,13 @@ d("audit_log spoof guard (INSERT WITH CHECK)", () => {
     expect(r.ok).toBe(true);
   });
 
-  it("SELECT on audit_log is denied to non-admin members", () => {
-    // The policy is `USING (private.is_admin(auth.uid()))`. A member should
-    // read zero rows even without an explicit error.
-    const r = execFileSync(
+  it("non-admin SELECT on audit_log returns zero rows (private.is_admin gate)", () => {
+    const out = execFileSync(
       "psql",
       [
         "-tAX",
+        "-v",
+        "ON_ERROR_STOP=1",
         "-c",
         `BEGIN;
          ${setJwt(memberId, memberEmail)}
@@ -237,8 +224,10 @@ d("audit_log spoof guard (INSERT WITH CHECK)", () => {
       ],
       { encoding: "utf8" },
     ).trim();
-    // Output is a multi-line psql result; the COUNT is the numeric line.
-    const nums = r.split(/\r?\n/).map((s) => s.trim()).filter((s) => /^\d+$/.test(s));
-    expect(nums[nums.length - 1]).toBe("0");
+    const nums = out
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter((s) => /^\d+$/.test(s));
+    expect(nums.at(-1)).toBe("0");
   });
 });
