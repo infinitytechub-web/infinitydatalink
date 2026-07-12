@@ -169,14 +169,35 @@
   }
 }
 
+/* Subtler default fade-in so route transitions feel calm, not swoopy. */
+@keyframes fade-in {
+  from { opacity: 0; transform: translate3d(0, 4px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.animate-fade-in {
+  animation: fade-in 180ms ease-out both;
+  will-change: opacity, transform;
+}
+
 /* Respect user reduced-motion preference. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
+  /* Recharts injects inline animation timings; neutralise them. */
+  .recharts-layer,
+  .recharts-line-curve,
+  .recharts-bar-rectangle,
+  .recharts-area-area {
+    animation: none !important;
+    transition: none !important;
+  }
 }
+

@@ -3,16 +3,7 @@ import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-} from "recharts";
+import { TrendChart, BarList } from "@/components/charts";
 import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -192,22 +183,18 @@ function ReportsBody() {
             <EmptyState title="No activity in this range" hint="Widen the date range or seed activity." />
           </div>
         ) : (
-          <div className="h-80 p-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.series}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="bucket" fontSize={11} stroke="currentColor" />
-                <YAxis fontSize={11} stroke="currentColor" />
-                <Tooltip
-                  contentStyle={{ fontSize: 12, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-                />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="new_members" stroke="#0f766e" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="contributions" stroke="#2563eb" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="disbursements" stroke="#d97706" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="repayments" stroke="#16a34a" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="p-4">
+            <TrendChart
+              title="Activity trend"
+              data={data.series}
+              xKey="bucket"
+              series={[
+                { key: "new_members", label: "New members" },
+                { key: "contributions", label: "Contributions", format: formatMoney },
+                { key: "disbursements", label: "Disbursements", format: formatMoney },
+                { key: "repayments", label: "Repayments", format: formatMoney },
+              ]}
+            />
           </div>
         )}
       </SectionCard>
@@ -221,7 +208,6 @@ function ReportsBody() {
 }
 
 function StatusMix({ data, s }: { data: AdminReport; s: SearchInput }) {
-  const max = Math.max(1, ...data.loan_status_mix.map((s) => s.count));
   return (
     <SectionCard
       title="Loan status mix"
@@ -242,22 +228,9 @@ function StatusMix({ data, s }: { data: AdminReport; s: SearchInput }) {
       {data.loan_status_mix.length === 0 ? (
         <div className="p-6"><EmptyState title="No loan activity in range" /></div>
       ) : (
-        <ul className="divide-y divide-emerald-deep/5">
-          {data.loan_status_mix.map((row) => (
-            <li key={row.status} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 px-6 py-3 text-sm">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70">
-                {row.status}
-              </span>
-              <div className="h-2 rounded bg-emerald-deep/5">
-                <div
-                  className="h-2 rounded bg-emerald-deep/60"
-                  style={{ width: `${(row.count / max) * 100}%` }}
-                />
-              </div>
-              <span className="tabular text-right text-sm">{row.count}</span>
-            </li>
-          ))}
-        </ul>
+        <BarList
+          rows={data.loan_status_mix.map((row) => ({ label: row.status, value: row.count }))}
+        />
       )}
     </SectionCard>
   );
