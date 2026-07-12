@@ -116,12 +116,13 @@ function SummaryCards() {
         ? `${Math.floor(oldestHours / 24)}d ${Math.floor(oldestHours % 24)}h`
         : `${Math.floor(oldestHours)}h`;
   const items = [
-    { label: "Pending", value: data.pending, tone: "text-gold" },
-    { label: "Assigned to me", value: data.assigned_to_me, tone: "text-emerald-mid" },
-    { label: "SLA breached", value: data.breached, tone: data.breached > 0 ? "text-red-600" : "text-emerald-deep/60" },
-    { label: `Oldest pending`, value: oldestLabel, tone: "text-emerald-deep" },
-    { label: "Unassigned", value: data.unassigned_pending, tone: "text-red-600" },
-    { label: "Decided (24h)", value: data.decided_today, tone: "text-emerald-deep" },
+    { label: "Pending", value: data.pending, tone: "text-warning" },
+    { label: "Assigned to me", value: data.assigned_to_me, tone: "text-success" },
+    { label: "SLA breached", value: data.breached, tone: data.breached > 0 ? "text-destructive" : "text-muted-foreground" },
+    { label: `Oldest pending`, value: oldestLabel, tone: "text-foreground" },
+    { label: "Unassigned", value: data.unassigned_pending, tone: "text-destructive" },
+    { label: "Decided (24h)", value: data.decided_today, tone: "text-foreground" },
+
   ];
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
