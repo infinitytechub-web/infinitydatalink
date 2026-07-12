@@ -89,7 +89,11 @@ function evalAuditPolicy(args: {
       )
     );
     ROLLBACK;
-  `).trim().split(/\r?\n/).at(-1)!.trim();
+  `)
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter((s) => s === "t" || s === "f")
+    .at(-1) ?? "";
 }
 
 d("guard_super_admin_role trigger", () => {
