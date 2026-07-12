@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
 import { useSuspenseQuery, queryOptions, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
-import { ErrorState, PageHeader, KPIStat, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import { ErrorState, PageHeader, KPIStat, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { adminRunHealthCheck, type ProbeResult, type HealthReport } from "@/lib/admin-health.functions";
 
 const healthQuery = queryOptions({
