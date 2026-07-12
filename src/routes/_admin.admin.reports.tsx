@@ -183,22 +183,18 @@ function ReportsBody() {
             <EmptyState title="No activity in this range" hint="Widen the date range or seed activity." />
           </div>
         ) : (
-          <div className="h-80 p-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.series}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="bucket" fontSize={11} stroke="currentColor" />
-                <YAxis fontSize={11} stroke="currentColor" />
-                <Tooltip
-                  contentStyle={{ fontSize: 12, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-                />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="new_members" stroke="#0f766e" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="contributions" stroke="#2563eb" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="disbursements" stroke="#d97706" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="repayments" stroke="#16a34a" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="p-4">
+            <TrendChart
+              title="Activity trend"
+              data={data.series}
+              xKey="bucket"
+              series={[
+                { key: "new_members", label: "New members" },
+                { key: "contributions", label: "Contributions", format: formatMoney },
+                { key: "disbursements", label: "Disbursements", format: formatMoney },
+                { key: "repayments", label: "Repayments", format: formatMoney },
+              ]}
+            />
           </div>
         )}
       </SectionCard>
