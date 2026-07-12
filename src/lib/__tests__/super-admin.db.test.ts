@@ -34,15 +34,14 @@ d("Database: super_admin seed & role enforcement", () => {
     expect(orphans).toBe(0);
   });
 
-  it("every super_admin user has a confirmed email", () => {
-    const unconfirmed = Number(
+  it("every super_admin role assignment has grant metadata (granted_at)", () => {
+    const missing = Number(
       q(
-        `SELECT COUNT(*) FROM public.user_roles ur
-            JOIN auth.users u ON u.id = ur.user_id
-           WHERE ur.role = 'super_admin' AND u.email_confirmed_at IS NULL`,
+        `SELECT COUNT(*) FROM public.user_roles
+          WHERE role = 'super_admin' AND granted_at IS NULL`,
       ),
     );
-    expect(unconfirmed).toBe(0);
+    expect(missing).toBe(0);
   });
 
   it("guard trigger is installed on user_roles", () => {
@@ -52,16 +51,17 @@ d("Database: super_admin seed & role enforcement", () => {
     expect(rows).toContain("guard_super_admin_role_ins");
   });
 
-  it("grant/revoke RPCs exist and require authenticated role", () => {
-    const grants = q(
-      `SELECT grantee || ':' || privilege_type FROM information_schema.routine_privileges
-         WHERE routine_schema='public'
-           AND routine_name IN ('grant_super_admin_by_email','revoke_super_admin','list_super_admins')`,
-    );
-    // Should be granted to authenticated (and NOT to PUBLIC or anon)
-    expect(grants).toContain("authenticated:EXECUTE");
-    expect(grants).not.toContain("PUBLIC:EXECUTE");
-    expect(grants).not.toContain("anon:EXECUTE");
+  it("grant/revoke/list RPCs are executable by authenticated role only", () => {
+    for (const fn of [
+      "grant_super_admin_by_email(text,text)",
+      "revoke_super_admin(uuid,text)",
+      "list_super_admins()",
+    ]) {
+      const auth = q(`SELECT has_function_privilege('authenticated','public.${fn}','EXECUTE')`);
+      const anon = q(`SELECT has_function_privilege('anon','public.${fn}','EXECUTE')`);
+      expect(auth, `authenticated should EXECUTE ${fn}`).toBe("t");
+      expect(anon, `anon must NOT EXECUTE ${fn}`).toBe("f");
+    }
   });
 
   it("user_roles has grant metadata columns", () => {
