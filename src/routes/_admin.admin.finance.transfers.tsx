@@ -16,6 +16,7 @@ import {
   listTransfers,
   postTransfer,
   clearTransfer,
+  rejectTransfer,
   listSavingsForFinance,
   type TransferRow,
 } from "@/lib/admin-finance.functions";
