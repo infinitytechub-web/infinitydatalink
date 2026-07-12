@@ -56,7 +56,7 @@ function SuperAdminsPage() {
         eyebrow="Governance"
         title="Super Admin directory"
         description="Grant, revoke and audit Super Admin access. Only Super Admins can view or modify this list."
-        actions={
+        action={
           <a
             href="/admin/super-admins/history"
             className="rounded border border-emerald-deep/15 px-3 py-1 text-xs uppercase tracking-widest hover:bg-emerald-deep/5"
