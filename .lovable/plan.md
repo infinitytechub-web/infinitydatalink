@@ -1,84 +1,83 @@
 ## Goal
 
-Close two gaps in the admin console: build the missing finance modules and add support for non-individual member types (Group, Department, Institution).
+Elevate the Groups / Departments / Institutions surface from a generic form + list into a polished, guided registration flow and a rich admin detail workspace with documents, timeline, and audit context.
 
-## What exists today
+## Scope
 
-- Admin has: Analytics, Reports (contributions/disbursements), Loans, Members (KYC queue for individuals), Savings, Payments, Audit, Security, Super Admins, Settings.
-- `profiles` covers individuals only. No entity model, no expenses, no transfers module, no cash-flow / P&L views.
+Frontend + a small amount of server-function/storage plumbing already scaffolded (`entity_documents` table + `entity-documents` bucket exist). No new DB tables.
 
-## Part A — Financial modules
+---
 
-### A1. Database
-New migration adds:
+## Part 1 — Multi-step registration wizard
 
-- `expenses` — id, category, vendor, amount, currency, incurred_on, paid_on, status (`pending|approved|paid|rejected`), payment_channel, reference, notes, created_by, approved_by, approved_at.
-- `expense_categories` — seeded catalogue (Payroll, Rent, Utilities, Bank Charges, Marketing, IT, Travel, Other).
-- `transfers` — id, from_account_id, to_account_id, amount, status (`pending|cleared|failed|reversed`), channel, note, ref, created_by, cleared_at. On clear, atomically debits/credits `savings_accounts` and writes two paired rows in `transactions` (kinds `transfer_out` / `transfer_in`).
-- `balance_adjustments` — id, savings_account_id, direction (`credit|debit`), amount, reason, reference_txn_id, approved_by. On post, writes a `transactions` row (`adjustment`) and updates `savings_accounts.balance`.
-- Extend `txn_kind` enum with `transfer_in`, `transfer_out`, `adjustment`, `expense` (if not present).
-- RPCs (SECURITY DEFINER, `search_path` pinned, `finance_officer`/`super_admin` only): `post_expense`, `approve_expense`, `pay_expense`, `post_transfer`, `clear_transfer`, `post_balance_adjustment`.
-- RLS: staff full access, members read-only on transfers where they are counterpart. All new tables get proper GRANTs + `service_role` full access.
-- Audit-log entries for every state change.
+Replace both:
+- `src/routes/_member.app.entities.register.tsx` (member self-serve)
+- New `src/routes/_admin.admin.entities.register.tsx` (admin-initiated) linked from the entities index "Register new" button
 
-### A2. Server functions (`src/lib/admin-finance.functions.ts`)
-`listCashFlow(range)`, `listIncomeBreakdown(range)`, `listExpenses(filters)`, `createExpense`, `approveExpense`, `payExpense`, `listTransfers`, `createTransfer`, `clearTransfer`, `listBalanceAdjustments`, `postBalanceAdjustment`, `getFinancialSummary(range)`. All use `requireSupabaseAuth` + `finance_officer|super_admin` guard.
+with a shared wizard component `src/components/entity-registration-wizard.tsx`:
 
-### A3. Routes
-- `/admin/finance` — layout with sub-nav.
-- `/admin/finance/index.tsx` — **Financial dashboard**: KPI cards (Net cash, Income MTD, Expenses MTD, Net position, Pending approvals), trend chart (income vs expenses), top categories.
-- `/admin/finance/cash-flow.tsx` — inflow vs outflow table + area chart, date range, CSV/PDF export.
-- `/admin/finance/income.tsx` — contributions + loan interest + fees, grouped and drillable.
-- `/admin/finance/expenses.tsx` — expenses table with filters (status/category/date), create/approve/pay dialogs, exports.
-- `/admin/finance/contributions.tsx` — dedicated view of member contributions, per-member and per-plan aggregates.
-- `/admin/finance/transfers.tsx` — transfers ledger + "New transfer" dialog + clear/reverse actions.
-- `/admin/finance/balances.tsx` — **Balance management**: per-account balances, reconciliation deltas, "Post adjustment" dialog.
-- `/admin/finance/summary.tsx` — **Financial summaries**: period P&L, movement schedule, exportable statement.
+Steps:
+1. **Type** — visual card picker for Group / Department / Institution with per-type description of required fields.
+2. **Basics** — name, registration_no, tax_id (required for institution), parent institution picker (required for department, calls new `listInstitutions` server fn).
+3. **Contact & location** — email, phone, region, physical address, digital address (Ghana Post GPS format hint).
+4. **Documents** — drag-drop uploader for registration certificate, tax certificate, mandate letter (Institution/Department require registration cert; Group optional). Uses new `uploadEntityDocument` server fn writing to `entity-documents` bucket + `entity_documents` row.
+5. **Review & submit** — summary of every field + doc list, terms checkbox, submit.
 
-All routes: Suspense with `KPIGridSkeleton`/`SectionCardSkeleton` fallbacks, `ErrorState` for `errorComponent`, URL-driven filters via `validateSearch`, ExportBar (CSV/Excel/PDF), reduced-motion-safe charts using `TrendChart`/`BarList`.
+UX details:
+- Step indicator with completed/current/upcoming states from theme tokens.
+- Per-step Zod validation; Next disabled until valid; Back preserves state.
+- Auto-save draft to `sessionStorage` keyed by user + type.
+- On submit: call existing `registerEntity`, then upload queued docs against the returned id, then navigate to detail page (admin) or `/app` with success toast (member).
 
-## Part B — Membership Management
+## Part 2 — Admin entity detail overhaul
 
-### B1. Database
-New migration adds:
+Rework `src/routes/_admin.admin.entities.$entityId.tsx` into a two-column workspace:
 
-- `entity_type` enum: `group | department | institution`.
-- `entities` — id, type, name, registration_no, tax_id, parent_entity_id (nullable, self-ref for department ⊂ institution), contact_email, contact_phone, region, address_line, digital_address, status (`pending|active|suspended|closed`), kyc_status, kyc_notes, created_by, reviewed_by, reviewed_at.
-- `entity_memberships` — id, entity_id, profile_id, role (`owner|admin|member`), joined_at, status. Unique(entity_id, profile_id).
-- `entity_documents` — bucket-backed KYC docs for entities (registration cert, tax cert, mandate).
-- New storage bucket `entity-documents` (private) mirroring `kyc-documents` policies.
-- RLS: staff full access; entity `owner|admin` sees own entity + its members; members see entity they belong to. GRANTs + `service_role`.
-- Audit rows on create/approve/suspend.
+Header:
+- Eyebrow (type + registration no), title, status pill, "Copy entity ID" button, primary action button (Approve / Suspend / Reactivate) driven by current status.
+- Approve/Suspend now open a proper Radix Dialog (not `window.prompt`) with textarea, character counter, and confirm/cancel — replaces the current inline prompt.
 
-### B2. Server functions (`src/lib/admin-entities.functions.ts`)
-`registerEntity`, `listEntities({type, status, q, page})`, `getEntity(id)`, `approveEntity`, `suspendEntity`, `addEntityMember`, `removeEntityMember`, `uploadEntityDocument`, plus a public/self-serve `registerEntitySelf` for the enroll flow.
+Tabs (URL-driven via `?tab=`):
+1. **Overview** — registration details grid (existing content), plus a right-column "Compliance snapshot" card: KYC status, days since submission, reviewer, last decision note.
+2. **Members** — existing roster; add search box, role filter, and CSV export via existing `exports.ts`; add-member form gains inline profile lookup preview (shows name/member_no when a valid `member_no` is typed).
+3. **Documents** — list rows from `entity_documents` with type badge, uploaded by, uploaded at, and a "View" button that fetches a short-lived signed URL from a new `getEntityDocumentUrl` server fn. Upload widget re-uses the wizard's dropzone.
+4. **Timeline** — chronological feed built from `audit_log` entries whose `meta ->> 'entity_id' = id` (new `listEntityTimeline` server fn). Icons + tone per event kind (registered, approved, suspended, member_added, document_uploaded).
 
-### B3. Routes
-Replace the current Members route with a proper Membership module:
+Loading/empty/error: `SectionCardSkeleton`, `EmptyState`, `ErrorState` for every tab.
 
-- `/admin/members` — layout w/ tabs: Individuals · Groups · Departments · Institutions.
-- `/admin/members/individuals.tsx` — current KYC queue (existing content moved).
-- `/admin/members/groups.tsx`, `/admin/members/departments.tsx`, `/admin/members/institutions.tsx` — filtered `entities` list per type with search, status filter, pagination, "Register new" button.
-- `/admin/members/entities.$id.tsx` — detail page: profile, documents, members roster, approve/suspend actions, audit.
-- `/admin/members/register.$type.tsx` — multi-step registration form (basics → contact → documents → review) with distinct field sets per type (Institution requires tax_id, Department requires `parent_entity_id`, Group allows optional registration_no).
-- Sidebar `Membership Management` group with 4 links (Individuals / Groups / Departments / Institutions).
+## Part 3 — Entities index polish
 
-### B4. Member self-serve
-`/app/entities/register.tsx` — signed-in member can register a Group/Department/Institution they are owner of; it enters the admin KYC queue.
+`src/routes/_admin.admin.entities.index.tsx`:
+- Replace native `<select>` filter with a proper filter bar: text search (name / registration_no), type pills (already present), status filter, and results-per-page.
+- Server-side pagination via `page`/`pageSize` in URL search; `listEntities` gets `page`, `pageSize`, `q` params.
+- Row hover reveals quick actions (Review, Copy ID).
+- "Register new" button in header opens the admin wizard route.
+- Sidebar `Membership Management` entries (Groups / Departments / Institutions) already deep-link with `?type=…`; keep as-is.
+
+## Part 4 — Server functions (small additions)
+
+`src/lib/admin-entities.functions.ts`:
+- Extend `listEntities` input with `q`, `page`, `pageSize`; return `{ rows, total }`.
+- `listInstitutions()` — lightweight `{id, name}` list for wizard's parent picker.
+- `uploadEntityDocument({ entity_id, doc_type, filename, contentBase64 })` — decodes, uploads to `entity-documents/{entity_id}/…` via admin client, inserts `entity_documents` row.
+- `listEntityDocuments({ entity_id })` and `getEntityDocumentUrl({ id })` — signed URL (5 min).
+- `listEntityTimeline({ entity_id, limit })` — reads `audit_log` filtered by meta.
+
+All use `requireSupabaseAuth` + existing staff/reviewer guards; `registerEntity` and `uploadEntityDocument` also allow the entity's owner to call them for member self-serve.
 
 ## Technical notes
 
-- `finance_officer` role already exists and is honoured by loan/payment RPCs — reuse it.
-- All new RPCs follow the established pattern: `_actor_id` param, `search_path=public,private,pg_temp`, audit-log write on state change.
-- New transfer/adjustment/expense rows share the existing `transactions` ledger so Reports and Analytics KPIs pick them up automatically.
-- Charts reuse `src/components/charts.tsx` primitives — no new chart libs.
-- All routes use the existing `KPIGridSkeleton` / `SectionCardSkeleton` / `ErrorState` primitives for consistent loading/empty/error states.
-- Follows TanStack route conventions (`_admin.admin.finance.*.tsx`, `_admin.admin.members.*.tsx`) with dot-separated filenames and matching `createFileRoute` paths.
+- All new UI pulls colors/tones from `src/lib/theme-tokens.ts`; no ad-hoc Tailwind color scales.
+- Wizard is a controlled component; parent route decides `mode: "member" | "admin"` for terminal navigation.
+- Dropzone uses native `<input type="file">` with drag-over styling — no new deps.
+- Signed URLs are generated per-click, never stored.
+- Route naming stays TanStack dot-convention (`_admin.admin.entities.register.tsx`).
+- No changes to existing enums or RLS; `entity_documents` policies already cover staff + owners.
 
-## Order of build
+## Build order
 
-1. Migration A1 (finance tables + RPCs).
-2. Server fns A2 + routes A3 + sidebar entries.
-3. Migration B1 (entities + memberships + storage bucket).
-4. Server fns B2 + routes B3 + B4.
-5. Typecheck, Playwright smoke of `/admin/finance/*` and `/admin/members/*`, screenshot verify.
+1. Server-fn additions (list/upload/timeline/url).
+2. Shared wizard component + admin & member wizard routes.
+3. Admin detail overhaul (dialogs, tabs, documents, timeline).
+4. Entities index filter bar + pagination.
+5. Typecheck; Playwright smoke of member registration → admin approve flow; screenshot verify.
