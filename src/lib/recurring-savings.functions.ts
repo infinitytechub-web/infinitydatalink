@@ -126,7 +126,7 @@ export const updateRecurring = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => UpdateSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const patch: Record<string, unknown> = {};
+    const patch: Record<string, any> = {};
     if (data.amount !== undefined) patch.amount = data.amount;
     if (data.channel !== undefined) patch.channel = data.channel;
     if (data.note !== undefined) patch.note = data.note;
