@@ -45,7 +45,7 @@ const accountsQuery = queryOptions({
 
 const recentTxnsQuery = queryOptions({
   queryKey: ["member", "savings", "recent"],
-  queryFn: () => getMyTransactions({ data: { limit: 25 } }),
+  queryFn: () => getMyTransactions({ data: { page: 1, pageSize: 25 } }),
   staleTime: 15_000,
 });
 
@@ -89,12 +89,13 @@ function Body() {
   const recent = useQuery(recentTxnsQuery);
   const total = accounts.reduce((s, a) => s + a.balance, 0);
   const active = accounts.filter((a) => a.status === "active");
-  const clearedDeposits = (recent.data ?? []).filter(
-    (t: any) => t.kind === "deposit" && t.status === "cleared",
+  const recentRows = recent.data && "rows" in recent.data ? recent.data.rows : [];
+  const clearedDeposits = recentRows.filter(
+    (t) => t.kind === "deposit" && t.status === "cleared",
   );
-  const lifetime = clearedDeposits.reduce((s: number, t: any) => s + Number(t.amount ?? 0), 0);
-  const pendingDeposits = (recent.data ?? []).filter(
-    (t: any) => t.kind === "deposit" && t.status === "pending",
+  const lifetime = clearedDeposits.reduce((s, t) => s + Number(t.amount ?? 0), 0);
+  const pendingDeposits = recentRows.filter(
+    (t) => t.kind === "deposit" && t.status === "pending",
   );
 
   return (
