@@ -65,7 +65,6 @@ export function RecurringContributionsSection({
   return (
     <SectionCard
       title="Recurring contributions"
-      description="Automate deposits — the system posts them on your schedule."
       action={
         activeAccounts.length > 0 ? (
           <Button size="sm" onClick={() => setCreating(true)} className="gap-1">
@@ -177,7 +176,18 @@ function ScheduleRow({ s, onEdit }: { s: RecurringSchedule; onEdit: () => void }
           <span className="text-emerald-deep/40">Not yet run</span>
         )}
       </td>
-      <td className="px-6 py-3 text-right"><StatusPill status={s.status} /></td>
+      <td className="px-6 py-3 text-right">
+        <span
+          className={
+            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest " +
+            (s.status === "active"
+              ? "bg-emerald-mid/15 text-emerald-mid"
+              : "bg-emerald-deep/10 text-emerald-deep/60")
+          }
+        >
+          {s.status}
+        </span>
+      </td>
       <td className="px-6 py-3 text-right">
         <div className="inline-flex gap-1">
           <Button
@@ -231,7 +241,7 @@ function ScheduleDialog({
   const create = useServerFn(createRecurring);
   const update = useServerFn(updateRecurring);
   const mut = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const payload = {
         account_id: accountId,
         amount: Number(amount),
@@ -241,9 +251,11 @@ function ScheduleDialog({
         day_of_week: frequency === "weekly" ? dow : null,
         day_of_month: frequency === "monthly" ? dom : null,
       };
-      return isEdit
-        ? update({ data: { id: initial!.id, ...payload } })
-        : create({ data: payload });
+      if (isEdit) {
+        await update({ data: { id: initial!.id, ...payload } });
+      } else {
+        await create({ data: payload });
+      }
     },
     onSuccess: () => {
       toast.success(isEdit ? "Schedule updated" : "Schedule created");
