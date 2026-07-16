@@ -36,6 +36,7 @@ import {
   type SavingsAccount,
 } from "@/lib/savings.functions";
 import { getMyTransactions } from "@/lib/member-data.functions";
+import { RecurringContributionsSection } from "@/components/recurring-contributions";
 
 const accountsQuery = queryOptions({
   queryKey: ["member", "savings", "accounts"],
@@ -140,6 +141,10 @@ function Body() {
               <AccountCard key={a.id} a={a} />
             ))}
           </div>
+
+          <RecurringContributionsSection accounts={accounts} />
+
+
 
           <SectionCard title="Contribution history">
             {recent.isLoading ? (

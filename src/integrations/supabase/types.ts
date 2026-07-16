@@ -884,6 +884,74 @@ export type Database = {
         }
         Relationships: []
       }
+      savings_recurring_contributions: {
+        Row: {
+          account_id: string
+          amount: number
+          channel: string
+          created_at: string
+          day_of_month: number | null
+          day_of_week: number | null
+          frequency: Database["public"]["Enums"]["recurring_frequency"]
+          id: string
+          last_run_at: string | null
+          last_run_error: string | null
+          last_run_status: string | null
+          next_run_at: string
+          note: string | null
+          runs_completed: number
+          status: Database["public"]["Enums"]["recurring_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          channel?: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency: Database["public"]["Enums"]["recurring_frequency"]
+          id?: string
+          last_run_at?: string | null
+          last_run_error?: string | null
+          last_run_status?: string | null
+          next_run_at: string
+          note?: string | null
+          runs_completed?: number
+          status?: Database["public"]["Enums"]["recurring_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          channel?: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency?: Database["public"]["Enums"]["recurring_frequency"]
+          id?: string
+          last_run_at?: string | null
+          last_run_error?: string | null
+          last_run_status?: string | null
+          next_run_at?: string
+          note?: string | null
+          runs_completed?: number
+          status?: Database["public"]["Enums"]["recurring_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_recurring_contributions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       super_admin_seed_emails: {
         Row: {
           created_at: string
@@ -1094,6 +1162,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_recurring_next_run: {
+        Args: {
+          _dom: number
+          _dow: number
+          _frequency: Database["public"]["Enums"]["recurring_frequency"]
+          _from: string
+        }
+        Returns: string
+      }
       approve_entity:
         | {
             Args: { _entity_id: string; _note: string }
@@ -1664,6 +1741,14 @@ export type Database = {
             Args: { _actor_id?: string; _reason?: string; _user_id: string }
             Returns: undefined
           }
+      run_recurring_savings_contributions: {
+        Args: never
+        Returns: {
+          error: string
+          outcome: string
+          schedule_id: string
+        }[]
+      }
       suspend_entity:
         | {
             Args: { _entity_id: string; _reason: string }
@@ -1748,6 +1833,8 @@ export type Database = {
       kyc_status: "pending" | "active" | "rejected"
       loan_status: "pending" | "approved" | "rejected" | "active" | "closed"
       member_tier: "standard" | "premium"
+      recurring_frequency: "daily" | "weekly" | "monthly"
+      recurring_status: "active" | "paused"
       transfer_status: "pending" | "cleared" | "failed" | "reversed"
       txn_kind:
         | "deposit"
@@ -1913,6 +2000,8 @@ export const Constants = {
       kyc_status: ["pending", "active", "rejected"],
       loan_status: ["pending", "approved", "rejected", "active", "closed"],
       member_tier: ["standard", "premium"],
+      recurring_frequency: ["daily", "weekly", "monthly"],
+      recurring_status: ["active", "paused"],
       transfer_status: ["pending", "cleared", "failed", "reversed"],
       txn_kind: [
         "deposit",
