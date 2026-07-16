@@ -12,7 +12,6 @@ import {
   EmptyState,
   Money,
   SectionCard,
-  StatusPill,
 } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
