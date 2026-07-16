@@ -65,6 +65,7 @@ import { Route as AdminAdminFinanceExpensesRouteImport } from './routes/_admin.a
 import { Route as AdminAdminFinanceContributionsRouteImport } from './routes/_admin.admin.finance.contributions'
 import { Route as AdminAdminFinanceBreakdownRouteImport } from './routes/_admin.admin.finance.breakdown'
 import { Route as AdminAdminFinanceAdjustmentsRouteImport } from './routes/_admin.admin.finance.adjustments'
+import { Route as AdminAdminEntitiesRegisterRouteImport } from './routes/_admin.admin.entities.register'
 import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
 import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
 
@@ -358,6 +359,12 @@ const AdminAdminFinanceAdjustmentsRoute =
     path: '/adjustments',
     getParentRoute: () => AdminAdminFinanceRoute,
   } as any)
+const AdminAdminEntitiesRegisterRoute =
+  AdminAdminEntitiesRegisterRouteImport.update({
+    id: '/register',
+    path: '/register',
+    getParentRoute: () => AdminAdminEntitiesRoute,
+  } as any)
 const AdminAdminEntitiesEntityIdRoute =
   AdminAdminEntitiesEntityIdRouteImport.update({
     id: '/$entityId',
@@ -406,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
+  '/admin/entities/register': typeof AdminAdminEntitiesRegisterRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
   '/admin/finance/breakdown': typeof AdminAdminFinanceBreakdownRoute
   '/admin/finance/contributions': typeof AdminAdminFinanceContributionsRoute
@@ -459,6 +467,7 @@ export interface FileRoutesByTo {
   '/app': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
+  '/admin/entities/register': typeof AdminAdminEntitiesRegisterRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
   '/admin/finance/breakdown': typeof AdminAdminFinanceBreakdownRoute
   '/admin/finance/contributions': typeof AdminAdminFinanceContributionsRoute
@@ -520,6 +529,7 @@ export interface FileRoutesById {
   '/_member/app/': typeof MemberAppIndexRoute
   '/_admin/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/_admin/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
+  '/_admin/admin/entities/register': typeof AdminAdminEntitiesRegisterRoute
   '/_admin/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
   '/_admin/admin/finance/breakdown': typeof AdminAdminFinanceBreakdownRoute
   '/_admin/admin/finance/contributions': typeof AdminAdminFinanceContributionsRoute
@@ -580,6 +590,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/audit/transfers'
     | '/admin/entities/$entityId'
+    | '/admin/entities/register'
     | '/admin/finance/adjustments'
     | '/admin/finance/breakdown'
     | '/admin/finance/contributions'
@@ -633,6 +644,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/admin/audit/transfers'
     | '/admin/entities/$entityId'
+    | '/admin/entities/register'
     | '/admin/finance/adjustments'
     | '/admin/finance/breakdown'
     | '/admin/finance/contributions'
@@ -693,6 +705,7 @@ export interface FileRouteTypes {
     | '/_member/app/'
     | '/_admin/admin/audit/transfers'
     | '/_admin/admin/entities/$entityId'
+    | '/_admin/admin/entities/register'
     | '/_admin/admin/finance/adjustments'
     | '/_admin/admin/finance/breakdown'
     | '/_admin/admin/finance/contributions'
@@ -1127,6 +1140,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminFinanceAdjustmentsRouteImport
       parentRoute: typeof AdminAdminFinanceRoute
     }
+    '/_admin/admin/entities/register': {
+      id: '/_admin/admin/entities/register'
+      path: '/register'
+      fullPath: '/admin/entities/register'
+      preLoaderRoute: typeof AdminAdminEntitiesRegisterRouteImport
+      parentRoute: typeof AdminAdminEntitiesRoute
+    }
     '/_admin/admin/entities/$entityId': {
       id: '/_admin/admin/entities/$entityId'
       path: '/$entityId'
@@ -1158,11 +1178,13 @@ const AdminAdminAuditRouteWithChildren = AdminAdminAuditRoute._addFileChildren(
 
 interface AdminAdminEntitiesRouteChildren {
   AdminAdminEntitiesEntityIdRoute: typeof AdminAdminEntitiesEntityIdRoute
+  AdminAdminEntitiesRegisterRoute: typeof AdminAdminEntitiesRegisterRoute
   AdminAdminEntitiesIndexRoute: typeof AdminAdminEntitiesIndexRoute
 }
 
 const AdminAdminEntitiesRouteChildren: AdminAdminEntitiesRouteChildren = {
   AdminAdminEntitiesEntityIdRoute: AdminAdminEntitiesEntityIdRoute,
+  AdminAdminEntitiesRegisterRoute: AdminAdminEntitiesRegisterRoute,
   AdminAdminEntitiesIndexRoute: AdminAdminEntitiesIndexRoute,
 }
 
