@@ -146,7 +146,7 @@ export const updateRecurring = createServerFn({ method: "POST" })
     }
     const { error } = await context.supabase
       .from("savings_recurring_contributions")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id)
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
