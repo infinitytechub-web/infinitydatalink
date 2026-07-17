@@ -92,8 +92,8 @@ function Body() {
   const [term, setTerm] = useState(search.q ?? "");
 
   const setStatus = (status: SearchParams["status"]) =>
-    navigate({ search: (s) => ({ ...s, status, page: 1 }) });
-  const setPage = (page: number) => navigate({ search: (s) => ({ ...s, page }) });
+    navigate({ search: (s: SearchParams) => ({ ...s, status, page: 1 }) });
+  const setPage = (page: number) => navigate({ search: (s: SearchParams) => ({ ...s, page }) });
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
 
