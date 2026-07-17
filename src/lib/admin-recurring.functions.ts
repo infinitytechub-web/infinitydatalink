@@ -66,7 +66,7 @@ export const adminListRecurring = createServerFn({ method: "POST" })
     let q = context.supabase
       .from("savings_recurring_contributions")
       .select(
-        "id, user_id, account_id, amount, channel, note, frequency, day_of_week, day_of_month, status, next_run_at, last_run_at, last_run_status, last_run_error, runs_completed, created_at, profiles!savings_recurring_contributions_user_id_fkey(full_name, email, member_no), savings_accounts!inner(nickname, savings_plans(name))",
+        "id, user_id, account_id, amount, channel, note, frequency, day_of_week, day_of_month, status, next_run_at, last_run_at, last_run_status, last_run_error, runs_completed, created_at, savings_accounts!inner(nickname, savings_plans(name))",
         { count: "exact" },
       );
 
@@ -80,13 +80,30 @@ export const adminListRecurring = createServerFn({ method: "POST" })
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
 
+    const userIds = Array.from(new Set((rows ?? []).map((r: any) => r.user_id as string)));
+    const profileMap = new Map<string, { full_name: string | null; email: string | null; member_no: string | null }>();
+    if (userIds.length > 0) {
+      const { data: profs, error: perr } = await context.supabase
+        .from("profiles")
+        .select("id, full_name, email, member_no")
+        .in("id", userIds);
+      if (perr) throw new Error(perr.message);
+      for (const p of (profs ?? []) as any[]) {
+        profileMap.set(p.id, {
+          full_name: p.full_name ?? null,
+          email: p.email ?? null,
+          member_no: p.member_no ?? null,
+        });
+      }
+    }
+
     const mapped: AdminRecurringRow[] = (rows ?? []).map((r: any) => ({
       id: r.id,
       user_id: r.user_id,
       account_id: r.account_id,
-      member_name: r.profiles?.full_name ?? null,
-      member_email: r.profiles?.email ?? null,
-      member_no: r.profiles?.member_no ?? null,
+      member_name: profileMap.get(r.user_id)?.full_name ?? null,
+      member_email: profileMap.get(r.user_id)?.email ?? null,
+      member_no: profileMap.get(r.user_id)?.member_no ?? null,
       account_label:
         r.savings_accounts?.nickname ||
         r.savings_accounts?.savings_plans?.name ||
