@@ -38,6 +38,7 @@ const groups: NavGroup[] = [
     label: "Operations",
     items: [
       { to: "/admin/savings", label: "Savings" },
+      { to: "/admin/recurring", label: "Recurring schedules" },
       { to: "/admin/loans", label: "Loans & Approvals" },
       { to: "/admin/payments", label: "Payments" },
     ],
