@@ -117,7 +117,7 @@ function Body() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                navigate({ search: (s) => ({ ...s, q: term || undefined, page: 1 }) });
+                navigate({ search: (s: SearchParams) => ({ ...s, q: term || undefined, page: 1 }) });
               }}
             >
               <Input
