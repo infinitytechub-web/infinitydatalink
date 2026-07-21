@@ -6,6 +6,8 @@ import { passwordStrength } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
+import { useBranding } from "@/components/branding-provider";
+
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -34,20 +36,44 @@ type PanelKind = "user" | "admin";
 
 function AuthPage() {
   const [activeTab, setActiveTab] = useState<PanelKind>("user");
+  const { branding } = useBranding();
+  const appName = branding.app_name || "IT-360 CashApp";
+  const heroUrl = branding.login_hero_url;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream via-cream to-emerald-deep/5 font-sans text-emerald-deep">
+    <div
+      className="min-h-screen bg-gradient-to-br from-cream via-cream to-emerald-deep/5 font-sans text-emerald-deep"
+      style={
+        heroUrl
+          ? {
+              backgroundImage: `linear-gradient(135deg, rgba(245,241,229,0.92), rgba(15,118,110,0.55)), url(${heroUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+          : undefined
+      }
+    >
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex size-9 items-center justify-center rounded-md bg-emerald-deep shadow-sm">
-            <div className="size-3 rotate-45 border-2 border-gold" />
-          </div>
-          <span className="font-serif text-lg tracking-tight">IT-360 CashApp</span>
+          {branding.logo_url ? (
+            <img src={branding.logo_url} alt={appName} className="h-9 w-9 rounded-md object-contain" />
+          ) : (
+            <div className="flex size-9 items-center justify-center rounded-md bg-emerald-deep shadow-sm">
+              <div className="size-3 rotate-45 border-2 border-gold" />
+            </div>
+          )}
+          <span className="font-serif text-lg tracking-tight">{appName}</span>
         </Link>
         <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
           Secure session · TLS 1.3
         </span>
       </header>
+
+      {branding.login_tagline ? (
+        <p className="mx-auto max-w-2xl px-6 pb-4 text-center text-sm text-emerald-deep/70">
+          {branding.login_tagline}
+        </p>
+      ) : null}
 
       {/* Mobile segmented tab */}
       <div className="mx-auto mb-4 flex max-w-md gap-1 rounded-full border border-emerald-deep/10 bg-white/70 p-1 backdrop-blur lg:hidden">
@@ -79,11 +105,28 @@ function AuthPage() {
       </main>
 
       <footer className="mx-auto max-w-7xl px-6 pb-8 text-center text-[11px] uppercase tracking-widest text-emerald-deep/40">
-        © {new Date().getFullYear()} IT-360 CashApp · Enterprise financial platform
+        {branding.footer_html ? (
+          <div
+            className="mb-2 normal-case tracking-normal text-emerald-deep/60"
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: branding.footer_html }}
+          />
+        ) : null}
+        © {new Date().getFullYear()} {appName} · Enterprise financial platform
+        {branding.support_email ? (
+          <>
+            {" · "}
+            <a href={`mailto:${branding.support_email}`} className="hover:underline">
+              {branding.support_email}
+            </a>
+          </>
+        ) : null}
+        {branding.support_phone ? <> · {branding.support_phone}</> : null}
       </footer>
     </div>
   );
 }
+
 
 function LoginPanel({ kind }: { kind: PanelKind }) {
   const isAdmin = kind === "admin";
