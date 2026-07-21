@@ -68,7 +68,7 @@ export const purgeNotifications = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const before = data.older_than_days
       ? new Date(Date.now() - data.older_than_days * 86400_000).toISOString()
-      : null;
+      : undefined;
     const { data: n, error } = await context.supabase.rpc("purge_notifications", {
       _scope: data.scope,
       _before: before,
