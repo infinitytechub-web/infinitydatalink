@@ -1,4 +1,16 @@
 import { createFileRoute, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
+import {
+  LayoutDashboard,
+  PiggyBank,
+  Landmark,
+  ArrowLeftRight,
+  CreditCard,
+  Send,
+  UserCircle2,
+  ShieldCheck,
+  Building2,
+  LifeBuoy,
+} from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
 
@@ -6,21 +18,21 @@ const groups: NavGroup[] = [
   {
     label: "Member Portal",
     items: [
-      { to: "/app", label: "Overview" },
-      { to: "/app/savings", label: "My Savings" },
-      { to: "/app/loans", label: "Active Loans" },
-      { to: "/app/transactions", label: "Transactions" },
-      { to: "/app/payments", label: "Payments" },
-      { to: "/app/transfers", label: "Transfers" },
-      { to: "/app/profile", label: "Profile & KYC" },
-      { to: "/app/kyc", label: "Verification status" },
-      { to: "/app/entities/register", label: "Register organization" },
+      { to: "/app", label: "Overview", icon: <LayoutDashboard /> },
+      { to: "/app/savings", label: "My Savings", icon: <PiggyBank /> },
+      { to: "/app/loans", label: "Active Loans", icon: <Landmark /> },
+      { to: "/app/transactions", label: "Transactions", icon: <ArrowLeftRight /> },
+      { to: "/app/payments", label: "Payments", icon: <CreditCard /> },
+      { to: "/app/transfers", label: "Transfers", icon: <Send /> },
+      { to: "/app/profile", label: "Profile & KYC", icon: <UserCircle2 /> },
+      { to: "/app/kyc", label: "Verification status", icon: <ShieldCheck /> },
+      { to: "/app/entities/register", label: "Register organization", icon: <Building2 /> },
     ],
   },
   {
     label: "Support",
     items: [
-      { to: "/app/support", label: "Help Centre" },
+      { to: "/app/support", label: "Help Centre", icon: <LifeBuoy /> },
     ],
   },
 ];
