@@ -180,45 +180,21 @@ export const deleteMyPasskey = createServerFn({ method: "POST" })
 // --- authentication (sign-in) ---------------------------------------------
 
 export const beginPasskeyAuthentication = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    z.object({ email: z.string().email().optional() }).parse(input),
-  )
-  .handler(async ({ data }) => {
+  .handler(async () => {
     const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { rpID } = deriveOrigin();
 
-    let userId: string | null = null;
-    let allowCredentials: { id: string; transports?: string[] }[] = [];
-
-    if (data.email) {
-      // Look up user by email via profiles (auth.users not directly queryable via PostgREST)
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("email", data.email.toLowerCase())
-        .maybeSingle();
-      if (profile?.id) {
-        userId = profile.id as string;
-        const { data: creds } = await supabaseAdmin
-          .from("user_passkeys")
-          .select("credential_id, transports")
-          .eq("user_id", userId);
-        allowCredentials = (creds ?? []).map((c) => ({
-          id: c.credential_id as string,
-          transports: (c.transports as string[] | null) ?? undefined,
-        }));
-      }
-    }
-
+    // Usernameless / discoverable-credential flow — the authenticator picks
+    // the account and returns a userHandle we resolve in the finish step.
     const options = await generateAuthenticationOptions({
       rpID,
       userVerification: "required",
-      allowCredentials: allowCredentials as never,
+      allowCredentials: [],
     });
 
     await supabaseAdmin.from("passkey_challenges").insert({
-      user_id: userId,
+      user_id: null,
       challenge: options.challenge,
       kind: "authentication",
     });
