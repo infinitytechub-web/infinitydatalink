@@ -28,6 +28,7 @@ import {
   KeyRound,
   Palette,
   Settings2,
+  Bug,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 
@@ -80,6 +81,7 @@ const groups: NavGroup[] = [
       { to: "/admin/console/approvals", label: "Change approvals", icon: <ClipboardList /> },
       { to: "/admin/console/snapshots", label: "Backup & restore", icon: <ClipboardCheck /> },
       { to: "/admin/security", label: "Security Centre", icon: <ShieldAlert /> },
+      { to: "/admin/logs", label: "Runtime Logs", icon: <Bug /> },
       { to: "/admin/health", label: "Integration Health", icon: <Activity /> },
       { to: "/admin/super-admins", label: "Super Admins", icon: <Crown /> },
       { to: "/admin/super-admins/history", label: "Grant history", icon: <ClipboardCheck /> },
@@ -112,6 +114,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/loans": "Loans & Approvals",
   "/admin/payments": "Payments",
   "/admin/security": "Security Centre",
+  "/admin/logs": "Runtime Logs",
   "/admin/health": "Integration Health",
 
   "/admin/super-admins": "Super Admins",

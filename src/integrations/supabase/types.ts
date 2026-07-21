@@ -989,6 +989,51 @@ export type Database = {
         }
         Relationships: []
       }
+      runtime_error_logs: {
+        Row: {
+          actor_role: string | null
+          id: string
+          kind: string
+          message: string
+          meta: Json
+          occurred_at: string
+          route: string | null
+          severity: string
+          stack: string | null
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actor_role?: string | null
+          id?: string
+          kind: string
+          message: string
+          meta?: Json
+          occurred_at?: string
+          route?: string | null
+          severity?: string
+          stack?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actor_role?: string | null
+          id?: string
+          kind?: string
+          message?: string
+          meta?: Json
+          occurred_at?: string
+          route?: string | null
+          severity?: string
+          stack?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       savings_accounts: {
         Row: {
           balance: number
