@@ -269,7 +269,7 @@ export type AuditRow = {
   actor_role: string | null;
   action: string;
   target: string | null;
-  meta: Record<string, unknown>;
+  meta: Json;
 };
 
 export const listConsoleAuditLog = createServerFn({ method: "POST" })
