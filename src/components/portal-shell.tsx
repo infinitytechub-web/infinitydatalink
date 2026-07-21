@@ -236,7 +236,7 @@ export function PortalShell({
         </div>
 
         <footer className="border-t border-border px-4 py-6 text-[11px] text-muted-foreground lg:px-8">
-          IT-360 CashApp · Confidential financial data · © {new Date().getFullYear()}
+          {displayName} · Confidential financial data · © {new Date().getFullYear()}
         </footer>
       </main>
     </div>
