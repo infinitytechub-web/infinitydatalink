@@ -145,7 +145,7 @@ export const updateBranding = createServerFn({ method: "POST" })
     ] as const) {
       if ((data as any)[k] !== undefined) patch[k] = (data as any)[k];
     }
-    const { error } = await context.supabase
+    const { error } = await (context.supabase as any)
       .from("branding_settings")
       .update(patch)
       .eq("id", 1);
