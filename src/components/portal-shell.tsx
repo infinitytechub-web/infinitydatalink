@@ -203,12 +203,18 @@ export function PortalShell({
                         <span
                           aria-hidden="true"
                           className={cn(
-                            "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br lg:size-8",
+                            "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br transition-transform lg:size-8",
                             accent,
-                            active ? "scale-105" : "opacity-95 group-hover:opacity-100",
+                            active ? "scale-105" : "opacity-95 group-hover:opacity-100 group-hover:scale-[1.03]",
                           )}
                         >
-                          <span className="size-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
+                          {item.icon ? (
+                            <span className="[&>svg]:size-4 [&>svg]:stroke-[2.25] text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
+                              {item.icon}
+                            </span>
+                          ) : (
+                            <span className="size-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
+                          )}
                         </span>
                         {!collapsed && (
                           <span className={cn("min-w-0 truncate", active && "font-semibold")}>

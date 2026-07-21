@@ -122,6 +122,17 @@
   --input: #cbd5e1;
   --ring: rgba(30, 58, 138, 0.45);
 
+  /* Chart series — dark-mode-safe palette lives in `.dark` below. */
+  --chart-1: #1e3a8a;   /* royal */
+  --chart-2: #059669;   /* emerald */
+  --chart-3: #d4af37;   /* gold */
+  --chart-4: #0284c7;   /* sky */
+  --chart-5: #7c3aed;   /* violet */
+  --chart-6: #dc2626;   /* crimson */
+  --chart-7: #475569;   /* slate */
+  --chart-grid: rgba(15, 23, 42, 0.08);
+  --chart-axis: #64748b;
+
   /* Sidebar: deep navy premium rail with subtle gradient (applied in shell). */
   --sidebar: #0f1e4d;
   --sidebar-foreground: #e2e8f0;
@@ -161,6 +172,18 @@
   --border: rgba(148, 163, 184, 0.16);
   --input: rgba(148, 163, 184, 0.22);
   --ring: rgba(96, 165, 250, 0.55);
+
+  /* Dark-mode chart palette — brighter, higher-chroma variants that clear
+     WCAG contrast on the dark card surface. */
+  --chart-1: #7aa2ff;   /* royal → soft indigo */
+  --chart-2: #34d399;   /* emerald */
+  --chart-3: #fbbf24;   /* gold */
+  --chart-4: #38bdf8;   /* sky */
+  --chart-5: #c084fc;   /* violet */
+  --chart-6: #fb7185;   /* rose */
+  --chart-7: #cbd5e1;   /* slate */
+  --chart-grid: rgba(226, 232, 240, 0.12);
+  --chart-axis: rgba(226, 232, 240, 0.7);
 
   --sidebar: #060c1f;
   --sidebar-foreground: #e2e8f0;

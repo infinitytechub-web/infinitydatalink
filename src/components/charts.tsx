@@ -130,33 +130,36 @@ export function TrendChart<T extends Record<string, unknown>>({
       <ChartA11ySummary title={title} data={data} series={colored} xKey={xKey} />
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data as Record<string, unknown>[]} margin={{ top: 8, right: 12, bottom: 4, left: -8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
           <XAxis
             dataKey={xKey}
             fontSize={11}
-            stroke="var(--muted-foreground)"
+            stroke="var(--chart-axis)"
+            tick={{ fill: "var(--chart-axis)" }}
             tickLine={false}
-            axisLine={{ stroke: "var(--border)" }}
+            axisLine={{ stroke: "var(--chart-grid)" }}
             minTickGap={16}
           />
           <YAxis
             fontSize={11}
-            stroke="var(--muted-foreground)"
+            stroke="var(--chart-axis)"
+            tick={{ fill: "var(--chart-axis)" }}
             tickLine={false}
             axisLine={false}
             width={48}
           />
           <Tooltip
-            cursor={{ stroke: "var(--border)", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1, strokeDasharray: "3 3" }}
             isAnimationActive={!reduced}
             animationDuration={reduced ? 0 : 120}
             content={<AccessibleTooltip series={colored} />}
           />
           <Legend
-            wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+            wrapperStyle={{ fontSize: 11, paddingTop: 8, color: "var(--muted-foreground)" }}
             iconType="circle"
             iconSize={8}
           />
+
           {colored.map((s) => (
             <Line
               key={s.key}
