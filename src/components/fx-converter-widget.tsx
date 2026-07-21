@@ -32,18 +32,18 @@ export function FxConverterWidget() {
   return (
     <SectionCard
       title="Universal currency converter"
-      hint={
-        <span className="flex items-center gap-2 text-xs text-muted-foreground">
-          <ArrowRightLeft className="size-3.5" />
-          {q.data?.source ? `Rates: ${q.data.source}` : "Loading…"}
-          {q.data?.fetched_at ? ` · ${new Date(q.data.fetched_at).toLocaleString()}` : ""}
-        </span>
-      }
       action={
-        <Button size="sm" variant="ghost" onClick={() => q.refetch()} disabled={q.isFetching}>
-          <RefreshCw className={`mr-1 size-3.5 ${q.isFetching ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <span className="hidden items-center gap-1 text-[11px] text-muted-foreground md:inline-flex">
+            <ArrowRightLeft className="size-3.5" />
+            {q.data?.source ? `Rates: ${q.data.source}` : "Loading…"}
+            {q.data?.fetched_at ? ` · ${new Date(q.data.fetched_at).toLocaleTimeString()}` : ""}
+          </span>
+          <Button size="sm" variant="ghost" onClick={() => q.refetch()} disabled={q.isFetching}>
+            <RefreshCw className={`mr-1 size-3.5 ${q.isFetching ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       }
     >
       <div className="grid gap-3 md:grid-cols-4">
