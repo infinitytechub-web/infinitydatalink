@@ -71,9 +71,9 @@ export const previewLogRetention = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase.rpc("preview_runtime_log_retention", {
-      _error_days: data.error_days ?? null,
-      _warning_days: data.warning_days ?? null,
-      _info_days: data.info_days ?? null,
+      _error_days: data.error_days,
+      _warning_days: data.warning_days,
+      _info_days: data.info_days,
     });
     if (error) throw new Error(error.message);
     return (rows ?? []) as RetentionPreviewRow[];
