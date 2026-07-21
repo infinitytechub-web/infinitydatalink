@@ -241,6 +241,21 @@ function Body() {
   );
 }
 
+type BadgeTone = "positive" | "neutral" | "warning" | "negative";
+function Badge({ tone, children }: { tone: BadgeTone; children: React.ReactNode }) {
+  const cls: Record<BadgeTone, string> = {
+    positive: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
+    neutral: "bg-slate-100 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200",
+    warning: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
+    negative: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${cls[tone]}`}>
+      {children}
+    </span>
+  );
+}
+
 function kindTone(k: string): "positive" | "neutral" | "warning" | "negative" {
   if (k === "rbac") return "warning";
   if (k === "render" || k === "route" || k === "server") return "negative";
