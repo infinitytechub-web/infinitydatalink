@@ -23,6 +23,7 @@ import {
   type AssignableRole,
   type UserWithRolesRow,
 } from "@/lib/admin-role-management.functions";
+import { Search, X } from "lucide-react";
 
 export const Route = createFileRoute("/_admin/admin/roles")({
   head: () => ({
@@ -79,26 +80,141 @@ const ROLE_TONE: Record<AppRole, "success" | "warning" | "info" | "neutral" | "d
   member: "neutral",
 };
 
+const PERMISSION_CATEGORIES: Record<string, string[]> = {
+  "Governance": [
+    "Full system access",
+    "Assign and revoke all roles (incl. super admin)",
+    "Manage branding, settings, security centre",
+    "View & export all audit logs",
+    "No admin access",
+  ],
+  "Compliance & KYC": [
+    "Review KYC submissions",
+    "Approve / reject member verification",
+  ],
+  "Loans": [
+    "Review loan applications",
+    "Approve / reject / disburse loans",
+    "View member savings & repayment history",
+  ],
+  "Finance": [
+    "Post income, expenses & balance adjustments",
+    "Approve transfers",
+    "Access financial reports & exports",
+  ],
+  "Audit": [
+    "Read-only access to all financial data",
+    "View audit logs & exports",
+    "Read audit logs",
+  ],
+  "Member": [
+    "Manage own savings, loans, transfers",
+    "Update own profile & KYC documents",
+  ],
+};
+
+const ALL_CATEGORIES = Object.keys(PERMISSION_CATEGORIES);
+
+function permissionCategory(permission: string): string | undefined {
+  for (const [cat, perms] of Object.entries(PERMISSION_CATEGORIES)) {
+    if (perms.includes(permission)) return cat;
+  }
+  return undefined;
+}
+
 function PermissionsMatrix() {
+  const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("All");
+
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const filteredRoles = useMemo(() => {
+    return ALL_ROLES.map((role) => {
+      const matched = ROLE_PERMISSIONS[role].filter((p) => {
+        const matchesText = !normalizedQuery || p.toLowerCase().includes(normalizedQuery);
+        const matchesCategory = activeCategory === "All" || permissionCategory(p) === activeCategory;
+        return matchesText && matchesCategory;
+      });
+      return { role, matched, visible: matched.length > 0 };
+    }).filter((r) => r.visible);
+  }, [normalizedQuery, activeCategory]);
+
   return (
     <SectionCard title="Effective permissions">
-      <div className="grid gap-3 p-6 md:grid-cols-2 xl:grid-cols-3">
-        {ALL_ROLES.map((role) => (
-          <div
-            key={role}
-            className="rounded-lg border border-emerald-deep/10 bg-white/60 p-4 dark:bg-white/5"
-          >
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-semibold">{ROLE_LABEL[role]}</span>
-              <span className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{role}</span>
-            </div>
-            <ul className="list-disc space-y-1 pl-4 text-xs text-slate-600 dark:text-slate-300">
-              {ROLE_PERMISSIONS[role].map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
+      <div className="space-y-4 p-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search permissions (e.g. KYC, loans, exports)..."
+              className="w-full rounded-lg border border-emerald-deep/15 bg-white py-2 pl-9 pr-9 text-sm dark:bg-white/5"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:bg-emerald-deep/10 hover:text-slate-600"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-        ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {["All", ...ALL_CATEGORIES].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider transition ${
+                activeCategory === cat
+                  ? "border-emerald-deep bg-emerald-deep text-white"
+                  : "border-emerald-deep/20 bg-emerald-deep/10 text-emerald-deep hover:bg-emerald-deep/20"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {filteredRoles.length === 0 ? (
+          <EmptyState title="No permissions match" />
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {filteredRoles.map(({ role, matched }) => (
+              <div
+                key={role}
+                className="rounded-lg border border-emerald-deep/10 bg-white/60 p-4 dark:bg-white/5"
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-semibold">{ROLE_LABEL[role]}</span>
+                  <span className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{role}</span>
+                </div>
+                <ul className="list-disc space-y-1 pl-4 text-xs text-slate-600 dark:text-slate-300">
+                  {matched.map((p) => {
+                    const cat = permissionCategory(p);
+                    const highlight = normalizedQuery && p.toLowerCase().includes(normalizedQuery);
+                    return (
+                      <li
+                        key={p}
+                        className={`${highlight ? "font-semibold text-emerald-deep" : ""}`}
+                      >
+                        {p}
+                        {cat && (
+                          <span className="ml-1.5 rounded border border-emerald-deep/10 bg-emerald-deep/5 px-1 py-0.5 text-[10px] text-slate-500">
+                            {cat}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </SectionCard>
   );
