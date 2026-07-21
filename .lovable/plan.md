@@ -1,83 +1,121 @@
-## Goal
 
-Elevate the Groups / Departments / Institutions surface from a generic form + list into a polished, guided registration flow and a rich admin detail workspace with documents, timeline, and audit context.
+# IT-360 CashApp — System Interface Phased Plan
 
-## Scope
-
-Frontend + a small amount of server-function/storage plumbing already scaffolded (`entity_documents` table + `entity-documents` bucket exist). No new DB tables.
+Delivered in 5 phases. Each phase is independently shippable and passes typecheck/build before the next starts. GHS is the default currency; FX uses `exchangerate.host` (no key).
 
 ---
 
-## Part 1 — Multi-step registration wizard
+## Phase 1 — Dual Login + Auth polish
 
-Replace both:
-- `src/routes/_member.app.entities.register.tsx` (member self-serve)
-- New `src/routes/_admin.admin.entities.register.tsx` (admin-initiated) linked from the entities index "Register new" button
+Redesign `src/routes/auth.tsx` into a two-panel layout matching the reference image.
 
-with a shared wizard component `src/components/entity-registration-wizard.tsx`:
+- Left panel: **User Login** (teal gradient, member iconography, "Sign in as member" CTA, link to sign-up + forgot password).
+- Right panel: **Administrator Login** (deep-emerald/gold accent, shield icon, "Staff sign-in" CTA, no self-service sign-up link).
+- Shared behind the scenes: same Supabase `signInWithPassword`; after sign-in, existing role gate routes members to `/app` and staff to `/admin` (no schema change).
+- Keep + polish password **strength meter** and **eye toggle** (already present) on both panels; add caps-lock hint and inline validation.
+- Responsive: stacks vertically < 900px with a segmented tab (User / Admin) to switch panels.
+- Apply professional typeface (already `serif`/`sans` tokens) consistently; refine spacing, focus rings, and dark-mode contrast.
 
-Steps:
-1. **Type** — visual card picker for Group / Department / Institution with per-type description of required fields.
-2. **Basics** — name, registration_no, tax_id (required for institution), parent institution picker (required for department, calls new `listInstitutions` server fn).
-3. **Contact & location** — email, phone, region, physical address, digital address (Ghana Post GPS format hint).
-4. **Documents** — drag-drop uploader for registration certificate, tax certificate, mandate letter (Institution/Department require registration cert; Group optional). Uses new `uploadEntityDocument` server fn writing to `entity-documents` bucket + `entity_documents` row.
-5. **Review & submit** — summary of every field + doc list, terms checkbox, submit.
+Signup approval gate (paired with Phase 4 DB change but shown to user here):
+- After successful sign-in, if `profiles.status = 'pending'` → route to a new `/auth/pending` screen ("Awaiting admin approval").
+- If `rejected` → `/auth/rejected` with contact prompt.
 
-UX details:
-- Step indicator with completed/current/upcoming states from theme tokens.
-- Per-step Zod validation; Next disabled until valid; Back preserves state.
-- Auto-save draft to `sessionStorage` keyed by user + type.
-- On submit: call existing `registerEntity`, then upload queued docs against the returned id, then navigate to detail page (admin) or `/app` with success toast (member).
+---
 
-## Part 2 — Admin entity detail overhaul
+## Phase 2 — 3D auto-collapse navigation
 
-Rework `src/routes/_admin.admin.entities.$entityId.tsx` into a two-column workspace:
+Enhance `src/components/portal-shell.tsx` (used by both `_admin` and `_member` shells).
 
-Header:
-- Eyebrow (type + registration no), title, status pill, "Copy entity ID" button, primary action button (Approve / Suspend / Reactivate) driven by current status.
-- Approve/Suspend now open a proper Radix Dialog (not `window.prompt`) with textarea, character counter, and confirm/cancel — replaces the current inline prompt.
+- Add a subtle 3D treatment: layered shadow, gradient rail, raised active card, hover lift; respects `prefers-reduced-motion`.
+- Behavior: sidebar **auto-collapses to icon rail** after any nav item click; hamburger/chevron re-expands. Persist state per portal in `localStorage`.
+- Keyboard: `[` toggles; focus outline preserved when collapsed.
+- Mobile: existing sheet drawer — auto-close on navigation (fix if currently sticky).
+- No route/data changes.
 
-Tabs (URL-driven via `?tab=`):
-1. **Overview** — registration details grid (existing content), plus a right-column "Compliance snapshot" card: KYC status, days since submission, reviewer, last decision note.
-2. **Members** — existing roster; add search box, role filter, and CSV export via existing `exports.ts`; add-member form gains inline profile lookup preview (shows name/member_no when a valid `member_no` is typed).
-3. **Documents** — list rows from `entity_documents` with type badge, uploaded by, uploaded at, and a "View" button that fetches a short-lived signed URL from a new `getEntityDocumentUrl` server fn. Upload widget re-uses the wizard's dropzone.
-4. **Timeline** — chronological feed built from `audit_log` entries whose `meta ->> 'entity_id' = id` (new `listEntityTimeline` server fn). Icons + tone per event kind (registered, approved, suspended, member_added, document_uploaded).
+---
 
-Loading/empty/error: `SectionCardSkeleton`, `EmptyState`, `ErrorState` for every tab.
+## Phase 3 — Admin dashboard widgets
 
-## Part 3 — Entities index polish
+Extend `src/routes/_admin.admin.index.tsx` with a grid of professional cards. All widgets use existing tokens + `recharts`.
 
-`src/routes/_admin.admin.entities.index.tsx`:
-- Replace native `<select>` filter with a proper filter bar: text search (name / registration_no), type pills (already present), status filter, and results-per-page.
-- Server-side pagination via `page`/`pageSize` in URL search; `listEntities` gets `page`, `pageSize`, `q` params.
-- Row hover reveals quick actions (Review, Copy ID).
-- "Register new" button in header opens the admin wizard route.
-- Sidebar `Membership Management` entries (Groups / Departments / Institutions) already deep-link with `?type=…`; keep as-is.
+Widgets:
+1. **Quick Statistics Cards** — members, active loans, deposits today, GHS liquidity (reuse `admin-analytics` KPIs).
+2. **Real-time AI Business Intelligence** — narrative summary + 3 recommended actions via `src/lib/ai-insights.functions.ts` (Lovable AI Gateway, existing); auto-refresh every 5 min.
+3. **Analytics Dashboard** — 30-day cash-flow + contribution mix charts.
+4. **System Health & Performance** — surfaces `admin-health` probes with pass/fail chips and last-run timestamp.
+5. **Live Users panel** — Supabase Realtime presence channel `presence:admin`; shows currently-online staff with avatars.
+6. **Notifications Center** — new `notifications` table (per-admin, read/unread, category); bell in header + drawer list.
+7. **Recent Activity Feed** — top 20 rows from `audit_log`.
+8. **System Status Monitoring** — DB latency, edge-fn last error, email queue depth (from existing analytics_query).
+9. **Universal Currency Converter Widget** — GHS default, dropdown for USD/EUR/GBP/NGN/etc., live rates from `exchangerate.host` via a `createServerFn` that caches 30 min in-memory + DB (`fx_rates` table).
+10. **Purge controls** — buttons on Notifications, Audit Trail, and a new **Recycle Bin** section; each calls a server fn that soft-deletes → hard-deletes after confirm dialog with typed confirmation. All purges write to `audit_log`.
 
-## Part 4 — Server functions (small additions)
+New tables (Phase 4 migration bundles these):
+- `notifications(id, user_id, category, title, body, read_at, created_at)`
+- `fx_rates(base, quote, rate, fetched_at)`
+- `recycle_bin(id, entity_table, entity_id, payload jsonb, deleted_by, deleted_at, purge_after)`
 
-`src/lib/admin-entities.functions.ts`:
-- Extend `listEntities` input with `q`, `page`, `pageSize`; return `{ rows, total }`.
-- `listInstitutions()` — lightweight `{id, name}` list for wizard's parent picker.
-- `uploadEntityDocument({ entity_id, doc_type, filename, contentBase64 })` — decodes, uploads to `entity-documents/{entity_id}/…` via admin client, inserts `entity_documents` row.
-- `listEntityDocuments({ entity_id })` and `getEntityDocumentUrl({ id })` — signed URL (5 min).
-- `listEntityTimeline({ entity_id, limit })` — reads `audit_log` filtered by meta.
+---
 
-All use `requireSupabaseAuth` + existing staff/reviewer guards; `registerEntity` and `uploadEntityDocument` also allow the entity's owner to call them for member self-serve.
+## Phase 4 — RBAC, signup approval, settings guardrails
+
+Database migration (single file):
+
+- `profiles`: add `status text not null default 'pending' check (status in ('pending','approved','rejected','deactivated'))`, `approved_by`, `approved_at`, `rejection_reason`.
+- Update `handle_new_user()` trigger: leaves status='pending'; existing rows backfilled to `approved` in same migration.
+- Add `approve_user(_uid, _note)` / `reject_user(_uid, _reason)` / `set_user_active(_uid, _active)` SECURITY DEFINER RPCs (super_admin or compliance_officer).
+- Create tables from Phase 3 (`notifications`, `fx_rates`, `recycle_bin`) with GRANTs + RLS.
+- New `permissions` + `role_permissions` tables so admins can create/edit **custom roles** and toggle permissions without a code deploy. Seed with the built-in matrix from `admin-role-management.functions.ts`.
+- `system_settings(key, value jsonb, updated_by, updated_at)` gated to super_admin for currency / FX overrides / regional settings.
+
+Server functions (`src/lib/`):
+- `admin-approvals.functions.ts` — list pending signups, approve, reject (bulk).
+- `admin-permissions.functions.ts` — CRUD custom roles, assign/revoke permissions, activate/deactivate accounts.
+- `system-settings.functions.ts` — read/write default currency, FX override, regions.
+- `fx.functions.ts` — public FX fetch (server-cached) + admin manual override.
+- `notifications.functions.ts` — list, mark read, purge.
+- `recycle-bin.functions.ts` — list, restore, purge.
+
+Routes:
+- `/admin/approvals` — pending signup queue with approve/reject.
+- `/admin/roles` — extended with **Create role** + **Edit permissions** tabs.
+- `/admin/settings` — currency, FX, regions, purge retention windows (super_admin only).
+- `/admin/recycle-bin` — recoverable deletions.
+- `/auth/pending`, `/auth/rejected` — post-signup gates.
+
+Gate wiring: `_member.tsx` + `_admin.tsx` check `profile.status`; only `approved` proceeds.
+
+---
+
+## Phase 5 — Expanded Branding
+
+Extend existing `branding_settings` table + `BrandingProvider`:
+
+- Add fields: `secondary_color`, `favicon_url`, `login_hero_url`, `login_tagline`, `org_legal_name`, `org_address`, `org_registration_no`, `footer_html`, `email_header_logo_url`, `email_footer_html`, `support_email`, `support_phone`.
+- `/admin/branding` gets tabbed sections: **Identity**, **Colors**, **Login Screen**, **Organization**, **Footer**, **Email Branding**. Live preview panel on the right.
+- `BrandingProvider` injects favicon `<link>`, secondary color CSS var, footer content into shells; `auth.tsx` reads `login_hero_url` and `login_tagline`; email templates in `src/lib/email-templates/*` read new branding fields.
+
+---
+
+## Delivery order
+
+1. Phase 1 (auth) — no DB change, ships immediately.
+2. Phase 2 (nav) — pure UI.
+3. Phase 4 DB migration + approval gate (blocks new signups behind admin).
+4. Phase 3 widgets consuming new tables.
+5. Phase 5 branding expansion.
 
 ## Technical notes
 
-- All new UI pulls colors/tones from `src/lib/theme-tokens.ts`; no ad-hoc Tailwind color scales.
-- Wizard is a controlled component; parent route decides `mode: "member" | "admin"` for terminal navigation.
-- Dropzone uses native `<input type="file">` with drag-over styling — no new deps.
-- Signed URLs are generated per-click, never stored.
-- Route naming stays TanStack dot-convention (`_admin.admin.entities.register.tsx`).
-- No changes to existing enums or RLS; `entity_documents` policies already cover staff + owners.
+- FX: server fn calls `https://api.exchangerate.host/latest?base=GHS`; store in `fx_rates`, TTL 30 min, fallback to last cached row on network fail. Admin can override any pair manually via `system_settings`.
+- Live users: Supabase Realtime presence on channel `presence:admin` joined inside `AdminLayout`; no DB writes.
+- Purge: two-step confirm dialog requires typing "PURGE"; server fn logs `audit_log` action `system.purge` with counts.
+- Every new `public` table ships with `GRANT` + RLS + policies in the same migration.
+- Reuse existing `role-guards.ts`; add `permission-guards.ts` sourced from `role_permissions` join for dynamic checks.
+- Signup approval: default `disable_signup=false` unchanged; users can sign up but can't reach `/app` until approved.
 
-## Build order
+## Out of scope (unless requested)
 
-1. Server-fn additions (list/upload/timeline/url).
-2. Shared wizard component + admin & member wizard routes.
-3. Admin detail overhaul (dialogs, tabs, documents, timeline).
-4. Entities index filter bar + pagination.
-5. Typecheck; Playwright smoke of member registration → admin approve flow; screenshot verify.
+- No mobile app; only responsive web.
+- No new payment integrations.
+- No overhaul of existing loans/savings flows beyond permission wiring.
