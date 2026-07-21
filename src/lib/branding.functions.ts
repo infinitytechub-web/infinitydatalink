@@ -85,7 +85,9 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
     );
     const { data } = await client
       .from("branding_settings")
-      .select("app_name, tagline, primary_color, accent_color, logo_path, favicon_path, updated_at")
+      .select(
+        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, org_legal_name, org_address, org_registration_no, footer_html, support_email, support_phone, updated_at",
+      )
       .eq("id", 1)
       .maybeSingle();
     if (!data) return DEFAULTS;
@@ -93,7 +95,7 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
       signBrandingUrl((data as any).logo_path),
       signBrandingUrl((data as any).favicon_path),
     ]);
-    return { ...(data as any), logo_url, favicon_url } as BrandingSettings;
+    return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
   },
 );
 
