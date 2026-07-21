@@ -33,27 +33,50 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Start with a stable default so SSR + first client render agree; hydrate the
   // real value in an effect to avoid a hydration mismatch warning.
   const [theme, setThemeState] = useState<Theme>("light");
+  const [hasExplicit, setHasExplicit] = useState(false);
 
   useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === "light" || stored === "dark") {
+        setHasExplicit(true);
+      }
+    } catch {
+      /* ignore */
+    }
     setThemeState(readInitial());
   }, []);
+
+  // Follow system preference changes only when the user hasn't explicitly picked.
+  useEffect(() => {
+    if (hasExplicit || typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => setThemeState(e.matches ? "dark" : "light");
+    mq.addEventListener?.("change", handler);
+    return () => mq.removeEventListener?.("change", handler);
+  }, [hasExplicit]);
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
+    // Hint native UI (scrollbars, form controls, autofill) to match.
+    root.style.colorScheme = theme;
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.content = theme === "dark" ? "#02121a" : "#0d9488";
+    if (meta) meta.content = theme === "dark" ? "#0b1220" : "#1e3a8a";
+  }, [theme]);
+
+  const setTheme = useCallback((t: Theme) => {
+    setThemeState(t);
+    setHasExplicit(true);
     try {
-      window.localStorage.setItem(STORAGE_KEY, theme);
+      window.localStorage.setItem(STORAGE_KEY, t);
     } catch {
       /* ignore */
     }
-  }, [theme]);
-
-  const setTheme = useCallback((t: Theme) => setThemeState(t), []);
+  }, []);
   const toggleTheme = useCallback(
-    () => setThemeState((t) => (t === "dark" ? "light" : "dark")),
-    [],
+    () => setTheme(document.documentElement.classList.contains("dark") ? "light" : "dark"),
+    [setTheme],
   );
 
   const value = useMemo(() => ({ theme, setTheme, toggleTheme }), [theme, setTheme, toggleTheme]);

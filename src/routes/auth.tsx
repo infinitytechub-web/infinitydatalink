@@ -6,6 +6,7 @@ import { passwordStrength } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useBranding } from "@/components/branding-provider";
 import {
   beginPasskeyAuthentication,
@@ -68,9 +69,12 @@ function AuthPage() {
           )}
           <span className="font-serif text-lg tracking-tight">{appName}</span>
         </Link>
-        <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
-          Secure session · TLS 1.3
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
+            Secure session · TLS 1.3
+          </span>
+          <ThemeToggle />
+        </div>
       </header>
 
       {branding.login_tagline ? (
@@ -137,9 +141,9 @@ function LoginPanel({ kind }: { kind: PanelKind }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
 
   const bg = isAdmin
-    ? "bg-gradient-to-br from-emerald-deep to-emerald-mid text-cream"
+    ? "bg-gradient-to-br from-[#0f1e4d] to-[#1e3a8a] text-white"
     : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white";
-  const badgeBg = isAdmin ? "bg-gold text-emerald-deep" : "bg-white text-teal-700";
+  const badgeBg = isAdmin ? "bg-gold text-[#0f172a]" : "bg-white text-teal-700";
   const eyebrow = isAdmin ? "Administrator access" : "Member access";
   const title = isAdmin ? "Administrator Login" : "User Login";
   const subtitle = isAdmin
@@ -563,7 +567,7 @@ function GoogleButton() {
         type="button"
         onClick={onClick}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-deep/15 bg-white py-3 text-xs font-bold uppercase tracking-widest text-emerald-deep transition-colors hover:bg-cream disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted disabled:opacity-60"
       >
         <GoogleIcon /> {loading ? "Connecting…" : "Continue with Google"}
       </button>
@@ -606,9 +610,9 @@ function Field({
   );
 }
 
-function inputClass(focus = "focus:border-emerald-mid") {
+function inputClass(focus = "focus:border-primary") {
   return cn(
-    "w-full rounded-lg border border-emerald-deep/15 bg-white px-3 py-2.5 text-sm text-emerald-deep outline-none transition-colors placeholder:text-emerald-deep/30",
+    "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70",
     focus,
   );
 }
