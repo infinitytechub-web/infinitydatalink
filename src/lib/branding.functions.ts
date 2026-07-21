@@ -110,21 +110,44 @@ export const updateBranding = createServerFn({ method: "POST" })
         tagline: z.string().trim().max(160).nullable().optional(),
         primary_color: z.string().regex(HEX, "Invalid hex color"),
         accent_color: z.string().regex(HEX, "Invalid hex color"),
+        secondary_color: z.string().regex(HEX, "Invalid hex color").optional(),
+        login_hero_url: z.string().url().max(500).nullable().optional(),
+        login_tagline: z.string().trim().max(200).nullable().optional(),
+        org_legal_name: z.string().trim().max(160).nullable().optional(),
+        org_address: z.string().trim().max(500).nullable().optional(),
+        org_registration_no: z.string().trim().max(80).nullable().optional(),
+        footer_html: z.string().trim().max(2000).nullable().optional(),
+        support_email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+        support_phone: z.string().trim().max(40).nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<BrandingSettings> => {
     await assertSuperAdmin(context.supabase, context.userId);
+    const patch: Record<string, any> = {
+      app_name: data.app_name,
+      tagline: data.tagline ?? null,
+      primary_color: data.primary_color,
+      accent_color: data.accent_color,
+      updated_at: new Date().toISOString(),
+      updated_by: context.userId,
+    };
+    for (const k of [
+      "secondary_color",
+      "login_hero_url",
+      "login_tagline",
+      "org_legal_name",
+      "org_address",
+      "org_registration_no",
+      "footer_html",
+      "support_email",
+      "support_phone",
+    ] as const) {
+      if ((data as any)[k] !== undefined) patch[k] = (data as any)[k];
+    }
     const { error } = await context.supabase
       .from("branding_settings")
-      .update({
-        app_name: data.app_name,
-        tagline: data.tagline ?? null,
-        primary_color: data.primary_color,
-        accent_color: data.accent_color,
-        updated_at: new Date().toISOString(),
-        updated_by: context.userId,
-      })
+      .update(patch)
       .eq("id", 1);
     if (error) throw new Error(error.message);
     await context.supabase.from("audit_log").insert({
@@ -132,7 +155,7 @@ export const updateBranding = createServerFn({ method: "POST" })
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: "super_admin",
       action: "branding.updated",
-      meta: { fields: Object.keys(data) },
+      meta: { fields: Object.keys(patch) },
     });
     return getBranding();
   });
