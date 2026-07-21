@@ -68,6 +68,10 @@ function AdminDashboard() {
         title="Institutional analytics"
         description="Real-time posture across membership, savings, loans, payments and security."
       />
+      <div className="mb-6 grid gap-6 xl:grid-cols-2">
+        <FxConverterWidget />
+        <PurgeControlsWidget />
+      </div>
       <Suspense fallback={<DashboardFallback />}>
         <DashboardBody />
       </Suspense>
