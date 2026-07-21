@@ -145,7 +145,7 @@ function ApprovalsInner() {
         {query.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : rows.length === 0 ? (
-          <EmptyState title="Nothing here" description="No users match this filter." />
+          <EmptyState title="Nothing here" hint="No users match this filter." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
