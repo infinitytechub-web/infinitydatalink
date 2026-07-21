@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { LogRetentionWidget } from "@/components/log-retention-widget";
 
 const SearchSchema = z.object({
   kind: z.enum(["all", "route", "api", "rbac", "render", "network", "server", "other"]).catch("all").default("all"),
@@ -151,6 +152,11 @@ function Body() {
         <KPIStat label="RBAC blocks" value={kpi.rbac.toString()} tone="gold" />
         <KPIStat label="API / network" value={kpi.api.toString()} tone="teal" />
       </div>
+
+      <div className="p-6 pb-0">
+        <LogRetentionWidget />
+      </div>
+
 
 
       <SectionCard
