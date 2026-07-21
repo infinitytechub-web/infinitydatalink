@@ -160,7 +160,7 @@ export const approveSettingsChange = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin.rpc("approve_settings_change", {
       _id: data.id,
-      _note: data.note || null,
+      _note: (data.note || null) as any,
     });
     if (error) throw new Error(error.message);
     return row as any;
@@ -232,7 +232,7 @@ export const createSnapshot = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin.rpc("create_settings_snapshot", {
       _label: data.label,
-      _note: data.note || null,
+      _note: (data.note || null) as any,
     });
     if (error) throw new Error(error.message);
     return row as SnapshotRow;
