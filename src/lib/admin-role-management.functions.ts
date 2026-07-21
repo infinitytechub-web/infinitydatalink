@@ -177,3 +177,66 @@ export const revokeRole = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+export type BulkRoleResult = {
+  ok: string[];
+  failed: { user_id: string; error: string }[];
+};
+
+export const bulkAssignRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        user_ids: z.array(z.string().uuid()).min(1).max(200),
+        role: z.enum(ASSIGNABLE_ROLES),
+        note: z.string().trim().max(500).optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }): Promise<BulkRoleResult> => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ok: string[] = [];
+    const failed: { user_id: string; error: string }[] = [];
+    for (const uid of data.user_ids) {
+      const { error } = await supabaseAdmin.rpc("admin_assign_role", {
+        _target_user: uid,
+        _role: data.role,
+        _actor_id: context.userId,
+        _note: data.note ?? undefined,
+      });
+      if (error) failed.push({ user_id: uid, error: error.message });
+      else ok.push(uid);
+    }
+    return { ok, failed };
+  });
+
+export const bulkRevokeRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        user_ids: z.array(z.string().uuid()).min(1).max(200),
+        role: z.enum(ASSIGNABLE_ROLES),
+        reason: z.string().trim().min(3, "Reason is required").max(500),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }): Promise<BulkRoleResult> => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ok: string[] = [];
+    const failed: { user_id: string; error: string }[] = [];
+    for (const uid of data.user_ids) {
+      const { error } = await supabaseAdmin.rpc("admin_revoke_role", {
+        _target_user: uid,
+        _role: data.role,
+        _actor_id: context.userId,
+        _reason: data.reason,
+      });
+      if (error) failed.push({ user_id: uid, error: error.message });
+      else ok.push(uid);
+    }
+    return { ok, failed };
+  });
