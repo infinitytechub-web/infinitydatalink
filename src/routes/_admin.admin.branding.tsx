@@ -410,3 +410,58 @@ async function fileToBase64(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+function BrandingPreview({ form, logoUrl }: { form: Form; logoUrl: string | null }) {
+  const primary = HEX.test(form.primary_color) ? form.primary_color : "#0d9488";
+  const accent = HEX.test(form.accent_color) ? form.accent_color : "#f5c451";
+  const secondary = HEX.test(form.secondary_color) ? form.secondary_color : "#0f766e";
+  return (
+    <SectionCard title="Live preview">
+      <div className="p-6">
+        <p className="mb-3 text-xs text-muted-foreground">
+          A mock preview of the sign-in banner, navigation, and CTA using unsaved values. Save to apply
+          across the platform.
+        </p>
+        <div
+          className="overflow-hidden rounded-xl border border-border shadow-sm"
+          style={{ background: `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)` }}
+        >
+          <div className="flex items-center justify-between px-6 py-4 text-white">
+            <div className="flex items-center gap-3">
+              {logoUrl ? (
+                <img src={logoUrl} alt="" className="h-8 w-auto rounded bg-white/10 p-1" />
+              ) : (
+                <div className="grid size-8 place-items-center rounded bg-white/15 text-xs font-bold">
+                  {(form.app_name || "IT").slice(0, 2).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <div className="text-sm font-bold">{form.app_name || "IT-360 CashApp"}</div>
+                {form.tagline ? (
+                  <div className="text-[11px] opacity-80">{form.tagline}</div>
+                ) : null}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="rounded-md px-3 py-1.5 text-xs font-semibold shadow-sm"
+              style={{ background: accent, color: "#1a1a1a" }}
+            >
+              Sign in
+            </button>
+          </div>
+          <div className="bg-white/10 px-6 py-8 text-white">
+            <div className="text-lg font-semibold">
+              {form.login_tagline || "Welcome back to your dashboard."}
+            </div>
+            <div className="mt-1 text-xs opacity-80">
+              {form.org_legal_name || "Your organization"} • Support:{" "}
+              {form.support_email || "support@example.com"}
+            </div>
+          </div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
