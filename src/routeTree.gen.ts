@@ -44,6 +44,7 @@ import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans
 import { Route as AdminAdminHealthRouteImport } from './routes/_admin.admin.health'
 import { Route as AdminAdminFinanceRouteImport } from './routes/_admin.admin.finance'
 import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.entities'
+import { Route as AdminAdminConsoleRouteImport } from './routes/_admin.admin.console'
 import { Route as AdminAdminBrandingRouteImport } from './routes/_admin.admin.branding'
 import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
 import { Route as AdminAdminApprovalsRouteImport } from './routes/_admin.admin.approvals'
@@ -246,6 +247,11 @@ const AdminAdminEntitiesRoute = AdminAdminEntitiesRouteImport.update({
   path: '/entities',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminConsoleRoute = AdminAdminConsoleRouteImport.update({
+  id: '/console',
+  path: '/console',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AdminAdminBrandingRoute = AdminAdminBrandingRouteImport.update({
   id: '/branding',
   path: '/branding',
@@ -415,6 +421,7 @@ export interface FileRoutesByFullPath {
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
+  '/admin/console': typeof AdminAdminConsoleRoute
   '/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/admin/health': typeof AdminAdminHealthRoute
@@ -476,6 +483,7 @@ export interface FileRoutesByTo {
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
+  '/admin/console': typeof AdminAdminConsoleRoute
   '/admin/health': typeof AdminAdminHealthRoute
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
@@ -539,6 +547,7 @@ export interface FileRoutesById {
   '/_admin/admin/approvals': typeof AdminAdminApprovalsRoute
   '/_admin/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/_admin/admin/branding': typeof AdminAdminBrandingRoute
+  '/_admin/admin/console': typeof AdminAdminConsoleRoute
   '/_admin/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/_admin/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/_admin/admin/health': typeof AdminAdminHealthRoute
@@ -604,6 +613,7 @@ export interface FileRouteTypes {
     | '/admin/approvals'
     | '/admin/audit'
     | '/admin/branding'
+    | '/admin/console'
     | '/admin/entities'
     | '/admin/finance'
     | '/admin/health'
@@ -665,6 +675,7 @@ export interface FileRouteTypes {
     | '/admin/approvals'
     | '/admin/audit'
     | '/admin/branding'
+    | '/admin/console'
     | '/admin/health'
     | '/admin/loans'
     | '/admin/members'
@@ -727,6 +738,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/approvals'
     | '/_admin/admin/audit'
     | '/_admin/admin/branding'
+    | '/_admin/admin/console'
     | '/_admin/admin/entities'
     | '/_admin/admin/finance'
     | '/_admin/admin/health'
@@ -1041,6 +1053,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminEntitiesRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/console': {
+      id: '/_admin/admin/console'
+      path: '/console'
+      fullPath: '/admin/console'
+      preLoaderRoute: typeof AdminAdminConsoleRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/branding': {
       id: '/_admin/admin/branding'
       path: '/branding'
@@ -1332,6 +1351,7 @@ interface AdminAdminRouteChildren {
   AdminAdminApprovalsRoute: typeof AdminAdminApprovalsRoute
   AdminAdminAuditRoute: typeof AdminAdminAuditRouteWithChildren
   AdminAdminBrandingRoute: typeof AdminAdminBrandingRoute
+  AdminAdminConsoleRoute: typeof AdminAdminConsoleRoute
   AdminAdminEntitiesRoute: typeof AdminAdminEntitiesRouteWithChildren
   AdminAdminFinanceRoute: typeof AdminAdminFinanceRouteWithChildren
   AdminAdminHealthRoute: typeof AdminAdminHealthRoute
@@ -1352,6 +1372,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminApprovalsRoute: AdminAdminApprovalsRoute,
   AdminAdminAuditRoute: AdminAdminAuditRouteWithChildren,
   AdminAdminBrandingRoute: AdminAdminBrandingRoute,
+  AdminAdminConsoleRoute: AdminAdminConsoleRoute,
   AdminAdminEntitiesRoute: AdminAdminEntitiesRouteWithChildren,
   AdminAdminFinanceRoute: AdminAdminFinanceRouteWithChildren,
   AdminAdminHealthRoute: AdminAdminHealthRoute,
