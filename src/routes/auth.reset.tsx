@@ -5,7 +5,7 @@ import { passwordStrength } from "@/lib/auth";
 export const Route = createFileRoute("/auth/reset")({
   head: () => ({
     meta: [
-      { title: "Set new password — Infinity Wealth" },
+      { title: "Set new password — IT-360 CashApp" },
       { name: "robots", content: "noindex" },
     ],
   }),

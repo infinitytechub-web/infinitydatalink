@@ -9,18 +9,18 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Infinity Wealth" },
+      { title: "Sign in — IT-360 CashApp" },
       {
         name: "description",
         content:
-          "Sign in or create your Infinity Wealth account to access savings, loans, and payments in your member or administrator portal.",
+          "Sign in or create your IT-360 CashApp account to access savings, loans, and payments in your member or administrator portal.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Sign in — Infinity Wealth" },
+      { property: "og:title", content: "Sign in — IT-360 CashApp" },
       {
         property: "og:description",
         content:
-          "Access your Infinity Wealth member or administrator portal to manage savings, loans, and payments.",
+          "Access your IT-360 CashApp member or administrator portal to manage savings, loans, and payments.",
       },
       { property: "og:url", content: "https://infinity-wealth360.lovable.app/auth" },
     ],
@@ -50,7 +50,7 @@ function AuthPage() {
           <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-deep">
             <div className="size-3 rotate-45 border-2 border-gold" />
           </div>
-          <span className="font-serif text-lg">Infinity Wealth</span>
+          <span className="font-serif text-lg">IT-360 CashApp</span>
         </Link>
         <span className="text-[11px] uppercase tracking-widest text-emerald-deep/50">
           Secure session · TLS 1.3

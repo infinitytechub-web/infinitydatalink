@@ -1,8 +1,8 @@
-# Infinity Wealth
+# IT-360 CashApp
 
 > Enterprise financial management platform for cooperatives, SACCOs, savings & loans companies, and membership organisations — one place for savings, loans, payments, and investment.
 
-Infinity Wealth provides two portals (member and administrator) over a single source of truth, with modules for savings accounts, loan origination and servicing, payments and reconciliation, KYC and compliance, and reporting.
+IT-360 CashApp provides two portals (member and administrator) over a single source of truth, with modules for savings accounts, loan origination and servicing, payments and reconciliation, KYC and compliance, and reporting.
 
 ## Pages
 

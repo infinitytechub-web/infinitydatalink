@@ -226,7 +226,7 @@ export function PortalShell({
         </div>
 
         <footer className="border-t border-border px-4 py-6 text-[11px] text-muted-foreground lg:px-8">
-          Infinity Wealth App · Confidential financial data · © {new Date().getFullYear()}
+          IT-360 CashApp App · Confidential financial data · © {new Date().getFullYear()}
         </footer>
       </main>
     </div>

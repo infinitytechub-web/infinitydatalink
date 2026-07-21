@@ -38,7 +38,7 @@ const myAccountsQuery = queryOptions({
 export const Route = createFileRoute("/_member/app/transfers")({
   head: () => ({
     meta: [
-      { title: "Transfers — Infinity Wealth" },
+      { title: "Transfers — IT-360 CashApp" },
       { name: "description", content: "Move funds between your accounts or send to another member." },
       { name: "robots", content: "noindex" },
     ],

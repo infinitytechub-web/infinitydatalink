@@ -11,11 +11,11 @@ const FAQS: Array<[string, string]> = [
 export const Route = createFileRoute("/_member/app/support")({
   head: () => ({
     meta: [
-      { title: "Help & Support — Infinity Wealth" },
+      { title: "Help & Support — IT-360 CashApp" },
       {
         name: "description",
         content:
-          "Get help with your Infinity Wealth account: live chat, WhatsApp, tickets, and answers to common savings, loans, and payments questions.",
+          "Get help with your IT-360 CashApp account: live chat, WhatsApp, tickets, and answers to common savings, loans, and payments questions.",
       },
       { name: "robots", content: "noindex" },
     ],

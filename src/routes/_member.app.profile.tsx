@@ -27,7 +27,7 @@ import {
 export const Route = createFileRoute("/_member/app/profile")({
   head: () => ({
     meta: [
-      { title: "Profile & KYC — Infinity Wealth" },
+      { title: "Profile & KYC — IT-360 CashApp" },
       { name: "robots", content: "noindex" },
     ],
   }),

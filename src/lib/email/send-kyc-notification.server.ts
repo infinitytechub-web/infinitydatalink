@@ -87,12 +87,12 @@ export async function sendKycDecisionEmail(
   const props =
     input.decision === "approved"
       ? {
-          siteName: "Infinity Wealth",
+          siteName: "IT-360 CashApp",
           memberName: profile.full_name ?? undefined,
           appUrl: `${APP_ORIGIN}/app/kyc`,
         }
       : {
-          siteName: "Infinity Wealth",
+          siteName: "IT-360 CashApp",
           memberName: profile.full_name ?? undefined,
           reviewerNote: input.reviewerNote ?? undefined,
           appUrl: `${APP_ORIGIN}/app/profile`,

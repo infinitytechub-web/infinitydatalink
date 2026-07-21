@@ -46,7 +46,7 @@ function SettingsPage() {
 
       <SectionCard title="Organization branding">
         <div className="grid gap-4 p-6 md:grid-cols-2">
-          <TextInput label="Institution name" value="Infinity Wealth Cooperative" />
+          <TextInput label="Institution name" value="IT-360 CashApp Cooperative" />
           <TextInput label="Address" value="12 Ring Road Central, Accra" />
           <TextInput label="Contact email" value="hello@infinitywealth.app" />
           <TextInput label="Contact phone" value="+233 55 000 0000" />

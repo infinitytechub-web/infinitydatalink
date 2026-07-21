@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_admin/admin/audit/transfers")({
   validateSearch: zodValidator(search),
   head: () => ({
     meta: [
-      { title: "Transfer Decision Audit — Infinity Wealth" },
+      { title: "Transfer Decision Audit — IT-360 CashApp" },
       { name: "description", content: "Immutable log of every transfer approve and reject action." },
       { name: "robots", content: "noindex" },
     ],
