@@ -68,9 +68,12 @@ function AuthPage() {
           )}
           <span className="font-serif text-lg tracking-tight">{appName}</span>
         </Link>
-        <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
-          Secure session · TLS 1.3
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
+            Secure session · TLS 1.3
+          </span>
+          <ThemeToggle />
+        </div>
       </header>
 
       {branding.login_tagline ? (
