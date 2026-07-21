@@ -168,6 +168,9 @@ function BrandingEditor() {
         description="Customize identity, colors, organization details, login and footer copy, support contacts, and outbound email branding. Changes apply immediately across the platform."
       />
 
+      <BrandingPreview form={form} logoUrl={branding.logo_url} />
+
+
       <SectionCard title="Identity">
         <div className="grid gap-4 md:grid-cols-2">
           <FieldText id="app-name" label="App name" value={form.app_name} onChange={(v) => set("app_name", v)} maxLength={60} />
