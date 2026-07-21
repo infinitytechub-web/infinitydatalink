@@ -101,6 +101,7 @@ function AuthForm({ mode }: { mode: Mode }) {
   const [fullName, setFullName] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const strength = useMemo(() => passwordStrength(password), [password]);
 
