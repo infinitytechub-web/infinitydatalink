@@ -19,7 +19,7 @@ interface Props {
 }
 
 const KycApprovedEmail = ({
-  siteName = "Infinity Wealth",
+  siteName = "IT-360 CashApp",
   memberName,
   appUrl = "https://infinity-wealth360.lovable.app/app/kyc",
 }: Props) => (

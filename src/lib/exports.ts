@@ -23,7 +23,7 @@ export type ExportOptions<T> = {
 };
 
 const BRAND = {
-  name: "Infinity Wealth",
+  name: "IT-360 CashApp",
   tagline: "Enterprise Financial Management · Savings · Loans · Payments",
   address: "Institutional Portal · Confidential",
   emerald: "#064e3b",

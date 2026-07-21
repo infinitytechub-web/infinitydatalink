@@ -40,7 +40,7 @@ const CRUMBS: Record<string, string> = {
 
 export const Route = createFileRoute("/_member/app")({
   head: () => ({
-    meta: [{ title: "Member portal — Infinity Wealth" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Member portal — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: MemberLayout,
 });
@@ -55,7 +55,7 @@ function MemberLayout() {
   const breadcrumb = CRUMBS[pathname] ?? "Overview";
   return (
     <PortalShell
-      brand="Infinity Wealth"
+      brand="IT-360 CashApp"
       groups={groups}
       breadcrumb={breadcrumb}
       action={

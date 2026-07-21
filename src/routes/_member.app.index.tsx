@@ -4,11 +4,11 @@ import { KPIStat, Money, StatusPill } from "@/components/primitives";
 export const Route = createFileRoute("/_member/app/")({
   head: () => ({
     meta: [
-      { title: "Member Dashboard — Infinity Wealth" },
+      { title: "Member Dashboard — IT-360 CashApp" },
       {
         name: "description",
         content:
-          "Your Infinity Wealth member dashboard: net worth, savings, loans, and recent transactions at a glance.",
+          "Your IT-360 CashApp member dashboard: net worth, savings, loans, and recent transactions at a glance.",
       },
       { name: "robots", content: "noindex" },
     ],

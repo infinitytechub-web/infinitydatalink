@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Infinity Wealth — Enterprise Financial Management Platform" },
+      { title: "IT-360 CashApp — Enterprise Financial Management Platform" },
       {
         name: "description",
         content:
           "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations.",
       },
-      { property: "og:title", content: "Infinity Wealth — Enterprise Financial Management Platform" },
+      { property: "og:title", content: "IT-360 CashApp — Enterprise Financial Management Platform" },
       {
         property: "og:description",
         content:
@@ -35,13 +35,13 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Service",
           serviceType: "Financial management platform",
-          provider: { "@type": "Organization", name: "Infinity Wealth" },
+          provider: { "@type": "Organization", name: "IT-360 CashApp" },
           areaServed: "Africa",
           description:
             "Savings, loans, payments, and investment management for cooperatives, SACCOs, and membership organisations.",
           hasOfferCatalog: {
             "@type": "OfferCatalog",
-            name: "Infinity Wealth modules",
+            name: "IT-360 CashApp modules",
             itemListElement: [
               { "@type": "Offer", itemOffered: { "@type": "Service", name: "Savings accounts & plans" } },
               { "@type": "Offer", itemOffered: { "@type": "Service", name: "Loan origination & servicing" } },
@@ -64,7 +64,7 @@ function Landing() {
           <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-deep">
             <div className="size-3 rotate-45 border-2 border-gold" />
           </div>
-          <span className="font-serif text-lg">Infinity Wealth</span>
+          <span className="font-serif text-lg">IT-360 CashApp</span>
         </div>
         <Link
           to="/auth"
@@ -85,7 +85,7 @@ function Landing() {
             <span className="italic">managed with care.</span>
           </h1>
           <p className="mt-6 max-w-lg text-base text-emerald-deep/70">
-            Infinity Wealth is a secure, membership-first platform for cooperatives, SACCOs,
+            IT-360 CashApp is a secure, membership-first platform for cooperatives, SACCOs,
             savings & loans companies, and investment groups. Two portals, one source of truth.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -159,7 +159,7 @@ function Landing() {
 
       <footer className="border-t border-emerald-deep/10 bg-cream">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-[11px] text-emerald-deep/50">
-          <span>© {new Date().getFullYear()} Infinity Wealth</span>
+          <span>© {new Date().getFullYear()} IT-360 CashApp</span>
           <span>Institutional-grade · Confidential</span>
         </div>
       </footer>

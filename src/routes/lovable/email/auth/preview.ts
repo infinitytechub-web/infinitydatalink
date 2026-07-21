@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "infinity-wealth360"
+const SITE_NAME = "IT-360 CashApp"
 const ROOT_DOMAIN = "infinitydatalink.com"
 
 // Sample data for preview mode ONLY (not used in actual email sending).

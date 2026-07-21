@@ -92,7 +92,7 @@ function crumbFor(pathname: string) {
 
 export const Route = createFileRoute("/_admin/admin")({
   head: () => ({
-    meta: [{ title: "Administrator — Infinity Wealth" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Administrator — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: AdminLayout,
 });
@@ -102,7 +102,7 @@ function AdminLayout() {
   const breadcrumb = crumbFor(pathname);
   return (
     <PortalShell
-      brand="Infinity Admin"
+      brand="IT-360 Admin"
       groups={groups}
       breadcrumb={breadcrumb}
       action={

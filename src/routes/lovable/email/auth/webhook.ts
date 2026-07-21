@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "infinity-wealth360"
+const SITE_NAME = "IT-360 CashApp"
 const SENDER_DOMAIN = "notify.infinitydatalink.com"
 const ROOT_DOMAIN = "infinitydatalink.com"
 const FROM_DOMAIN = "notify.infinitydatalink.com"

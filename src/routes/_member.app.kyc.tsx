@@ -13,7 +13,7 @@ const statusQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_member/app/kyc")({
-  head: () => ({ meta: [{ title: "KYC verification — Infinity Wealth" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "KYC verification — IT-360 CashApp" }, { name: "robots", content: "noindex" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(statusQuery),
   component: KycStatusPage,
   errorComponent: ({ error }) => (

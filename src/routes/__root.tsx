@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#0d9488" },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Infinity Wealth" },
+      { property: "og:site_name", content: "IT-360 CashApp" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "Infinity Wealth",
+          name: "IT-360 CashApp",
           url: "https://infinity-wealth360.lovable.app",
           logo: "https://infinity-wealth360.lovable.app/icon-512.png",
           description:
@@ -106,7 +106,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "Infinity Wealth",
+          name: "IT-360 CashApp",
           url: "https://infinity-wealth360.lovable.app",
         }),
       },

@@ -27,7 +27,7 @@ import {
 export const Route = createFileRoute("/_admin/admin/super-admins")({
   head: () => ({
     meta: [
-      { title: "Super Admins — Infinity Wealth" },
+      { title: "Super Admins — IT-360 CashApp" },
       { name: "robots", content: "noindex" },
     ],
   }),

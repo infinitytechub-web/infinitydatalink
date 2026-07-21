@@ -3,7 +3,7 @@ import { render } from "@react-email/render";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { TEMPLATES } from "@/lib/email-templates/registry";
 
-const SITE_NAME = "infinity-wealth360";
+const SITE_NAME = "IT-360 CashApp";
 const SENDER_DOMAIN = "notify.infinitydatalink.com";
 const FROM_DOMAIN = "notify.infinitydatalink.com";
 const APP_ORIGIN = "https://infinity-wealth360.lovable.app";
@@ -87,12 +87,12 @@ export async function sendKycDecisionEmail(
   const props =
     input.decision === "approved"
       ? {
-          siteName: "Infinity Wealth",
+          siteName: "IT-360 CashApp",
           memberName: profile.full_name ?? undefined,
           appUrl: `${APP_ORIGIN}/app/kyc`,
         }
       : {
-          siteName: "Infinity Wealth",
+          siteName: "IT-360 CashApp",
           memberName: profile.full_name ?? undefined,
           reviewerNote: input.reviewerNote ?? undefined,
           appUrl: `${APP_ORIGIN}/app/profile`,

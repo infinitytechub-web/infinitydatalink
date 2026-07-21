@@ -39,7 +39,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/_admin/admin/super-admins/history")({
   head: () => ({
     meta: [
-      { title: "Super Admin grant history — Infinity Wealth" },
+      { title: "Super Admin grant history — IT-360 CashApp" },
       { name: "robots", content: "noindex" },
     ],
   }),

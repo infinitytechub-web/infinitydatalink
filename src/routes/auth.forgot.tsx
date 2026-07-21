@@ -4,7 +4,7 @@ import { useState } from "react";
 export const Route = createFileRoute("/auth/forgot")({
   head: () => ({
     meta: [
-      { title: "Reset password — Infinity Wealth" },
+      { title: "Reset password — IT-360 CashApp" },
       { name: "robots", content: "noindex" },
     ],
   }),
