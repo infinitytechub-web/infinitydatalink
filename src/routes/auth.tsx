@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { Eye, EyeOff, ShieldCheck, UserRound } from "lucide-react";
+import { Eye, EyeOff, Fingerprint, ShieldCheck, UserRound } from "lucide-react";
 import { passwordStrength } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -210,6 +210,12 @@ function LoginPanel({ kind }: { kind: PanelKind }) {
           <div className="h-px flex-1 bg-emerald-deep/10" />
         </div>
 
+        <BiometricButton kind={kind} />
+        <div className="my-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">
+          <div className="h-px flex-1 bg-emerald-deep/10" />
+          or
+          <div className="h-px flex-1 bg-emerald-deep/10" />
+        </div>
         <GoogleButton />
 
         <p className="mt-6 text-[11px] leading-relaxed text-emerald-deep/50">
@@ -418,6 +424,107 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
     </form>
   );
 }
+
+function BiometricButton({ kind }: { kind: PanelKind }) {
+  const isAdmin = kind === "admin";
+  const [supported, setSupported] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<{ tone: "info" | "error" | "success"; text: string } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const check = async () => {
+      try {
+        if (typeof window === "undefined" || !window.PublicKeyCredential) {
+          if (!cancelled) setSupported(false);
+          return;
+        }
+        const available = await (
+          window.PublicKeyCredential as unknown as {
+            isUserVerifyingPlatformAuthenticatorAvailable?: () => Promise<boolean>;
+          }
+        ).isUserVerifyingPlatformAuthenticatorAvailable?.();
+        if (!cancelled) setSupported(!!available);
+      } catch {
+        if (!cancelled) setSupported(false);
+      }
+    };
+    void check();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (supported === false) return null;
+
+  const onClick = async () => {
+    setMsg(null);
+    setLoading(true);
+    try {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+      await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          timeout: 60_000,
+          userVerification: "required",
+          rpId: window.location.hostname,
+        },
+        mediation: "optional",
+      } as CredentialRequestOptions);
+      setMsg({
+        tone: "info",
+        text: "Biometric verified on this device. Passkey server verification isn't wired yet — sign in with your password to continue.",
+      });
+    } catch (e) {
+      const name = (e as { name?: string } | null)?.name;
+      if (name === "NotAllowedError") {
+        setMsg({ tone: "error", text: "Biometric prompt cancelled." });
+      } else {
+        setMsg({
+          tone: "info",
+          text: "No passkey registered for this site yet. Sign in with your password to continue.",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mb-3">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={loading || supported === null}
+        className={cn(
+          "flex w-full items-center justify-center gap-2 rounded-lg border py-3 text-xs font-bold uppercase tracking-widest transition-colors disabled:opacity-60",
+          isAdmin
+            ? "border-emerald-deep/20 bg-emerald-deep/5 text-emerald-deep hover:bg-emerald-deep/10"
+            : "border-teal-500/25 bg-teal-500/5 text-teal-700 hover:bg-teal-500/10",
+        )}
+      >
+        <Fingerprint className="size-4" />
+        {loading
+          ? "Waiting for biometric…"
+          : isAdmin
+            ? "Sign in with biometrics"
+            : "Use Face ID / fingerprint"}
+      </button>
+      {msg ? (
+        <p
+          className={cn(
+            "mt-2 text-[11px] leading-relaxed",
+            msg.tone === "error" ? "text-destructive" : "text-emerald-deep/60",
+          )}
+        >
+          {msg.text}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 
 function GoogleButton() {
   const [loading, setLoading] = useState(false);
