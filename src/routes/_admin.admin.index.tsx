@@ -20,6 +20,8 @@ import { generateBusinessInsights } from "@/lib/ai-insights.functions";
 import { getAdminOverview, type ActivityEntry, type PendingApproval } from "@/lib/admin-analytics.functions";
 import { decideLoan } from "@/lib/admin-loans.functions";
 import { RefreshCw, Sparkles } from "lucide-react";
+import { FxConverterWidget } from "@/components/fx-converter-widget";
+import { PurgeControlsWidget } from "@/components/purge-controls-widget";
 
 const overviewQuery = queryOptions({
   queryKey: ["admin", "overview"],
