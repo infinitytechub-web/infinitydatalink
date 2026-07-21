@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SIDEBAR_GROUP_CHIPS } from "@/lib/theme-tokens";
+import { useBranding } from "@/components/branding-provider";
 
 const GROUP_ACCENTS = SIDEBAR_GROUP_CHIPS;
 
@@ -30,6 +31,8 @@ export function PortalShell({
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { branding } = useBranding();
+  const displayName = branding.app_name || brand;
 
   // Close mobile drawer when the route changes.
   useEffect(() => {
@@ -86,9 +89,16 @@ export function PortalShell({
         <div className="flex items-center justify-between border-b border-white/10 p-6">
           <Link
             to="/"
-            className="font-serif text-xl tracking-tight text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]"
+            className="flex items-center gap-2 font-serif text-xl tracking-tight text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]"
           >
-            {brand}
+            {branding.logo_url ? (
+              <img
+                src={branding.logo_url}
+                alt=""
+                className="h-8 w-8 rounded-md bg-white/10 object-contain p-1"
+              />
+            ) : null}
+            <span className="truncate">{displayName}</span>
           </Link>
           <button
             type="button"
@@ -206,7 +216,7 @@ export function PortalShell({
               <Menu className="size-4" />
             </button>
             <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
-              <span className="hidden truncate text-muted-foreground sm:inline">{brand}</span>
+              <span className="hidden truncate text-muted-foreground sm:inline">{displayName}</span>
               <span className="hidden text-muted-foreground/60 sm:inline">/</span>
               <span className="truncate">{breadcrumb}</span>
             </div>
@@ -226,7 +236,7 @@ export function PortalShell({
         </div>
 
         <footer className="border-t border-border px-4 py-6 text-[11px] text-muted-foreground lg:px-8">
-          IT-360 CashApp · Confidential financial data · © {new Date().getFullYear()}
+          {displayName} · Confidential financial data · © {new Date().getFullYear()}
         </footer>
       </main>
     </div>

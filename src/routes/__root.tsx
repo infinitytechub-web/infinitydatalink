@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/components/theme-provider";
+import { BrandingProvider } from "@/components/branding-provider";
 
 function NotFoundComponent() {
   return (
@@ -138,9 +139,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <Outlet />
-        </AuthProvider>
+        <BrandingProvider>
+          <AuthProvider>
+            <Outlet />
+          </AuthProvider>
+        </BrandingProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

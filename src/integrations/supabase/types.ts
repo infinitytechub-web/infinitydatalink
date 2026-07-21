@@ -94,6 +94,42 @@ export type Database = {
           },
         ]
       }
+      branding_settings: {
+        Row: {
+          accent_color: string
+          app_name: string
+          favicon_path: string | null
+          id: number
+          logo_path: string | null
+          primary_color: string
+          tagline: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          accent_color?: string
+          app_name?: string
+          favicon_path?: string | null
+          id?: number
+          logo_path?: string | null
+          primary_color?: string
+          tagline?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          accent_color?: string
+          app_name?: string
+          favicon_path?: string | null
+          id?: number
+          logo_path?: string | null
+          primary_color?: string
+          tagline?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
