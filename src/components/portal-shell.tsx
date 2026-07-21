@@ -7,11 +7,18 @@ import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SIDEBAR_GROUP_CHIPS } from "@/lib/theme-tokens";
 import { useBranding } from "@/components/branding-provider";
+import {
+  SidebarWidget,
+  SidebarWidgetHeader,
+  SidebarNavItem,
+  SidebarWidgetEmpty,
+} from "@/components/sidebar-widgets";
+import type { NavGroup, NavItem } from "@/components/portal-shell.types";
+
+export type { NavGroup, NavItem };
 
 const GROUP_ACCENTS = SIDEBAR_GROUP_CHIPS;
 
-export type NavItem = { to: string; label: string; icon?: ReactNode };
-export type NavGroup = { label: string; items: NavItem[] };
 
 const COLLAPSE_KEY = "it360:sidebar-collapsed";
 
