@@ -210,6 +210,12 @@ function LoginPanel({ kind }: { kind: PanelKind }) {
           <div className="h-px flex-1 bg-emerald-deep/10" />
         </div>
 
+        <BiometricButton kind={kind} />
+        <div className="my-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">
+          <div className="h-px flex-1 bg-emerald-deep/10" />
+          or
+          <div className="h-px flex-1 bg-emerald-deep/10" />
+        </div>
         <GoogleButton />
 
         <p className="mt-6 text-[11px] leading-relaxed text-emerald-deep/50">
