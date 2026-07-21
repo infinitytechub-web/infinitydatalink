@@ -14,10 +14,19 @@ const DEFAULTS: BrandingSettings = {
   tagline: null,
   primary_color: "#0d9488",
   accent_color: "#f5c451",
+  secondary_color: "#0f766e",
   logo_url: null,
   favicon_url: null,
   logo_path: null,
   favicon_path: null,
+  login_hero_url: null,
+  login_tagline: null,
+  org_legal_name: null,
+  org_address: null,
+  org_registration_no: null,
+  footer_html: null,
+  support_email: null,
+  support_phone: null,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -49,10 +58,13 @@ function applyBranding(branding: BrandingSettings) {
   const root = document.documentElement;
   const primary = hexToRgb(branding.primary_color);
   const accent = hexToRgb(branding.accent_color);
+  const secondary = hexToRgb(branding.secondary_color);
   if (primary) root.style.setProperty("--brand-primary-rgb", primary);
   if (accent) root.style.setProperty("--brand-accent-rgb", accent);
+  if (secondary) root.style.setProperty("--brand-secondary-rgb", secondary);
   root.style.setProperty("--brand-primary", branding.primary_color);
   root.style.setProperty("--brand-accent", branding.accent_color);
+  root.style.setProperty("--brand-secondary", branding.secondary_color);
 
   // Update <title> suffix
   if (branding.app_name) {

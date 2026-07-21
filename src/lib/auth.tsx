@@ -54,11 +54,15 @@ const ADMIN_ROLES: AppRole[] = [
   "super_admin", "compliance_officer", "loan_officer", "finance_officer", "auditor",
 ];
 
+export type AccountStatus = "pending" | "approved" | "rejected" | "deactivated";
+
 export type SessionUser = {
   id: string;
   email: string;
   fullName: string;
   roles: AppRole[];
+  status: AccountStatus;
+  rejectionReason: string | null;
 };
 
 type AuthState = {
@@ -82,7 +86,24 @@ async function loadRoles(userId: string): Promise<AppRole[]> {
   return data.map((r) => r.role as AppRole);
 }
 
-function toSessionUser(u: User, roles: AppRole[]): SessionUser {
+async function loadStatus(userId: string): Promise<{ status: AccountStatus; rejectionReason: string | null }> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("status, rejection_reason")
+    .eq("id", userId)
+    .maybeSingle();
+  return {
+    status: ((data as any)?.status ?? "pending") as AccountStatus,
+    rejectionReason: ((data as any)?.rejection_reason ?? null) as string | null,
+  };
+}
+
+function toSessionUser(
+  u: User,
+  roles: AppRole[],
+  status: AccountStatus,
+  rejectionReason: string | null,
+): SessionUser {
   return {
     id: u.id,
     email: u.email ?? "",
@@ -90,6 +111,8 @@ function toSessionUser(u: User, roles: AppRole[]): SessionUser {
       (u.user_metadata?.full_name as string | undefined) ??
       (u.email?.split("@")[0] ?? "Member"),
     roles: roles.length ? roles : ["member"],
+    status,
+    rejectionReason,
   };
 }
 
@@ -102,8 +125,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       return;
     }
-    const roles = await loadRoles(authUser.id);
-    setUser(toSessionUser(authUser, roles));
+    const [roles, statusInfo] = await Promise.all([loadRoles(authUser.id), loadStatus(authUser.id)]);
+    setUser(toSessionUser(authUser, roles, statusInfo.status, statusInfo.rejectionReason));
   };
 
   useEffect(() => {

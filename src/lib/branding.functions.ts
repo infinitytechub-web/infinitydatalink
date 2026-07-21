@@ -18,10 +18,19 @@ export type BrandingSettings = {
   tagline: string | null;
   primary_color: string;
   accent_color: string;
+  secondary_color: string;
   logo_url: string | null;
   favicon_url: string | null;
   logo_path: string | null;
   favicon_path: string | null;
+  login_hero_url: string | null;
+  login_tagline: string | null;
+  org_legal_name: string | null;
+  org_address: string | null;
+  org_registration_no: string | null;
+  footer_html: string | null;
+  support_email: string | null;
+  support_phone: string | null;
   updated_at: string;
 };
 
@@ -30,10 +39,19 @@ const DEFAULTS: BrandingSettings = {
   tagline: null,
   primary_color: "#0d9488",
   accent_color: "#f5c451",
+  secondary_color: "#0f766e",
   logo_url: null,
   favicon_url: null,
   logo_path: null,
   favicon_path: null,
+  login_hero_url: null,
+  login_tagline: null,
+  org_legal_name: null,
+  org_address: null,
+  org_registration_no: null,
+  footer_html: null,
+  support_email: null,
+  support_phone: null,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -67,7 +85,9 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
     );
     const { data } = await client
       .from("branding_settings")
-      .select("app_name, tagline, primary_color, accent_color, logo_path, favicon_path, updated_at")
+      .select(
+        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, org_legal_name, org_address, org_registration_no, footer_html, support_email, support_phone, updated_at",
+      )
       .eq("id", 1)
       .maybeSingle();
     if (!data) return DEFAULTS;
@@ -75,7 +95,7 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
       signBrandingUrl((data as any).logo_path),
       signBrandingUrl((data as any).favicon_path),
     ]);
-    return { ...(data as any), logo_url, favicon_url } as BrandingSettings;
+    return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
   },
 );
 
@@ -90,21 +110,44 @@ export const updateBranding = createServerFn({ method: "POST" })
         tagline: z.string().trim().max(160).nullable().optional(),
         primary_color: z.string().regex(HEX, "Invalid hex color"),
         accent_color: z.string().regex(HEX, "Invalid hex color"),
+        secondary_color: z.string().regex(HEX, "Invalid hex color").optional(),
+        login_hero_url: z.string().url().max(500).nullable().optional(),
+        login_tagline: z.string().trim().max(200).nullable().optional(),
+        org_legal_name: z.string().trim().max(160).nullable().optional(),
+        org_address: z.string().trim().max(500).nullable().optional(),
+        org_registration_no: z.string().trim().max(80).nullable().optional(),
+        footer_html: z.string().trim().max(2000).nullable().optional(),
+        support_email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+        support_phone: z.string().trim().max(40).nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<BrandingSettings> => {
     await assertSuperAdmin(context.supabase, context.userId);
-    const { error } = await context.supabase
+    const patch: Record<string, any> = {
+      app_name: data.app_name,
+      tagline: data.tagline ?? null,
+      primary_color: data.primary_color,
+      accent_color: data.accent_color,
+      updated_at: new Date().toISOString(),
+      updated_by: context.userId,
+    };
+    for (const k of [
+      "secondary_color",
+      "login_hero_url",
+      "login_tagline",
+      "org_legal_name",
+      "org_address",
+      "org_registration_no",
+      "footer_html",
+      "support_email",
+      "support_phone",
+    ] as const) {
+      if ((data as any)[k] !== undefined) patch[k] = (data as any)[k];
+    }
+    const { error } = await (context.supabase as any)
       .from("branding_settings")
-      .update({
-        app_name: data.app_name,
-        tagline: data.tagline ?? null,
-        primary_color: data.primary_color,
-        accent_color: data.accent_color,
-        updated_at: new Date().toISOString(),
-        updated_by: context.userId,
-      })
+      .update(patch)
       .eq("id", 1);
     if (error) throw new Error(error.message);
     await context.supabase.from("audit_log").insert({
@@ -112,7 +155,7 @@ export const updateBranding = createServerFn({ method: "POST" })
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: "super_admin",
       action: "branding.updated",
-      meta: { fields: Object.keys(data) },
+      meta: { fields: Object.keys(patch) },
     });
     return getBranding();
   });

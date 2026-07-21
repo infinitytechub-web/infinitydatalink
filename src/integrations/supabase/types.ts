@@ -99,9 +99,18 @@ export type Database = {
           accent_color: string
           app_name: string
           favicon_path: string | null
+          footer_html: string | null
           id: number
+          login_hero_url: string | null
+          login_tagline: string | null
           logo_path: string | null
+          org_address: string | null
+          org_legal_name: string | null
+          org_registration_no: string | null
           primary_color: string
+          secondary_color: string
+          support_email: string | null
+          support_phone: string | null
           tagline: string | null
           updated_at: string
           updated_by: string | null
@@ -110,9 +119,18 @@ export type Database = {
           accent_color?: string
           app_name?: string
           favicon_path?: string | null
+          footer_html?: string | null
           id?: number
+          login_hero_url?: string | null
+          login_tagline?: string | null
           logo_path?: string | null
+          org_address?: string | null
+          org_legal_name?: string | null
+          org_registration_no?: string | null
           primary_color?: string
+          secondary_color?: string
+          support_email?: string | null
+          support_phone?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -121,9 +139,18 @@ export type Database = {
           accent_color?: string
           app_name?: string
           favicon_path?: string | null
+          footer_html?: string | null
           id?: number
+          login_hero_url?: string | null
+          login_tagline?: string | null
           logo_path?: string | null
+          org_address?: string | null
+          org_legal_name?: string | null
+          org_registration_no?: string | null
           primary_color?: string
+          secondary_color?: string
+          support_email?: string | null
+          support_phone?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -469,6 +496,30 @@ export type Database = {
           },
         ]
       }
+      fx_rates: {
+        Row: {
+          base: string
+          fetched_at: string
+          quote: string
+          rate: number
+          source: string
+        }
+        Insert: {
+          base: string
+          fetched_at?: string
+          quote: string
+          rate: number
+          source?: string
+        }
+        Update: {
+          base?: string
+          fetched_at?: string
+          quote?: string
+          rate?: number
+          source?: string
+        }
+        Relationships: []
+      }
       kyc_documents: {
         Row: {
           created_at: string
@@ -752,9 +803,44 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line: string | null
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           date_of_birth: string | null
           digital_address: string | null
@@ -773,11 +859,15 @@ export type Database = {
           occupation: string | null
           phone: string | null
           region: string | null
+          rejection_reason: string | null
+          status: string
           tier: Database["public"]["Enums"]["member_tier"]
           updated_at: string
         }
         Insert: {
           address_line?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           date_of_birth?: string | null
           digital_address?: string | null
@@ -796,11 +886,15 @@ export type Database = {
           occupation?: string | null
           phone?: string | null
           region?: string | null
+          rejection_reason?: string | null
+          status?: string
           tier?: Database["public"]["Enums"]["member_tier"]
           updated_at?: string
         }
         Update: {
           address_line?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           date_of_birth?: string | null
           digital_address?: string | null
@@ -819,8 +913,40 @@ export type Database = {
           occupation?: string | null
           phone?: string | null
           region?: string | null
+          rejection_reason?: string | null
+          status?: string
           tier?: Database["public"]["Enums"]["member_tier"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      recycle_bin: {
+        Row: {
+          deleted_at: string
+          deleted_by: string | null
+          entity_id: string
+          entity_table: string
+          id: string
+          payload: Json
+          purge_after: string
+        }
+        Insert: {
+          deleted_at?: string
+          deleted_by?: string | null
+          entity_id: string
+          entity_table: string
+          id?: string
+          payload: Json
+          purge_after?: string
+        }
+        Update: {
+          deleted_at?: string
+          deleted_by?: string | null
+          entity_id?: string
+          entity_table?: string
+          id?: string
+          payload?: Json
+          purge_after?: string
         }
         Relationships: []
       }
@@ -1313,6 +1439,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_user: {
+        Args: { _note?: string; _uid: string }
+        Returns: undefined
+      }
       clear_transfer: {
         Args: { _actor_id: string; _transfer_id: string }
         Returns: {
@@ -1617,6 +1747,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      purge_audit_log: { Args: { _before: string }; Returns: number }
+      purge_notifications: {
+        Args: { _before?: string; _scope?: string }
+        Returns: number
+      }
+      purge_recycle_bin: { Args: { _all?: boolean }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -1757,6 +1893,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reject_user: {
+        Args: { _reason: string; _uid: string }
+        Returns: undefined
+      }
       request_transfer: {
         Args: {
           _amount: number
@@ -1802,6 +1942,10 @@ export type Database = {
           outcome: string
           schedule_id: string
         }[]
+      }
+      set_user_active: {
+        Args: { _active: boolean; _reason?: string; _uid: string }
+        Returns: undefined
       }
       suspend_entity:
         | {
@@ -1862,6 +2006,10 @@ export type Database = {
               isSetofReturn: false
             }
           }
+      upsert_fx_rate: {
+        Args: { _base: string; _quote: string; _rate: number }
+        Returns: undefined
+      }
     }
     Enums: {
       adjustment_direction: "credit" | "debit"

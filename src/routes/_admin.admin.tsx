@@ -28,6 +28,7 @@ const groups: NavGroup[] = [
   {
     label: "Membership",
     items: [
+      { to: "/admin/approvals", label: "User Approvals" },
       { to: "/admin/members", label: "Individuals (KYC)" },
       { to: "/admin/entities?type=group", label: "Groups" },
       { to: "/admin/entities?type=department", label: "Departments" },
@@ -73,6 +74,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/finance/transfers": "Transfers",
   "/admin/finance/adjustments": "Balance Management",
   "/admin/members": "KYC queue",
+  "/admin/approvals": "User Approvals",
   "/admin/entities": "Entities",
   "/admin/savings": "Savings",
   "/admin/recurring": "Recurring schedules",

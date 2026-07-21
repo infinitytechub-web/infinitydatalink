@@ -52,6 +52,7 @@ function MemberLayout() {
   if (!user) return <Navigate to="/auth" />;
   // Staff land on the admin dashboard; the member shell is for members only.
   if (isAdmin) return <Navigate to="/admin" replace />;
+  if (user.status !== "approved") return <PendingApprovalGate />;
   const breadcrumb = CRUMBS[pathname] ?? "Overview";
   return (
     <PortalShell
@@ -66,5 +67,42 @@ function MemberLayout() {
     >
       <Outlet />
     </PortalShell>
+  );
+}
+
+function PendingApprovalGate() {
+  const { user, signOut } = useAuth();
+  const status = user?.status ?? "pending";
+  const copy =
+    status === "rejected"
+      ? {
+          title: "Account access denied",
+          body:
+            user?.rejectionReason ??
+            "Your registration was rejected. Contact support if you believe this is an error.",
+        }
+      : status === "deactivated"
+        ? {
+            title: "Account deactivated",
+            body: "Your account is currently deactivated. Please contact an administrator.",
+          }
+        : {
+            title: "Awaiting administrator approval",
+            body:
+              "Thanks for signing up. An administrator will review and approve your account shortly. You'll be notified by email once you're approved.",
+          };
+  return (
+    <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-6 px-6 text-center">
+      <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
+        <h1 className="text-2xl font-semibold text-foreground">{copy.title}</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{copy.body}</p>
+        <button
+          onClick={() => signOut()}
+          className="mt-6 rounded-md bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+        >
+          Sign out
+        </button>
+      </div>
+    </div>
   );
 }
