@@ -165,8 +165,14 @@ export function PortalShell({
           </button>
         </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto p-3">
-          {groups.length === 0 ? (
+        <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-busy={loading || undefined}>
+          {loading ? (
+            <>
+              <SidebarWidgetSkeleton rows={4} collapsed={collapsed} />
+              <SidebarWidgetSkeleton rows={5} collapsed={collapsed} />
+              <SidebarWidgetSkeleton rows={3} collapsed={collapsed} />
+            </>
+          ) : groups.length === 0 ? (
             <SidebarWidgetEmpty
               label="Navigation"
               message="No sections available"
