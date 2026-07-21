@@ -461,34 +461,41 @@ function BiometricButton({ kind }: { kind: PanelKind }) {
 
   if (supported === false) return null;
 
+  const navigate = useNavigate();
+
   const onClick = async () => {
     setMsg(null);
     setLoading(true);
     try {
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-      await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          timeout: 60_000,
-          userVerification: "required",
-          rpId: window.location.hostname,
-        },
-        mediation: "optional",
-      } as CredentialRequestOptions);
-      setMsg({
-        tone: "info",
-        text: "Biometric verified on this device. Passkey server verification isn't wired yet — sign in with your password to continue.",
+      const { startAuthentication } = await import("@simplewebauthn/browser");
+      const options = await beginPasskeyAuthentication();
+      const assertion = await startAuthentication({ optionsJSON: options as never });
+      const { email, tokenHash } = await finishPasskeyAuthentication({
+        data: { response: assertion },
       });
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token_hash: tokenHash,
+        type: "magiclink",
+      });
+      if (error) {
+        setMsg({ tone: "error", text: error.message });
+        return;
+      }
+      setMsg({ tone: "success", text: "Signed in with passkey — redirecting…" });
+      setTimeout(() => navigate({ to: isAdmin ? "/admin" : "/app" }), 150);
     } catch (e) {
       const name = (e as { name?: string } | null)?.name;
+      const message = (e as { message?: string } | null)?.message;
       if (name === "NotAllowedError") {
         setMsg({ tone: "error", text: "Biometric prompt cancelled." });
-      } else {
+      } else if (message?.includes("not recognised")) {
         setMsg({
-          tone: "info",
-          text: "No passkey registered for this site yet. Sign in with your password to continue.",
+          tone: "error",
+          text: "No passkey on this device is registered for this app. Sign in with your password, then enrol a passkey from Profile & KYC.",
         });
+      } else {
+        setMsg({ tone: "error", text: message ?? "Passkey sign-in failed." });
       }
     } finally {
       setLoading(false);
