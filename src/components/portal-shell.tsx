@@ -31,6 +31,8 @@ export function PortalShell({
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { branding } = useBranding();
+  const displayName = branding.app_name || brand;
 
   // Close mobile drawer when the route changes.
   useEffect(() => {
