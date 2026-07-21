@@ -136,6 +136,11 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    // Fire-and-forget: dynamic import so SSR bundle stays lean.
+    void import("@/lib/runtime-error-logger").then((m) => m.installGlobalErrorHandlers());
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
