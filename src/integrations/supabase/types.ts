@@ -98,6 +98,10 @@ export type Database = {
         Row: {
           accent_color: string
           app_name: string
+          email_footer_html: string | null
+          email_from_name: string | null
+          email_header_html: string | null
+          email_reply_to: string | null
           favicon_path: string | null
           footer_html: string | null
           id: number
@@ -118,6 +122,10 @@ export type Database = {
         Insert: {
           accent_color?: string
           app_name?: string
+          email_footer_html?: string | null
+          email_from_name?: string | null
+          email_header_html?: string | null
+          email_reply_to?: string | null
           favicon_path?: string | null
           footer_html?: string | null
           id?: number
@@ -138,6 +146,10 @@ export type Database = {
         Update: {
           accent_color?: string
           app_name?: string
+          email_footer_html?: string | null
+          email_from_name?: string | null
+          email_header_html?: string | null
+          email_reply_to?: string | null
           favicon_path?: string | null
           footer_html?: string | null
           id?: number
