@@ -56,7 +56,7 @@ export async function logRuntimeError(input: LogErrorInput): Promise<void> {
       user_email: user?.email ?? null,
       actor_role: input.actorRole ?? null,
       user_agent: clip(navigator.userAgent, 500) ?? null,
-      meta: input.meta ?? {},
+      meta: (input.meta ?? {}) as never,
     });
   } catch {
     // Never propagate logger failures.
