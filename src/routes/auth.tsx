@@ -563,7 +563,7 @@ function GoogleButton() {
         type="button"
         onClick={onClick}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-deep/15 bg-white py-3 text-xs font-bold uppercase tracking-widest text-emerald-deep transition-colors hover:bg-cream disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted disabled:opacity-60"
       >
         <GoogleIcon /> {loading ? "Connecting…" : "Continue with Google"}
       </button>
