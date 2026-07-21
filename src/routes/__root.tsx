@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BrandingProvider } from "@/components/branding-provider";
+import { AsyncBoundary } from "@/components/async-boundary";
 
 function NotFoundComponent() {
   return (
