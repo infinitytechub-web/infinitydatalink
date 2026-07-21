@@ -117,7 +117,7 @@ export function PortalShell({
         className={cn(
           "fixed left-0 top-0 z-30 h-full w-[min(88vw,17rem)] flex-col text-white transition-[transform,width] duration-300 lg:flex lg:translate-x-0",
           collapsed ? "lg:w-20" : "lg:w-64",
-          "bg-linear-to-b from-[#083344] via-[#0e7490] to-[#083344]",
+          "bg-linear-to-b from-[#0b1636] via-[#0f1e4d] to-[#0b1636]",
           "shadow-[var(--shadow-nav)] ring-1 ring-inset ring-white/5",
           open ? "flex translate-x-0" : "flex -translate-x-full lg:translate-x-0",
         )}

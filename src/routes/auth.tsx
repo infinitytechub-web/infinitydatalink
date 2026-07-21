@@ -459,9 +459,10 @@ function BiometricButton({ kind }: { kind: PanelKind }) {
     };
   }, []);
 
+  const navigate = useNavigate();
+
   if (supported === false) return null;
 
-  const navigate = useNavigate();
 
   const onClick = async () => {
     setMsg(null);

@@ -24,15 +24,15 @@ export function KPIStat({
   tone?: KPITone;
   className?: string;
 }) {
-  const resolvedTone: KPITone = tone ?? (accent ? "amber" : "teal");
+  const resolvedTone: KPITone = tone ?? (accent ? "gold" : "royal");
   const t = KPI_TONES[resolvedTone];
   return (
     <div
       className={cn(
         "group relative overflow-hidden rounded-2xl p-6 ring-1",
-        "shadow-[0_18px_40px_-18px_rgba(2,24,30,0.45)]",
-        "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out",
-        "motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-[0_28px_60px_-20px_rgba(2,24,30,0.55)]",
+        "shadow-[0_10px_28px_-14px_rgba(15,23,42,0.35)]",
+        "motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out",
+        "motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.45)]",
         t.bg,
         t.ring,
         className,
@@ -40,23 +40,24 @@ export function KPIStat({
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-white/20 blur-2xl"
+        className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-white/15 blur-2xl"
       />
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-16 -left-10 size-40 rounded-full bg-black/15 blur-2xl"
+        className="pointer-events-none absolute -bottom-16 -left-10 size-40 rounded-full bg-black/10 blur-2xl"
       />
-      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-0.5", t.bar)} />
-      <p className={cn("mb-2 text-[11px] font-semibold uppercase tracking-widest", t.label)}>
+      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-0.5 opacity-80", t.bar)} />
+      <p className={cn("mb-3 text-[10.5px] font-semibold uppercase tracking-[0.14em]", t.label)}>
         {label}
       </p>
-      <h2 className={cn("font-serif text-3xl drop-shadow-[0_1px_0_rgba(0,0,0,0.15)]", t.value)}>
+      <h2 className={cn("font-display text-3xl font-bold tracking-tight tabular-nums drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]", t.value)}>
         {value}
       </h2>
-      {hint ? <div className={cn("mt-4 text-[11px]", t.hint)}>{hint}</div> : null}
+      {hint ? <div className={cn("mt-4 text-[11px] font-medium", t.hint)}>{hint}</div> : null}
     </div>
   );
 }
+
 
 
 export function Money({ amount, signed }: { amount: number; signed?: boolean }) {
@@ -105,20 +106,21 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border bg-card",
-        "shadow-[0_12px_30px_-12px_rgba(2,24,30,0.35)]",
+        "relative overflow-hidden rounded-xl border border-border bg-card",
+        "shadow-sm transition-shadow duration-200 hover:shadow-md",
         className,
       )}
     >
-      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-1", SECTION_ACCENT(accent))} />
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-linear-to-b from-muted/60 to-transparent p-6 pt-7">
-        <h3 className="font-serif text-lg font-semibold text-foreground">{title}</h3>
+      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-0.5 opacity-70", SECTION_ACCENT(accent))} />
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-linear-to-b from-muted/40 to-transparent px-6 py-5">
+        <h3 className="font-display text-base font-semibold tracking-tight text-foreground">{title}</h3>
         {action}
       </header>
       {children}
     </section>
   );
 }
+
 
 
 export function PageHeader({
@@ -140,7 +142,7 @@ export function PageHeader({
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="truncate font-serif text-2xl text-foreground sm:text-3xl">{title}</h1>
+        <h1 className="truncate font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
         ) : null}
