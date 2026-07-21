@@ -72,6 +72,7 @@ import { Route as AdminAdminFinanceBreakdownRouteImport } from './routes/_admin.
 import { Route as AdminAdminFinanceAdjustmentsRouteImport } from './routes/_admin.admin.finance.adjustments'
 import { Route as AdminAdminEntitiesRegisterRouteImport } from './routes/_admin.admin.entities.register'
 import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
+import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.admin.console.snapshots'
 import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
 import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
 
@@ -402,6 +403,12 @@ const AdminAdminEntitiesEntityIdRoute =
     path: '/$entityId',
     getParentRoute: () => AdminAdminEntitiesRoute,
   } as any)
+const AdminAdminConsoleSnapshotsRoute =
+  AdminAdminConsoleSnapshotsRouteImport.update({
+    id: '/snapshots',
+    path: '/snapshots',
+    getParentRoute: () => AdminAdminConsoleRoute,
+  } as any)
 const AdminAdminConsoleApprovalsRoute =
   AdminAdminConsoleApprovalsRouteImport.update({
     id: '/approvals',
@@ -455,6 +462,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
+  '/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/admin/entities/register': typeof AdminAdminEntitiesRegisterRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
@@ -515,6 +523,7 @@ export interface FileRoutesByTo {
   '/app': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
+  '/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/admin/entities/register': typeof AdminAdminEntitiesRegisterRoute
   '/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
@@ -583,6 +592,7 @@ export interface FileRoutesById {
   '/_member/app/': typeof MemberAppIndexRoute
   '/_admin/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
   '/_admin/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
+  '/_admin/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
   '/_admin/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
   '/_admin/admin/entities/register': typeof AdminAdminEntitiesRegisterRoute
   '/_admin/admin/finance/adjustments': typeof AdminAdminFinanceAdjustmentsRoute
@@ -650,6 +660,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/audit/transfers'
     | '/admin/console/approvals'
+    | '/admin/console/snapshots'
     | '/admin/entities/$entityId'
     | '/admin/entities/register'
     | '/admin/finance/adjustments'
@@ -710,6 +721,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/admin/audit/transfers'
     | '/admin/console/approvals'
+    | '/admin/console/snapshots'
     | '/admin/entities/$entityId'
     | '/admin/entities/register'
     | '/admin/finance/adjustments'
@@ -777,6 +789,7 @@ export interface FileRouteTypes {
     | '/_member/app/'
     | '/_admin/admin/audit/transfers'
     | '/_admin/admin/console/approvals'
+    | '/_admin/admin/console/snapshots'
     | '/_admin/admin/entities/$entityId'
     | '/_admin/admin/entities/register'
     | '/_admin/admin/finance/adjustments'
@@ -1262,6 +1275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminEntitiesEntityIdRouteImport
       parentRoute: typeof AdminAdminEntitiesRoute
     }
+    '/_admin/admin/console/snapshots': {
+      id: '/_admin/admin/console/snapshots'
+      path: '/snapshots'
+      fullPath: '/admin/console/snapshots'
+      preLoaderRoute: typeof AdminAdminConsoleSnapshotsRouteImport
+      parentRoute: typeof AdminAdminConsoleRoute
+    }
     '/_admin/admin/console/approvals': {
       id: '/_admin/admin/console/approvals'
       path: '/approvals'
@@ -1293,10 +1313,12 @@ const AdminAdminAuditRouteWithChildren = AdminAdminAuditRoute._addFileChildren(
 
 interface AdminAdminConsoleRouteChildren {
   AdminAdminConsoleApprovalsRoute: typeof AdminAdminConsoleApprovalsRoute
+  AdminAdminConsoleSnapshotsRoute: typeof AdminAdminConsoleSnapshotsRoute
 }
 
 const AdminAdminConsoleRouteChildren: AdminAdminConsoleRouteChildren = {
   AdminAdminConsoleApprovalsRoute: AdminAdminConsoleApprovalsRoute,
+  AdminAdminConsoleSnapshotsRoute: AdminAdminConsoleSnapshotsRoute,
 }
 
 const AdminAdminConsoleRouteWithChildren =
