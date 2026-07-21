@@ -153,6 +153,11 @@ function Body() {
         <KPIStat label="API / network" value={kpi.api.toString()} tone="teal" />
       </div>
 
+      <div className="p-6 pb-0">
+        <LogRetentionWidget />
+      </div>
+
+
 
       <SectionCard
         title="Live event feed"
