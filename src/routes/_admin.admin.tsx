@@ -74,6 +74,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/finance/transfers": "Transfers",
   "/admin/finance/adjustments": "Balance Management",
   "/admin/members": "KYC queue",
+  "/admin/approvals": "User Approvals",
   "/admin/entities": "Entities",
   "/admin/savings": "Savings",
   "/admin/recurring": "Recurring schedules",
