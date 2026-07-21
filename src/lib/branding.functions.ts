@@ -18,10 +18,19 @@ export type BrandingSettings = {
   tagline: string | null;
   primary_color: string;
   accent_color: string;
+  secondary_color: string;
   logo_url: string | null;
   favicon_url: string | null;
   logo_path: string | null;
   favicon_path: string | null;
+  login_hero_url: string | null;
+  login_tagline: string | null;
+  org_legal_name: string | null;
+  org_address: string | null;
+  org_registration_no: string | null;
+  footer_html: string | null;
+  support_email: string | null;
+  support_phone: string | null;
   updated_at: string;
 };
 
@@ -30,10 +39,19 @@ const DEFAULTS: BrandingSettings = {
   tagline: null,
   primary_color: "#0d9488",
   accent_color: "#f5c451",
+  secondary_color: "#0f766e",
   logo_url: null,
   favicon_url: null,
   logo_path: null,
   favicon_path: null,
+  login_hero_url: null,
+  login_tagline: null,
+  org_legal_name: null,
+  org_address: null,
+  org_registration_no: null,
+  footer_html: null,
+  support_email: null,
+  support_phone: null,
   updated_at: new Date(0).toISOString(),
 };
 
