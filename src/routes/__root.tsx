@@ -144,6 +144,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
 
   useEffect(() => {
     // Fire-and-forget: dynamic import so SSR bundle stays lean.
@@ -155,10 +156,17 @@ function RootComponent() {
       <ThemeProvider>
         <BrandingProvider>
           <AuthProvider>
-            <Outlet />
+            <AsyncBoundary
+              name="root_outlet"
+              loadingLabel="Loading…"
+              onRetry={() => router.invalidate()}
+            >
+              <Outlet />
+            </AsyncBoundary>
           </AuthProvider>
         </BrandingProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
 }
+
