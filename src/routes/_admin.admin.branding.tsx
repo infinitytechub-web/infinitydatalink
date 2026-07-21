@@ -112,10 +112,10 @@ function BrandingEditor() {
       <PageHeader
         eyebrow="Governance"
         title="Branding"
-        description="Customize the app name, tagline, colors, logo, and favicon. Changes apply everywhere in the platform."
+       
       />
 
-      <SectionCard title="Identity" description="Shown in the sidebar, page titles, and emails.">
+      <SectionCard title="Identity">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="app-name">App name</Label>
@@ -139,7 +139,7 @@ function BrandingEditor() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Colors" description="Primary drives buttons and accents. Preview updates live.">
+      <SectionCard title="Colors">
         <div className="grid gap-4 md:grid-cols-2">
           <ColorField label="Primary" value={primary} onChange={setPrimary} />
           <ColorField label="Accent" value={accent} onChange={setAccent} />
@@ -160,7 +160,7 @@ function BrandingEditor() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Logo" description="PNG, JPEG, SVG, or WEBP up to 2 MB. Displayed in the sidebar.">
+      <SectionCard title="Logo">
         <AssetUploader
           kind="logo"
           currentUrl={branding.logo_url}
@@ -171,7 +171,7 @@ function BrandingEditor() {
         />
       </SectionCard>
 
-      <SectionCard title="Favicon" description="PNG, SVG, or ICO up to 2 MB. Shown in browser tabs.">
+      <SectionCard title="Favicon">
         <AssetUploader
           kind="favicon"
           currentUrl={branding.favicon_url}
