@@ -1153,6 +1153,84 @@ export type Database = {
           },
         ]
       }
+      settings_change_requests: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          kind: Database["public"]["Enums"]["settings_change_kind"]
+          payload: Json
+          requested_at: string
+          requested_by: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["settings_change_status"]
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["settings_change_kind"]
+          payload: Json
+          requested_at?: string
+          requested_by: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["settings_change_status"]
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["settings_change_kind"]
+          payload?: Json
+          requested_at?: string
+          requested_by?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["settings_change_status"]
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      settings_snapshots: {
+        Row: {
+          branding: Json | null
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          note: string | null
+        }
+        Insert: {
+          branding?: Json | null
+          created_at?: string
+          created_by: string
+          id?: string
+          label: string
+          note?: string | null
+        }
+        Update: {
+          branding?: Json | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
       super_admin_seed_emails: {
         Row: {
           created_at: string
@@ -1517,6 +1595,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_settings_change: {
+        Args: { _id: string; _note: string }
+        Returns: {
+          applied_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          kind: Database["public"]["Enums"]["settings_change_kind"]
+          payload: Json
+          requested_at: string
+          requested_by: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["settings_change_status"]
+          summary: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "settings_change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_user: {
         Args: { _note?: string; _uid: string }
         Returns: undefined
@@ -1543,6 +1646,23 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_settings_snapshot: {
+        Args: { _label: string; _note: string }
+        Returns: {
+          branding: Json | null
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          note: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "settings_snapshots"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1945,6 +2065,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reject_settings_change: {
+        Args: { _id: string; _reason: string }
+        Returns: {
+          applied_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          kind: Database["public"]["Enums"]["settings_change_kind"]
+          payload: Json
+          requested_at: string
+          requested_by: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["settings_change_status"]
+          summary: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "settings_change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reject_transfer: {
         Args: { _actor_id: string; _reason: string; _transfer_id: string }
         Returns: {
@@ -1974,6 +2119,14 @@ export type Database = {
       reject_user: {
         Args: { _reason: string; _uid: string }
         Returns: undefined
+      }
+      request_settings_change: {
+        Args: {
+          _kind: Database["public"]["Enums"]["settings_change_kind"]
+          _payload: Json
+          _summary: string
+        }
+        Returns: string
       }
       request_transfer: {
         Args: {
@@ -2007,6 +2160,7 @@ export type Database = {
         }
       }
       reset_own_kyc_pending: { Args: never; Returns: undefined }
+      restore_settings_snapshot: { Args: { _id: string }; Returns: undefined }
       revoke_super_admin:
         | { Args: { _reason?: string; _user_id: string }; Returns: undefined }
         | {
@@ -2115,6 +2269,17 @@ export type Database = {
       member_tier: "standard" | "premium"
       recurring_frequency: "daily" | "weekly" | "monthly"
       recurring_status: "active" | "paused"
+      settings_change_kind:
+        | "branding"
+        | "institution"
+        | "role_grant"
+        | "role_revoke"
+      settings_change_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "applied"
+        | "failed"
       transfer_status: "pending" | "cleared" | "failed" | "reversed"
       txn_kind:
         | "deposit"
@@ -2282,6 +2447,19 @@ export const Constants = {
       member_tier: ["standard", "premium"],
       recurring_frequency: ["daily", "weekly", "monthly"],
       recurring_status: ["active", "paused"],
+      settings_change_kind: [
+        "branding",
+        "institution",
+        "role_grant",
+        "role_revoke",
+      ],
+      settings_change_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "applied",
+        "failed",
+      ],
       transfer_status: ["pending", "cleared", "failed", "reversed"],
       txn_kind: [
         "deposit",
