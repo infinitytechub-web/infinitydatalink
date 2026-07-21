@@ -141,16 +141,17 @@ function Body() {
   const totalPages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
 
   const update = (patch: Partial<Search>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
+    navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
 
   return (
     <>
       <div className="grid gap-4 p-6 pb-0 md:grid-cols-4">
-        <KPIStat label="Events (24h)" value={kpi.total.toString()} icon={<Bug className="h-4 w-4" />} />
-        <KPIStat label="Errors" value={kpi.errors.toString()} icon={<AlertTriangle className="h-4 w-4" />} />
-        <KPIStat label="RBAC blocks" value={kpi.rbac.toString()} icon={<ShieldAlert className="h-4 w-4" />} />
-        <KPIStat label="API / network" value={kpi.api.toString()} icon={<Radio className="h-4 w-4" />} />
+        <KPIStat label="Events (24h)" value={kpi.total.toString()} />
+        <KPIStat label="Errors" value={kpi.errors.toString()} tone="rose" />
+        <KPIStat label="RBAC blocks" value={kpi.rbac.toString()} tone="gold" />
+        <KPIStat label="API / network" value={kpi.api.toString()} tone="teal" />
       </div>
+
 
       <SectionCard
         title="Live event feed"
