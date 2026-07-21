@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BrandingProvider } from "@/components/branding-provider";
+import { AsyncBoundary } from "@/components/async-boundary";
 
 function NotFoundComponent() {
   return (
@@ -143,6 +144,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
 
   useEffect(() => {
     // Fire-and-forget: dynamic import so SSR bundle stays lean.
@@ -154,10 +156,17 @@ function RootComponent() {
       <ThemeProvider>
         <BrandingProvider>
           <AuthProvider>
-            <Outlet />
+            <AsyncBoundary
+              name="root_outlet"
+              loadingLabel="Loading…"
+              onRetry={() => router.invalidate()}
+            >
+              <Outlet />
+            </AsyncBoundary>
           </AuthProvider>
         </BrandingProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
 }
+
