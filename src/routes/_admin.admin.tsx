@@ -116,6 +116,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/super-admins/history": "Grant history",
   "/admin/roles": "Roles & Permissions",
   "/admin/branding": "Branding",
+  "/admin/console": "Admin Console",
   "/admin/settings": "Settings",
 };
 
