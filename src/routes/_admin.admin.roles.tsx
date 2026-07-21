@@ -223,17 +223,36 @@ function PermissionsMatrix() {
 }
 
 function UsersTable() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkOpen, setBulkOpen] = useState<null | "assign" | "revoke">(null);
   const { data } = useSuspenseQuery(usersQuery(search, role, page));
 
   const totalPages = Math.max(1, Math.ceil((data.total ?? 0) / 25));
+  const pageIds = data.rows.map((r) => r.user_id);
+  const allSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+
+  const toggle = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+  const toggleAll = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allSelected) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
 
   return (
-    <SectionCard
-      title="Team members"
-    >
+    <SectionCard title="Team members">
       <div className="flex flex-wrap items-center gap-2 p-4">
         <input
           value={search}
@@ -261,6 +280,30 @@ function UsersTable() {
         </select>
       </div>
 
+      {selected.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 border-t border-emerald-deep/10 bg-emerald-deep/5 px-4 py-2 text-xs">
+          <span className="font-semibold">{selected.size} selected</span>
+          <button
+            onClick={() => setBulkOpen("assign")}
+            className="rounded bg-emerald-deep px-3 py-1 font-semibold uppercase tracking-widest text-white"
+          >
+            Bulk assign
+          </button>
+          <button
+            onClick={() => setBulkOpen("revoke")}
+            className="rounded border border-red-500/40 px-3 py-1 font-semibold uppercase tracking-widest text-red-600 hover:bg-red-500/10"
+          >
+            Bulk revoke
+          </button>
+          <button
+            onClick={() => setSelected(new Set())}
+            className="ml-auto rounded border border-emerald-deep/15 px-3 py-1 uppercase tracking-widest"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       {data.rows.length === 0 ? (
         <EmptyState title="No users match" />
       ) : (
@@ -268,6 +311,14 @@ function UsersTable() {
           <table className="w-full text-sm">
             <thead className="bg-emerald-deep/5 text-left text-xs uppercase tracking-wider text-slate-500">
               <tr>
+                <th className="w-10 px-4 py-2">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    aria-label="Select all on page"
+                  />
+                </th>
                 <th className="px-4 py-2">Member</th>
                 <th className="px-4 py-2">Email</th>
                 <th className="px-4 py-2">Roles</th>
@@ -276,7 +327,12 @@ function UsersTable() {
             </thead>
             <tbody>
               {data.rows.map((row) => (
-                <UserRow key={row.user_id} row={row} />
+                <UserRow
+                  key={row.user_id}
+                  row={row}
+                  selected={selected.has(row.user_id)}
+                  onToggle={() => toggle(row.user_id)}
+                />
               ))}
             </tbody>
           </table>
@@ -304,15 +360,44 @@ function UsersTable() {
           </button>
         </div>
       </div>
+
+      {bulkOpen && (
+        <BulkDialog
+          mode={bulkOpen}
+          userIds={Array.from(selected)}
+          onClose={() => setBulkOpen(null)}
+          onDone={() => {
+            setBulkOpen(null);
+            setSelected(new Set());
+            qc.invalidateQueries({ queryKey: ["admin", "roles", "users"] });
+          }}
+        />
+      )}
     </SectionCard>
   );
 }
 
-function UserRow({ row }: { row: UserWithRolesRow }) {
+function UserRow({
+  row,
+  selected,
+  onToggle,
+}: {
+  row: UserWithRolesRow;
+  selected: boolean;
+  onToggle: () => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <tr className="border-t border-emerald-deep/10 hover:bg-emerald-deep/5">
+        <td className="px-4 py-2">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggle}
+            aria-label={`Select ${row.full_name ?? row.email ?? row.user_id}`}
+          />
+        </td>
         <td className="px-4 py-2">
           <div className="font-medium">{row.full_name ?? "—"}</div>
           <div className="text-xs text-slate-500">{row.member_no ?? "—"}</div>
