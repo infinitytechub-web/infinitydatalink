@@ -3,7 +3,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { AlertTriangle, RefreshCw, ShieldAlert, Bug, Radio } from "lucide-react";
-import { ErrorState, KPIStat, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
+import { ErrorState, KPIStat, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -157,9 +157,7 @@ function Body() {
         title="Live event feed"
         action={
           <div className="flex flex-wrap items-center gap-2">
-            <StatusPill tone={live ? "positive" : "neutral"}>
-              {live ? "● Live" : "Paused"}
-            </StatusPill>
+            <Badge tone={live ? "positive" : "neutral"}>{live ? "● Live" : "Paused"}</Badge>
             <Button size="sm" variant="outline" onClick={() => setLive((v) => !v)}>
               {live ? "Pause" : "Resume"}
             </Button>
@@ -225,8 +223,8 @@ function Body() {
                     className="cursor-pointer border-t border-emerald-deep/5 hover:bg-cream/30"
                   >
                     <td className="p-3 font-mono text-[11px]">{new Date(row.occurred_at).toLocaleString()}</td>
-                    <td className="p-3"><StatusPill tone={kindTone(row.kind)}>{row.kind}</StatusPill></td>
-                    <td className="p-3"><StatusPill tone={severityTone(row.severity)}>{row.severity}</StatusPill></td>
+                    <td className="p-3"><Badge tone={kindTone(row.kind)}>{row.kind}</Badge></td>
+                    <td className="p-3"><Badge tone={severityTone(row.severity)}>{row.severity}</Badge></td>
                     <td className="p-3 font-mono text-[11px] text-emerald-deep/70">{row.route ?? "—"}</td>
                     <td className="p-3">{row.user_email ?? <span className="text-emerald-deep/40">anonymous</span>}</td>
                     <td className="p-3 max-w-[420px] truncate">{row.message}</td>
