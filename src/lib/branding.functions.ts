@@ -31,6 +31,10 @@ export type BrandingSettings = {
   footer_html: string | null;
   support_email: string | null;
   support_phone: string | null;
+  email_from_name: string | null;
+  email_reply_to: string | null;
+  email_header_html: string | null;
+  email_footer_html: string | null;
   updated_at: string;
 };
 
@@ -52,8 +56,13 @@ const DEFAULTS: BrandingSettings = {
   footer_html: null,
   support_email: null,
   support_phone: null,
+  email_from_name: null,
+  email_reply_to: null,
+  email_header_html: null,
+  email_footer_html: null,
   updated_at: new Date(0).toISOString(),
 };
+
 
 async function assertSuperAdmin(supabase: any, userId: string) {
   const { data } = await supabase
@@ -86,7 +95,7 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
     const { data } = await client
       .from("branding_settings")
       .select(
-        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, org_legal_name, org_address, org_registration_no, footer_html, support_email, support_phone, updated_at",
+        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, org_legal_name, org_address, org_registration_no, footer_html, support_email, support_phone, email_from_name, email_reply_to, email_header_html, email_footer_html, updated_at",
       )
       .eq("id", 1)
       .maybeSingle();
@@ -111,7 +120,7 @@ export const updateBranding = createServerFn({ method: "POST" })
         primary_color: z.string().regex(HEX, "Invalid hex color"),
         accent_color: z.string().regex(HEX, "Invalid hex color"),
         secondary_color: z.string().regex(HEX, "Invalid hex color").optional(),
-        login_hero_url: z.string().url().max(500).nullable().optional(),
+        login_hero_url: z.string().url().max(500).nullable().optional().or(z.literal("").transform(() => null)),
         login_tagline: z.string().trim().max(200).nullable().optional(),
         org_legal_name: z.string().trim().max(160).nullable().optional(),
         org_address: z.string().trim().max(500).nullable().optional(),
@@ -119,6 +128,10 @@ export const updateBranding = createServerFn({ method: "POST" })
         footer_html: z.string().trim().max(2000).nullable().optional(),
         support_email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
         support_phone: z.string().trim().max(40).nullable().optional(),
+        email_from_name: z.string().trim().max(80).nullable().optional(),
+        email_reply_to: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+        email_header_html: z.string().trim().max(4000).nullable().optional(),
+        email_footer_html: z.string().trim().max(4000).nullable().optional(),
       })
       .parse(d),
   )
@@ -142,6 +155,10 @@ export const updateBranding = createServerFn({ method: "POST" })
       "footer_html",
       "support_email",
       "support_phone",
+      "email_from_name",
+      "email_reply_to",
+      "email_header_html",
+      "email_footer_html",
     ] as const) {
       if ((data as any)[k] !== undefined) patch[k] = (data as any)[k];
     }
