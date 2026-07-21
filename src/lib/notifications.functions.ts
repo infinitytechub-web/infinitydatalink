@@ -109,7 +109,7 @@ export type RecycleRow = {
   id: string;
   entity_table: string;
   entity_id: string;
-  payload: Record<string, unknown>;
+  payload: any;
   deleted_by: string | null;
   deleted_at: string;
   purge_after: string;
