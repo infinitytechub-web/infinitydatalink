@@ -48,7 +48,7 @@ function SettingsPage() {
         <div className="grid gap-4 p-6 md:grid-cols-2">
           <TextInput label="Institution name" value="IT-360 CashApp Cooperative" />
           <TextInput label="Address" value="12 Ring Road Central, Accra" />
-          <TextInput label="Contact email" value="hello@infinitywealth.app" />
+          <TextInput label="Contact email" value="hello@it360cashapp.app" />
           <TextInput label="Contact phone" value="+233 55 000 0000" />
         </div>
       </SectionCard>

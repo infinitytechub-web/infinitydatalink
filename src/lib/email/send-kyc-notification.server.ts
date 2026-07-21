@@ -3,7 +3,7 @@ import { render } from "@react-email/render";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { TEMPLATES } from "@/lib/email-templates/registry";
 
-const SITE_NAME = "infinity-wealth360";
+const SITE_NAME = "IT-360 CashApp";
 const SENDER_DOMAIN = "notify.infinitydatalink.com";
 const FROM_DOMAIN = "notify.infinitydatalink.com";
 const APP_ORIGIN = "https://infinity-wealth360.lovable.app";

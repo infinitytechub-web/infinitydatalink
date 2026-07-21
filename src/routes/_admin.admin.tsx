@@ -102,7 +102,7 @@ function AdminLayout() {
   const breadcrumb = crumbFor(pathname);
   return (
     <PortalShell
-      brand="Infinity Admin"
+      brand="IT-360 Admin"
       groups={groups}
       breadcrumb={breadcrumb}
       action={
