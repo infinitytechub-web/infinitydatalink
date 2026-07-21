@@ -183,13 +183,14 @@ export const BUTTON_TONE = {
     "bg-linear-to-r from-[#1e3a8a] to-[#3b5bdb] text-white shadow-sm ring-1 ring-blue-400/40 hover:brightness-110",
 } as const;
 
-/** Chart palette — enterprise, harmonised. */
+/** Chart palette — sourced from CSS variables so series colors flip with
+ *  light/dark mode and stay legible on either surface. */
 export const CHART_PALETTE: string[] = [
-  "#1e3a8a", // royal blue
-  "#059669", // emerald
-  "#d4af37", // gold
-  "#0284c7", // sky
-  "#7c3aed", // violet
-  "#dc2626", // crimson
-  "#475569", // slate
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--chart-6)",
+  "var(--chart-7)",
 ];
