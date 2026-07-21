@@ -137,9 +137,9 @@ function LoginPanel({ kind }: { kind: PanelKind }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
 
   const bg = isAdmin
-    ? "bg-gradient-to-br from-emerald-deep to-emerald-mid text-cream"
+    ? "bg-gradient-to-br from-[#0f1e4d] to-[#1e3a8a] text-white"
     : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white";
-  const badgeBg = isAdmin ? "bg-gold text-emerald-deep" : "bg-white text-teal-700";
+  const badgeBg = isAdmin ? "bg-gold text-[#0f172a]" : "bg-white text-teal-700";
   const eyebrow = isAdmin ? "Administrator access" : "Member access";
   const title = isAdmin ? "Administrator Login" : "User Login";
   const subtitle = isAdmin
