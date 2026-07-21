@@ -28,6 +28,7 @@ const groups: NavGroup[] = [
   {
     label: "Membership",
     items: [
+      { to: "/admin/approvals", label: "User Approvals" },
       { to: "/admin/members", label: "Individuals (KYC)" },
       { to: "/admin/entities?type=group", label: "Groups" },
       { to: "/admin/entities?type=department", label: "Departments" },
