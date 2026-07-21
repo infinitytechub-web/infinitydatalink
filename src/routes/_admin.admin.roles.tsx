@@ -206,7 +206,7 @@ function UserRow({ row }: { row: UserWithRolesRow }) {
               <span className="text-xs text-slate-400">no roles</span>
             ) : (
               row.roles.map((r) => (
-                <StatusPill key={r} tone={ROLE_TONE[r]}>
+                <span key={r} className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
                   {ROLE_LABEL[r]}
                 </span>
               ))
@@ -286,7 +286,7 @@ function ManageDialog({ row, onClose }: { row: UserWithRolesRow; onClose: () => 
                 <span className="text-xs text-slate-400">none</span>
               ) : (
                 row.roles.map((r) => (
-                  <StatusPill key={r} tone={ROLE_TONE[r]}>
+                  <span key={r} className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
                     {ROLE_LABEL[r]}
                   </span>
                 ))
