@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { LogRetentionWidget } from "@/components/log-retention-widget";
 
 const SearchSchema = z.object({
   kind: z.enum(["all", "route", "api", "rbac", "render", "network", "server", "other"]).catch("all").default("all"),
