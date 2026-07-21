@@ -148,7 +148,7 @@ export const assignRole = createServerFn({ method: "POST" })
       _target_user: data.user_id,
       _role: data.role,
       _actor_id: context.userId,
-      _note: data.note ?? null,
+      _note: data.note ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { ok: true as const };
