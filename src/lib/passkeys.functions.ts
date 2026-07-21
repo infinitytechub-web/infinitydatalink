@@ -176,3 +176,134 @@ export const deleteMyPasskey = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// --- authentication (sign-in) ---------------------------------------------
+
+export const beginPasskeyAuthentication = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ email: z.string().email().optional() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { rpID } = deriveOrigin();
+
+    let userId: string | null = null;
+    let allowCredentials: { id: string; transports?: string[] }[] = [];
+
+    if (data.email) {
+      // Look up user by email via profiles (auth.users not directly queryable via PostgREST)
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", data.email.toLowerCase())
+        .maybeSingle();
+      if (profile?.id) {
+        userId = profile.id as string;
+        const { data: creds } = await supabaseAdmin
+          .from("user_passkeys")
+          .select("credential_id, transports")
+          .eq("user_id", userId);
+        allowCredentials = (creds ?? []).map((c) => ({
+          id: c.credential_id as string,
+          transports: (c.transports as string[] | null) ?? undefined,
+        }));
+      }
+    }
+
+    const options = await generateAuthenticationOptions({
+      rpID,
+      userVerification: "required",
+      allowCredentials: allowCredentials as never,
+    });
+
+    await supabaseAdmin.from("passkey_challenges").insert({
+      user_id: userId,
+      challenge: options.challenge,
+      kind: "authentication",
+    });
+
+    return options;
+  });
+
+export const finishPasskeyAuthentication = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ response: z.any() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { origin, rpID } = deriveOrigin();
+
+    const credentialId: string | undefined = data.response?.id;
+    if (!credentialId) throw new Error("Missing credential id");
+
+    // Load the stored credential
+    const { data: cred, error: credErr } = await supabaseAdmin
+      .from("user_passkeys")
+      .select("id, user_id, credential_id, public_key, counter, transports")
+      .eq("credential_id", credentialId)
+      .maybeSingle();
+    if (credErr || !cred) throw new Error("Passkey not recognised on this account");
+
+    // Fetch most recent authentication challenge for this user (or unbound)
+    const { data: challengeRow } = await supabaseAdmin
+      .from("passkey_challenges")
+      .select("id, challenge, expires_at, user_id")
+      .eq("kind", "authentication")
+      .gt("expires_at", new Date().toISOString())
+      .or(`user_id.eq.${cred.user_id},user_id.is.null`)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!challengeRow) throw new Error("Passkey challenge expired — please try again");
+
+    const publicKey = Buffer.from(cred.public_key as string, "base64");
+
+    const verification = await verifyAuthenticationResponse({
+      response: data.response,
+      expectedChallenge: challengeRow.challenge as string,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
+      requireUserVerification: true,
+      credential: {
+        id: cred.credential_id as string,
+        publicKey,
+        counter: Number(cred.counter ?? 0),
+        transports: ((cred.transports as string[] | null) ?? undefined) as never,
+      },
+    } as never);
+
+    if (!verification.verified) throw new Error("Passkey verification failed");
+
+    // Update counter + last_used_at
+    await supabaseAdmin
+      .from("user_passkeys")
+      .update({
+        counter: verification.authenticationInfo.newCounter,
+        last_used_at: new Date().toISOString(),
+      })
+      .eq("id", cred.id);
+
+    // Clean up challenge
+    await supabaseAdmin.from("passkey_challenges").delete().eq("id", challengeRow.id);
+
+    // Resolve email for this user + mint a magic-link token the client can exchange for a session
+    const { data: userInfo, error: userErr } =
+      await supabaseAdmin.auth.admin.getUserById(cred.user_id as string);
+    if (userErr || !userInfo?.user?.email) throw new Error("Unable to resolve account email");
+    const email = userInfo.user.email;
+
+    const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+    if (linkErr || !linkData?.properties?.hashed_token) {
+      throw new Error(linkErr?.message ?? "Unable to establish session");
+    }
+
+    return {
+      email,
+      tokenHash: linkData.properties.hashed_token,
+    };
+  });
