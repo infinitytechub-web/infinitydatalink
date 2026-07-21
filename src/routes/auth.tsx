@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { Eye, EyeOff, ShieldCheck, UserRound } from "lucide-react";
+import { Eye, EyeOff, Fingerprint, ShieldCheck, UserRound } from "lucide-react";
 import { passwordStrength } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
