@@ -27,8 +27,8 @@ export const Route = createFileRoute("/_admin/admin/branding")({
 });
 
 function BrandingPage() {
-  const { hasRole, initializing } = useAuth();
-  if (initializing) return null;
+  const { hasRole, loading } = useAuth();
+  if (loading) return null;
   if (!hasRole("super_admin")) return <Navigate to="/admin" replace />;
   return <BrandingEditor />;
 }
