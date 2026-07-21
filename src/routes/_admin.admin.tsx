@@ -77,6 +77,8 @@ const groups: NavGroup[] = [
     label: "Governance",
     items: [
       { to: "/admin/console", label: "Admin Console", icon: <Settings2 /> },
+      { to: "/admin/console/approvals", label: "Change approvals", icon: <ClipboardList /> },
+      { to: "/admin/console/snapshots", label: "Backup & restore", icon: <ClipboardCheck /> },
       { to: "/admin/security", label: "Security Centre", icon: <ShieldAlert /> },
       { to: "/admin/health", label: "Integration Health", icon: <Activity /> },
       { to: "/admin/super-admins", label: "Super Admins", icon: <Crown /> },
@@ -117,6 +119,8 @@ const CRUMBS: Record<string, string> = {
   "/admin/roles": "Roles & Permissions",
   "/admin/branding": "Branding",
   "/admin/console": "Admin Console",
+  "/admin/console/approvals": "Change approvals",
+  "/admin/console/snapshots": "Backup & restore",
   "/admin/settings": "Settings",
 };
 
