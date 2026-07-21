@@ -76,6 +76,7 @@ const groups: NavGroup[] = [
   {
     label: "Governance",
     items: [
+      { to: "/admin/console", label: "Admin Console", icon: <Settings2 /> },
       { to: "/admin/security", label: "Security Centre", icon: <ShieldAlert /> },
       { to: "/admin/health", label: "Integration Health", icon: <Activity /> },
       { to: "/admin/super-admins", label: "Super Admins", icon: <Crown /> },
