@@ -87,10 +87,11 @@ export function PasskeyEnrollmentCard() {
   });
 
   return (
-    <SectionCard
-      title="Biometric passkeys"
-      description="Register Face ID, fingerprint, Windows Hello, or a hardware key so you can sign in without typing your password."
-    >
+    <SectionCard title="Biometric passkeys">
+      <p className="mb-3 text-xs text-emerald-deep/60">
+        Register Face ID, fingerprint, Windows Hello, or a hardware key so you can sign in without
+        typing your password.
+      </p>
       {supported === false ? (
         <p className="rounded border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-700">
           This browser or device doesn't support platform biometrics. Try Chrome, Safari, or Edge
