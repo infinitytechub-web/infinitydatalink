@@ -163,88 +163,47 @@ export function PortalShell({
         </div>
 
         <nav className="flex-1 space-y-5 overflow-y-auto p-3">
-          {groups.map((g, gi) => {
-            const accent = GROUP_ACCENTS[gi % GROUP_ACCENTS.length];
-            return (
-              <div
-                key={g.label}
-                className={cn(
-                  "rounded-2xl bg-white/[0.04] ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
-                  collapsed ? "lg:bg-transparent lg:p-0 lg:ring-0 lg:shadow-none" : "p-2",
-                )}
-              >
-                {!collapsed && (
-                  <div className="mb-2 flex items-center gap-2 px-2 pt-1">
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "h-2 w-2 rounded-full bg-linear-to-br shadow-[0_0_10px_rgba(255,255,255,0.35)]",
-                        accent,
-                      )}
-                    />
-                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/70">
-                      {g.label}
-                    </div>
-                  </div>
-                )}
-                <div className="space-y-1">
-                  {g.items.map((item) => {
-                    const active =
-                      pathname === item.to ||
-                      (item.to !== "/app" && item.to !== "/admin" && pathname.startsWith(item.to));
-                    return (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        onClick={handleNavClick}
-                        aria-current={active ? "page" : undefined}
-                        title={collapsed ? item.label : undefined}
-                        className={cn(
-                          "group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm transition-all duration-200 lg:py-2",
-                          collapsed && "lg:justify-center lg:px-1.5",
-                          active
-                            ? "bg-white/15 text-white ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_24px_-12px_rgba(255,255,255,0.35)]"
-                            : "text-white/80 hover:bg-white/10 hover:text-white",
-                        )}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className={cn(
-                            "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br transition-transform lg:size-8",
-                            accent,
-                            active ? "scale-105" : "opacity-95 group-hover:opacity-100 group-hover:scale-[1.03]",
-                          )}
-                        >
-                          {item.icon ? (
-                            <span className="[&>svg]:size-4 [&>svg]:stroke-[2.25] text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
-                              {item.icon}
-                            </span>
-                          ) : (
-                            <span className="size-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
-                          )}
-                        </span>
-                        {!collapsed && (
-                          <span className={cn("min-w-0 truncate", active && "font-semibold")}>
-                            {item.label}
-                          </span>
-                        )}
-                        {active && !collapsed ? (
-                          <span
-                            aria-hidden="true"
-                            className={cn(
-                              "absolute inset-y-1 left-0 w-1 rounded-r-full bg-linear-to-b",
-                              accent,
-                            )}
+          {groups.length === 0 ? (
+            <SidebarWidgetEmpty
+              label="Navigation"
+              message="No sections available"
+              collapsed={collapsed}
+            />
+          ) : (
+            groups.map((g, gi) => {
+              const accent = GROUP_ACCENTS[gi % GROUP_ACCENTS.length];
+              return (
+                <SidebarWidget key={g.label} collapsed={collapsed}>
+                  <SidebarWidgetHeader label={g.label} accent={accent} collapsed={collapsed} />
+                  {g.items.length === 0 ? (
+                    <SidebarWidgetEmpty message="No items" collapsed={collapsed} />
+                  ) : (
+                    <div className="space-y-1">
+                      {g.items.map((item) => {
+                        const active =
+                          pathname === item.to ||
+                          (item.to !== "/app" &&
+                            item.to !== "/admin" &&
+                            pathname.startsWith(item.to));
+                        return (
+                          <SidebarNavItem
+                            key={item.to}
+                            item={item}
+                            accent={accent}
+                            active={active}
+                            collapsed={collapsed}
+                            onNavigate={handleNavClick}
                           />
-                        ) : null}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+                        );
+                      })}
+                    </div>
+                  )}
+                </SidebarWidget>
+              );
+            })
+          )}
         </nav>
+
 
         <div className={cn("border-t border-white/10 p-4", collapsed && "lg:p-2")}>
           <div className={cn("flex items-center gap-3", collapsed && "lg:justify-center")}>
