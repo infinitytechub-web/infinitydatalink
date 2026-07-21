@@ -50,6 +50,7 @@ const groups: NavGroup[] = [
       { to: "/admin/health", label: "Integration Health" },
       { to: "/admin/super-admins", label: "Super Admins" },
       { to: "/admin/super-admins/history", label: "Grant history" },
+      { to: "/admin/branding", label: "Branding" },
       { to: "/admin/settings", label: "Settings" },
 
     ],
