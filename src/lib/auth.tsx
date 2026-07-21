@@ -54,11 +54,15 @@ const ADMIN_ROLES: AppRole[] = [
   "super_admin", "compliance_officer", "loan_officer", "finance_officer", "auditor",
 ];
 
+export type AccountStatus = "pending" | "approved" | "rejected" | "deactivated";
+
 export type SessionUser = {
   id: string;
   email: string;
   fullName: string;
   roles: AppRole[];
+  status: AccountStatus;
+  rejectionReason: string | null;
 };
 
 type AuthState = {
