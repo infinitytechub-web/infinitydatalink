@@ -58,10 +58,13 @@ function applyBranding(branding: BrandingSettings) {
   const root = document.documentElement;
   const primary = hexToRgb(branding.primary_color);
   const accent = hexToRgb(branding.accent_color);
+  const secondary = hexToRgb(branding.secondary_color);
   if (primary) root.style.setProperty("--brand-primary-rgb", primary);
   if (accent) root.style.setProperty("--brand-accent-rgb", accent);
+  if (secondary) root.style.setProperty("--brand-secondary-rgb", secondary);
   root.style.setProperty("--brand-primary", branding.primary_color);
   root.style.setProperty("--brand-accent", branding.accent_color);
+  root.style.setProperty("--brand-secondary", branding.secondary_color);
 
   // Update <title> suffix
   if (branding.app_name) {
