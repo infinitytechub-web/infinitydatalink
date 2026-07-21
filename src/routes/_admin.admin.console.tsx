@@ -138,11 +138,8 @@ function AdminConsolePage() {
 
       <div className="space-y-6">
         {SECTIONS.map((section) => (
-          <SectionCard
-            key={section.title}
-            title={section.title}
-            description={section.description}
-          >
+          <SectionCard key={section.title} title={section.title}>
+            <p className="px-6 pt-4 text-xs text-muted-foreground">{section.description}</p>
             <div className="grid gap-4 p-6 sm:grid-cols-2 xl:grid-cols-3">
               {section.tiles.map((t) => (
                 <ConsoleTile key={t.to} tile={t} />
