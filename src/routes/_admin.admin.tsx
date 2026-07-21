@@ -102,7 +102,7 @@ function AdminLayout() {
   const breadcrumb = crumbFor(pathname);
   return (
     <PortalShell
-      brand="IT-360 Admin"
+      brand="IT-360 CashApp Admin"
       groups={groups}
       breadcrumb={breadcrumb}
       action={
