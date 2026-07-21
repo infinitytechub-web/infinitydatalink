@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Menu, X, LogOut, Search } from "lucide-react";
+import { Menu, X, LogOut, Search, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -12,6 +12,8 @@ const GROUP_ACCENTS = SIDEBAR_GROUP_CHIPS;
 
 export type NavItem = { to: string; label: string; icon?: ReactNode };
 export type NavGroup = { label: string; items: NavItem[] };
+
+const COLLAPSE_KEY = "it360:sidebar-collapsed";
 
 export function PortalShell({
   brand,
@@ -28,11 +30,25 @@ export function PortalShell({
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, signOut } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // mobile drawer
+  const [collapsed, setCollapsed] = useState(false); // desktop rail
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { branding } = useBranding();
   const displayName = branding.app_name || brand;
+
+  // Hydrate desktop collapse preference
+  useEffect(() => {
+    try {
+      setCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === "1");
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
+    } catch {}
+  }, [collapsed]);
 
   // Close mobile drawer when the route changes.
   useEffect(() => {
@@ -54,6 +70,18 @@ export function PortalShell({
     };
   }, [open]);
 
+  // Keyboard shortcut: [ toggles desktop rail.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (target?.isContentEditable) return;
+      if (e.key === "[") setCollapsed((c) => !c);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const handleSignOut = async () => {
     await qc.cancelQueries();
     qc.clear();
@@ -61,6 +89,13 @@ export function PortalShell({
     navigate({ to: "/auth", replace: true });
   };
 
+  const handleNavClick = () => {
+    setOpen(false);
+    // Auto-collapse desktop rail after a nav selection
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
+      setCollapsed(true);
+    }
+  };
 
   return (
     <div className="flex min-h-dvh bg-background font-sans text-foreground">
@@ -80,13 +115,19 @@ export function PortalShell({
         aria-modal={open ? true : undefined}
         role={open ? "dialog" : undefined}
         className={cn(
-          "fixed left-0 top-0 z-30 h-full w-[min(88vw,17rem)] flex-col text-white transition-transform duration-300 lg:flex lg:w-64 lg:translate-x-0",
+          "fixed left-0 top-0 z-30 h-full w-[min(88vw,17rem)] flex-col text-white transition-[transform,width] duration-300 lg:flex lg:translate-x-0",
+          collapsed ? "lg:w-20" : "lg:w-64",
           "bg-linear-to-b from-[#083344] via-[#0e7490] to-[#083344]",
           "shadow-[var(--shadow-nav)] ring-1 ring-inset ring-white/5",
           open ? "flex translate-x-0" : "flex -translate-x-full lg:translate-x-0",
         )}
       >
-        <div className="flex items-center justify-between border-b border-white/10 p-6">
+        <div
+          className={cn(
+            "flex items-center border-b border-white/10 p-4",
+            collapsed ? "lg:justify-center lg:p-3" : "justify-between p-6",
+          )}
+        >
           <Link
             to="/"
             className="flex items-center gap-2 font-serif text-xl tracking-tight text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]"
@@ -95,10 +136,14 @@ export function PortalShell({
               <img
                 src={branding.logo_url}
                 alt=""
-                className="h-8 w-8 rounded-md bg-white/10 object-contain p-1"
+                className="h-8 w-8 shrink-0 rounded-md bg-white/10 object-contain p-1"
               />
-            ) : null}
-            <span className="truncate">{displayName}</span>
+            ) : (
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/10 font-serif text-xs">
+                IT
+              </span>
+            )}
+            {!collapsed && <span className="truncate lg:inline">{displayName}</span>}
           </Link>
           <button
             type="button"
@@ -114,97 +159,117 @@ export function PortalShell({
           {groups.map((g, gi) => {
             const accent = GROUP_ACCENTS[gi % GROUP_ACCENTS.length];
             return (
-            <div
-              key={g.label}
-              className="rounded-2xl bg-white/[0.04] p-2 ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-            >
-              <div className="mb-2 flex items-center gap-2 px-2 pt-1">
-                <span
-                  aria-hidden="true"
-                  className={cn("h-2 w-2 rounded-full bg-linear-to-br shadow-[0_0_10px_rgba(255,255,255,0.35)]", accent)}
-                />
-                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/70">
-                  {g.label}
-                </div>
-              </div>
-              <div className="space-y-1">
-                {g.items.map((item) => {
-                  const active =
-                    pathname === item.to ||
-                    (item.to !== "/app" && item.to !== "/admin" && pathname.startsWith(item.to));
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      onClick={() => setOpen(false)}
-                      aria-current={active ? "page" : undefined}
+              <div
+                key={g.label}
+                className={cn(
+                  "rounded-2xl bg-white/[0.04] ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
+                  collapsed ? "lg:bg-transparent lg:p-0 lg:ring-0 lg:shadow-none" : "p-2",
+                )}
+              >
+                {!collapsed && (
+                  <div className="mb-2 flex items-center gap-2 px-2 pt-1">
+                    <span
+                      aria-hidden="true"
                       className={cn(
-                        "group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm transition-all duration-200 lg:py-2",
-                        active
-                          ? "bg-white/15 text-white ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_24px_-12px_rgba(255,255,255,0.35)]"
-                          : "text-white/80 hover:bg-white/10 hover:text-white",
+                        "h-2 w-2 rounded-full bg-linear-to-br shadow-[0_0_10px_rgba(255,255,255,0.35)]",
+                        accent,
                       )}
-                    >
-                      <span
-                        aria-hidden="true"
+                    />
+                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/70">
+                      {g.label}
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-1">
+                  {g.items.map((item) => {
+                    const active =
+                      pathname === item.to ||
+                      (item.to !== "/app" && item.to !== "/admin" && pathname.startsWith(item.to));
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={handleNavClick}
+                        aria-current={active ? "page" : undefined}
+                        title={collapsed ? item.label : undefined}
                         className={cn(
-                          "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br lg:size-8",
-                          accent,
-                          active ? "scale-105" : "opacity-95 group-hover:opacity-100",
+                          "group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm transition-all duration-200 lg:py-2",
+                          collapsed && "lg:justify-center lg:px-1.5",
+                          active
+                            ? "bg-white/15 text-white ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_24px_-12px_rgba(255,255,255,0.35)]"
+                            : "text-white/80 hover:bg-white/10 hover:text-white",
                         )}
                       >
-                        <span className="size-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
-                      </span>
-                      <span className={cn("min-w-0 truncate", active && "font-semibold")}>
-                        {item.label}
-                      </span>
-                      {active ? (
                         <span
                           aria-hidden="true"
                           className={cn(
-                            "absolute inset-y-1 left-0 w-1 rounded-r-full bg-linear-to-b",
+                            "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br lg:size-8",
                             accent,
+                            active ? "scale-105" : "opacity-95 group-hover:opacity-100",
                           )}
-                        />
-                      ) : null}
-                    </Link>
-                  );
-                })}
+                        >
+                          <span className="size-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
+                        </span>
+                        {!collapsed && (
+                          <span className={cn("min-w-0 truncate", active && "font-semibold")}>
+                            {item.label}
+                          </span>
+                        )}
+                        {active && !collapsed ? (
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "absolute inset-y-1 left-0 w-1 rounded-r-full bg-linear-to-b",
+                              accent,
+                            )}
+                          />
+                        ) : null}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
             );
           })}
         </nav>
 
-
-        <div className="border-t border-white/10 p-4">
-          <div className="flex items-center gap-3">
+        <div className={cn("border-t border-white/10 p-4", collapsed && "lg:p-2")}>
+          <div className={cn("flex items-center gap-3", collapsed && "lg:justify-center")}>
             <div
               className="grid size-9 shrink-0 place-items-center rounded-lg bg-linear-to-br from-white/20 to-white/5 font-serif text-white shadow-inner"
               aria-hidden="true"
             >
               {(user?.fullName || "?").slice(0, 2).toUpperCase()}
             </div>
-            <div className="min-w-0 flex-1 text-xs">
-              <p className="truncate font-medium text-white">{user?.fullName ?? "Guest"}</p>
-              <p className="truncate capitalize text-white/60">
-                {user?.roles?.[0]?.replace(/_/g, " ") ?? "no role"}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              aria-label="Sign out"
-              className="grid size-8 place-items-center rounded-md text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <LogOut className="size-3.5" />
-            </button>
+            {!collapsed && (
+              <>
+                <div className="min-w-0 flex-1 text-xs">
+                  <p className="truncate font-medium text-white">{user?.fullName ?? "Guest"}</p>
+                  <p className="truncate capitalize text-white/60">
+                    {user?.roles?.[0]?.replace(/_/g, " ") ?? "no role"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  aria-label="Sign out"
+                  className="grid size-8 place-items-center rounded-md text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <LogOut className="size-3.5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </aside>
 
       {/* Main */}
-      <main className="flex min-w-0 flex-1 flex-col lg:ml-64">
+      <main
+        className={cn(
+          "flex min-w-0 flex-1 flex-col transition-[margin] duration-300",
+          collapsed ? "lg:ml-20" : "lg:ml-64",
+        )}
+      >
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/70 px-4 backdrop-blur-xl lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
@@ -214,6 +279,15 @@ export function PortalShell({
               onClick={() => setOpen(true)}
             >
               <Menu className="size-4" />
+            </button>
+            <button
+              type="button"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={collapsed ? "Expand sidebar ( [ )" : "Collapse sidebar ( [ )"}
+              className="hidden size-9 place-items-center rounded-md text-foreground transition-colors hover:bg-muted lg:grid"
+              onClick={() => setCollapsed((c) => !c)}
+            >
+              {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
             </button>
             <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
               <span className="hidden truncate text-muted-foreground sm:inline">{displayName}</span>
