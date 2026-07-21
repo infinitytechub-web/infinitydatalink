@@ -4,6 +4,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // ---- Types ---------------------------------------------------------------
 
+type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
+
 export type SettingsChangeKind = "branding" | "institution" | "role_grant" | "role_revoke";
 export type SettingsChangeStatus = "pending" | "approved" | "rejected" | "applied" | "failed";
 
@@ -11,7 +13,7 @@ export type SettingsChangeRequest = {
   id: string;
   kind: SettingsChangeKind;
   status: SettingsChangeStatus;
-  payload: Record<string, unknown>;
+  payload: Json;
   summary: string | null;
   requested_by: string;
   requested_at: string;
@@ -28,7 +30,7 @@ export type SnapshotRow = {
   id: string;
   label: string;
   note: string | null;
-  branding: Record<string, unknown> | null;
+  branding: Json | null;
   created_by: string;
   created_by_email: string | null;
   created_at: string;
