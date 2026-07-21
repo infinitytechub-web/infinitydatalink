@@ -35,20 +35,60 @@ function BrandingPage() {
 
 const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
+type Form = {
+  app_name: string;
+  tagline: string;
+  primary_color: string;
+  accent_color: string;
+  secondary_color: string;
+  login_hero_url: string;
+  login_tagline: string;
+  org_legal_name: string;
+  org_address: string;
+  org_registration_no: string;
+  footer_html: string;
+  support_email: string;
+  support_phone: string;
+  email_from_name: string;
+  email_reply_to: string;
+  email_header_html: string;
+  email_footer_html: string;
+};
+
+function toForm(b: ReturnType<typeof useBranding>["branding"]): Form {
+  return {
+    app_name: b.app_name,
+    tagline: b.tagline ?? "",
+    primary_color: b.primary_color,
+    accent_color: b.accent_color,
+    secondary_color: b.secondary_color,
+    login_hero_url: b.login_hero_url ?? "",
+    login_tagline: b.login_tagline ?? "",
+    org_legal_name: b.org_legal_name ?? "",
+    org_address: b.org_address ?? "",
+    org_registration_no: b.org_registration_no ?? "",
+    footer_html: b.footer_html ?? "",
+    support_email: b.support_email ?? "",
+    support_phone: b.support_phone ?? "",
+    email_from_name: b.email_from_name ?? "",
+    email_reply_to: b.email_reply_to ?? "",
+    email_header_html: b.email_header_html ?? "",
+    email_footer_html: b.email_footer_html ?? "",
+  };
+}
+
 function BrandingEditor() {
   const { branding, refresh } = useBranding();
   const qc = useQueryClient();
-  const [appName, setAppName] = useState(branding.app_name);
-  const [tagline, setTagline] = useState(branding.tagline ?? "");
-  const [primary, setPrimary] = useState(branding.primary_color);
-  const [accent, setAccent] = useState(branding.accent_color);
+  const [form, setForm] = useState<Form>(() => toForm(branding));
 
   useEffect(() => {
-    setAppName(branding.app_name);
-    setTagline(branding.tagline ?? "");
-    setPrimary(branding.primary_color);
-    setAccent(branding.accent_color);
-  }, [branding.app_name, branding.tagline, branding.primary_color, branding.accent_color]);
+    setForm(toForm(branding));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [branding.updated_at]);
+
+  const set = <K extends keyof Form>(k: K, v: Form[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   const updateFn = useServerFn(updateBranding);
   const uploadFn = useServerFn(uploadBrandingAsset);
@@ -57,15 +97,30 @@ function BrandingEditor() {
   const invalidate = () => qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY });
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      updateFn({
+    mutationFn: () => {
+      const trim = (s: string) => (s.trim() ? s.trim() : null);
+      return updateFn({
         data: {
-          app_name: appName.trim(),
-          tagline: tagline.trim() ? tagline.trim() : null,
-          primary_color: primary,
-          accent_color: accent,
+          app_name: form.app_name.trim(),
+          tagline: trim(form.tagline),
+          primary_color: form.primary_color,
+          accent_color: form.accent_color,
+          secondary_color: form.secondary_color,
+          login_hero_url: trim(form.login_hero_url),
+          login_tagline: trim(form.login_tagline),
+          org_legal_name: trim(form.org_legal_name),
+          org_address: trim(form.org_address),
+          org_registration_no: trim(form.org_registration_no),
+          footer_html: trim(form.footer_html),
+          support_email: trim(form.support_email),
+          support_phone: trim(form.support_phone),
+          email_from_name: trim(form.email_from_name),
+          email_reply_to: trim(form.email_reply_to),
+          email_header_html: trim(form.email_header_html),
+          email_footer_html: trim(form.email_footer_html),
         },
-      }),
+      });
+    },
     onSuccess: () => {
       toast.success("Branding updated");
       invalidate();
@@ -78,12 +133,7 @@ function BrandingEditor() {
     mutationFn: async ({ kind, file }: { kind: "logo" | "favicon"; file: File }) => {
       const base64 = await fileToBase64(file);
       return uploadFn({
-        data: {
-          kind,
-          filename: file.name,
-          mime_type: file.type,
-          content_base64: base64,
-        },
+        data: { kind, filename: file.name, mime_type: file.type, content_base64: base64 },
       });
     },
     onSuccess: () => {
@@ -104,59 +154,37 @@ function BrandingEditor() {
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
 
-  const canSave =
-    appName.trim().length > 0 && HEX.test(primary) && HEX.test(accent) && !saveMut.isPending;
+  const colorsValid =
+    HEX.test(form.primary_color) &&
+    HEX.test(form.accent_color) &&
+    HEX.test(form.secondary_color);
+  const canSave = form.app_name.trim().length > 0 && colorsValid && !saveMut.isPending;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Governance"
         title="Branding"
-        description="Customize the app name, tagline, colors, logo, and favicon. Changes apply everywhere in the platform."
+        description="Customize identity, colors, organization details, login and footer copy, support contacts, and outbound email branding. Changes apply immediately across the platform."
       />
 
       <SectionCard title="Identity">
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="app-name">App name</Label>
-            <Input
-              id="app-name"
-              value={appName}
-              onChange={(e) => setAppName(e.target.value)}
-              maxLength={60}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="tagline">Tagline (optional)</Label>
-            <Textarea
-              id="tagline"
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-              maxLength={160}
-              rows={2}
-            />
-          </div>
+          <FieldText id="app-name" label="App name" value={form.app_name} onChange={(v) => set("app_name", v)} maxLength={60} />
+          <FieldArea id="tagline" label="Tagline (optional)" value={form.tagline} onChange={(v) => set("tagline", v)} maxLength={160} rows={2} />
         </div>
       </SectionCard>
 
       <SectionCard title="Colors">
-        <div className="grid gap-4 md:grid-cols-2">
-          <ColorField label="Primary" value={primary} onChange={setPrimary} />
-          <ColorField label="Accent" value={accent} onChange={setAccent} />
+        <div className="grid gap-4 md:grid-cols-3">
+          <ColorField label="Primary" value={form.primary_color} onChange={(v) => set("primary_color", v)} />
+          <ColorField label="Secondary" value={form.secondary_color} onChange={(v) => set("secondary_color", v)} />
+          <ColorField label="Accent" value={form.accent_color} onChange={(v) => set("accent_color", v)} />
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
-          <div
-            className="flex h-16 flex-1 min-w-[180px] items-center justify-center rounded-lg text-sm font-medium text-white shadow"
-            style={{ backgroundColor: HEX.test(primary) ? primary : "#0d9488" }}
-          >
-            Primary
-          </div>
-          <div
-            className="flex h-16 flex-1 min-w-[180px] items-center justify-center rounded-lg text-sm font-medium text-black shadow"
-            style={{ backgroundColor: HEX.test(accent) ? accent : "#f5c451" }}
-          >
-            Accent
-          </div>
+          <Swatch color={form.primary_color} label="Primary" light />
+          <Swatch color={form.secondary_color} label="Secondary" light />
+          <Swatch color={form.accent_color} label="Accent" />
         </div>
       </SectionCard>
 
@@ -182,16 +210,71 @@ function BrandingEditor() {
         />
       </SectionCard>
 
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={() => {
-            setAppName(branding.app_name);
-            setTagline(branding.tagline ?? "");
-            setPrimary(branding.primary_color);
-            setAccent(branding.accent_color);
-          }}
-        >
+      <SectionCard title="Organization details">
+        <div className="grid gap-4 md:grid-cols-2">
+          <FieldText id="org-name" label="Legal name" value={form.org_legal_name} onChange={(v) => set("org_legal_name", v)} maxLength={160} />
+          <FieldText id="org-reg" label="Registration / Tax ID" value={form.org_registration_no} onChange={(v) => set("org_registration_no", v)} maxLength={80} />
+          <div className="md:col-span-2">
+            <FieldArea id="org-addr" label="Registered address" value={form.org_address} onChange={(v) => set("org_address", v)} maxLength={500} rows={3} />
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Login page">
+        <div className="grid gap-4 md:grid-cols-2">
+          <FieldText
+            id="login-hero"
+            label="Hero image URL"
+            value={form.login_hero_url}
+            onChange={(v) => set("login_hero_url", v)}
+            maxLength={500}
+            placeholder="https://…/hero.jpg"
+          />
+          <FieldArea
+            id="login-tagline"
+            label="Login tagline"
+            value={form.login_tagline}
+            onChange={(v) => set("login_tagline", v)}
+            maxLength={200}
+            rows={2}
+            placeholder="Shown under the sign-in title"
+          />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Footer & support">
+        <div className="grid gap-4 md:grid-cols-2">
+          <FieldText id="support-email" label="Support email" value={form.support_email} onChange={(v) => set("support_email", v)} maxLength={160} placeholder="support@example.com" />
+          <FieldText id="support-phone" label="Support phone" value={form.support_phone} onChange={(v) => set("support_phone", v)} maxLength={40} placeholder="+233…" />
+          <div className="md:col-span-2">
+            <FieldArea
+              id="footer-html"
+              label="Footer HTML"
+              value={form.footer_html}
+              onChange={(v) => set("footer_html", v)}
+              maxLength={2000}
+              rows={4}
+              placeholder="Optional. Rendered at the bottom of public pages."
+            />
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Email branding">
+        <div className="grid gap-4 md:grid-cols-2">
+          <FieldText id="email-from" label="From name" value={form.email_from_name} onChange={(v) => set("email_from_name", v)} maxLength={80} placeholder="IT-360 CashApp" />
+          <FieldText id="email-reply" label="Reply-to address" value={form.email_reply_to} onChange={(v) => set("email_reply_to", v)} maxLength={160} placeholder="no-reply@example.com" />
+          <div className="md:col-span-2">
+            <FieldArea id="email-header" label="Email header HTML" value={form.email_header_html} onChange={(v) => set("email_header_html", v)} maxLength={4000} rows={3} />
+          </div>
+          <div className="md:col-span-2">
+            <FieldArea id="email-footer" label="Email footer HTML" value={form.email_footer_html} onChange={(v) => set("email_footer_html", v)} maxLength={4000} rows={3} />
+          </div>
+        </div>
+      </SectionCard>
+
+      <div className="sticky bottom-4 z-10 flex justify-end gap-2 rounded-lg border border-border bg-background/95 p-3 shadow-lg backdrop-blur">
+        <Button variant="outline" onClick={() => setForm(toForm(branding))} disabled={saveMut.isPending}>
           Reset
         </Button>
         <Button onClick={() => saveMut.mutate()} disabled={!canSave}>
@@ -202,15 +285,47 @@ function BrandingEditor() {
   );
 }
 
-function ColorField({
-  label,
-  value,
-  onChange,
+function Swatch({ color, label, light }: { color: string; label: string; light?: boolean }) {
+  const valid = HEX.test(color);
+  return (
+    <div
+      className="flex h-16 flex-1 min-w-[160px] items-center justify-center rounded-lg text-sm font-medium shadow"
+      style={{ backgroundColor: valid ? color : "#888", color: light ? "#fff" : "#000" }}
+    >
+      {label}
+    </div>
+  );
+}
+
+function FieldText({
+  id, label, value, onChange, maxLength, placeholder,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
+  id: string; label: string; value: string; onChange: (v: string) => void; maxLength?: number; placeholder?: string;
 }) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} placeholder={placeholder} />
+    </div>
+  );
+}
+
+function FieldArea({
+  id, label, value, onChange, maxLength, rows, placeholder,
+}: {
+  id: string; label: string; value: string; onChange: (v: string) => void; maxLength?: number; rows?: number; placeholder?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Textarea id={id} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} rows={rows} placeholder={placeholder} />
+    </div>
+  );
+}
+
+function ColorField({
+  label, value, onChange,
+}: { label: string; value: string; onChange: (v: string) => void }) {
   const valid = HEX.test(value);
   return (
     <div className="space-y-1.5">
@@ -229,20 +344,13 @@ function ColorField({
           className={valid ? "" : "border-destructive"}
         />
       </div>
-      {!valid ? (
-        <p className="text-xs text-destructive">Enter a valid hex color like #0d9488</p>
-      ) : null}
+      {!valid ? <p className="text-xs text-destructive">Enter a valid hex color like #0d9488</p> : null}
     </div>
   );
 }
 
 function AssetUploader({
-  kind,
-  currentUrl,
-  accept,
-  onUpload,
-  onClear,
-  busy,
+  kind, currentUrl, accept, onUpload, onClear, busy,
 }: {
   kind: "logo" | "favicon";
   currentUrl: string | null;
