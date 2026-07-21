@@ -585,3 +585,158 @@ function ManageDialog({ row, onClose }: { row: UserWithRolesRow; onClose: () => 
     </Dialog>
   );
 }
+
+function BulkDialog({
+  mode,
+  userIds,
+  onClose,
+  onDone,
+}: {
+  mode: "assign" | "revoke";
+  userIds: string[];
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [selectedRole, setSelectedRole] = useState<AssignableRole>(ASSIGNABLE_ROLES[0]);
+  const [note, setNote] = useState("");
+  const [reason, setReason] = useState("");
+  const [result, setResult] = useState<{ ok: string[]; failed: { user_id: string; error: string }[] } | null>(null);
+
+  const mut = useMutation({
+    mutationFn: async () => {
+      if (mode === "assign") {
+        return bulkAssignRole({
+          data: { user_ids: userIds, role: selectedRole, note: note || undefined },
+        });
+      }
+      return bulkRevokeRole({
+        data: { user_ids: userIds, role: selectedRole, reason },
+      });
+    },
+    onSuccess: (res) => {
+      setResult(res);
+      const okN = res.ok.length;
+      const failN = res.failed.length;
+      if (failN === 0) toast.success(`${okN} user${okN === 1 ? "" : "s"} updated`);
+      else toast.warning(`${okN} succeeded, ${failN} failed`);
+    },
+    onError: (e: any) => toast.error(e.message ?? "Bulk operation failed"),
+  });
+
+  const isRevoke = mode === "revoke";
+  const canSubmit =
+    !mut.isPending &&
+    userIds.length > 0 &&
+    (!isRevoke || reason.trim().length >= 3);
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && (result ? onDone() : onClose())}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>
+            {isRevoke ? "Bulk revoke role" : "Bulk assign role"} — {userIds.length} user
+            {userIds.length === 1 ? "" : "s"}
+          </DialogTitle>
+          <DialogDescription>
+            {isRevoke
+              ? "The role will be removed from every selected user who currently has it. Users without it are skipped by the database."
+              : "The selected role will be granted to every selected user. Users who already have it are unchanged."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {result ? (
+          <div className="space-y-2 text-sm">
+            <div className="rounded border border-emerald-deep/15 p-3">
+              <div className="font-semibold text-emerald-deep">
+                Succeeded: {result.ok.length}
+              </div>
+              <div className="font-semibold text-red-600">
+                Failed: {result.failed.length}
+              </div>
+            </div>
+            {result.failed.length > 0 && (
+              <ul className="max-h-40 overflow-auto rounded border border-red-500/20 p-2 text-xs">
+                {result.failed.map((f) => (
+                  <li key={f.user_id} className="text-red-600">
+                    <span className="font-mono">{f.user_id.slice(0, 8)}…</span> — {f.error}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Role
+              </label>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value as AssignableRole)}
+                className="w-full rounded border border-emerald-deep/15 bg-white px-2 py-1 text-sm dark:bg-white/5"
+              >
+                {ASSIGNABLE_ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABEL[r]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {isRevoke ? (
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-red-500">
+                  Reason (required, min 3 chars)
+                </label>
+                <input
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="w-full rounded border border-emerald-deep/15 bg-white px-2 py-1 text-sm dark:bg-white/5"
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Note (optional)
+                </label>
+                <input
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="w-full rounded border border-emerald-deep/15 bg-white px-2 py-1 text-sm dark:bg-white/5"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        <DialogFooter>
+          {result ? (
+            <button
+              onClick={onDone}
+              className="rounded bg-emerald-deep px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white"
+            >
+              Done
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={onClose}
+                className="rounded border border-emerald-deep/15 px-3 py-1 text-xs uppercase tracking-widest"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={!canSubmit}
+                onClick={() => mut.mutate()}
+                className={`rounded px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white disabled:opacity-40 ${
+                  isRevoke ? "bg-red-600" : "bg-emerald-deep"
+                }`}
+              >
+                {mut.isPending ? "Working…" : isRevoke ? "Revoke" : "Assign"}
+              </button>
+            </>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
