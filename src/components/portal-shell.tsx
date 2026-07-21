@@ -12,6 +12,7 @@ import {
   SidebarWidgetHeader,
   SidebarNavItem,
   SidebarWidgetEmpty,
+  SidebarWidgetSkeleton,
 } from "@/components/sidebar-widgets";
 import type { NavGroup, NavItem } from "@/components/portal-shell.types";
 
@@ -27,12 +28,14 @@ export function PortalShell({
   groups,
   breadcrumb,
   action,
+  loading = false,
   children,
 }: {
   brand: string;
   groups: NavGroup[];
   breadcrumb: string;
   action?: ReactNode;
+  loading?: boolean;
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
