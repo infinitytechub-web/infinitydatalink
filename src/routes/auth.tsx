@@ -184,16 +184,30 @@ function AuthForm({ mode }: { mode: Mode }) {
           ) : null
         }
       >
-        <input
-          type="password"
-          required
-          autoComplete={mode === "signup" ? "new-password" : "current-password"}
-          className={inputClass()}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="At least 8 characters"
-        />
-        {password && mode === "signup" ? (
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            required
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            className={cn(inputClass(), "pr-20")}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 8 characters"
+          />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowPassword((s) => !s);
+            }}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            className="absolute inset-y-0 right-2 my-auto h-7 rounded px-2 text-[10px] font-bold uppercase tracking-widest text-emerald-mid hover:bg-emerald-deep/5"
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        {password ? (
           <div className="mt-2">
             <div className="h-1 w-full overflow-hidden rounded-full bg-emerald-deep/10">
               <div
