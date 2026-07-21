@@ -17,6 +17,8 @@ import {
   ASSIGNABLE_ROLES,
   ROLE_PERMISSIONS,
   assignRole,
+  bulkAssignRole,
+  bulkRevokeRole,
   listUsersWithRoles,
   revokeRole,
   type AppRole,
