@@ -1,0 +1,211 @@
+import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+const BUCKET = "branding";
+const MAX_BYTES = 2 * 1024 * 1024;
+const ALLOWED_LOGO_MIMES = new Set(["image/png", "image/jpeg", "image/svg+xml", "image/webp"]);
+const ALLOWED_FAVICON_MIMES = new Set([
+  "image/png",
+  "image/svg+xml",
+  "image/x-icon",
+  "image/vnd.microsoft.icon",
+]);
+
+export type BrandingSettings = {
+  app_name: string;
+  tagline: string | null;
+  primary_color: string;
+  accent_color: string;
+  logo_url: string | null;
+  favicon_url: string | null;
+  logo_path: string | null;
+  favicon_path: string | null;
+  updated_at: string;
+};
+
+const DEFAULTS: BrandingSettings = {
+  app_name: "IT-360 CashApp",
+  tagline: null,
+  primary_color: "#0d9488",
+  accent_color: "#f5c451",
+  logo_url: null,
+  favicon_url: null,
+  logo_path: null,
+  favicon_path: null,
+  updated_at: new Date(0).toISOString(),
+};
+
+async function assertSuperAdmin(supabase: any, userId: string) {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "super_admin")
+    .maybeSingle();
+  if (!data) throw new Error("Forbidden: super_admin role required");
+}
+
+async function signBrandingUrl(path: string | null): Promise<string | null> {
+  if (!path) return null;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await (supabaseAdmin as any).storage
+    .from(BUCKET)
+    .createSignedUrl(path, 60 * 60 * 24 * 7); // 7 days
+  if (error) return null;
+  return data?.signedUrl ?? null;
+}
+
+/** Public read — used by BrandingProvider on every visit. */
+export const getBranding = createServerFn({ method: "GET" }).handler(
+  async (): Promise<BrandingSettings> => {
+    const client = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
+    const { data } = await client
+      .from("branding_settings")
+      .select("app_name, tagline, primary_color, accent_color, logo_path, favicon_path, updated_at")
+      .eq("id", 1)
+      .maybeSingle();
+    if (!data) return DEFAULTS;
+    const [logo_url, favicon_url] = await Promise.all([
+      signBrandingUrl((data as any).logo_path),
+      signBrandingUrl((data as any).favicon_path),
+    ]);
+    return { ...(data as any), logo_url, favicon_url } as BrandingSettings;
+  },
+);
+
+const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+export const updateBranding = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        app_name: z.string().trim().min(1).max(60),
+        tagline: z.string().trim().max(160).nullable().optional(),
+        primary_color: z.string().regex(HEX, "Invalid hex color"),
+        accent_color: z.string().regex(HEX, "Invalid hex color"),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<BrandingSettings> => {
+    await assertSuperAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase
+      .from("branding_settings")
+      .update({
+        app_name: data.app_name,
+        tagline: data.tagline ?? null,
+        primary_color: data.primary_color,
+        accent_color: data.accent_color,
+        updated_at: new Date().toISOString(),
+        updated_by: context.userId,
+      })
+      .eq("id", 1);
+    if (error) throw new Error(error.message);
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: "super_admin",
+      action: "branding.updated",
+      meta: { fields: Object.keys(data) },
+    });
+    return getBranding();
+  });
+
+export const uploadBrandingAsset = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        kind: z.enum(["logo", "favicon"]),
+        filename: z.string().min(1).max(160),
+        mime_type: z.string().min(3).max(80),
+        content_base64: z.string().min(4),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<BrandingSettings> => {
+    await assertSuperAdmin(context.supabase, context.userId);
+    const allowed = data.kind === "logo" ? ALLOWED_LOGO_MIMES : ALLOWED_FAVICON_MIMES;
+    if (!allowed.has(data.mime_type)) {
+      throw new Error(
+        data.kind === "logo"
+          ? "Logo must be PNG, JPEG, SVG, or WEBP"
+          : "Favicon must be PNG, SVG, or ICO",
+      );
+    }
+    const b64 = data.content_base64.replace(/^data:[^;]+;base64,/, "");
+    const buffer = Buffer.from(b64, "base64");
+    if (buffer.byteLength > MAX_BYTES) throw new Error("File exceeds 2 MB limit.");
+
+    const safe = data.filename.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(-80);
+    const path = `${data.kind}/${crypto.randomUUID()}-${safe}`;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: upErr } = await (supabaseAdmin as any).storage
+      .from(BUCKET)
+      .upload(path, buffer, { contentType: data.mime_type, upsert: false });
+    if (upErr) throw new Error(upErr.message);
+
+    // Fetch current path to clean up old asset
+    const { data: prev } = await context.supabase
+      .from("branding_settings")
+      .select("logo_path, favicon_path")
+      .eq("id", 1)
+      .maybeSingle();
+    const oldPath = data.kind === "logo" ? (prev as any)?.logo_path : (prev as any)?.favicon_path;
+
+    const patch =
+      data.kind === "logo"
+        ? { logo_path: path, updated_at: new Date().toISOString(), updated_by: context.userId }
+        : { favicon_path: path, updated_at: new Date().toISOString(), updated_by: context.userId };
+    const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
+    if (error) throw new Error(error.message);
+
+    if (oldPath) {
+      await (supabaseAdmin as any).storage.from(BUCKET).remove([oldPath]).catch(() => {});
+    }
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: "super_admin",
+      action: `branding.${data.kind}.uploaded`,
+      meta: { path, size_bytes: buffer.byteLength },
+    });
+    return getBranding();
+  });
+
+export const clearBrandingAsset = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ kind: z.enum(["logo", "favicon"]) }).parse(d))
+  .handler(async ({ data, context }): Promise<BrandingSettings> => {
+    await assertSuperAdmin(context.supabase, context.userId);
+    const { data: prev } = await context.supabase
+      .from("branding_settings")
+      .select("logo_path, favicon_path")
+      .eq("id", 1)
+      .maybeSingle();
+    const oldPath = data.kind === "logo" ? (prev as any)?.logo_path : (prev as any)?.favicon_path;
+    const patch =
+      data.kind === "logo"
+        ? { logo_path: null, updated_at: new Date().toISOString(), updated_by: context.userId }
+        : { favicon_path: null, updated_at: new Date().toISOString(), updated_by: context.userId };
+    const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
+    if (error) throw new Error(error.message);
+    if (oldPath) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await (supabaseAdmin as any).storage.from(BUCKET).remove([oldPath]).catch(() => {});
+    }
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: "super_admin",
+      action: `branding.${data.kind}.cleared`,
+    });
+    return getBranding();
+  });
