@@ -27,6 +27,10 @@ const DEFAULTS: BrandingSettings = {
   footer_html: null,
   support_email: null,
   support_phone: null,
+  email_from_name: null,
+  email_reply_to: null,
+  email_header_html: null,
+  email_footer_html: null,
   updated_at: new Date(0).toISOString(),
 };
 
