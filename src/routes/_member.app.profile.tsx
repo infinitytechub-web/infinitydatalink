@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CheckCircle2, Clock, FileText, Loader2, Lock, Trash2, Upload, X, XCircle } from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/primitives";
+import { PasskeyEnrollmentCard } from "@/components/passkey-enrollment";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { getOrgConfig, ORG_PRESETS, setOrgConfig } from "@/lib/org-config";
