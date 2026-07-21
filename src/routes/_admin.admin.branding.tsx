@@ -112,7 +112,7 @@ function BrandingEditor() {
       <PageHeader
         eyebrow="Governance"
         title="Branding"
-       
+        description="Customize the app name, tagline, colors, logo, and favicon. Changes apply everywhere in the platform."
       />
 
       <SectionCard title="Identity">
