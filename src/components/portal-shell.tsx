@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SIDEBAR_GROUP_CHIPS } from "@/lib/theme-tokens";
+import { useBranding } from "@/components/branding-provider";
 
 const GROUP_ACCENTS = SIDEBAR_GROUP_CHIPS;
 
