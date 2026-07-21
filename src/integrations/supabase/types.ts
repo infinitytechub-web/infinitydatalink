@@ -1198,6 +1198,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_assign_role: {
+        Args: {
+          _actor_id: string
+          _note?: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _target_user: string
+        }
+        Returns: undefined
+      }
+      admin_revoke_role: {
+        Args: {
+          _actor_id: string
+          _reason: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _target_user: string
+        }
+        Returns: undefined
+      }
       advance_recurring_next_run: {
         Args: {
           _dom: number
