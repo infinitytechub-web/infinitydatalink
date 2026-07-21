@@ -216,7 +216,7 @@ export function PortalShell({
               <Menu className="size-4" />
             </button>
             <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
-              <span className="hidden truncate text-muted-foreground sm:inline">{brand}</span>
+              <span className="hidden truncate text-muted-foreground sm:inline">{displayName}</span>
               <span className="hidden text-muted-foreground/60 sm:inline">/</span>
               <span className="truncate">{breadcrumb}</span>
             </div>
