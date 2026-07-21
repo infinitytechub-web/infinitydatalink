@@ -68,6 +68,7 @@ function ProfileBody() {
         <PersonalDetailsForm profile={data.profile} />
         <NextOfKinSection rows={data.next_of_kin} />
         <DocumentsSection documents={data.documents} />
+        <PasskeyEnrollmentCard />
       </div>
       <div className="space-y-6">
         <RegionPresetCard />
