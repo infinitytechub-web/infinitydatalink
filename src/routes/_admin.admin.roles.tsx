@@ -2,7 +2,7 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { Suspense, useMemo, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { EmptyState, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import { EmptyState, PageHeader, SectionCard } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -52,7 +52,6 @@ function RolesPage() {
       <PageHeader
         eyebrow="Governance"
         title="Roles & Permissions"
-        description="Assign or revoke staff roles, and review the effective permissions each role grants across the platform."
       />
       <PermissionsMatrix />
       <Suspense fallback={<Skeleton className="mt-6 h-96 w-full" />}>
@@ -82,7 +81,7 @@ const ROLE_TONE: Record<AppRole, "success" | "warning" | "info" | "neutral" | "d
 
 function PermissionsMatrix() {
   return (
-    <SectionCard title="Effective permissions" description="Capabilities granted by each role.">
+    <SectionCard title="Effective permissions">
       <div className="grid gap-3 p-6 md:grid-cols-2 xl:grid-cols-3">
         {ALL_ROLES.map((role) => (
           <div
@@ -91,7 +90,7 @@ function PermissionsMatrix() {
           >
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-semibold">{ROLE_LABEL[role]}</span>
-              <StatusPill tone={ROLE_TONE[role]}>{role}</StatusPill>
+              <span className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{role}</span>
             </div>
             <ul className="list-disc space-y-1 pl-4 text-xs text-slate-600 dark:text-slate-300">
               {ROLE_PERMISSIONS[role].map((p) => (
@@ -116,7 +115,6 @@ function UsersTable() {
   return (
     <SectionCard
       title="Team members"
-      description="Search users, then click a row to manage their role assignments."
     >
       <div className="flex flex-wrap items-center gap-2 p-4">
         <input
@@ -146,7 +144,7 @@ function UsersTable() {
       </div>
 
       {data.rows.length === 0 ? (
-        <EmptyState title="No users match" description="Try clearing the filters." />
+        <EmptyState title="No users match" />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -210,7 +208,7 @@ function UserRow({ row }: { row: UserWithRolesRow }) {
               row.roles.map((r) => (
                 <StatusPill key={r} tone={ROLE_TONE[r]}>
                   {ROLE_LABEL[r]}
-                </StatusPill>
+                </span>
               ))
             )}
           </div>
@@ -290,7 +288,7 @@ function ManageDialog({ row, onClose }: { row: UserWithRolesRow; onClose: () => 
                 row.roles.map((r) => (
                   <StatusPill key={r} tone={ROLE_TONE[r]}>
                     {ROLE_LABEL[r]}
-                  </StatusPill>
+                  </span>
                 ))
               )}
             </div>
