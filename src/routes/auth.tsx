@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
+import { Eye, EyeOff, ShieldCheck, UserRound } from "lucide-react";
 import { passwordStrength } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Sign in or create your IT-360 CashApp account to access savings, loans, and payments in your member or administrator portal.",
+          "Sign in to your IT-360 CashApp member or administrator portal to access savings, loans, transfers, and system controls.",
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Sign in — IT-360 CashApp" },
@@ -29,6 +30,155 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+type PanelKind = "user" | "admin";
+
+function AuthPage() {
+  const [activeTab, setActiveTab] = useState<PanelKind>("user");
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-cream via-cream to-emerald-deep/5 font-sans text-emerald-deep">
+      <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex size-9 items-center justify-center rounded-md bg-emerald-deep shadow-sm">
+            <div className="size-3 rotate-45 border-2 border-gold" />
+          </div>
+          <span className="font-serif text-lg tracking-tight">IT-360 CashApp</span>
+        </Link>
+        <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
+          Secure session · TLS 1.3
+        </span>
+      </header>
+
+      {/* Mobile segmented tab */}
+      <div className="mx-auto mb-4 flex max-w-md gap-1 rounded-full border border-emerald-deep/10 bg-white/70 p-1 backdrop-blur lg:hidden">
+        {(["user", "admin"] as const).map((k) => (
+          <button
+            key={k}
+            onClick={() => setActiveTab(k)}
+            className={cn(
+              "flex-1 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all",
+              activeTab === k
+                ? k === "admin"
+                  ? "bg-emerald-deep text-cream shadow-sm"
+                  : "bg-teal-500 text-white shadow-sm"
+                : "text-emerald-deep/60",
+            )}
+          >
+            {k === "user" ? "User" : "Administrator"}
+          </button>
+        ))}
+      </div>
+
+      <main className="mx-auto grid max-w-7xl gap-6 px-6 pb-16 lg:grid-cols-2">
+        <div className={cn(activeTab === "user" ? "block" : "hidden", "lg:block")}>
+          <LoginPanel kind="user" />
+        </div>
+        <div className={cn(activeTab === "admin" ? "block" : "hidden", "lg:block")}>
+          <LoginPanel kind="admin" />
+        </div>
+      </main>
+
+      <footer className="mx-auto max-w-7xl px-6 pb-8 text-center text-[11px] uppercase tracking-widest text-emerald-deep/40">
+        © {new Date().getFullYear()} IT-360 CashApp · Enterprise financial platform
+      </footer>
+    </div>
+  );
+}
+
+function LoginPanel({ kind }: { kind: PanelKind }) {
+  const isAdmin = kind === "admin";
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+
+  const bg = isAdmin
+    ? "bg-gradient-to-br from-emerald-deep to-emerald-mid text-cream"
+    : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white";
+  const badgeBg = isAdmin ? "bg-gold text-emerald-deep" : "bg-white text-teal-700";
+  const eyebrow = isAdmin ? "Administrator access" : "Member access";
+  const title = isAdmin ? "Administrator Login" : "User Login";
+  const subtitle = isAdmin
+    ? "Staff sign-in for compliance, finance, and system administration."
+    : "Sign in to manage your savings, loans, transfers, and profile.";
+
+  return (
+    <section
+      className={cn(
+        "flex h-full flex-col overflow-hidden rounded-2xl shadow-2xl ring-1 transition-transform",
+        isAdmin ? "ring-emerald-deep/10" : "ring-teal-500/10",
+      )}
+    >
+      {/* Hero */}
+      <div className={cn("relative px-8 pb-8 pt-10", bg)}>
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-15"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4) 0, transparent 40%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.25) 0, transparent 40%)",
+          }}
+        />
+        <div className="relative flex items-start justify-between">
+          <div>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest",
+                badgeBg,
+              )}
+            >
+              {isAdmin ? <ShieldCheck className="size-3" /> : <UserRound className="size-3" />}
+              {eyebrow}
+            </span>
+            <h2 className="mt-4 font-serif text-3xl leading-tight">{title}</h2>
+            <p className="mt-2 max-w-sm text-sm opacity-90">{subtitle}</p>
+          </div>
+          <div
+            className={cn(
+              "flex size-14 items-center justify-center rounded-xl shadow-lg backdrop-blur",
+              isAdmin ? "bg-white/10" : "bg-white/20",
+            )}
+            aria-hidden
+          >
+            {isAdmin ? <ShieldCheck className="size-7" /> : <UserRound className="size-7" />}
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col bg-card p-8">
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="font-serif text-lg text-emerald-deep">
+            {mode === "signin" ? "Sign in" : "Create account"}
+          </h3>
+          {!isAdmin && (
+            <button
+              type="button"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              className="text-[11px] font-bold uppercase tracking-widest text-teal-600 hover:underline"
+            >
+              {mode === "signin" ? "Create account" : "Have an account? Sign in"}
+            </button>
+          )}
+        </div>
+
+        <AuthForm mode={isAdmin ? "signin" : mode} kind={kind} />
+
+        <div className="my-6 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">
+          <div className="h-px flex-1 bg-emerald-deep/10" />
+          or
+          <div className="h-px flex-1 bg-emerald-deep/10" />
+        </div>
+
+        <GoogleButton />
+
+        <p className="mt-6 text-[11px] leading-relaxed text-emerald-deep/50">
+          {isAdmin
+            ? "Administrator roles are assigned by an existing Super Admin. Access is logged for audit review."
+            : "New accounts start with Member permissions and require identity verification (KYC) before full access."}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 const signInSchema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "At least 8 characters"),
@@ -38,63 +188,7 @@ const signUpSchema = signInSchema.extend({
   fullName: z.string().min(2, "Enter your full name"),
 });
 
-type Mode = "signin" | "signup";
-
-function AuthPage() {
-  const [mode, setMode] = useState<Mode>("signin");
-
-  return (
-    <div className="min-h-screen bg-cream font-sans text-emerald-deep">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-deep">
-            <div className="size-3 rotate-45 border-2 border-gold" />
-          </div>
-          <span className="font-serif text-lg">IT-360 CashApp</span>
-        </Link>
-        <span className="text-[11px] uppercase tracking-widest text-emerald-deep/50">
-          Secure session · TLS 1.3
-        </span>
-      </header>
-
-      <div className="mx-auto grid max-w-2xl gap-8 px-6 pb-16">
-        <div className="rounded-sm border border-emerald-deep/5 bg-card p-8 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">
-                Member & Administrator portal
-              </p>
-              <h1 className="mt-1 font-serif text-2xl text-emerald-deep">
-                {mode === "signin" ? "Sign in to your account" : "Create your account"}
-              </h1>
-            </div>
-            <button
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="text-[11px] font-bold uppercase tracking-widest text-emerald-mid hover:underline"
-            >
-              {mode === "signin" ? "Create account" : "Have an account? Sign in"}
-            </button>
-          </div>
-
-          <AuthForm mode={mode} />
-
-          <div className="my-6 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">
-            <div className="h-px flex-1 bg-emerald-deep/10" /> or <div className="h-px flex-1 bg-emerald-deep/10" />
-          </div>
-
-          <GoogleButton />
-
-          <p className="mt-6 text-[11px] text-emerald-deep/50">
-            Administrator roles are assigned by an existing Super Admin from the admin console.
-            New accounts start with Member permissions.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AuthForm({ mode }: { mode: Mode }) {
+function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -102,8 +196,26 @@ function AuthForm({ mode }: { mode: Mode }) {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [capsOn, setCapsOn] = useState(false);
 
+  const isAdmin = kind === "admin";
   const strength = useMemo(() => passwordStrength(password), [password]);
+  const accent = isAdmin
+    ? "bg-emerald-deep hover:bg-emerald-mid text-cream"
+    : "bg-teal-600 hover:bg-teal-700 text-white";
+  const focusRing = isAdmin ? "focus:border-emerald-mid" : "focus:border-teal-500";
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (typeof e.getModifierState === "function") setCapsOn(e.getModifierState("CapsLock"));
+    };
+    window.addEventListener("keydown", handler);
+    window.addEventListener("keyup", handler);
+    return () => {
+      window.removeEventListener("keydown", handler);
+      window.removeEventListener("keyup", handler);
+    };
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,8 +252,8 @@ function AuthForm({ mode }: { mode: Mode }) {
           setErr(error.message);
           return;
         }
-        // Wait a tick for auth state to hydrate roles, then route.
-        setTimeout(() => navigate({ to: "/app" }), 100);
+        // Route hint by panel; role gates will further redirect if needed.
+        setTimeout(() => navigate({ to: isAdmin ? "/admin" : "/app" }), 100);
       }
     } finally {
       setLoading(false);
@@ -149,14 +261,14 @@ function AuthForm({ mode }: { mode: Mode }) {
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} className="space-y-4">
       {mode === "signup" ? (
         <Field label="Full name">
           <input
             type="text"
             required
             autoComplete="name"
-            className={inputClass()}
+            className={inputClass(focusRing)}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Ada Lovelace"
@@ -168,17 +280,23 @@ function AuthForm({ mode }: { mode: Mode }) {
           type="email"
           required
           autoComplete="email"
-          className={inputClass()}
+          className={inputClass(focusRing)}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder={isAdmin ? "staff@it360.example" : "you@example.com"}
         />
       </Field>
       <Field
         label="Password"
         hint={
           mode === "signin" ? (
-            <Link to="/auth/forgot" className="text-[11px] font-medium text-emerald-mid hover:underline">
+            <Link
+              to="/auth/forgot"
+              className={cn(
+                "text-[11px] font-medium hover:underline",
+                isAdmin ? "text-emerald-mid" : "text-teal-600",
+              )}
+            >
               Forgot password?
             </Link>
           ) : null
@@ -189,7 +307,7 @@ function AuthForm({ mode }: { mode: Mode }) {
             type={showPassword ? "text" : "password"}
             required
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            className={cn(inputClass(), "pr-20")}
+            className={cn(inputClass(focusRing), "pr-11")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 8 characters"
@@ -202,18 +320,29 @@ function AuthForm({ mode }: { mode: Mode }) {
             }}
             aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
-            className="absolute inset-y-0 right-2 my-auto h-7 rounded px-2 text-[10px] font-bold uppercase tracking-widest text-emerald-mid hover:bg-emerald-deep/5"
+            className="absolute inset-y-0 right-1 my-auto flex h-8 w-8 items-center justify-center rounded text-emerald-deep/60 hover:bg-emerald-deep/5 hover:text-emerald-deep"
           >
-            {showPassword ? "Hide" : "Show"}
+            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
         </div>
+        {capsOn ? (
+          <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-widest text-gold">
+            Caps Lock is on
+          </p>
+        ) : null}
         {password ? (
           <div className="mt-2">
-            <div className="h-1 w-full overflow-hidden rounded-full bg-emerald-deep/10">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-emerald-deep/10">
               <div
                 className={cn(
-                  "h-full transition-all",
-                  strength.score <= 1 ? "bg-destructive" : strength.score === 2 ? "bg-gold" : "bg-emerald-mid",
+                  "h-full transition-all duration-300",
+                  strength.score <= 1
+                    ? "bg-destructive"
+                    : strength.score === 2
+                      ? "bg-gold"
+                      : strength.score === 3
+                        ? "bg-teal-500"
+                        : "bg-emerald-mid",
                 )}
                 style={{ width: `${(strength.score / 4) * 100}%` }}
               />
@@ -230,9 +359,18 @@ function AuthForm({ mode }: { mode: Mode }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded bg-emerald-deep py-3 text-xs font-bold uppercase tracking-widest text-cream transition-colors hover:bg-emerald-mid disabled:opacity-60"
+        className={cn(
+          "w-full rounded-lg py-3 text-xs font-bold uppercase tracking-widest shadow-sm transition-all hover:shadow-md disabled:opacity-60",
+          accent,
+        )}
       >
-        {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
+        {loading
+          ? "Please wait…"
+          : mode === "signup"
+            ? "Create account"
+            : isAdmin
+              ? "Sign in to admin"
+              : "Sign in"}
       </button>
     </form>
   );
@@ -251,7 +389,6 @@ function GoogleButton() {
       });
       if (result.error) setErr(result.error.message || "Google sign-in failed");
       if (result.redirected) return;
-      // In-preview flow: session set. Navigate.
       window.location.assign("/app");
     } finally {
       setLoading(false);
@@ -264,7 +401,7 @@ function GoogleButton() {
         type="button"
         onClick={onClick}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded border border-emerald-deep/15 bg-white py-3 text-xs font-bold uppercase tracking-widest text-emerald-deep transition-colors hover:bg-cream disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-deep/15 bg-white py-3 text-xs font-bold uppercase tracking-widest text-emerald-deep transition-colors hover:bg-cream disabled:opacity-60"
       >
         <GoogleIcon /> {loading ? "Connecting…" : "Continue with Google"}
       </button>
@@ -276,16 +413,24 @@ function GoogleButton() {
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 48 48">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-      <path fill="none" d="M0 0h48v48H0z"/>
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+      <path fill="none" d="M0 0h48v48H0z" />
     </svg>
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: React.ReactNode; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <div className="mb-1.5 flex items-center justify-between">
@@ -299,6 +444,9 @@ function Field({ label, hint, children }: { label: string; hint?: React.ReactNod
   );
 }
 
-function inputClass() {
-  return "w-full rounded border border-emerald-deep/15 bg-white px-3 py-2.5 text-sm text-emerald-deep outline-none transition-colors placeholder:text-emerald-deep/30 focus:border-emerald-mid";
+function inputClass(focus = "focus:border-emerald-mid") {
+  return cn(
+    "w-full rounded-lg border border-emerald-deep/15 bg-white px-3 py-2.5 text-sm text-emerald-deep outline-none transition-colors placeholder:text-emerald-deep/30",
+    focus,
+  );
 }
