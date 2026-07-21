@@ -138,7 +138,7 @@ export const requestSettingsChange = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: id, error } = await supabaseAdmin.rpc("request_settings_change", {
       _kind: data.kind,
-      _payload: data.payload,
+      _payload: data.payload as any,
       _summary: data.summary,
     });
     if (error) throw new Error(error.message);
