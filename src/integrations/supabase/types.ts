@@ -1034,6 +1034,42 @@ export type Database = {
         }
         Relationships: []
       }
+      runtime_log_retention: {
+        Row: {
+          auto_purge_enabled: boolean
+          id: number
+          last_purge_at: string | null
+          last_purge_deleted: number | null
+          retention_error_days: number
+          retention_info_days: number
+          retention_warning_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auto_purge_enabled?: boolean
+          id?: number
+          last_purge_at?: string | null
+          last_purge_deleted?: number | null
+          retention_error_days?: number
+          retention_info_days?: number
+          retention_warning_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auto_purge_enabled?: boolean
+          id?: number
+          last_purge_at?: string | null
+          last_purge_deleted?: number | null
+          retention_error_days?: number
+          retention_info_days?: number
+          retention_warning_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       savings_accounts: {
         Row: {
           balance: number
@@ -1990,12 +2026,30 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      preview_runtime_log_retention: {
+        Args: {
+          _error_days?: number
+          _info_days?: number
+          _warning_days?: number
+        }
+        Returns: {
+          bytes_to_delete: number
+          bytes_to_keep: number
+          cutoff: string
+          retention_days: number
+          rows_to_delete: number
+          rows_to_keep: number
+          rows_total: number
+          severity: string
+        }[]
+      }
       purge_audit_log: { Args: { _before: string }; Returns: number }
       purge_notifications: {
         Args: { _before?: string; _scope?: string }
         Returns: number
       }
       purge_recycle_bin: { Args: { _all?: boolean }; Returns: number }
+      purge_runtime_error_logs: { Args: { _manual?: boolean }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
