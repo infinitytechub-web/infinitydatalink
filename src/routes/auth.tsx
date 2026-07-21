@@ -606,9 +606,9 @@ function Field({
   );
 }
 
-function inputClass(focus = "focus:border-emerald-mid") {
+function inputClass(focus = "focus:border-primary") {
   return cn(
-    "w-full rounded-lg border border-emerald-deep/15 bg-white px-3 py-2.5 text-sm text-emerald-deep outline-none transition-colors placeholder:text-emerald-deep/30",
+    "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70",
     focus,
   );
 }
