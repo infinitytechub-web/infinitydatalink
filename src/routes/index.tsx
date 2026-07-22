@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Savings, loans, payments, and investment for cooperatives, SACCOs, and membership organisations.",
+          "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations.",
       },
       { property: "og:url", content: "https://infinity-wealth360.lovable.app/" },
       {
