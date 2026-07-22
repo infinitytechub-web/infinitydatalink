@@ -36,12 +36,12 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
   const btn =
     "inline-flex items-center gap-1.5 rounded border border-emerald-deep/15 bg-card px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep hover:bg-cream transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-card";
 
-  const guard = (fn: () => void) => () => {
+  const guard = (fn: () => void | Promise<void>) => () => {
     if (!allowed) {
       console.warn(`[RBAC] Blocked export — missing permission: ${permission}`);
       return;
     }
-    fn();
+    void fn();
   };
 
   const toggle = (header: string) => {

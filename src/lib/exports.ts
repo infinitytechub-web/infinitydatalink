@@ -1,10 +1,7 @@
 // Export utilities for admin tables: PDF (with QR/barcode + header/footer),
 // Excel, CSV, and Print. Client-side only.
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
-import QRCode from "qrcode";
-import JsBarcode from "jsbarcode";
+// Heavy browser/export libraries are loaded lazily inside click handlers so
+// server rendering can import routes that reference these utilities safely.
 import { getOrgConfig } from "./org-config";
 
 export type ExportColumn<T> = {
@@ -49,6 +46,7 @@ function generateDocId(prefix = "IW") {
 }
 
 async function makeQrDataUrl(text: string): Promise<string> {
+  const QRCode = await import("qrcode");
   return QRCode.toDataURL(text, {
     margin: 0,
     width: 220,
@@ -56,7 +54,8 @@ async function makeQrDataUrl(text: string): Promise<string> {
   });
 }
 
-function makeBarcodeDataUrl(text: string): string {
+async function makeBarcodeDataUrl(text: string): Promise<string> {
+  const JsBarcode = (await import("jsbarcode")).default;
   const canvas = document.createElement("canvas");
   JsBarcode(canvas, text, {
     format: "CODE128",
@@ -70,6 +69,10 @@ function makeBarcodeDataUrl(text: string): string {
 
 // ----------------------- PDF -----------------------
 export async function exportPdf<T>(opts: ExportOptions<T>) {
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
   const cfg = getOrgConfig();
   const docId = opts.docId || generateDocId();
   const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
@@ -79,7 +82,7 @@ export async function exportPdf<T>(opts: ExportOptions<T>) {
   const qrDataUrl = await makeQrDataUrl(
     JSON.stringify({ id: docId, title: opts.title, org: cfg.name, ts: new Date().toISOString() }),
   );
-  const barcodeDataUrl = makeBarcodeDataUrl(docId);
+  const barcodeDataUrl = await makeBarcodeDataUrl(docId);
 
   const drawHeader = () => {
     // Emerald band
@@ -173,7 +176,8 @@ function sanitizeCell(v: unknown): string {
 }
 
 // ----------------------- Excel -----------------------
-export function exportExcel<T>(opts: ExportOptions<T>) {
+export async function exportExcel<T>(opts: ExportOptions<T>) {
+  const XLSX = await import("xlsx");
   const cfg = getOrgConfig();
   const docId = opts.docId || generateDocId();
   const headerRows = [
@@ -239,7 +243,7 @@ export async function exportPrint<T>(opts: ExportOptions<T>) {
   const qr = await makeQrDataUrl(
     JSON.stringify({ id: docId, title: opts.title, org: cfg.name, ts: new Date().toISOString() }),
   );
-  const barcode = makeBarcodeDataUrl(docId);
+  const barcode = await makeBarcodeDataUrl(docId);
   const win = window.open("", "_blank", "width=1100,height=800");
   if (!win) return;
 
