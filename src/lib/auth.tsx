@@ -159,32 +159,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return Array.from(set);
   }, [user]);
 
-  const hasRole = (r: AppRole) => !!user?.roles.includes(r);
-  const isMember = !!user?.roles.includes("member");
-  const isAdmin = !!user?.roles.some((r) => ADMIN_ROLES.includes(r));
-  const hasPermission = (p: Permission) => permissions.includes(p);
-  const hasAnyPermission = (ps: Permission[]) => ps.some((p) => permissions.includes(p));
+  const value = useMemo<AuthState>(() => {
+    const hasRole = (r: AppRole) => !!user?.roles.includes(r);
+    const isMember = !!user?.roles.includes("member");
+    const isAdmin = !!user?.roles.some((r) => ADMIN_ROLES.includes(r));
+    const hasPermission = (p: Permission) => permissions.includes(p);
+    const hasAnyPermission = (ps: Permission[]) => ps.some((p) => permissions.includes(p));
+    const signOut = async () => {
+      await supabase.auth.signOut();
+      setUser(null);
+    };
+    const refresh = async () => {
+      const { data } = await supabase.auth.getSession();
+      await hydrate(data.session?.user ?? null);
+    };
+    return {
+      user, loading, permissions, isMember, isAdmin,
+      hasRole, hasPermission, hasAnyPermission, signOut, refresh,
+    };
+  }, [user, loading, permissions]);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
-
-  const refresh = async () => {
-    const { data } = await supabase.auth.getSession();
-    await hydrate(data.session?.user ?? null);
-  };
-
-  return (
-    <AuthCtx.Provider
-      value={{
-        user, loading, permissions, isMember, isAdmin,
-        hasRole, hasPermission, hasAnyPermission, signOut, refresh,
-      }}
-    >
-      {children}
-    </AuthCtx.Provider>
-  );
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 
 export function useAuth() {
