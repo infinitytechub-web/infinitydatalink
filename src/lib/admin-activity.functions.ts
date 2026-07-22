@@ -26,8 +26,9 @@ export type ActivityEntry = {
   actor_id: string | null;
   actor_email: string | null;
   actor_role: string | null;
-  meta: Record<string, unknown> | null;
+  meta: unknown;
 };
+
 
 export type ActivityListResult = {
   rows: ActivityEntry[];
