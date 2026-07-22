@@ -1,0 +1,36 @@
+name: SSR smoke tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ssr-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build app
+        run: bun run build
+        env:
+          # Public/publishable values only — server secrets aren't needed for
+          # SSR compilation. Adjust in repo secrets if your build reads more.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://example.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder' }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID || 'placeholder' }}
+
+      - name: Run SSR smoke tests
+        run: node scripts/ssr-smoke.mjs
+        env:
+          SSR_SMOKE_HOST: http://127.0.0.1:4173

@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test -c e2e/playwright.config.ts"
+    "test:e2e": "playwright test -c e2e/playwright.config.ts",
+    "test:ssr-smoke": "node scripts/ssr-smoke.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.5",
