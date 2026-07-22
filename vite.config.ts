@@ -5,11 +5,35 @@
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { fileURLToPath } from "node:url";
+
+const realtimeSsrStub = fileURLToPath(
+  new URL("./src/integrations/supabase/realtime-ssr-stub.ts", import.meta.url),
+);
 
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+  },
+  vite: {
+    plugins: [
+      {
+        // SSR-only alias: swap @supabase/realtime-js for an inert stub in
+        // the server bundle. Realtime is a browser-only feature here; the
+        // real module drags tslib/CJS-interop-hostile deps into the
+        // Cloudflare Worker build and crashes at module init. Browser
+        // bundle is untouched, so client-side realtime subscriptions keep
+        // working as normal.
+        name: "ssr-stub-supabase-realtime",
+        enforce: "pre",
+        resolveId(source, _importer, options) {
+          if (!options?.ssr) return null;
+          if (source === "@supabase/realtime-js") return realtimeSsrStub;
+          return null;
+        },
+      },
+    ],
   },
 });
