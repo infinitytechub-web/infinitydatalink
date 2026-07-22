@@ -21,9 +21,8 @@ export const getRouter = () => {
     scrollRestoration: true,
     // Preload on link hover/focus so navigations feel instant.
     defaultPreload: "intent",
-    // Cached preloads stay fresh 30s; Query controls freshness beyond that.
-    defaultPreloadStaleTime: 30_000,
-    defaultPreloadGcTime: 5 * 60_000,
+    // Query owns cache freshness for loader data; router preload cache is disabled.
+    defaultPreloadStaleTime: 0,
   });
 
   return router;
