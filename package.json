@@ -13,7 +13,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test -c e2e/playwright.config.ts",
-    "test:ssr-smoke": "node scripts/ssr-smoke.mjs"
+    "test:ssr-smoke": "node scripts/ssr-smoke.mjs",
+    "security:audit": "node scripts/dependency-audit.mjs",
+    "security:definer": "node scripts/security-definer-scan.mjs",
+    "security:gate": "node scripts/dependency-audit.mjs && node scripts/security-definer-scan.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.5",
