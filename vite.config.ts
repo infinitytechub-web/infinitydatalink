@@ -18,16 +18,22 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    // SSR-only alias: swap @supabase/realtime-js for an inert stub in the
-    // server bundle. Realtime is a browser-only feature here; the real
-    // module drags tslib/CJS-interop-hostile deps into the Cloudflare
-    // Worker build and crashes at module init. Browser bundle is untouched.
-    ssr: {
-      resolve: {
-        alias: [
-          { find: /^@supabase\/realtime-js$/, replacement: realtimeSsrStub },
-        ],
+    plugins: [
+      {
+        // SSR-only alias: swap @supabase/realtime-js for an inert stub in
+        // the server bundle. Realtime is a browser-only feature here; the
+        // real module drags tslib/CJS-interop-hostile deps into the
+        // Cloudflare Worker build and crashes at module init. Browser
+        // bundle is untouched, so client-side realtime subscriptions keep
+        // working as normal.
+        name: "ssr-stub-supabase-realtime",
+        enforce: "pre",
+        resolveId(source, _importer, options) {
+          if (!options?.ssr) return null;
+          if (source === "@supabase/realtime-js") return realtimeSsrStub;
+          return null;
+        },
       },
-    },
+    ],
   },
 });
