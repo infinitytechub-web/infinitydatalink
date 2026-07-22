@@ -18,6 +18,14 @@ async function assertAdmin(supabase: any, userId: string) {
   }
 }
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [k: string]: JsonValue };
+
 export type ActivityEntry = {
   id: string;
   created_at: string;
@@ -26,8 +34,9 @@ export type ActivityEntry = {
   actor_id: string | null;
   actor_email: string | null;
   actor_role: string | null;
-  meta: unknown;
+  meta: JsonValue;
 };
+
 
 
 export type ActivityListResult = {
