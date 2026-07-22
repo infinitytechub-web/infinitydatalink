@@ -49,6 +49,7 @@ import { Route as AdminAdminConsoleRouteImport } from './routes/_admin.admin.con
 import { Route as AdminAdminBrandingRouteImport } from './routes/_admin.admin.branding'
 import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
 import { Route as AdminAdminApprovalsRouteImport } from './routes/_admin.admin.approvals'
+import { Route as AdminAdminActivityRouteImport } from './routes/_admin.admin.activity'
 import { Route as MemberAppSavingsIndexRouteImport } from './routes/_member.app.savings.index'
 import { Route as AdminAdminFinanceIndexRouteImport } from './routes/_admin.admin.finance.index'
 import { Route as AdminAdminEntitiesIndexRouteImport } from './routes/_admin.admin.entities.index'
@@ -275,6 +276,11 @@ const AdminAdminApprovalsRoute = AdminAdminApprovalsRouteImport.update({
   path: '/approvals',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminActivityRoute = AdminAdminActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const MemberAppSavingsIndexRoute = MemberAppSavingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -438,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/admin/activity': typeof AdminAdminActivityRoute
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
@@ -503,6 +510,7 @@ export interface FileRoutesByTo {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/admin/activity': typeof AdminAdminActivityRoute
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
@@ -570,6 +578,7 @@ export interface FileRoutesById {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/_admin/admin/activity': typeof AdminAdminActivityRoute
   '/_admin/admin/approvals': typeof AdminAdminApprovalsRoute
   '/_admin/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/_admin/admin/branding': typeof AdminAdminBrandingRoute
@@ -639,6 +648,7 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/reset'
     | '/email/unsubscribe'
+    | '/admin/activity'
     | '/admin/approvals'
     | '/admin/audit'
     | '/admin/branding'
@@ -704,6 +714,7 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/reset'
     | '/email/unsubscribe'
+    | '/admin/activity'
     | '/admin/approvals'
     | '/admin/audit'
     | '/admin/branding'
@@ -770,6 +781,7 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/reset'
     | '/email/unsubscribe'
+    | '/_admin/admin/activity'
     | '/_admin/admin/approvals'
     | '/_admin/admin/audit'
     | '/_admin/admin/branding'
@@ -1126,6 +1138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminApprovalsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/activity': {
+      id: '/_admin/admin/activity'
+      path: '/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminAdminActivityRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_member/app/savings/': {
       id: '/_member/app/savings/'
       path: '/'
@@ -1420,6 +1439,7 @@ const AdminAdminSuperAdminsRouteWithChildren =
   )
 
 interface AdminAdminRouteChildren {
+  AdminAdminActivityRoute: typeof AdminAdminActivityRoute
   AdminAdminApprovalsRoute: typeof AdminAdminApprovalsRoute
   AdminAdminAuditRoute: typeof AdminAdminAuditRouteWithChildren
   AdminAdminBrandingRoute: typeof AdminAdminBrandingRoute
@@ -1442,6 +1462,7 @@ interface AdminAdminRouteChildren {
 }
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
+  AdminAdminActivityRoute: AdminAdminActivityRoute,
   AdminAdminApprovalsRoute: AdminAdminApprovalsRoute,
   AdminAdminAuditRoute: AdminAdminAuditRouteWithChildren,
   AdminAdminBrandingRoute: AdminAdminBrandingRoute,
