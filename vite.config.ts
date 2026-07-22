@@ -28,8 +28,10 @@ export default defineConfig({
         // working as normal.
         name: "ssr-stub-supabase-realtime",
         enforce: "pre",
-        resolveId(source, _importer, options) {
-          if (!options?.ssr) return null;
+        applyToEnvironment(env: { name: string }) {
+          return env.name !== "client";
+        },
+        resolveId(source: string) {
           if (source === "@supabase/realtime-js") return realtimeSsrStub;
           return null;
         },
