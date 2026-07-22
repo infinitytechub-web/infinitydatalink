@@ -98,7 +98,9 @@ const CRUMBS: Record<string, string> = {
   "/admin": "Analytics",
   "/admin/reports": "Reports",
   "/admin/audit": "Audit & Activity",
+  "/admin/activity": "Activity Timeline",
   "/admin/audit/transfers": "Transfer Audit",
+
 
   "/admin/finance": "Financial Dashboard",
   "/admin/finance/summary": "Financial Summary",
