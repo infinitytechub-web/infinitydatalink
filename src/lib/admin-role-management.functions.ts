@@ -85,11 +85,11 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
 
     let q = supabaseAdmin
       .from("profiles")
-      .select("id, email, full_name, member_no, created_at", { count: "exact" });
+      .select("id, full_name, member_no, created_at", { count: "exact" });
 
     if (data.search) {
       const s = `%${data.search}%`;
-      q = q.or(`email.ilike.${s},full_name.ilike.${s},member_no.ilike.${s}`);
+      q = q.or(`full_name.ilike.${s},member_no.ilike.${s}`);
     }
 
     const from = (data.page - 1) * data.pageSize;
@@ -101,6 +101,7 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
 
     const ids = (profiles ?? []).map((p: any) => p.id);
     let rolesByUser = new Map<string, AppRole[]>();
+    const emailMap = new Map<string, string>();
     if (ids.length) {
       const { data: rolesRows, error: rErr } = await supabaseAdmin
         .from("user_roles")
@@ -112,16 +113,21 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
         list.push(r.role as AppRole);
         rolesByUser.set(r.user_id, list);
       }
+      const { data: usersRes } = await (supabaseAdmin as any).auth.admin.listUsers({ page: 1, perPage: 200 });
+      for (const u of usersRes?.users ?? []) {
+        if (u.email && ids.includes(u.id)) emailMap.set(u.id, u.email);
+      }
     }
 
     let rows: UserWithRolesRow[] = (profiles ?? []).map((p: any) => ({
       user_id: p.id,
-      email: p.email,
+      email: emailMap.get(p.id) ?? null,
       full_name: p.full_name,
       member_no: p.member_no,
       created_at: p.created_at,
       roles: rolesByUser.get(p.id) ?? [],
     }));
+
 
     if (data.role !== "all") {
       rows = rows.filter((r) => r.roles.includes(data.role as AppRole));
