@@ -8,6 +8,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useBranding } from "@/components/branding-provider";
+import DOMPurify from "isomorphic-dompurify";
 import {
   beginPasskeyAuthentication,
   finishPasskeyAuthentication,
