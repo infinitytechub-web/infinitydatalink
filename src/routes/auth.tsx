@@ -118,7 +118,13 @@ function AuthPage() {
           <div
             className="mb-2 normal-case tracking-normal text-emerald-deep/60"
             // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: branding.footer_html }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(branding.footer_html, {
+                ALLOWED_TAGS: ["a", "b", "strong", "i", "em", "u", "br", "span", "p", "small"],
+                ALLOWED_ATTR: ["href", "title", "target", "rel"],
+                ALLOWED_URI_REGEXP: /^(https?:|mailto:|tel:|#)/i,
+              }),
+            }}
           />
         ) : null}
         © {new Date().getFullYear()} {appName} · Enterprise financial platform
