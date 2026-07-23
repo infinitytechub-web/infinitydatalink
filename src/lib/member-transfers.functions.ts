@@ -129,7 +129,8 @@ export const listTransferableAccounts = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.search) {
-      q = q.or(`full_name.ilike.%${data.search}%,member_no.ilike.%${data.search}%`, { foreignTable: "profiles" });
+      const term = data.search.replace(/[%,()*]/g, "");
+      q = q.or(`full_name.ilike.%${term}%,member_no.ilike.%${term}%`, { foreignTable: "profiles" });
     }
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
