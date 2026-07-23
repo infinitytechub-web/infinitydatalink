@@ -88,7 +88,7 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
       .select("id, full_name, member_no, created_at", { count: "exact" });
 
     if (data.search) {
-      const s = `%${data.search}%`;
+      const s = `%${data.search.replace(/[%,()*]/g, "")}%`;
       q = q.or(`full_name.ilike.${s},member_no.ilike.${s}`);
     }
 

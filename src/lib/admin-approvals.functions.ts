@@ -41,7 +41,7 @@ export const listPendingUsers = createServerFn({ method: "GET" })
       .select("id, full_name, member_no, status, rejection_reason, created_at", { count: "exact" });
     if (data.status !== "all") q = q.eq("status", data.status);
     if (data.search) {
-      const s = `%${data.search}%`;
+      const s = `%${data.search.replace(/[%,()*]/g, "")}%`;
       q = q.or(`full_name.ilike.${s},member_no.ilike.${s}`);
     }
     const from = (data.page - 1) * data.pageSize;

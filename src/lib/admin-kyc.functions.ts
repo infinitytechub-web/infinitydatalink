@@ -73,7 +73,7 @@ export const listKycQueue = createServerFn({ method: "GET" })
 
     if (data.status !== "all") q = q.eq("kyc", data.status);
     if (data.q) {
-      const needle = `%${data.q}%`;
+      const needle = `%${data.q.replace(/[%,()*]/g, "")}%`;
       q = q.or(`full_name.ilike.${needle},member_no.ilike.${needle},national_id.ilike.${needle}`);
     }
 
