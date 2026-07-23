@@ -203,8 +203,11 @@ export const listSnapshots = createServerFn({ method: "GET" })
     const emails = new Map<string, string>();
     if (ids.length) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: users } = await supabaseAdmin.from("profiles").select("id, email").in("id", ids);
-      for (const u of (users ?? []) as any[]) if (u.email) emails.set(u.id, u.email);
+      // profiles has no email column — pull emails from auth.users via admin API
+      const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      for (const u of list?.users ?? []) {
+        if (u.id && ids.includes(u.id) && u.email) emails.set(u.id, u.email);
+      }
     }
     return ((rows ?? []) as any[]).map((r) => ({
       id: r.id,
