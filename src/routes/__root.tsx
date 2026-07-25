@@ -156,6 +156,7 @@ function RootComponent() {
   useEffect(() => {
     // Fire-and-forget: dynamic import so SSR bundle stays lean.
     void import("@/lib/runtime-error-logger").then((m) => m.installGlobalErrorHandlers());
+    void import("@/lib/web-vitals-reporter").then((m) => m.installWebVitalsReporter());
   }, []);
 
   return (

@@ -82,16 +82,26 @@ const AuthCtx = createContext<AuthState | null>(null);
 
 async function loadRoles(userId: string): Promise<AppRole[]> {
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  if (error || !data) return [];
+  if (error || !data) {
+    if (import.meta.env.DEV && error) {
+      // Surface RLS / permission regressions during development — silent
+      // failure in prod so we don't leak schema details in the console.
+      console.warn("[auth] loadRoles failed:", error.message);
+    }
+    return [];
+  }
   return data.map((r) => r.role as AppRole);
 }
 
 async function loadStatus(userId: string): Promise<{ status: AccountStatus; rejectionReason: string | null }> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .select("status, rejection_reason")
     .eq("id", userId)
     .maybeSingle();
+  if (import.meta.env.DEV && error) {
+    console.warn("[auth] loadStatus failed:", error.message);
+  }
   return {
     status: ((data as any)?.status ?? "pending") as AccountStatus,
     rejectionReason: ((data as any)?.rejection_reason ?? null) as string | null,
@@ -119,12 +129,22 @@ function toSessionUser(
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // Track the last authenticated user id we hydrated so USER_UPDATED
+  // events (email/metadata edits) don't trigger duplicate roles+profile
+  // fetches every time Supabase refreshes the token.
+  const lastHydratedId = { current: null as string | null };
 
-  const hydrate = async (authUser: User | null) => {
+  const hydrate = async (authUser: User | null, opts: { force?: boolean } = {}) => {
     if (!authUser) {
+      lastHydratedId.current = null;
       setUser(null);
       return;
     }
+    if (!opts.force && lastHydratedId.current === authUser.id) {
+      // Same signed-in user — skip the roles/profile round-trip.
+      return;
+    }
+    lastHydratedId.current = authUser.id;
     const [roles, statusInfo] = await Promise.all([loadRoles(authUser.id), loadStatus(authUser.id)]);
     setUser(toSessionUser(authUser, roles, statusInfo.status, statusInfo.rejectionReason));
   };
@@ -134,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     supabase.auth.getSession().then(async ({ data }) => {
       if (cancelled) return;
-      await hydrate(data.session?.user ?? null);
+      await hydrate(data.session?.user ?? null, { force: true });
       setLoading(false);
     });
 
