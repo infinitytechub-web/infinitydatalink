@@ -1,183 +1,34 @@
-import { useMemo, type ReactNode } from "react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-  type TooltipProps,
-} from "recharts";
+// Public chart API. Heavy recharts implementation is code-split into
+// `charts.recharts.tsx` so admin/dashboard chunks don't pay for it on
+// first paint — the module only ships once a chart actually renders.
+import { lazy, Suspense, type ReactNode } from "react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
-
 import { CHART_PALETTE } from "@/lib/theme-tokens";
+import type { ChartSeries, TrendChartProps } from "./charts.recharts";
 
-/**
- * Shared chart palette — sourced from the centralized tone tokens so chart
- * series match KPI tiles, section accents, and status pills app-wide.
- */
+export type { ChartSeries } from "./charts.recharts";
 export const chartPalette = CHART_PALETTE;
 
+const LazyTrendChart = lazy(() => import("./charts.recharts"));
 
-export type ChartSeries = {
-  key: string;
-  label: string;
-  color?: string;
-  format?: (value: number) => string;
-};
-
-/**
- * Accessible tooltip: renders values as a description list so screen
- * readers announce the label/value pairs coherently. Recharts owns the
- * positioning; we only theme the surface.
- */
-function AccessibleTooltip({
-  active,
-  payload,
-  label,
-  series,
-}: TooltipProps<number, string> & { series: ChartSeries[] }) {
-  if (!active || !payload || payload.length === 0) return null;
+function ChartSkeleton({ height, className }: { height: number; className?: string }) {
   return (
     <div
-      role="tooltip"
-      className="rounded-md border border-border bg-popover/95 px-3 py-2 text-xs text-popover-foreground shadow-md backdrop-blur"
-    >
-      <p className="mb-1 font-semibold">{label}</p>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
-        {payload.map((entry) => {
-          const meta = series.find((s) => s.key === entry.dataKey);
-          const value = typeof entry.value === "number" ? entry.value : Number(entry.value ?? 0);
-          const formatted = meta?.format ? meta.format(value) : String(entry.value ?? "");
-          return (
-            <div key={String(entry.dataKey)} className="contents">
-              <dt className="flex items-center gap-1.5 text-muted-foreground">
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-2 rounded-full"
-                  style={{ background: entry.color }}
-                />
-                {meta?.label ?? String(entry.dataKey)}
-              </dt>
-              <dd className="tabular text-right font-medium text-foreground">{formatted}</dd>
-            </div>
-          );
-        })}
-      </dl>
-    </div>
-  );
-}
-
-/** Renders a plain-text summary of the chart for assistive tech. */
-function ChartA11ySummary({
-  title,
-  data,
-  series,
-  xKey,
-}: {
-  title: string;
-  data: readonly Record<string, unknown>[];
-  series: ChartSeries[];
-  xKey: string;
-}) {
-  if (data.length === 0) return null;
-  const first = data[0];
-  const last = data[data.length - 1];
-  const range = `${String(first[xKey])} to ${String(last[xKey])}`;
-  const totals = series.map((s) => {
-    const sum = data.reduce((acc, row) => acc + (Number(row[s.key]) || 0), 0);
-    return `${s.label}: ${s.format ? s.format(sum) : sum}`;
-  });
-  return (
-    <p className="sr-only">
-      {title}. {range}. Totals — {totals.join("; ")}.
-    </p>
-  );
-}
-
-export function TrendChart<T extends Record<string, unknown>>({
-  data,
-  series,
-  xKey,
-  title,
-  height = 320,
-  className,
-}: {
-  data: readonly T[];
-  series: ChartSeries[];
-  xKey: string;
-  title: string;
-  height?: number;
-  className?: string;
-}) {
-  const reduced = useReducedMotion();
-  // Recharts re-renders on every tooltip move; memoise the palette lookup.
-  const colored = useMemo(
-    () => series.map((s, i) => ({ ...s, color: s.color ?? chartPalette[i % chartPalette.length] })),
-    [series],
-  );
-
-  return (
-    <div
-      className={cn("w-full", className)}
+      aria-hidden="true"
+      className={cn("w-full animate-pulse rounded-lg bg-muted/40", className)}
       style={{ height }}
-      role="img"
-      aria-label={title}
-    >
-      <ChartA11ySummary title={title} data={data} series={colored} xKey={xKey} />
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data as Record<string, unknown>[]} margin={{ top: 8, right: 12, bottom: 4, left: -8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
-          <XAxis
-            dataKey={xKey}
-            fontSize={11}
-            stroke="var(--chart-axis)"
-            tick={{ fill: "var(--chart-axis)" }}
-            tickLine={false}
-            axisLine={{ stroke: "var(--chart-grid)" }}
-            minTickGap={16}
-          />
-          <YAxis
-            fontSize={11}
-            stroke="var(--chart-axis)"
-            tick={{ fill: "var(--chart-axis)" }}
-            tickLine={false}
-            axisLine={false}
-            width={48}
-          />
-          <Tooltip
-            cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1, strokeDasharray: "3 3" }}
-            isAnimationActive={!reduced}
-            animationDuration={reduced ? 0 : 120}
-            content={<AccessibleTooltip series={colored} />}
-          />
-          <Legend
-            wrapperStyle={{ fontSize: 11, paddingTop: 8, color: "var(--muted-foreground)" }}
-            iconType="circle"
-            iconSize={8}
-          />
+    />
+  );
+}
 
-          {colored.map((s) => (
-            <Line
-              key={s.key}
-              type="monotone"
-              dataKey={s.key}
-              name={s.label}
-              stroke={s.color}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
-              isAnimationActive={!reduced}
-              animationDuration={reduced ? 0 : 400}
-              animationEasing="ease-out"
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+export function TrendChart<T extends Record<string, unknown>>(props: TrendChartProps<T>): ReactNode {
+  const height = props.height ?? 320;
+  return (
+    <Suspense fallback={<ChartSkeleton height={height} className={props.className} />}>
+      {/* Cast: generic passthrough for the lazy component. */}
+      <LazyTrendChart {...(props as TrendChartProps<Record<string, unknown>>)} />
+    </Suspense>
   );
 }
 
