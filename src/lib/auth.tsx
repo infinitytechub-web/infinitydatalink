@@ -1,5 +1,5 @@
 // Supabase-backed auth context with RBAC. Roles come from the `user_roles` table.
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -132,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Track the last authenticated user id we hydrated so USER_UPDATED
   // events (email/metadata edits) don't trigger duplicate roles+profile
   // fetches every time Supabase refreshes the token.
-  const lastHydratedId = { current: null as string | null };
+  const lastHydratedId = useRef<string | null>(null);
 
   const hydrate = async (authUser: User | null, opts: { force?: boolean } = {}) => {
     if (!authUser) {

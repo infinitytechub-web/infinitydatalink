@@ -6,10 +6,15 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { fileURLToPath } from "node:url";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const realtimeSsrStub = fileURLToPath(
   new URL("./src/integrations/supabase/realtime-ssr-stub.ts", import.meta.url),
 );
+
+// Opt-in bundle analyzer: run `BUNDLE_ANALYZE=1 bun run build` to emit
+// dist/stats.html with an interactive treemap of the client bundle.
+const analyze = process.env.BUNDLE_ANALYZE === "1";
 
 export default defineConfig({
   tanstackStart: {
@@ -36,6 +41,16 @@ export default defineConfig({
           return null;
         },
       },
+      ...(analyze
+        ? [
+            visualizer({
+              filename: "dist/stats.html",
+              gzipSize: true,
+              brotliSize: true,
+              template: "treemap",
+            }),
+          ]
+        : []),
     ],
   },
 });
