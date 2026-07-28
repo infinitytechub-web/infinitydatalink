@@ -157,6 +157,9 @@ function RootComponent() {
     // Fire-and-forget: dynamic import so SSR bundle stays lean.
     void import("@/lib/runtime-error-logger").then((m) => m.installGlobalErrorHandlers());
     void import("@/lib/web-vitals-reporter").then((m) => m.installWebVitalsReporter());
+    // Preview/dev/iframe only: wipe any stale service worker + caches so the
+    // preview pane always renders fresh content. No-op in production.
+    void import("@/lib/preview-sw-cleanup").then((m) => m.cleanupPreviewServiceWorkers());
   }, []);
 
   return (
