@@ -108,6 +108,8 @@ function TransfersBody({
 
       <NewTransferForm accounts={accounts} onDone={() => qc.invalidateQueries({ queryKey: ["member", "transfers"] })} />
 
+      <SweepsSection accounts={accounts} />
+
       <SectionCard
         title="My transfers"
         action={
