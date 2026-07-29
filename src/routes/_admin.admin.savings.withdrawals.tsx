@@ -69,7 +69,14 @@ const listQuery = (s: SearchParams) =>
     queryKey: ["admin", "withdrawals", s],
     queryFn: () =>
       adminListWithdrawals({
-        data: { status: s.status, search: s.q ?? null, page: s.page, page_size: PAGE_SIZE },
+        data: {
+          status: s.status,
+          search: s.q ?? null,
+          page: s.page,
+          page_size: PAGE_SIZE,
+          date_from: s.date_from ?? null,
+          date_to: s.date_to ?? null,
+        },
       }),
     staleTime: 10_000,
   });
