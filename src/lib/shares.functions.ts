@@ -490,6 +490,12 @@ export type AdminInvestmentsOverview = {
     cost_basis: number;
     market_value: number;
   }>;
+  viewer: {
+    user_id: string;
+    roles: string[];
+    can_approve: boolean;
+    can_execute: boolean;
+  };
 };
 
 export const getAdminInvestments = createServerFn({ method: "GET" })
