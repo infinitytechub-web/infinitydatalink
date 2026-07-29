@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   getAdminInvestments,
+  getAdminInvestmentSeries,
   upsertShareProduct,
   createDividendRun,
   executeDividendRun,
@@ -12,18 +13,28 @@ import {
   type AdminInvestmentsOverview,
   type DividendRunPreview,
   type ShareProduct,
+  type InvestmentSeriesPoint,
 } from "@/lib/shares.functions";
+import { TrendChart } from "@/components/charts";
 
 const overviewQO = queryOptions<AdminInvestmentsOverview>({
   queryKey: ["admin", "investments"],
   queryFn: () => getAdminInvestments(),
 });
 
+const adminSeriesQO = queryOptions<InvestmentSeriesPoint[]>({
+  queryKey: ["admin", "investments", "series"],
+  queryFn: () => getAdminInvestmentSeries(),
+});
+
 export const Route = createFileRoute("/_admin/admin/investments")({
   head: () => ({
     meta: [{ title: "Investments & Shares — Admin — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(overviewQO),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(overviewQO);
+    context.queryClient.ensureQueryData(adminSeriesQO);
+  },
   component: AdminInvestments,
 });
 
