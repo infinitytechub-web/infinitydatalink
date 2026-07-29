@@ -878,7 +878,7 @@ function BreakdownDialog({
   );
 }
 
-function StatTile({ label, value }: { label: string; value: React.ReactNode }) {
+function StatTile({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-xl border border-emerald-deep/10 bg-emerald-deep/[0.02] p-3 dark:border-emerald-100/10 dark:bg-emerald-100/[0.03]">
       <div className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
