@@ -661,9 +661,17 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
           · total <Money amount={total} />
         </span>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="ghost" onClick={onDone}>
           Clear selection
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => exportSelectedWithdrawals(rows)}
+          aria-label="Export selected withdrawal requests as CSV"
+        >
+          <FileDown className="mr-1 size-4" /> CSV export
         </Button>
         <Button size="sm" variant="destructive" onClick={() => setOpen(true)}>
           <X className="mr-1 size-4" /> Cancel selected
