@@ -74,6 +74,12 @@ function SavingsPage() {
         action={
           <div className="flex items-center gap-2">
             <Link
+              to="/app/savings/ledger"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              <ListOrdered className="h-4 w-4" /> Full ledger
+            </Link>
+            <Link
               to="/app/savings/deposit"
               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
             >

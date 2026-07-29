@@ -43,6 +43,7 @@ const CRUMBS: Record<string, string> = {
   "/app": "Financial Summary",
   "/app/savings": "My Savings",
   "/app/savings/deposit": "Top up savings",
+  "/app/savings/ledger": "Savings ledger",
   "/app/loans": "Active Loans",
   "/app/investments": "Investments & Shares",
   "/app/transactions": "Transactions",
