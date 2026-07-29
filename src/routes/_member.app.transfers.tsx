@@ -417,6 +417,7 @@ function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listM
                 <tr>
                   <th className="px-3 py-2 text-left">From → To</th>
                   <th className="px-3 py-2 text-right">Amount</th>
+                  <th className="px-3 py-2 text-left">Rules</th>
                   <th className="px-3 py-2 text-left">Frequency</th>
                   <th className="px-3 py-2 text-left">Next run</th>
                   <th className="px-3 py-2 text-left">Status</th>
