@@ -438,6 +438,49 @@ const CreateRunSchema = z.object({
   note: z.string().trim().max(500).optional().nullable(),
 });
 
+const PreviewRunSchema = z.object({
+  product_id: z.string().uuid(),
+  per_unit_amount: z.number().nonnegative().max(1_000_000),
+});
+
+export type DividendRunPreview = {
+  eligible_members: number;
+  total_units: number;
+  per_unit_amount: number;
+  estimated_total: number;
+  currency: string;
+};
+
+export const previewDividendRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => PreviewRunSchema.parse(data))
+  .handler(async ({ data, context }): Promise<DividendRunPreview> => {
+    await assertFinanceStaff(context.supabase, context.userId);
+    const [{ data: prod, error: pErr }, { data: holdings, error: hErr }] = await Promise.all([
+      context.supabase.from("share_products").select("currency").eq("id", data.product_id).single(),
+      context.supabase
+        .from("share_holdings")
+        .select("user_id, units")
+        .eq("product_id", data.product_id)
+        .gt("units", 0),
+    ]);
+    if (pErr) throw new Error(pErr.message);
+    if (hErr) throw new Error(hErr.message);
+    const holders = new Set<string>();
+    let totalUnits = 0;
+    for (const h of holdings ?? []) {
+      holders.add((h as any).user_id);
+      totalUnits += Number((h as any).units ?? 0);
+    }
+    return {
+      eligible_members: holders.size,
+      total_units: totalUnits,
+      per_unit_amount: data.per_unit_amount,
+      estimated_total: Number((totalUnits * data.per_unit_amount).toFixed(2)),
+      currency: (prod as any)?.currency ?? "GHS",
+    };
+  });
+
 export const createDividendRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => CreateRunSchema.parse(data))
