@@ -1,20 +1,25 @@
+import { memo } from "react";
 import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useOnlinePresence } from "@/lib/online-presence";
+import { useOnlinePresence, useOnlinePresenceCount } from "@/lib/online-presence";
 
 /** Blinking green presence dot. */
-export function LiveDot({ className }: { className?: string }) {
+export const LiveDot = memo(function LiveDot({ className }: { className?: string }) {
   return (
     <span className={cn("relative flex h-2.5 w-2.5", className)} aria-hidden="true">
       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
       <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.9)]" />
     </span>
   );
-}
+});
 
 /** Compact header indicator: green blinking dot + live online count. */
-export function OnlinePresencePill({ className }: { className?: string }) {
-  const { total, staff } = useOnlinePresence();
+export const OnlinePresencePill = memo(function OnlinePresencePill({
+  className,
+}: {
+  className?: string;
+}) {
+  const { total, staff } = useOnlinePresenceCount();
   return (
     <div
       className={cn(
@@ -29,7 +34,7 @@ export function OnlinePresencePill({ className }: { className?: string }) {
       <span className="hidden sm:inline">online</span>
     </div>
   );
-}
+});
 
 function initials(name: string) {
   return (
@@ -43,7 +48,11 @@ function initials(name: string) {
 }
 
 /** Live roster rendered inside the dark navigation pane. */
-export function SidebarOnlinePanel({ collapsed }: { collapsed?: boolean }) {
+export const SidebarOnlinePanel = memo(function SidebarOnlinePanel({
+  collapsed,
+}: {
+  collapsed?: boolean;
+}) {
   const { users, total, meId } = useOnlinePresence();
 
   if (collapsed) {
@@ -98,4 +107,4 @@ export function SidebarOnlinePanel({ collapsed }: { collapsed?: boolean }) {
       )}
     </div>
   );
-}
+});
