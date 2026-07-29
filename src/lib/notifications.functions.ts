@@ -16,18 +16,40 @@ export type NotificationRow = {
 export const listNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ limit: z.number().int().min(1).max(100).optional().default(20) }).parse(d ?? {}),
+    z
+      .object({
+        limit: z.number().int().min(1).max(100).optional().default(20),
+        /** Cursor: return rows strictly older than this ISO timestamp. */
+        before: z.string().datetime({ offset: true }).optional(),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase
+    let query = context.supabase
       .from("notifications")
       .select("id, user_id, category, title, body, link, read_at, created_at")
       .order("created_at", { ascending: false })
       .limit(data.limit);
+    if (data.before) query = query.lt("created_at", data.before);
+
+    const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
-    const unread = (rows ?? []).filter((r: any) => !r.read_at).length;
-    return { rows: (rows ?? []) as NotificationRow[], unread };
+
+    // Exact unread count for the whole feed, not just the loaded page.
+    const { count, error: countError } = await context.supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .is("read_at", null);
+    if (countError) throw new Error(countError.message);
+
+    const list = (rows ?? []) as NotificationRow[];
+    return {
+      rows: list,
+      unread: count ?? 0,
+      nextCursor: list.length === data.limit ? list[list.length - 1].created_at : null,
+    };
   });
+
 
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
