@@ -578,6 +578,11 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
 
   const run = useMutation({
     mutationFn: async () => {
+      if (missing.length > 0) {
+        throw new Error(
+          `Batch blocked: ${missing.length} request(s) still need a reason of at least ${MIN_REASON} characters.`,
+        );
+      }
       const step_up_token = await ensure(`cancel ${rows.length} withdrawal requests`);
       return bulkCancel({
         data: {
@@ -592,7 +597,6 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
         toast.error(`${res.failed.length} could not be cancelled: ${friendlyError(res.failed[0].error)}`);
       setOpen(false);
       setNotes({});
-      setShared("");
       onDone();
       qc.invalidateQueries({ queryKey: ["admin", "withdrawals"] });
     },
