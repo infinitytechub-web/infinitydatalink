@@ -1,3 +1,4 @@
+import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -387,7 +388,7 @@ export const purchaseShares = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     const r = Array.isArray(row) ? row[0] : row;
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       action: "shares.purchase",
       target: r.id,
@@ -415,7 +416,7 @@ export const sellShares = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     const r = Array.isArray(row) ? row[0] : row;
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       action: "shares.sale",
       target: r.id,
@@ -471,7 +472,7 @@ export const transferShares = createServerFn({ method: "POST" })
       throw new Error(map[error.message] ?? error.message);
     }
     const r = Array.isArray(row) ? row[0] : row;
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       action: "shares.transfer",
       target: r.out_txn_id,
@@ -706,7 +707,7 @@ export const upsertShareProduct = createServerFn({ method: "POST" })
       resultId = row!.id as string;
       action = "shares.product.create";
     }
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       action,
       target: resultId,
@@ -764,7 +765,7 @@ export const previewDividendRun = createServerFn({ method: "POST" })
       estimated_total: Number((totalUnits * data.per_unit_amount).toFixed(2)),
       currency: (prod as any)?.currency ?? "GHS",
     };
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       action: "shares.dividend_run.preview",
       target: data.product_id,
@@ -794,7 +795,7 @@ export const createDividendRun = createServerFn({ method: "POST" })
       .select("id, ref")
       .single();
     if (error) throw new Error(error.message);
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       action: "shares.dividend_run.create",
       target: (row!.id as string),
@@ -916,7 +917,7 @@ export const cancelDividendRun = createServerFn({ method: "POST" })
       .eq("id", data.run_id)
       .eq("status", "draft");
     if (error) throw new Error(error.message);
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       action: "shares.dividend_run.cancel",
       target: data.run_id,

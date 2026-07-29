@@ -1,3 +1,4 @@
+import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -114,7 +115,7 @@ export const decideLoan = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: role,
