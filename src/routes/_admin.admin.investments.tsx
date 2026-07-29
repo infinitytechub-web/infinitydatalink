@@ -481,6 +481,37 @@ function NewRunDialog({
     per_unit_amount: 5,
     note: "",
   });
+  const preview = useServerFn(previewDividendRun);
+  const [calc, setCalc] = useState<DividendRunPreview | null>(null);
+  const [calcLoading, setCalcLoading] = useState(false);
+  const [calcErr, setCalcErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!form.product_id || form.per_unit_amount <= 0) {
+      setCalc(null);
+      return;
+    }
+    let cancelled = false;
+    setCalcLoading(true);
+    setCalcErr(null);
+    const t = setTimeout(async () => {
+      try {
+        const r = await preview({
+          data: { product_id: form.product_id, per_unit_amount: form.per_unit_amount },
+        });
+        if (!cancelled) setCalc(r);
+      } catch (e) {
+        if (!cancelled) setCalcErr((e as Error).message);
+      } finally {
+        if (!cancelled) setCalcLoading(false);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [form.product_id, form.per_unit_amount, preview]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-emerald-950">
@@ -531,6 +562,31 @@ function NewRunDialog({
               className="w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
             />
           </Field>
+        </div>
+        <div className="mt-4 rounded-md bg-emerald-deep/5 p-3 text-sm dark:bg-emerald-100/5">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+            Payout preview
+          </p>
+          {calcErr ? (
+            <p className="mt-1 text-red-600">{calcErr}</p>
+          ) : calcLoading && !calc ? (
+            <p className="mt-1 text-emerald-deep/60">Calculating…</p>
+          ) : calc ? (
+            <dl className="mt-1 grid grid-cols-2 gap-y-1">
+              <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Eligible members</dt>
+              <dd className="text-right font-semibold">{calc.eligible_members}</dd>
+              <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Total units</dt>
+              <dd className="text-right font-semibold">{calc.total_units.toLocaleString()}</dd>
+              <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Estimated total</dt>
+              <dd className="text-right font-semibold">
+                {new Intl.NumberFormat("en-GH", { style: "currency", currency: calc.currency }).format(
+                  calc.estimated_total,
+                )}
+              </dd>
+            </dl>
+          ) : (
+            <p className="mt-1 text-emerald-deep/60">Select a product and per-unit amount to preview.</p>
+          )}
         </div>
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         <div className="mt-5 flex justify-end gap-2">
