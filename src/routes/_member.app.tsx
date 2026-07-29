@@ -42,6 +42,7 @@ const groups: NavGroup[] = [
 const CRUMBS: Record<string, string> = {
   "/app": "Financial Summary",
   "/app/savings": "My Savings",
+  "/app/savings/deposit": "Top up savings",
   "/app/loans": "Active Loans",
   "/app/investments": "Investments & Shares",
   "/app/transactions": "Transactions",
