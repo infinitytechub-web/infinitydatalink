@@ -2,36 +2,63 @@ import { memo } from "react";
 import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOnlinePresence, useOnlinePresenceCount } from "@/lib/online-presence";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
-/** Blinking green presence dot. */
+/**
+ * Green presence dot. Blinks only when the user has not requested reduced
+ * motion; the dot itself is decorative, so callers must supply a text status.
+ */
 export const LiveDot = memo(function LiveDot({ className }: { className?: string }) {
+  const reduced = useReducedMotion();
   return (
     <span className={cn("relative flex h-2.5 w-2.5", className)} aria-hidden="true">
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
-      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.9)]" />
+      {!reduced && (
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
+      )}
+      <span
+        className={cn(
+          "relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500",
+          reduced
+            ? "ring-2 ring-emerald-600/60"
+            : "shadow-[0_0_8px_rgba(16,185,129,0.9)]",
+        )}
+      />
     </span>
   );
 });
 
-/** Compact header indicator: green blinking dot + live online count. */
+function statusText(total: number, staff: number) {
+  const base = total === 1 ? "1 person online now" : `${total} people online now`;
+  return staff ? `${base}, including ${staff} staff` : base;
+}
+
+/** Compact header indicator: green presence dot + live online count. */
 export const OnlinePresencePill = memo(function OnlinePresencePill({
   className,
 }: {
   className?: string;
 }) {
   const { total, staff } = useOnlinePresenceCount();
+  const label = statusText(total, staff);
   return (
     <div
       className={cn(
         "flex h-9 items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 text-xs font-semibold text-emerald-700 dark:text-emerald-300",
         className,
       )}
-      title={`${total} online${staff ? ` · ${staff} staff` : ""}`}
+      title={label}
+      role="status"
       aria-live="polite"
+      aria-atomic="true"
     >
       <LiveDot />
-      <span className="tabular-nums">{total}</span>
-      <span className="hidden sm:inline">online</span>
+      <span className="sr-only">{label}</span>
+      <span className="tabular-nums" aria-hidden="true">
+        {total}
+      </span>
+      <span className="hidden sm:inline" aria-hidden="true">
+        online
+      </span>
     </div>
   );
 });
