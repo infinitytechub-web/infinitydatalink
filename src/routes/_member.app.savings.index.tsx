@@ -153,6 +153,16 @@ function Body() {
 
           <RecurringContributionsSection accounts={accounts} />
 
+          <WithdrawalRequestsSection
+            accounts={active.map((a) => ({
+              id: a.id,
+              label: a.nickname || a.plan_name,
+              balance: a.balance,
+            }))}
+          />
+
+
+
 
 
           <SectionCard title="Contribution history">
