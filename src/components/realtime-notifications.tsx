@@ -158,6 +158,24 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
     [hasNextPage, isFetchingNextPage, fetchNextPage, rows.length],
   );
 
+  // Auto-load the next page when the sentinel scrolls into view. Appending
+  // never reorders existing items, so the focused element stays focused.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadMore(false);
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, loadMore]);
+
+
+
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLElement>, index: number, row: NotificationRow) => {
