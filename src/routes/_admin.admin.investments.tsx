@@ -334,10 +334,12 @@ function AdminInvestments() {
                         cancelRunMut.isPending ||
                         reviewMut.isPending
                       }
+                      exporting={exportingId === r.id}
                       onSubmit={() => submitRunMut.mutate(r.id)}
                       onCancel={() => cancelRunMut.mutate(r.id)}
                       onExecute={() => executeRunMut.mutate(r.id)}
                       onReview={(mode) => setReviewing({ run: r, mode })}
+                      onExport={() => downloadRunCsv(r)}
                     />
                   </td>
                 </tr>
