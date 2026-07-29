@@ -1739,6 +1739,99 @@ export type Database = {
           },
         ]
       }
+      savings_interest_runs: {
+        Row: {
+          accounts_credited: number
+          accounts_processed: number
+          basis: string
+          created_at: string
+          dry_run: boolean
+          executed_by: string | null
+          frequency: string
+          id: string
+          note: string | null
+          period_end: string
+          period_start: string
+          rate_source: string
+          total_interest: number
+        }
+        Insert: {
+          accounts_credited?: number
+          accounts_processed?: number
+          basis: string
+          created_at?: string
+          dry_run?: boolean
+          executed_by?: string | null
+          frequency: string
+          id?: string
+          note?: string | null
+          period_end: string
+          period_start: string
+          rate_source: string
+          total_interest?: number
+        }
+        Update: {
+          accounts_credited?: number
+          accounts_processed?: number
+          basis?: string
+          created_at?: string
+          dry_run?: boolean
+          executed_by?: string | null
+          frequency?: string
+          id?: string
+          note?: string | null
+          period_end?: string
+          period_start?: string
+          rate_source?: string
+          total_interest?: number
+        }
+        Relationships: []
+      }
+      savings_interest_settings: {
+        Row: {
+          basis: string
+          enabled: boolean
+          exclude_held_funds: boolean
+          flat_rate_annual: number
+          frequency: string
+          id: number
+          min_balance_to_earn: number
+          min_interest_to_post: number
+          rate_source: string
+          rounding_dp: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          basis?: string
+          enabled?: boolean
+          exclude_held_funds?: boolean
+          flat_rate_annual?: number
+          frequency?: string
+          id?: number
+          min_balance_to_earn?: number
+          min_interest_to_post?: number
+          rate_source?: string
+          rounding_dp?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          basis?: string
+          enabled?: boolean
+          exclude_held_funds?: boolean
+          flat_rate_annual?: number
+          frequency?: string
+          id?: number
+          min_balance_to_earn?: number
+          min_interest_to_post?: number
+          rate_source?: string
+          rounding_dp?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       savings_plans: {
         Row: {
           contribution_amount: number
@@ -3431,6 +3524,23 @@ export type Database = {
           _note: string
         }
         Returns: string
+      }
+      post_savings_interest: {
+        Args: {
+          _actor?: string
+          _dry_run?: boolean
+          _note?: string
+          _period_end?: string
+        }
+        Returns: {
+          accounts_credited: number
+          accounts_processed: number
+          dry_run: boolean
+          period_end: string
+          period_start: string
+          run_id: string
+          total_interest: number
+        }[]
       }
       post_savings_withdrawal: {
         Args: {
