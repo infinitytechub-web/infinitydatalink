@@ -227,6 +227,55 @@ export const sellShares = createServerFn({ method: "POST" })
     return { id: r.id, ref: r.ref };
   });
 
+// ---------- Member-to-member transfer ----------
+
+const TransferSchema = z.object({
+  product_id: z.string().uuid(),
+  to_member_no: z.string().trim().min(1).max(40),
+  units: z.number().int().positive().max(1_000_000),
+  note: z.string().trim().max(240).optional().nullable(),
+});
+
+export type ShareTransferResult = {
+  out_txn_id: string;
+  in_txn_id: string;
+  to_user_id: string;
+  to_full_name: string | null;
+};
+
+export const transferShares = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => TransferSchema.parse(data))
+  .handler(async ({ data, context }): Promise<ShareTransferResult> => {
+    const { data: row, error } = await (context.supabase as any).rpc("transfer_shares", {
+      _product_id: data.product_id,
+      _to_member_no: data.to_member_no,
+      _units: data.units,
+      _note: data.note ?? "",
+      _actor_id: context.userId,
+    });
+    if (error) {
+      const map: Record<string, string> = {
+        recipient_not_found: "No member found with that member number.",
+        recipient_required: "Recipient member number is required.",
+        cannot_transfer_to_self: "You cannot transfer shares to yourself.",
+        insufficient_units: "You don't hold enough units to transfer.",
+        recipient_exceeds_max: "The recipient would exceed the maximum units allowed per member.",
+        invalid_units: "Units must be a positive whole number.",
+        product_not_available: "This share product is unavailable.",
+        not_authorized: "Not authorized.",
+      };
+      throw new Error(map[error.message] ?? error.message);
+    }
+    const r = Array.isArray(row) ? row[0] : row;
+    return {
+      out_txn_id: r.out_txn_id,
+      in_txn_id: r.in_txn_id,
+      to_user_id: r.to_user_id,
+      to_full_name: r.to_full_name ?? null,
+    };
+  });
+
 // ============================================================================
 // Admin: products, holdings, dividend runs
 // ============================================================================
