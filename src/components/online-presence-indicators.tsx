@@ -160,6 +160,6 @@ export const SidebarOnlinePanel = memo(function SidebarOnlinePanel({
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 });
