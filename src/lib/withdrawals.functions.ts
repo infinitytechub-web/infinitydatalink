@@ -24,6 +24,7 @@ export type WithdrawalRequest = {
   approved_at: string | null;
   rejected_at: string | null;
   paid_at: string | null;
+  cancelled_at: string | null;
   approved_by: string | null;
   paid_by: string | null;
   txn_id: string | null;
@@ -51,7 +52,7 @@ export type AdminWithdrawalList = {
 };
 
 const SELECT_COLS =
-  "id, ref, user_id, account_id, amount, channel, reason, status, balance_at_request, approval_note, rejection_reason, approved_at, rejected_at, paid_at, approved_by, paid_by, txn_id, created_at, savings_accounts(nickname, savings_plans(name))";
+  "id, ref, user_id, account_id, amount, channel, reason, status, balance_at_request, approval_note, rejection_reason, approved_at, rejected_at, paid_at, cancelled_at, approved_by, paid_by, txn_id, created_at, savings_accounts(nickname, savings_plans(name))";
 
 function mapRow(
   r: any,
@@ -76,6 +77,7 @@ function mapRow(
     approved_at: r.approved_at ?? null,
     rejected_at: r.rejected_at ?? null,
     paid_at: r.paid_at ?? null,
+    cancelled_at: r.cancelled_at ?? null,
     approved_by: r.approved_by ?? null,
     paid_by: r.paid_by ?? null,
     txn_id: r.txn_id ?? null,

@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BanknoteArrowDown, Lock, XCircle } from "lucide-react";
+import { BanknoteArrowDown, History as HistoryIcon, Lock, XCircle } from "lucide-react";
 import { EmptyState, Money, SectionCard, StatusPill } from "@/components/primitives";
+import { WithdrawalTimeline } from "@/components/withdrawal-timeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,6 +74,7 @@ export function WithdrawalRequestsSection({
   const cancel = useServerFn(cancelWithdrawalRequest);
 
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [amount, setAmount] = useState("");
   const [channel, setChannel] = useState("bank_transfer");
@@ -183,41 +185,62 @@ export function WithdrawalRequestsSection({
               </thead>
               <tbody className="divide-y divide-border/60">
                 {(query.data?.requests ?? []).map((r) => (
-                  <tr key={r.id}>
-                    <td className="py-3 pr-4 font-mono text-xs">{r.ref}</td>
-                    <td className="py-3 pr-4">{r.account_label}</td>
-                    <td className="py-3 pr-4 font-semibold">
-                      <Money amount={r.amount} />
-                    </td>
-                    <td className="py-3 pr-4 capitalize">{r.channel.replace(/_/g, " ")}</td>
-                    <td className="py-3 pr-4">
-                      <StatusPill status={pillStatus(r.status)} />
-                      {r.status === "rejected" && r.rejection_reason ? (
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          {r.rejection_reason}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="py-3 pr-4 text-xs text-muted-foreground">
-                      {new Date(r.created_at).toLocaleString()}
-                    </td>
-                    <td className="py-3 text-right">
-                      {r.status === "pending" ? (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => cancelMutation.mutate(r.id)}
-                          disabled={cancelMutation.isPending}
-                        >
-                          <XCircle className="mr-1 size-4" /> Cancel
-                        </Button>
-                      ) : r.status === "approved" ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <Lock className="size-3" /> Awaiting payout
-                        </span>
-                      ) : null}
-                    </td>
-                  </tr>
+                  <Fragment key={r.id}>
+                    <tr>
+                      <td className="py-3 pr-4 font-mono text-xs">{r.ref}</td>
+                      <td className="py-3 pr-4">{r.account_label}</td>
+                      <td className="py-3 pr-4 font-semibold">
+                        <Money amount={r.amount} />
+                      </td>
+                      <td className="py-3 pr-4 capitalize">{r.channel.replace(/_/g, " ")}</td>
+                      <td className="py-3 pr-4">
+                        <StatusPill status={pillStatus(r.status)} />
+                        {r.status === "rejected" && r.rejection_reason ? (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {r.rejection_reason}
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="py-3 pr-4 text-xs text-muted-foreground">
+                        {new Date(r.created_at).toLocaleString()}
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            aria-expanded={expanded === r.id}
+                            aria-controls={`wd-timeline-${r.id}`}
+                            onClick={() => setExpanded((cur) => (cur === r.id ? null : r.id))}
+                          >
+                            <HistoryIcon className="mr-1 size-4" />
+                            {expanded === r.id ? "Hide timeline" : "Timeline"}
+                          </Button>
+                          {r.status === "pending" ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => cancelMutation.mutate(r.id)}
+                              disabled={cancelMutation.isPending}
+                            >
+                              <XCircle className="mr-1 size-4" /> Cancel
+                            </Button>
+                          ) : r.status === "approved" ? (
+                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                              <Lock className="size-3" /> Awaiting payout
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                    {expanded === r.id ? (
+                      <tr id={`wd-timeline-${r.id}`}>
+                        <td colSpan={7} className="bg-muted/30 px-4 py-4">
+                          <WithdrawalTimeline request={r} />
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
