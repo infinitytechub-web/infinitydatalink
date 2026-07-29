@@ -184,7 +184,13 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
           break;
         case "PageDown":
           next = Math.min(index + 3, last);
+          if (index === last && hasNextPage) {
+            event.preventDefault();
+            loadMore(true);
+            return;
+          }
           break;
+
         case "PageUp":
           next = Math.max(index - 3, 0);
           break;
