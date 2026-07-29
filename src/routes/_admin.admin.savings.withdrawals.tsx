@@ -1,0 +1,464 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { Suspense, useState } from "react";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { z } from "zod";
+import { BanknoteArrowDown, Check, Search, Settings2, Wallet, X } from "lucide-react";
+import {
+  EmptyState,
+  ErrorState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  adminApproveWithdrawal,
+  adminListWithdrawals,
+  adminPayWithdrawal,
+  adminRejectWithdrawal,
+  adminUpdateWithdrawalSettings,
+  type AdminWithdrawalList,
+  type WithdrawalRequest,
+  type WithdrawalStatus,
+} from "@/lib/withdrawals.functions";
+
+const STATUSES = ["pending", "approved", "paid", "rejected", "cancelled", "all"] as const;
+
+const SearchSchema = z.object({
+  status: z.enum(STATUSES).catch("pending").default("pending"),
+  q: z.string().max(120).optional().catch(undefined),
+  page: z.coerce.number().int().min(1).catch(1).default(1),
+});
+type SearchParams = z.infer<typeof SearchSchema>;
+
+const PAGE_SIZE = 25;
+
+const listQuery = (s: SearchParams) =>
+  queryOptions({
+    queryKey: ["admin", "withdrawals", s],
+    queryFn: () =>
+      adminListWithdrawals({
+        data: { status: s.status, search: s.q ?? null, page: s.page, page_size: PAGE_SIZE },
+      }),
+    staleTime: 10_000,
+  });
+
+export const Route = createFileRoute("/_admin/admin/savings/withdrawals")({
+  validateSearch: (raw) => SearchSchema.parse(raw ?? {}),
+  head: () => ({
+    meta: [
+      { title: "Withdrawal approvals · IT-360 CashApp" },
+      {
+        name: "description",
+        content:
+          "Review, approve, reject and pay out member savings withdrawal requests with dual-control checks.",
+      },
+      { property: "og:title", content: "Withdrawal approvals · IT-360 CashApp" },
+      {
+        property: "og:description",
+        content: "Finance queue for member savings withdrawal requests and payouts.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  errorComponent: ({ error }) => <ErrorState message={(error as Error).message} />,
+  component: WithdrawalsPage,
+});
+
+function pillStatus(status: WithdrawalStatus) {
+  if (status === "paid") return "cleared" as const;
+  if (status === "cancelled") return "closed" as const;
+  if (status === "approved") return "approved" as const;
+  if (status === "rejected") return "rejected" as const;
+  return "pending" as const;
+}
+
+function WithdrawalsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const [term, setTerm] = useState(search.q ?? "");
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Savings"
+        title="Withdrawal approvals"
+        description="Members request payouts against held funds. Approve, reject, or release payment — dual control keeps approval and payout separate."
+        action={<SettingsButton />}
+      />
+
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="w-44">
+          <Label className="mb-1.5 block text-xs">Status</Label>
+          <Select
+            value={search.status}
+            onValueChange={(v) =>
+              navigate({ search: (p) => ({ ...p, status: v as SearchParams["status"], page: 1 }) })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUSES.map((s) => (
+                <SelectItem key={s} value={s} className="capitalize">
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-64">
+          <Label className="mb-1.5 block text-xs">Search</Label>
+          <div className="flex gap-2">
+            <Input
+              value={term}
+              placeholder="Reference, member, account"
+              onChange={(e) => setTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter")
+                  navigate({ search: (p) => ({ ...p, q: term || undefined, page: 1 }) });
+              }}
+            />
+            <Button
+              variant="secondary"
+              onClick={() => navigate({ search: (p) => ({ ...p, q: term || undefined, page: 1 }) })}
+            >
+              <Search className="size-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <Suspense fallback={<SectionCardSkeleton />}>
+        <QueueBody search={search} />
+      </Suspense>
+    </div>
+  );
+}
+
+function QueueBody({ search }: { search: SearchParams }) {
+  const navigate = Route.useNavigate();
+  const { data } = useSuspenseQuery(listQuery(search));
+  const list = data as AdminWithdrawalList;
+  const pages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KPIStat label="Pending review" value={String(list.counts.pending)} tone="gold" icon={<BanknoteArrowDown />} />
+        <KPIStat label="Approved, awaiting payout" value={String(list.counts.approved)} tone="royal" icon={<Check />} />
+        <KPIStat label="Paid out" value={String(list.counts.paid)} tone="emerald" icon={<Wallet />} />
+        <KPIStat
+          label="Value on hold"
+          value={list.pending_value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          tone="teal"
+          icon={<Wallet />}
+        />
+      </div>
+
+      <SectionCard title={`Requests (${list.total})`} accent="gold">
+        {list.rows.length === 0 ? (
+          <div className="px-6 py-10">
+            <EmptyState
+              icon={<BanknoteArrowDown className="size-5" />}
+              title="Nothing in this queue"
+              hint="Try a different status filter."
+            />
+          </div>
+        ) : (
+          <div className="overflow-x-auto px-6 py-4">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <th className="py-2 pr-4 font-semibold">Reference</th>
+                  <th className="py-2 pr-4 font-semibold">Member</th>
+                  <th className="py-2 pr-4 font-semibold">Account</th>
+                  <th className="py-2 pr-4 font-semibold">Amount</th>
+                  <th className="py-2 pr-4 font-semibold">Reason</th>
+                  <th className="py-2 pr-4 font-semibold">Status</th>
+                  <th className="py-2 font-semibold text-right">Decision</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {list.rows.map((row) => (
+                  <RequestRow key={row.id} row={row} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </SectionCard>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          Page {search.page} of {pages}
+        </span>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={search.page <= 1}
+            onClick={() => navigate({ search: (p) => ({ ...p, page: p.page - 1 }) })}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={search.page >= pages}
+            onClick={() => navigate({ search: (p) => ({ ...p, page: p.page + 1 }) })}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RequestRow({ row }: { row: WithdrawalRequest }) {
+  const qc = useQueryClient();
+  const approve = useServerFn(adminApproveWithdrawal);
+  const reject = useServerFn(adminRejectWithdrawal);
+  const pay = useServerFn(adminPayWithdrawal);
+
+  const [mode, setMode] = useState<null | "approve" | "reject">(null);
+  const [note, setNote] = useState("");
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "withdrawals"] });
+
+  const decide = useMutation({
+    mutationFn: () =>
+      mode === "approve"
+        ? approve({ data: { id: row.id, note: note.trim() } })
+        : reject({ data: { id: row.id, note: note.trim() } }),
+    onSuccess: () => {
+      toast.success(mode === "approve" ? "Request approved" : "Request rejected");
+      setMode(null);
+      setNote("");
+      invalidate();
+    },
+    onError: (e) => toast.error(friendlyError(e)),
+  });
+
+  const payout = useMutation({
+    mutationFn: () => pay({ data: { id: row.id } }),
+    onSuccess: () => {
+      toast.success("Payout posted to the member's account");
+      invalidate();
+    },
+    onError: (e) => toast.error(friendlyError(e)),
+  });
+
+  return (
+    <tr>
+      <td className="py-3 pr-4 font-mono text-xs">{row.ref}</td>
+      <td className="py-3 pr-4">
+        <div className="font-medium">{row.member_name ?? "Member"}</div>
+        <div className="text-xs text-muted-foreground">{row.member_no ?? row.user_id.slice(0, 8)}</div>
+      </td>
+      <td className="py-3 pr-4">
+        <div>{row.account_label}</div>
+        <div className="text-xs text-muted-foreground capitalize">{row.channel.replace(/_/g, " ")}</div>
+      </td>
+      <td className="py-3 pr-4 font-semibold">
+        <Money amount={row.amount} />
+      </td>
+      <td className="py-3 pr-4 max-w-[16rem] truncate" title={row.reason}>
+        {row.reason}
+      </td>
+      <td className="py-3 pr-4">
+        <StatusPill status={pillStatus(row.status)} />
+      </td>
+      <td className="py-3 text-right">
+        {row.status === "pending" ? (
+          <div className="flex justify-end gap-2">
+            <Button size="sm" onClick={() => setMode("approve")}>
+              <Check className="mr-1 size-4" /> Approve
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => setMode("reject")}>
+              <X className="mr-1 size-4" /> Reject
+            </Button>
+          </div>
+        ) : row.status === "approved" ? (
+          <div className="flex justify-end gap-2">
+            <Button size="sm" onClick={() => payout.mutate()} disabled={payout.isPending}>
+              {payout.isPending ? "Paying…" : "Pay out"}
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => setMode("reject")}>
+              Reject
+            </Button>
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">
+            {row.status === "paid" && row.paid_at
+              ? new Date(row.paid_at).toLocaleString()
+              : row.rejection_reason ?? "—"}
+          </span>
+        )}
+
+        <Dialog open={mode !== null} onOpenChange={(o) => !o && setMode(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {mode === "approve" ? "Approve withdrawal" : "Reject withdrawal"} · {row.ref}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 text-left">
+              <p className="text-sm text-muted-foreground">
+                <Money amount={row.amount} /> for {row.member_name ?? "member"} from{" "}
+                {row.account_label}.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor={`note-${row.id}`}>
+                  {mode === "approve" ? "Approval note" : "Rejection reason"} (required)
+                </Label>
+                <Textarea
+                  id={`note-${row.id}`}
+                  value={note}
+                  maxLength={500}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Minimum 5 characters — recorded in the audit log"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setMode(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant={mode === "reject" ? "destructive" : "default"}
+                disabled={note.trim().length < 5 || decide.isPending}
+                onClick={() => decide.mutate()}
+              >
+                {decide.isPending ? "Saving…" : mode === "approve" ? "Approve" : "Reject"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </td>
+    </tr>
+  );
+}
+
+function SettingsButton() {
+  const qc = useQueryClient();
+  const save = useServerFn(adminUpdateWithdrawalSettings);
+  const [open, setOpen] = useState(false);
+  const [min, setMin] = useState("10");
+  const [max, setMax] = useState("50000");
+  const [daily, setDaily] = useState("100000");
+  const [dual, setDual] = useState(true);
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      save({
+        data: {
+          min_amount: Number(min),
+          max_amount: Number(max),
+          daily_limit: Number(daily),
+          require_dual_control: dual,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Withdrawal policy updated");
+      setOpen(false);
+      qc.invalidateQueries({ queryKey: ["admin", "withdrawals"] });
+    },
+    onError: (e) => toast.error(friendlyError(e)),
+  });
+
+  return (
+    <>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
+        <Settings2 className="mr-2 size-4" /> Policy
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Withdrawal policy</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="p-min">Minimum</Label>
+                <Input id="p-min" type="number" value={min} onChange={(e) => setMin(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-max">Maximum</Label>
+                <Input id="p-max" type="number" value={max} onChange={(e) => setMax(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-daily">Daily cap</Label>
+                <Input
+                  id="p-daily"
+                  type="number"
+                  value={daily}
+                  onChange={(e) => setDaily(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+              <div>
+                <p className="text-sm font-medium">Require dual control</p>
+                <p className="text-xs text-muted-foreground">
+                  The officer who approves a request cannot also release the payout.
+                </p>
+              </div>
+              <Switch checked={dual} onCheckedChange={setDual} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+              {mutation.isPending ? "Saving…" : "Save policy"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+const ERRORS: Record<string, string> = {
+  dual_control_required: "A different officer must release this payout.",
+  request_not_approved: "Only approved requests can be paid out.",
+  request_not_pending: "This request is no longer pending.",
+  request_not_open: "This request is already closed.",
+  insufficient_funds: "The account no longer has enough balance.",
+  forbidden: "You do not have permission for this action.",
+  min_must_be_below_max: "Minimum must be below the maximum.",
+};
+
+function friendlyError(err: unknown) {
+  const raw = err instanceof Error ? err.message : String(err);
+  for (const key of Object.keys(ERRORS)) if (raw.includes(key)) return ERRORS[key];
+  return raw;
+}
