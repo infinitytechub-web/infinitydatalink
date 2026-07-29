@@ -23,7 +23,12 @@ export function OnlineUsersWidget({ className }: { className?: string }) {
       accent="emerald"
       className={className}
       action={
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-mid/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-mid">
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-mid/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-mid"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <LiveDot />
           {users.length} online{staff ? ` · ${staff} staff` : ""}
         </span>
