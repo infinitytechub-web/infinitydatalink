@@ -38,7 +38,16 @@ export function buildWithdrawalTimeline(r: WithdrawalRequest): Step[] {
       label: "Cancelled",
       state: "cancelled",
       at: r.cancelled_at ?? null,
-      message: "You cancelled this request. The hold on your balance was released.",
+      message: (() => {
+        const byStaff = !!r.cancelled_by_role && r.cancelled_by_role !== "member";
+        const who = byStaff
+          ? `Cancelled by a ${r.cancelled_by_role!.replace(/_/g, " ")} on your behalf`
+          : "You cancelled this request";
+        const why = r.cancellation_reason?.trim()
+          ? ` Reason: ${r.cancellation_reason.trim()}`
+          : "";
+        return `${who}. The hold on your balance was released.${why}`;
+      })(),
       icon: Ban,
     });
     return steps;
