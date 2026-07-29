@@ -10,6 +10,8 @@ export type Sweep = {
   to_account_id: string;
   to_label: string;
   amount: number;
+  min_balance: number;
+  max_amount: number | null;
   frequency: "daily" | "weekly" | "monthly";
   day_of_week: number | null;
   day_of_month: number | null;
@@ -18,20 +20,30 @@ export type Sweep = {
   last_run_at: string | null;
   last_run_status: string | null;
   last_run_error: string | null;
+  last_run_amount: number | null;
   runs_completed: number;
   note: string | null;
+};
+
+const RuleFields = {
+  amount: z.number().positive().max(10_000_000),
+  frequency: z.enum(["daily", "weekly", "monthly"]),
+  day_of_week: z.number().int().min(0).max(6).optional().nullable(),
+  day_of_month: z.number().int().min(1).max(28).optional().nullable(),
+  min_balance: z.number().min(0).max(10_000_000).default(0),
+  max_amount: z.number().positive().max(10_000_000).optional().nullable(),
+  note: z.string().max(500).optional().nullable(),
 };
 
 const CreateSchema = z.object({
   from_account_id: z.string().uuid(),
   to_account_id: z.string().uuid(),
-  amount: z.number().positive().max(10_000_000),
-  frequency: z.enum(["daily", "weekly", "monthly"]),
-  day_of_week: z.number().int().min(0).max(6).optional().nullable(),
-  day_of_month: z.number().int().min(1).max(28).optional().nullable(),
-  note: z.string().max(500).optional().nullable(),
+  ...RuleFields,
   start_at: z.string().datetime().optional().nullable(),
 });
+
+const UpdateSchema = z.object({ id: z.string().uuid(), ...RuleFields });
+
 
 function firstRun(frequency: string, dow: number | null | undefined, dom: number | null | undefined, start?: string | null): string {
   const base = start ? new Date(start) : new Date(Date.now() + 60_000);
