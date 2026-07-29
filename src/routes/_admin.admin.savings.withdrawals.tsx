@@ -564,6 +564,40 @@ function friendlyError(err: unknown) {
   return raw;
 }
 
+const WITHDRAWAL_EXPORT_COLUMNS: ExportColumn<WithdrawalRequest>[] = [
+  { header: "Reference", accessor: (r) => r.ref },
+  { header: "Member", accessor: (r) => r.member_name ?? "" },
+  { header: "Member No", accessor: (r) => r.member_no ?? "" },
+  { header: "Account", accessor: (r) => r.account_label },
+  { header: "Channel", accessor: (r) => r.channel.replace(/_/g, " ") },
+  { header: "Amount", accessor: (r) => r.amount, align: "right" },
+  { header: "Reason", accessor: (r) => r.reason },
+  { header: "Status", accessor: (r) => r.status },
+  { header: "Balance at Request", accessor: (r) => r.balance_at_request, align: "right" },
+  { header: "Created at", accessor: (r) => r.created_at },
+  { header: "Approved at", accessor: (r) => r.approved_at ?? "" },
+  { header: "Approved by", accessor: (r) => r.approved_by ?? "" },
+  { header: "Approval note", accessor: (r) => r.approval_note ?? "" },
+  { header: "Paid at", accessor: (r) => r.paid_at ?? "" },
+  { header: "Paid by", accessor: (r) => r.paid_by ?? "" },
+  { header: "Rejected at", accessor: (r) => r.rejected_at ?? "" },
+  { header: "Rejection reason", accessor: (r) => r.rejection_reason ?? "" },
+  { header: "Cancelled at", accessor: (r) => r.cancelled_at ?? "" },
+  { header: "Cancelled by", accessor: (r) => r.cancelled_by ?? "" },
+  { header: "Cancelled by role", accessor: (r) => r.cancelled_by_role ?? "" },
+  { header: "Cancellation reason", accessor: (r) => r.cancellation_reason ?? "" },
+  { header: "Transaction ID", accessor: (r) => r.txn_id ?? "" },
+];
+
+function formatDate(value: string | null) {
+  if (!value) return "";
+  try {
+    return new Date(value).toISOString();
+  } catch {
+    return value;
+  }
+}
+
 function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: () => void }) {
   const qc = useQueryClient();
   const bulkCancel = useServerFn(adminBulkCancelWithdrawals);
