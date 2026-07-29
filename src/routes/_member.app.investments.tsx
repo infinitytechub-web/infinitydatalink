@@ -464,7 +464,7 @@ function TradeDialog({
               </div>
             </div>
           </div>
-        ) : (
+        ) : step === "review" ? (
           <div className="mt-4 space-y-3 text-sm">
             <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
               <div className="flex justify-between">
@@ -517,42 +517,134 @@ function TradeDialog({
               vary slightly if the unit price changes before confirmation.
             </p>
           </div>
+        ) : (
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-mid/10 px-3 py-2 text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-mid text-cream">✓</span>
+              <span className="text-sm font-semibold">
+                {state.mode === "buy" ? "Purchase" : "Sale"} confirmed
+              </span>
+            </div>
+            <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
+              <div className="flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Reference</span>
+                <span className="font-mono">{receipt?.ref}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Timestamp</span>
+                <span className="tabular">{receipt ? new Date(receipt.timestamp).toLocaleString() : ""}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Product</span>
+                <span>{state.product.name}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Units</span>
+                <span className="tabular">{units.toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="rounded-md bg-emerald-deep/5 p-3 dark:bg-emerald-100/5">
+              <div className="flex justify-between">
+                <span>Gross amount</span>
+                <span className="tabular font-semibold">{money(quote.gross, ccy)}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-emerald-deep/80 dark:text-emerald-200/80">
+                <span>Transaction fee ({(quote.feeRate * 100).toFixed(2)}%)</span>
+                <span className="tabular">
+                  {state.mode === "buy" ? "+" : "−"} {money(quote.fee, ccy)}
+                </span>
+              </div>
+              <div className="mt-2 flex justify-between border-t border-emerald-deep/10 pt-2 dark:border-emerald-100/10">
+                <span className="font-semibold">
+                  {state.mode === "buy" ? "Net debited" : "Net credited"}
+                </span>
+                <span className="tabular font-serif text-base">{money(quote.net, ccy)}</span>
+              </div>
+            </div>
+            <p className="text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+              This receipt is your permanent record of the trade. A matching entry is filed in the immutable audit log.
+            </p>
+          </div>
         )}
 
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
         <div className="mt-5 flex justify-end gap-2">
-          <button
-            onClick={step === "review" ? () => setStep("edit") : onCancel}
-            disabled={submitting}
-            className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100 disabled:opacity-50"
-          >
-            {step === "review" ? "Back" : "Cancel"}
-          </button>
-          {step === "edit" ? (
-            <button
-              disabled={!canReview}
-              onClick={() => setStep("review")}
-              className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
-            >
-              Review
-            </button>
+          {step === "receipt" ? (
+            <>
+              <button
+                onClick={() =>
+                  receipt &&
+                  downloadTradeReceipt({
+                    ref: receipt.ref,
+                    timestamp: receipt.timestamp,
+                    mode: state.mode,
+                    product_name: state.product.name,
+                    product_code: state.product.code,
+                    currency: ccy,
+                    units,
+                    unit_price: price,
+                    gross: quote.gross,
+                    feeRate: quote.feeRate,
+                    fee: quote.fee,
+                    net: quote.net,
+                    account_label: account?.nickname ?? account?.plan_name ?? "—",
+                    note: note.trim() || null,
+                  })
+                }
+                className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100"
+              >
+                Download receipt
+              </button>
+              <button
+                onClick={onCancel}
+                className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream"
+              >
+                Done
+              </button>
+            </>
           ) : (
-            <button
-              disabled={submitting || insufficient}
-              onClick={() =>
-                onSubmit({ savings_account_id: accountId, units, note: note.trim() ? note.trim() : null })
-              }
-              className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
-            >
-              {submitting ? "Working…" : state.mode === "buy" ? "Confirm purchase" : "Confirm sale"}
-            </button>
+            <>
+              <button
+                onClick={step === "review" ? () => setStep("edit") : onCancel}
+                disabled={submitting}
+                className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100 disabled:opacity-50"
+              >
+                {step === "review" ? "Back" : "Cancel"}
+              </button>
+              {step === "edit" ? (
+                <button
+                  disabled={!canReview}
+                  onClick={() => setStep("review")}
+                  className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+                >
+                  Review
+                </button>
+              ) : (
+                <button
+                  disabled={submitting || insufficient}
+                  onClick={async () => {
+                    const res = await onSubmit({
+                      savings_account_id: accountId,
+                      units,
+                      note: note.trim() ? note.trim() : null,
+                    });
+                    setReceipt({ ref: res.ref, timestamp: new Date().toISOString() });
+                    setStep("receipt");
+                  }}
+                  className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+                >
+                  {submitting ? "Working…" : state.mode === "buy" ? "Confirm purchase" : "Confirm sale"}
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
     </div>
   );
 }
+
 
 function TransferDialog({
   state,
