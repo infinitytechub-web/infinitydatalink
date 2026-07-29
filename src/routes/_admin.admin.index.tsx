@@ -22,6 +22,8 @@ import { decideLoan } from "@/lib/admin-loans.functions";
 import { RefreshCw, Sparkles } from "lucide-react";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
 import { PurgeControlsWidget } from "@/components/purge-controls-widget";
+import { RealtimeNotifications } from "@/components/realtime-notifications";
+import { OnlineUsersWidget } from "@/components/online-users-widget";
 
 const overviewQuery = queryOptions({
   queryKey: ["admin", "overview"],
@@ -68,6 +70,10 @@ function AdminDashboard() {
         title="Institutional analytics"
         description="Real-time posture across membership, savings, loans, payments and security."
       />
+      <div className="mb-6 grid gap-6 xl:grid-cols-2">
+        <RealtimeNotifications />
+        <OnlineUsersWidget />
+      </div>
       <div className="mb-6 grid gap-6 xl:grid-cols-2">
         <FxConverterWidget />
         <PurgeControlsWidget />

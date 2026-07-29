@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KPIStat, Money, StatusPill } from "@/components/primitives";
+import { RealtimeNotifications } from "@/components/realtime-notifications";
+import { OnlineUsersWidget } from "@/components/online-users-widget";
 
 export const Route = createFileRoute("/_member/app/")({
   head: () => ({
@@ -123,6 +125,8 @@ function Dashboard() {
 
         {/* Right column */}
         <aside className="space-y-6">
+          <RealtimeNotifications limit={6} />
+          <OnlineUsersWidget />
           {/* AI insight */}
           <div className="relative overflow-hidden rounded bg-emerald-deep p-6 text-cream shadow-lg">
             <div className="pointer-events-none absolute right-0 top-0 p-8 opacity-10">
