@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAnyRole, FINANCE_ROLES, loadRoleSet, type Role } from "@/lib/role-guards";
+import { assertDecisionPermission } from "@/lib/rbac-matrix";
+import type { DecisionOutcome } from "@/lib/decision-audit";
 import { writeAudit } from "@/lib/audit-log";
 
 export type WithdrawalStatus = "pending" | "approved" | "rejected" | "cancelled" | "paid";
@@ -276,7 +278,23 @@ export const adminListWithdrawals = createServerFn({ method: "POST" })
 const DecisionSchema = z.object({
   id: z.string().uuid(),
   note: z.string().trim().min(5).max(500),
+  step_up_token: z.string().min(16).max(200),
 });
+
+/** Fine-grained role check + fresh re-authentication for a withdrawal decision. */
+async function requireDecisionAuthority(
+  context: any,
+  outcome: DecisionOutcome,
+  token: string | undefined,
+  label: string,
+) {
+  const roles = await loadRoleSet(context.supabase, context.userId);
+  assertAnyRole(roles, FINANCE_ROLES, "finance");
+  assertDecisionPermission(roles, "withdrawal", outcome);
+  const { assertStepUp } = await import("@/lib/step-up.server");
+  const proof = await assertStepUp(context.userId, token, label);
+  return { actorRole: pickActorRole(roles), proof };
+}
 
 async function requireFinance(context: any) {
   const roles = await loadRoleSet(context.supabase, context.userId);
@@ -288,7 +306,12 @@ export const adminApproveWithdrawal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => DecisionSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const actorRole = await requireFinance(context);
+    const { actorRole, proof } = await requireDecisionAuthority(
+      context,
+      "approved",
+      data.step_up_token,
+      "approve withdrawal",
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin.rpc("approve_savings_withdrawal", {
       _id: data.id,
@@ -302,7 +325,7 @@ export const adminApproveWithdrawal = createServerFn({ method: "POST" })
       actor_role: actorRole,
       action: "withdrawal.approved",
       target: data.id,
-      meta: { ref: r?.ref, amount: r?.amount, note: data.note },
+      meta: { ref: r?.ref, amount: r?.amount, note: data.note, step_up: { method: proof.method, session_id: proof.id } },
     });
     return { ok: true };
   });
@@ -311,7 +334,12 @@ export const adminRejectWithdrawal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => DecisionSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const actorRole = await requireFinance(context);
+    const { actorRole, proof } = await requireDecisionAuthority(
+      context,
+      "rejected",
+      data.step_up_token,
+      "reject withdrawal",
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin.rpc("reject_savings_withdrawal", {
       _id: data.id,
@@ -325,16 +353,23 @@ export const adminRejectWithdrawal = createServerFn({ method: "POST" })
       actor_role: actorRole,
       action: "withdrawal.rejected",
       target: data.id,
-      meta: { ref: r?.ref, amount: r?.amount, reason: data.note },
+      meta: { ref: r?.ref, amount: r?.amount, reason: data.note, step_up: { method: proof.method, session_id: proof.id } },
     });
     return { ok: true };
   });
 
 export const adminPayWithdrawal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), step_up_token: z.string().min(16).max(200) }).parse(d),
+  )
   .handler(async ({ data, context }): Promise<{ txn_id: string | null }> => {
-    const actorRole = await requireFinance(context);
+    const { actorRole, proof } = await requireDecisionAuthority(
+      context,
+      "paid",
+      data.step_up_token,
+      "post withdrawal payout",
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin.rpc("pay_savings_withdrawal", {
       _id: data.id,
@@ -347,7 +382,7 @@ export const adminPayWithdrawal = createServerFn({ method: "POST" })
       actor_role: actorRole,
       action: "withdrawal.paid",
       target: data.id,
-      meta: { ref: r?.ref, amount: r?.amount, txn_id: r?.txn_id },
+      meta: { ref: r?.ref, amount: r?.amount, txn_id: r?.txn_id, step_up: { method: proof.method, session_id: proof.id } },
     });
     return { txn_id: r?.txn_id ?? null };
   });

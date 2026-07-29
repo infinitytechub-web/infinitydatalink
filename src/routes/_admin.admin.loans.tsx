@@ -17,6 +17,7 @@ import {
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
 import { listAdminLoans, decideLoan, type AdminLoanRow } from "@/lib/admin-loans.functions";
+import { useStepUp } from "@/components/step-up-dialog";
 
 export const Route = createFileRoute("/_admin/admin/loans")({
   component: AdminLoans,
@@ -144,12 +145,17 @@ function AdminLoansContent() {
 function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
   const qc = useQueryClient();
   const decide = useServerFn(decideLoan);
+  const { ensure, dialog } = useStepUp();
   const [note, setNote] = useState("");
   const [showPanel, setShowPanel] = useState(false);
   const noteValid = note.trim().length >= 5;
   const mutation = useMutation({
-    mutationFn: (decision: "approved" | "rejected") =>
-      decide({ data: { loan_id: loan.id, decision, note: note.trim() } }),
+    mutationFn: async (decision: "approved" | "rejected") => {
+      const step_up_token = await ensure(
+        `${decision === "approved" ? "approve" : "reject"} loan ${loan.ref}`,
+      );
+      return decide({ data: { loan_id: loan.id, decision, note: note.trim(), step_up_token } });
+    },
     onSuccess: (updated) => {
       toast.success(`Loan ${updated.status}`, { description: `Reference ${updated.ref}` });
       qc.invalidateQueries({ queryKey: ["admin", "loans"] });
@@ -157,7 +163,10 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
       setShowPanel(false);
       setNote("");
     },
-    onError: (err: Error) => toast.error("Decision failed", { description: err.message }),
+    onError: (err: Error) => {
+      if (/cancelled/i.test(err.message)) return;
+      toast.error("Decision failed", { description: err.message });
+    },
   });
 
   const attemptDecide = (decision: "approved" | "rejected") => {
@@ -173,6 +182,7 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
 
   return (
     <>
+      {dialog}
       <tr>
         <td className="tabular px-6 py-4 text-sm font-semibold">{loan.ref}</td>
         <td className="px-6 py-4 text-sm">
