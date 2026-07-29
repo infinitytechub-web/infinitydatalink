@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getStatement, listMyStatements, type Statement } from "@/lib/savings-statements.functions";
 import { formatMoney } from "@/lib/org-config";
+import { StatementGenerator } from "@/components/statement-generator";
 
 const statementsQuery = queryOptions({
   queryKey: ["member", "savings", "statements"],
