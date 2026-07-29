@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import {
+  BanknoteArrowDown,
   BarChart3,
   FileBarChart,
   History,
