@@ -268,7 +268,17 @@ function QueueBody({ search }: { search: SearchParams }) {
   );
 }
 
-function RequestRow({ row }: { row: WithdrawalRequest }) {
+function RequestRow({
+  row,
+  selectable = false,
+  selected = false,
+  onSelectedChange,
+}: {
+  row: WithdrawalRequest;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectedChange?: (on: boolean) => void;
+}) {
   const qc = useQueryClient();
   const approve = useServerFn(adminApproveWithdrawal);
   const reject = useServerFn(adminRejectWithdrawal);
