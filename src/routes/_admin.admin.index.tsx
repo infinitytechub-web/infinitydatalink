@@ -185,6 +185,8 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
   };
 
   return (
+    <>
+      {dialog}
     <SectionCard
       title="Approval queue"
       className="lg:col-span-2"
@@ -257,6 +259,7 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
         </table>
       )}
     </SectionCard>
+    </>
   );
 }
 

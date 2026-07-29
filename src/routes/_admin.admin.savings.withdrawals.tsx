@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useStepUp } from "@/components/step-up-dialog";
 import {
   adminApproveWithdrawal,
   adminListWithdrawals,
@@ -245,6 +246,7 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
   const approve = useServerFn(adminApproveWithdrawal);
   const reject = useServerFn(adminRejectWithdrawal);
   const pay = useServerFn(adminPayWithdrawal);
+  const { ensure, dialog } = useStepUp();
 
   const [mode, setMode] = useState<null | "approve" | "reject">(null);
   const [note, setNote] = useState("");
@@ -252,10 +254,14 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "withdrawals"] });
 
   const decide = useMutation({
-    mutationFn: () =>
-      mode === "approve"
-        ? approve({ data: { id: row.id, note: note.trim() } })
-        : reject({ data: { id: row.id, note: note.trim() } }),
+    mutationFn: async () => {
+      const step_up_token = await ensure(
+        `${mode === "approve" ? "approve" : "reject"} withdrawal ${row.ref}`,
+      );
+      return mode === "approve"
+        ? approve({ data: { id: row.id, note: note.trim(), step_up_token } })
+        : reject({ data: { id: row.id, note: note.trim(), step_up_token } });
+    },
     onSuccess: () => {
       toast.success(mode === "approve" ? "Request approved" : "Request rejected");
       setMode(null);
@@ -266,7 +272,10 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
   });
 
   const payout = useMutation({
-    mutationFn: () => pay({ data: { id: row.id } }),
+    mutationFn: async () => {
+      const step_up_token = await ensure(`post payout for withdrawal ${row.ref}`);
+      return pay({ data: { id: row.id, step_up_token } });
+    },
     onSuccess: () => {
       toast.success("Payout posted to the member's account");
       invalidate();
@@ -276,7 +285,10 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
 
   return (
     <tr>
-      <td className="py-3 pr-4 font-mono text-xs">{row.ref}</td>
+      <td className="py-3 pr-4 font-mono text-xs">
+        {dialog}
+        {row.ref}
+      </td>
       <td className="py-3 pr-4">
         <div className="font-medium">{row.member_name ?? "Member"}</div>
         <div className="text-xs text-muted-foreground">{row.member_no ?? row.user_id.slice(0, 8)}</div>
