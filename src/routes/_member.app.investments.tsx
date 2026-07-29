@@ -720,3 +720,171 @@ function TransferDialog({
     </div>
   );
 }
+
+function BreakdownDialog({
+  state,
+  onClose,
+}: {
+  state: { holding: ShareHolding; product: ShareProduct };
+  onClose: () => void;
+}) {
+  const fetchBreakdown = useServerFn(getMyHoldingBreakdown);
+  const { data, isLoading, error } = useQuery<HoldingBreakdown>({
+    queryKey: ["member", "investments", "breakdown", state.product.id],
+    queryFn: () => fetchBreakdown({ data: { product_id: state.product.id } }),
+  });
+  const ccy = state.product.currency;
+  const fmt = (n: number) => money(n, ccy);
+  const gainClass = (n: number) =>
+    n > 0
+      ? "text-emerald-600 dark:text-emerald-400"
+      : n < 0
+        ? "text-rose-600 dark:text-rose-400"
+        : "text-emerald-deep/70 dark:text-emerald-100/70";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-emerald-950">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+              Cost basis — {state.product.name}
+            </h3>
+            <p className="text-xs font-mono text-emerald-deep/50 dark:text-emerald-200/50">
+              {state.product.code}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded px-3 py-1 text-xs uppercase tracking-widest text-emerald-deep/60 hover:bg-emerald-deep/5 dark:text-emerald-200/60"
+          >
+            Close
+          </button>
+        </div>
+
+        {isLoading && (
+          <p className="mt-6 text-sm text-emerald-deep/60 dark:text-emerald-200/60">
+            Loading breakdown…
+          </p>
+        )}
+        {error && (
+          <p className="mt-6 text-sm text-rose-600 dark:text-rose-400">
+            {(error as Error).message}
+          </p>
+        )}
+
+        {data && (
+          <>
+            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              <StatTile label="Units held" value={data.units.toLocaleString()} />
+              <StatTile label="Average cost / unit" value={fmt(data.average_cost)} />
+              <StatTile label="Cost basis" value={fmt(data.cost_basis)} />
+              <StatTile label="Market value" value={fmt(data.market_value)} />
+              <StatTile
+                label="Unrealized P/L"
+                value={
+                  <span className={gainClass(data.unrealized_gain)}>
+                    {fmt(data.unrealized_gain)}
+                    <span className="ml-1 text-xs">
+                      ({data.unrealized_gain_pct.toFixed(2)}%)
+                    </span>
+                  </span>
+                }
+              />
+              <StatTile
+                label="Realized P/L"
+                value={
+                  <span className={gainClass(data.realized_gain)}>{fmt(data.realized_gain)}</span>
+                }
+              />
+              <StatTile label="Dividends received" value={fmt(data.total_dividends)} />
+              <StatTile
+                label="Units bought / sold"
+                value={`${data.total_units_purchased.toLocaleString()} / ${data.total_units_sold.toLocaleString()}`}
+              />
+            </div>
+
+            <h4 className="mt-6 font-serif text-sm uppercase tracking-widest text-emerald-deep/70 dark:text-emerald-200/70">
+              Transaction history
+            </h4>
+            {data.lots.length === 0 ? (
+              <p className="mt-2 text-sm text-emerald-deep/60 dark:text-emerald-200/60">
+                No transactions recorded for this product.
+              </p>
+            ) : (
+              <div className="mt-2 overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="text-left text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+                    <tr>
+                      <th className="py-2">Date</th>
+                      <th>Ref</th>
+                      <th>Type</th>
+                      <th className="text-right">Units</th>
+                      <th className="text-right">Unit price</th>
+                      <th className="text-right">Amount</th>
+                      <th className="text-right">Avg cost after</th>
+                      <th className="text-right">Realized P/L</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.lots.map((lot) => {
+                      const label =
+                        lot.kind === "dividend"
+                          ? "Dividend"
+                          : lot.is_transfer
+                            ? lot.direction === "out"
+                              ? "Transfer out"
+                              : "Transfer in"
+                            : lot.kind === "purchase"
+                              ? "Buy"
+                              : "Sell";
+                      const sign =
+                        lot.direction === "out" ? "-" : lot.direction === "in" ? "+" : "+";
+                      return (
+                        <tr
+                          key={lot.id}
+                          className="border-t border-emerald-deep/5 dark:border-emerald-100/10"
+                        >
+                          <td className="py-2 whitespace-nowrap">
+                            {new Date(lot.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="font-mono text-xs">{lot.ref}</td>
+                          <td>{label}</td>
+                          <td className="text-right">{lot.units.toLocaleString()}</td>
+                          <td className="text-right">{fmt(lot.unit_price)}</td>
+                          <td className="text-right font-semibold">
+                            {sign}
+                            {fmt(lot.amount)}
+                          </td>
+                          <td className="text-right">{fmt(lot.running_avg_cost)}</td>
+                          <td className={`text-right ${lot.realized_gain != null ? gainClass(lot.realized_gain) : "text-emerald-deep/40"}`}>
+                            {lot.realized_gain != null ? fmt(lot.realized_gain) : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="mt-4 text-xs text-emerald-deep/50 dark:text-emerald-200/50">
+              Realized P/L uses the weighted-average cost method. Transfers between members
+              move cost basis but are not recorded as realized gains or losses.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatTile({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-emerald-deep/10 bg-emerald-deep/[0.02] p-3 dark:border-emerald-100/10 dark:bg-emerald-100/[0.03]">
+      <div className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+        {label}
+      </div>
+      <div className="mt-1 font-semibold text-emerald-deep dark:text-emerald-100">{value}</div>
+    </div>
+  );
+}
