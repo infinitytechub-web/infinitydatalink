@@ -39,6 +39,7 @@ import {
   adminApproveWithdrawal,
   adminListWithdrawals,
   adminPayWithdrawal,
+  adminCancelWithdrawal,
   adminRejectWithdrawal,
   adminUpdateWithdrawalSettings,
   type AdminWithdrawalList,
@@ -248,22 +249,29 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
   const pay = useServerFn(adminPayWithdrawal);
   const { ensure, dialog } = useStepUp();
 
-  const [mode, setMode] = useState<null | "approve" | "reject">(null);
+  const cancelReq = useServerFn(adminCancelWithdrawal);
+  const [mode, setMode] = useState<null | "approve" | "reject" | "cancel">(null);
   const [note, setNote] = useState("");
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "withdrawals"] });
 
   const decide = useMutation({
     mutationFn: async () => {
-      const step_up_token = await ensure(
-        `${mode === "approve" ? "approve" : "reject"} withdrawal ${row.ref}`,
-      );
-      return mode === "approve"
-        ? approve({ data: { id: row.id, note: note.trim(), step_up_token } })
-        : reject({ data: { id: row.id, note: note.trim(), step_up_token } });
+      const verb = mode === "approve" ? "approve" : mode === "cancel" ? "cancel" : "reject";
+      const step_up_token = await ensure(`${verb} withdrawal ${row.ref}`);
+      const payload = { data: { id: row.id, note: note.trim(), step_up_token } };
+      if (mode === "approve") return approve(payload);
+      if (mode === "cancel") return cancelReq(payload);
+      return reject(payload);
     },
     onSuccess: () => {
-      toast.success(mode === "approve" ? "Request approved" : "Request rejected");
+      toast.success(
+        mode === "approve"
+          ? "Request approved"
+          : mode === "cancel"
+            ? "Request cancelled"
+            : "Request rejected",
+      );
       setMode(null);
       setNote("");
       invalidate();
@@ -321,6 +329,9 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
             <Button size="sm" variant="destructive" onClick={() => setMode("reject")}>
               <X className="mr-1 size-4" /> Reject
             </Button>
+            <Button size="sm" variant="ghost" onClick={() => setMode("cancel")}>
+              Cancel
+            </Button>
           </div>
         ) : row.status === "approved" ? (
           <div className="flex justify-end gap-2">
@@ -330,12 +341,19 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
             <Button size="sm" variant="destructive" onClick={() => setMode("reject")}>
               Reject
             </Button>
+            <Button size="sm" variant="ghost" onClick={() => setMode("cancel")}>
+              Cancel
+            </Button>
           </div>
         ) : (
           <span className="text-xs text-muted-foreground">
             {row.status === "paid" && row.paid_at
               ? new Date(row.paid_at).toLocaleString()
-              : row.rejection_reason ?? "—"}
+              : row.status === "cancelled"
+                ? `Cancelled${row.cancelled_at ? ` ${new Date(row.cancelled_at).toLocaleString()}` : ""}${
+                    row.cancellation_reason ? ` — ${row.cancellation_reason}` : ""
+                  }${row.cancelled_by_role && row.cancelled_by_role !== "member" ? " (staff)" : ""}`
+                : row.rejection_reason ?? "—"}
           </span>
         )}
 
@@ -343,7 +361,12 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {mode === "approve" ? "Approve withdrawal" : "Reject withdrawal"} · {row.ref}
+                {mode === "approve"
+                  ? "Approve withdrawal"
+                  : mode === "cancel"
+                    ? "Cancel withdrawal"
+                    : "Reject withdrawal"}{" "}
+                · {row.ref}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-3 text-left">
@@ -353,7 +376,12 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
               </p>
               <div className="space-y-2">
                 <Label htmlFor={`note-${row.id}`}>
-                  {mode === "approve" ? "Approval note" : "Rejection reason"} (required)
+                  {mode === "approve"
+                    ? "Approval note"
+                    : mode === "cancel"
+                      ? "Cancellation reason"
+                      : "Rejection reason"}{" "}
+                  (required)
                 </Label>
                 <Textarea
                   id={`note-${row.id}`}
@@ -369,11 +397,17 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
                 Cancel
               </Button>
               <Button
-                variant={mode === "reject" ? "destructive" : "default"}
+                variant={mode === "approve" ? "default" : "destructive"}
                 disabled={note.trim().length < 5 || decide.isPending}
                 onClick={() => decide.mutate()}
               >
-                {decide.isPending ? "Saving…" : mode === "approve" ? "Approve" : "Reject"}
+                {decide.isPending
+                  ? "Saving…"
+                  : mode === "approve"
+                    ? "Approve"
+                    : mode === "cancel"
+                      ? "Cancel request"
+                      : "Reject"}
               </Button>
             </DialogFooter>
           </DialogContent>
