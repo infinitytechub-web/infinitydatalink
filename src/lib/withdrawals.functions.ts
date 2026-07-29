@@ -27,6 +27,9 @@ export type WithdrawalRequest = {
   rejected_at: string | null;
   paid_at: string | null;
   cancelled_at: string | null;
+  cancelled_by: string | null;
+  cancelled_by_role: string | null;
+  cancellation_reason: string | null;
   approved_by: string | null;
   paid_by: string | null;
   txn_id: string | null;
@@ -54,7 +57,7 @@ export type AdminWithdrawalList = {
 };
 
 const SELECT_COLS =
-  "id, ref, user_id, account_id, amount, channel, reason, status, balance_at_request, approval_note, rejection_reason, approved_at, rejected_at, paid_at, cancelled_at, approved_by, paid_by, txn_id, created_at, savings_accounts(nickname, savings_plans(name))";
+  "id, ref, user_id, account_id, amount, channel, reason, status, balance_at_request, approval_note, rejection_reason, approved_at, rejected_at, paid_at, cancelled_at, cancelled_by, cancelled_by_role, cancellation_reason, approved_by, paid_by, txn_id, created_at, savings_accounts(nickname, savings_plans(name))";
 
 function mapRow(
   r: any,
@@ -80,6 +83,9 @@ function mapRow(
     rejected_at: r.rejected_at ?? null,
     paid_at: r.paid_at ?? null,
     cancelled_at: r.cancelled_at ?? null,
+    cancelled_by: r.cancelled_by ?? null,
+    cancelled_by_role: r.cancelled_by_role ?? null,
+    cancellation_reason: r.cancellation_reason ?? null,
     approved_by: r.approved_by ?? null,
     paid_by: r.paid_by ?? null,
     txn_id: r.txn_id ?? null,
@@ -167,16 +173,23 @@ export const createWithdrawalRequest = createServerFn({ method: "POST" })
 
 export const cancelWithdrawalRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({ id: z.string().uuid(), reason: z.string().trim().min(5).max(500) })
+      .parse(d),
+  )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const { error } = await context.supabase.rpc("cancel_savings_withdrawal", { _id: data.id });
+    const { error } = await context.supabase.rpc("cancel_savings_withdrawal", {
+      _id: data.id,
+      _reason: data.reason,
+    });
     if (error) throw new Error(error.message);
     await writeAudit({
       actor_id: context.userId,
       actor_role: "member",
       action: "withdrawal.cancelled",
       target: data.id,
-      meta: {},
+      meta: { reason: data.reason, cancelled_by_role: "member" },
     });
     return { ok: true };
   });
@@ -385,6 +398,41 @@ export const adminPayWithdrawal = createServerFn({ method: "POST" })
       meta: { ref: r?.ref, amount: r?.amount, txn_id: r?.txn_id, step_up: { method: proof.method, session_id: proof.id } },
     });
     return { txn_id: r?.txn_id ?? null };
+  });
+
+export const adminCancelWithdrawal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => DecisionSchema.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { actorRole, proof } = await requireDecisionAuthority(
+      context,
+      "cancelled",
+      data.step_up_token,
+      "cancel withdrawal",
+    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin.rpc("admin_cancel_savings_withdrawal", {
+      _id: data.id,
+      _reason: data.note,
+      _actor_id: context.userId,
+      _actor_role: actorRole,
+    });
+    if (error) throw new Error(error.message);
+    const r = (Array.isArray(row) ? row[0] : row) as any;
+    await writeAudit({
+      actor_id: context.userId,
+      actor_role: actorRole,
+      action: "withdrawal.cancelled",
+      target: data.id,
+      meta: {
+        ref: r?.ref,
+        amount: r?.amount,
+        reason: data.note,
+        cancelled_by_role: actorRole,
+        step_up: { method: proof.method, session_id: proof.id },
+      },
+    });
+    return { ok: true };
   });
 
 const SettingsSchema = z.object({
