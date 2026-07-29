@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_step_up_sessions: {
+        Row: {
+          aal: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          ip: string | null
+          last_used_at: string | null
+          method: string
+          revoked_at: string | null
+          token_hash: string
+          updated_at: string
+          use_count: number
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          aal?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip?: string | null
+          last_used_at?: string | null
+          method: string
+          revoked_at?: string | null
+          token_hash: string
+          updated_at?: string
+          use_count?: number
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          aal?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip?: string | null
+          last_used_at?: string | null
+          method?: string
+          revoked_at?: string | null
+          token_hash?: string
+          updated_at?: string
+          use_count?: number
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
