@@ -26,6 +26,7 @@ import {
   Activity,
   Crown,
   ClipboardCheck,
+  ShieldCheck,
   KeyRound,
   Palette,
   Settings2,
@@ -82,6 +83,7 @@ const groups: NavGroup[] = [
   {
     label: "Governance",
     items: [
+      { to: "/admin/compliance/approvals", label: "Approval Audit Trail", icon: <ShieldCheck /> },
       { to: "/admin/console", label: "Admin Console", icon: <Settings2 /> },
       { to: "/admin/console/approvals", label: "Change approvals", icon: <ClipboardList /> },
       { to: "/admin/console/snapshots", label: "Backup & restore", icon: <ClipboardCheck /> },
@@ -129,6 +131,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/super-admins/history": "Grant history",
   "/admin/roles": "Roles & Permissions",
   "/admin/branding": "Branding",
+  "/admin/compliance/approvals": "Approval Audit Trail",
   "/admin/console": "Admin Console",
   "/admin/console/approvals": "Change approvals",
   "/admin/console/snapshots": "Backup & restore",
