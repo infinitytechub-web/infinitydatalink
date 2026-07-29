@@ -501,7 +501,7 @@ export type AdminInvestmentsOverview = {
 export const getAdminInvestments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AdminInvestmentsOverview> => {
-    await assertStaff(context.supabase, context.userId);
+    const roles = await assertStaff(context.supabase, context.userId);
     const { supabase } = context;
 
     const [{ data: products, error: pErr }, { data: runs, error: rErr }, { data: holdings, error: hErr }] =
