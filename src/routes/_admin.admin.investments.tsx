@@ -53,10 +53,14 @@ function AdminInvestments() {
   const createRun = useServerFn(createDividendRun);
   const executeRun = useServerFn(executeDividendRun);
   const cancelRun = useServerFn(cancelDividendRun);
+  const submitRun = useServerFn(submitDividendRunForApproval);
+  const approveRun = useServerFn(approveDividendRun);
+  const rejectRun = useServerFn(rejectDividendRun);
 
   const [editing, setEditing] = useState<ShareProduct | null>(null);
   const [showNewProduct, setShowNewProduct] = useState(false);
   const [showNewRun, setShowNewRun] = useState(false);
+  const [reviewing, setReviewing] = useState<{ run: DividendRun; mode: "approve" | "reject" } | null>(null);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "investments"] });
 
@@ -84,6 +88,20 @@ function AdminInvestments() {
   const cancelRunMut = useMutation({
     mutationFn: (run_id: string) => cancelRun({ data: { run_id } }),
     onSuccess: invalidate,
+  });
+  const submitRunMut = useMutation({
+    mutationFn: (run_id: string) => submitRun({ data: { run_id } }),
+    onSuccess: invalidate,
+  });
+  const reviewMut = useMutation({
+    mutationFn: async (v: { run_id: string; mode: "approve" | "reject"; text: string }) => {
+      if (v.mode === "approve") return approveRun({ data: { run_id: v.run_id, note: v.text || null } });
+      return rejectRun({ data: { run_id: v.run_id, reason: v.text } });
+    },
+    onSuccess: async () => {
+      await invalidate();
+      setReviewing(null);
+    },
   });
 
   return (
