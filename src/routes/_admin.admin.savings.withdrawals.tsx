@@ -147,6 +147,34 @@ function WithdrawalsPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex items-end gap-2">
+          <div>
+            <Label className="mb-1.5 block text-xs flex items-center gap-1">
+              <Calendar className="size-3" /> From
+            </Label>
+            <input
+              type="date"
+              value={search.date_from ?? ""}
+              onChange={(e) =>
+                navigate({ search: (p: SearchParams) => ({ ...p, date_from: e.target.value || undefined, page: 1 }) })
+              }
+              className="block h-9 rounded-md border border-border bg-background px-2 text-sm"
+            />
+          </div>
+          <div>
+            <Label className="mb-1.5 block text-xs flex items-center gap-1">
+              <Calendar className="size-3" /> To
+            </Label>
+            <input
+              type="date"
+              value={search.date_to ?? ""}
+              onChange={(e) =>
+                navigate({ search: (p: SearchParams) => ({ ...p, date_to: e.target.value || undefined, page: 1 }) })
+              }
+              className="block h-9 rounded-md border border-border bg-background px-2 text-sm"
+            />
+          </div>
+        </div>
         <div className="w-64">
           <Label className="mb-1.5 block text-xs">Search</Label>
           <div className="flex gap-2">
@@ -166,6 +194,9 @@ function WithdrawalsPage() {
               <Search className="size-4" />
             </Button>
           </div>
+        </div>
+        <div className="ml-auto">
+          <ExportWindowButton search={search} />
         </div>
       </div>
 
