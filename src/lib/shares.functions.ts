@@ -840,6 +840,80 @@ export const cancelDividendRun = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export type DividendRunExportRow = {
+  member_no: string | null;
+  full_name: string | null;
+  units: number;
+  per_unit_amount: number;
+  amount: number;
+  currency: string;
+  status: "paid" | "estimated";
+};
+
+export const getDividendRunExport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ run_id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }): Promise<{
+    run: DividendRun;
+    rows: DividendRunExportRow[];
+  }> => {
+    await assertStaff(context.supabase, context.userId);
+
+    const { data: runRow, error: runErr } = await context.supabase
+      .from("dividend_runs")
+      .select("*, share_products(name, currency)")
+      .eq("id", data.run_id)
+      .single();
+    if (runErr) throw new Error(runErr.message);
+    const run = mapDividendRun(runRow);
+    const currency = (runRow as any)?.share_products?.currency ?? "GHS";
+
+    let rows: DividendRunExportRow[] = [];
+
+    if (run.status === "executed") {
+      const { data: txns, error: tErr } = await context.supabase
+        .from("share_transactions")
+        .select("user_id, units, unit_price, amount, profiles!share_transactions_user_id_fkey(full_name, member_no)")
+        .eq("dividend_run_id", data.run_id)
+        .eq("kind", "dividend");
+      if (tErr) throw new Error(tErr.message);
+      rows = (txns ?? []).map((t: any) => ({
+        member_no: t.profiles?.member_no ?? null,
+        full_name: t.profiles?.full_name ?? null,
+        units: Number(t.units ?? 0),
+        per_unit_amount: Number(t.unit_price ?? run.per_unit_amount),
+        amount: Number(t.amount ?? 0),
+        currency,
+        status: "paid",
+      }));
+    } else {
+      const { data: holdings, error: hErr } = await context.supabase
+        .from("share_holdings")
+        .select("user_id, units, profiles!share_holdings_user_id_fkey(full_name, member_no)")
+        .eq("product_id", run.product_id)
+        .gt("units", 0);
+      if (hErr) throw new Error(hErr.message);
+      rows = (holdings ?? []).map((h: any) => {
+        const units = Number(h.units ?? 0);
+        return {
+          member_no: h.profiles?.member_no ?? null,
+          full_name: h.profiles?.full_name ?? null,
+          units,
+          per_unit_amount: run.per_unit_amount,
+          amount: Number((units * run.per_unit_amount).toFixed(2)),
+          currency,
+          status: "estimated",
+        };
+      });
+    }
+
+    rows.sort(
+      (a, b) => b.amount - a.amount || (a.member_no ?? "").localeCompare(b.member_no ?? ""),
+    );
+    return { run, rows };
+  });
+
+
 // ============================================================================
 // Time-series for charts (last N months)
 // ============================================================================
