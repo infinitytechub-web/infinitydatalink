@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { recordDecision } from "@/lib/decision-audit";
 
 // ---- Types ---------------------------------------------------------------
 
@@ -163,6 +164,16 @@ export const approveSettingsChange = createServerFn({ method: "POST" })
       _note: (data.note || null) as any,
     });
     if (error) throw new Error(error.message);
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole: "super_admin",
+      module: "settings",
+      outcome: "approved",
+      target: data.id,
+      note: data.note || null,
+      meta: { kind: (row as any)?.kind ?? null, summary: (row as any)?.summary ?? null },
+    });
     return row as any;
   });
 
@@ -184,6 +195,15 @@ export const rejectSettingsChange = createServerFn({ method: "POST" })
       _reason: data.reason,
     });
     if (error) throw new Error(error.message);
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole: "super_admin",
+      module: "settings",
+      outcome: "rejected",
+      target: data.id,
+      note: data.reason,
+    });
     return { ok: true as const };
   });
 
