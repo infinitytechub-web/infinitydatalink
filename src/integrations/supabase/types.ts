@@ -1466,6 +1466,123 @@ export type Database = {
           },
         ]
       }
+      savings_withdrawal_requests: {
+        Row: {
+          account_id: string
+          amount: number
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          balance_at_request: number
+          cancelled_at: string | null
+          channel: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          reason: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          balance_at_request?: number
+          cancelled_at?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          reason: string
+          ref: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          balance_at_request?: number
+          cancelled_at?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          reason?: string
+          ref?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_withdrawal_requests_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_withdrawal_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_withdrawal_settings: {
+        Row: {
+          daily_limit: number
+          id: number
+          max_amount: number
+          min_amount: number
+          require_dual_control: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          daily_limit?: number
+          id?: number
+          max_amount?: number
+          min_amount?: number
+          require_dual_control?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          daily_limit?: number
+          id?: number
+          max_amount?: number
+          min_amount?: number
+          require_dual_control?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       settings_change_requests: {
         Row: {
           applied_at: string | null
@@ -2147,6 +2264,38 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_savings_withdrawal: {
+        Args: { _actor_id: string; _id: string; _note: string }
+        Returns: {
+          account_id: string
+          amount: number
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          balance_at_request: number
+          cancelled_at: string | null
+          channel: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          reason: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_settings_change: {
         Args: { _id: string; _note: string }
         Returns: {
@@ -2175,6 +2324,38 @@ export type Database = {
       approve_user: {
         Args: { _note?: string; _uid: string }
         Returns: undefined
+      }
+      cancel_savings_withdrawal: {
+        Args: { _id: string }
+        Returns: {
+          account_id: string
+          amount: number
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          balance_at_request: number
+          cancelled_at: string | null
+          channel: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          reason: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       clear_transfer: {
         Args: { _actor_id: string; _transfer_id: string }
@@ -2410,6 +2591,38 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "expenses"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pay_savings_withdrawal: {
+        Args: { _actor_id: string; _id: string }
+        Returns: {
+          account_id: string
+          amount: number
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          balance_at_request: number
+          cancelled_at: string | null
+          channel: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          reason: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_withdrawal_requests"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2737,6 +2950,38 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reject_savings_withdrawal: {
+        Args: { _actor_id: string; _id: string; _reason: string }
+        Returns: {
+          account_id: string
+          amount: number
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          balance_at_request: number
+          cancelled_at: string | null
+          channel: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          reason: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reject_settings_change: {
         Args: { _id: string; _reason: string }
         Returns: {
@@ -2791,6 +3036,43 @@ export type Database = {
       reject_user: {
         Args: { _reason: string; _uid: string }
         Returns: undefined
+      }
+      request_savings_withdrawal: {
+        Args: {
+          _account_id: string
+          _amount: number
+          _channel: string
+          _reason: string
+        }
+        Returns: {
+          account_id: string
+          amount: number
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          balance_at_request: number
+          cancelled_at: string | null
+          channel: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          reason: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       request_settings_change: {
         Args: {
@@ -2855,6 +3137,7 @@ export type Database = {
           sweep_id: string
         }[]
       }
+      savings_held_amount: { Args: { _account_id: string }; Returns: number }
       sell_shares: {
         Args: {
           _actor_id: string
@@ -3056,6 +3339,12 @@ export type Database = {
         | "adjustment"
         | "expense"
       txn_status: "cleared" | "pending" | "failed"
+      withdrawal_request_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "cancelled"
+        | "paid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3238,6 +3527,13 @@ export const Constants = {
         "expense",
       ],
       txn_status: ["cleared", "pending", "failed"],
+      withdrawal_request_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled",
+        "paid",
+      ],
     },
   },
 } as const
