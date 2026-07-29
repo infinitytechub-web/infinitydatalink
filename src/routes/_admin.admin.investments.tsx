@@ -447,18 +447,22 @@ function RunActions({
   run,
   viewer,
   pending,
+  exporting,
   onSubmit,
   onCancel,
   onExecute,
   onReview,
+  onExport,
 }: {
   run: DividendRun;
   viewer: AdminInvestmentsOverview["viewer"];
   pending: boolean;
+  exporting: boolean;
   onSubmit: () => void;
   onCancel: () => void;
   onExecute: () => void;
   onReview: (mode: "approve" | "reject") => void;
+  onExport: () => void;
 }) {
   const isCreator = run.created_by === viewer.user_id || run.submitted_by === viewer.user_id;
   const isApprover = run.approved_by === viewer.user_id;
@@ -469,6 +473,21 @@ function RunActions({
   const btnDanger =
     "rounded bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white hover:bg-red-700 disabled:opacity-50";
 
+  const exportBtn = (
+    <button
+      disabled={exporting}
+      onClick={onExport}
+      className={btnGhost}
+      title={
+        run.status === "executed"
+          ? "Download recorded payouts as CSV"
+          : "Download estimated payout list as CSV"
+      }
+    >
+      {exporting ? "Exporting…" : "Export CSV"}
+    </button>
+  );
+
   if (run.status === "draft" && viewer.can_execute) {
     return (
       <div className="inline-flex gap-1">
@@ -478,13 +497,17 @@ function RunActions({
         <button disabled={pending} onClick={onCancel} className={btnGhost}>
           Cancel
         </button>
+        {exportBtn}
       </div>
     );
   }
   if (run.status === "pending_approval" && viewer.can_approve) {
     if (isCreator) {
       return (
-        <span className="text-xs italic text-emerald-deep/60">Awaiting second reviewer</span>
+        <div className="inline-flex items-center gap-2">
+          <span className="text-xs italic text-emerald-deep/60">Awaiting second reviewer</span>
+          {exportBtn}
+        </div>
       );
     }
     return (
@@ -495,24 +518,31 @@ function RunActions({
         <button disabled={pending} onClick={() => onReview("reject")} className={btnDanger}>
           Reject
         </button>
+        {exportBtn}
       </div>
     );
   }
   if (run.status === "approved" && viewer.can_execute) {
     if (isApprover) {
       return (
-        <span className="text-xs italic text-emerald-deep/60">
-          Awaiting a different officer
-        </span>
+        <div className="inline-flex items-center gap-2">
+          <span className="text-xs italic text-emerald-deep/60">
+            Awaiting a different officer
+          </span>
+          {exportBtn}
+        </div>
       );
     }
     return (
-      <button disabled={pending} onClick={onExecute} className={btnPrimary}>
-        Execute payouts
-      </button>
+      <div className="inline-flex gap-1">
+        <button disabled={pending} onClick={onExecute} className={btnPrimary}>
+          Execute payouts
+        </button>
+        {exportBtn}
+      </div>
     );
   }
-  return <span className="text-xs text-emerald-deep/40">—</span>;
+  return <div className="inline-flex gap-1">{exportBtn}</div>;
 }
 
 function ReviewDialog({
