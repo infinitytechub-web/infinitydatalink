@@ -297,9 +297,21 @@ function AdminInvestments() {
             </tbody>
           </table>
         </div>
-        {executeRunMut.error && (
-          <p className="mt-3 text-sm text-red-600">{(executeRunMut.error as Error).message}</p>
+        {(executeRunMut.error || submitRunMut.error || cancelRunMut.error) && (
+          <p className="mt-3 text-sm text-red-600">
+            {(
+              (executeRunMut.error as Error | null) ??
+              (submitRunMut.error as Error | null) ??
+              (cancelRunMut.error as Error | null)
+            )?.message}
+          </p>
         )}
+        <p className="mt-3 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+          Dividend runs require dual control: after submission, an approver
+          (super admin or compliance officer) other than the creator must
+          approve the run before a finance officer can execute payouts, and
+          the executor cannot be the same person who approved.
+        </p>
       </section>
 
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
