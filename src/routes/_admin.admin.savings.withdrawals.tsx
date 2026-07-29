@@ -335,6 +335,15 @@ function RequestRow({
 
   return (
     <tr>
+      <td className="py-3 pr-3 align-top">
+        {selectable ? (
+          <Checkbox
+            aria-label={`Select withdrawal ${row.ref}`}
+            checked={selected}
+            onCheckedChange={(v: boolean | "indeterminate") => onSelectedChange?.(v === true)}
+          />
+        ) : null}
+      </td>
       <td className="py-3 pr-4 font-mono text-xs">
         {dialog}
         {row.ref}
