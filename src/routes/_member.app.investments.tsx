@@ -26,7 +26,10 @@ const seriesQO = queryOptions<InvestmentSeriesPoint[]>({
 
 export const Route = createFileRoute("/_member/app/investments")({
   head: () => ({ meta: [{ title: "Investments & Shares — IT-360 CashApp" }] }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(investmentsQO),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(investmentsQO);
+    context.queryClient.ensureQueryData(seriesQO);
+  },
   component: InvestmentsPage,
 });
 
@@ -35,6 +38,7 @@ const money = (n: number, ccy = "GHS") =>
 
 function InvestmentsPage() {
   const { data } = useSuspenseQuery(investmentsQO);
+  const { data: series } = useSuspenseQuery(seriesQO);
   const qc = useQueryClient();
   const purchase = useServerFn(purchaseShares);
   const sell = useServerFn(sellShares);
