@@ -29,9 +29,9 @@ async function assertStaff(supabase: any, userId: string) {
     .select("role")
     .eq("user_id", userId);
   if (error) throw new Error(error.message);
-  const roles = (data ?? []).map((r: any) => r.role as string);
+  const roles: string[] = (data ?? []).map((r: any) => String(r.role));
   const allowed = ["super_admin", "compliance_officer", "auditor", "finance_officer", "loan_officer"];
-  if (!roles.some((r) => allowed.includes(r))) throw new Error("Forbidden");
+  if (!roles.some((r: string) => allowed.includes(r))) throw new Error("Forbidden");
   return roles;
 }
 
