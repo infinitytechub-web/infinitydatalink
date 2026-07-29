@@ -20,6 +20,7 @@ export const DECISION_PERMISSIONS: Partial<Record<Capability, readonly Role[]>> 
   "withdrawal.approved": ["finance_officer"],
   "withdrawal.rejected": ["finance_officer"],
   "withdrawal.paid": ["finance_officer"],
+  "withdrawal.cancelled": ["finance_officer"],
 
   "payment.approved": ["finance_officer"],
   "payment.rejected": ["finance_officer"],

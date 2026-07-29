@@ -1522,7 +1522,10 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           balance_at_request: number
+          cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           channel: string
           created_at: string
           id: string
@@ -1545,7 +1548,10 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           balance_at_request?: number
+          cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_by_role?: string | null
           channel?: string
           created_at?: string
           id?: string
@@ -1568,7 +1574,10 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           balance_at_request?: number
+          cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_by_role?: string | null
           channel?: string
           created_at?: string
           id?: string
@@ -2171,6 +2180,46 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_cancel_savings_withdrawal: {
+        Args: {
+          _actor_id: string
+          _actor_role?: string
+          _id: string
+          _reason: string
+        }
+        Returns: {
+          account_id: string
+          amount: number
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          balance_at_request: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
+          channel: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          reason: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_request_status"]
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_revoke_role: {
         Args: {
           _actor_id: string
@@ -2321,7 +2370,10 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           balance_at_request: number
+          cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           channel: string
           created_at: string
           id: string
@@ -2374,7 +2426,7 @@ export type Database = {
         Returns: undefined
       }
       cancel_savings_withdrawal: {
-        Args: { _id: string }
+        Args: { _id: string; _reason?: string }
         Returns: {
           account_id: string
           amount: number
@@ -2382,7 +2434,10 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           balance_at_request: number
+          cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           channel: string
           created_at: string
           id: string
@@ -2652,7 +2707,10 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           balance_at_request: number
+          cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           channel: string
           created_at: string
           id: string
@@ -3007,7 +3065,10 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           balance_at_request: number
+          cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           channel: string
           created_at: string
           id: string
@@ -3099,7 +3160,10 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           balance_at_request: number
+          cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           channel: string
           created_at: string
           id: string

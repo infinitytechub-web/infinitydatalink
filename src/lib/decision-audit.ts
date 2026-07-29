@@ -31,6 +31,7 @@ export const DECISION_OUTCOMES = [
   "cleared",
   "activated",
   "deactivated",
+  "cancelled",
 ] as const;
 export type DecisionOutcome = (typeof DECISION_OUTCOMES)[number];
 
