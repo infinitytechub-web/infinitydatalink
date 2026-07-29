@@ -73,7 +73,7 @@ function NotificationsContent() {
 
   return (
     <div className="space-y-6">
-      <SectionCard title="Delivery channels" hint="In-app alerts always appear in your notification bell when enabled.">
+      <SectionCard title="Delivery channels">
         <div className="space-y-4">
           <ChannelRow
             icon={<BellRing className="h-4 w-4" />}
@@ -106,7 +106,7 @@ function NotificationsContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Event types" hint="Turn off any event you don't want to be alerted about.">
+      <SectionCard title="Event types">
         <div className="grid gap-3 sm:grid-cols-2">
           {NOTIFICATION_CATEGORIES.map((cat) => {
             const muted = prefs.muted_categories.includes(cat.key);
@@ -128,7 +128,7 @@ function NotificationsContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Recent deliveries" hint="Email and SMS copies queued for your alerts.">
+      <SectionCard title="Recent deliveries">
         {data.deliveries.length === 0 ? (
           <EmptyState title="No deliveries yet" hint="Email and SMS alerts will appear here once events occur." />
         ) : (
