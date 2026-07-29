@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BanknoteArrowDown, Lock, XCircle } from "lucide-react";
+import { BanknoteArrowDown, History as HistoryIcon, Lock, XCircle } from "lucide-react";
 import { EmptyState, Money, SectionCard, StatusPill } from "@/components/primitives";
+import { WithdrawalTimeline } from "@/components/withdrawal-timeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
