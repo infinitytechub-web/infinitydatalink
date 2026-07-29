@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { recordDecision } from "@/lib/decision-audit";
 
 const FINANCE_ROLES = new Set(["super_admin", "finance_officer"]);
 const VIEW_ROLES = new Set([...FINANCE_ROLES, "auditor", "compliance_officer"]);
@@ -9,9 +10,10 @@ async function loadRoles(supabase: any, userId: string): Promise<string[]> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   return (data ?? []).map((r: any) => r.role as string);
 }
-async function assertFinance(supabase: any, userId: string) {
+async function assertFinance(supabase: any, userId: string): Promise<string> {
   const roles = await loadRoles(supabase, userId);
   if (!roles.some((r) => FINANCE_ROLES.has(r))) throw new Error("Forbidden: finance role required");
+  return roles.find((r) => FINANCE_ROLES.has(r)) ?? "finance_officer";
 }
 async function assertView(supabase: any, userId: string) {
   const roles = await loadRoles(supabase, userId);
@@ -109,7 +111,7 @@ export const decideExpense = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertFinance(context.supabase, context.userId);
+    const actorRole = await assertFinance(context.supabase, context.userId);
     let args: Record<string, any>;
     let rpc: string;
     if (data.action === "approve") {
@@ -131,6 +133,30 @@ export const decideExpense = createServerFn({ method: "POST" })
     const { supabaseAdmin: sbAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await (sbAdmin as any).rpc(rpc, args);
     if (error) throw new Error(error.message);
+
+    const { data: expense } = await (sbAdmin as any)
+      .from("expenses")
+      .select("ref, vendor, amount, category_code")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole,
+      module: "expense",
+      outcome: data.action === "approve" ? "approved" : data.action === "reject" ? "rejected" : "paid",
+      target: data.id,
+      note: data.reason ?? null,
+      reference: expense?.ref ?? null,
+      amount: expense?.amount == null ? null : Number(expense.amount),
+      meta: {
+        vendor: expense?.vendor ?? null,
+        category: expense?.category_code ?? null,
+        channel: data.channel ?? null,
+        payment_reference: data.reference ?? null,
+      },
+    });
     return { ok: true };
   });
 
@@ -194,13 +220,29 @@ export const clearTransfer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertFinance(context.supabase, context.userId);
+    const actorRole = await assertFinance(context.supabase, context.userId);
     const { supabaseAdmin: sbAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await (sbAdmin as any).rpc("clear_transfer", {
       _transfer_id: data.id,
       _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
+    const { data: tr } = await (sbAdmin as any)
+      .from("transfers")
+      .select("ref, amount, from_account_id, to_account_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole,
+      module: "transfer",
+      outcome: "cleared",
+      target: data.id,
+      reference: tr?.ref ?? null,
+      amount: tr?.amount == null ? null : Number(tr.amount),
+      meta: { from_account_id: tr?.from_account_id ?? null, to_account_id: tr?.to_account_id ?? null },
+    });
     return { ok: true };
   });
 
@@ -210,7 +252,7 @@ export const rejectTransfer = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), reason: z.string().min(3).max(500) }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertFinance(context.supabase, context.userId);
+    const actorRole = await assertFinance(context.supabase, context.userId);
     const { supabaseAdmin: sbAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await (sbAdmin as any).rpc("reject_transfer", {
       _transfer_id: data.id,
@@ -218,6 +260,22 @@ export const rejectTransfer = createServerFn({ method: "POST" })
       _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
+    const { data: tr } = await (sbAdmin as any)
+      .from("transfers")
+      .select("ref, amount")
+      .eq("id", data.id)
+      .maybeSingle();
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole,
+      module: "transfer",
+      outcome: "rejected",
+      target: data.id,
+      note: data.reason,
+      reference: tr?.ref ?? null,
+      amount: tr?.amount == null ? null : Number(tr.amount),
+    });
     return { ok: true };
   });
 
