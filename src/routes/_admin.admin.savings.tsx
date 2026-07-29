@@ -250,3 +250,63 @@ function RejectDialog({ txn }: { txn: AdminPendingTxn }) {
     </Dialog>
   );
 }
+
+function AccrualDialog() {
+  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const [periodEnd, setPeriodEnd] = useState("");
+  const qc = useQueryClient();
+  const call = useServerFn(adminRunMonthlyAccrual);
+  const mut = useMutation({
+    mutationFn: () => call({ data: { note, period_end: periodEnd || null } }),
+    onSuccess: async (r) => {
+      toast.success(`Accrued interest across ${r.accounts} accounts (${formatMoney(r.total_interest)})`);
+      setOpen(false);
+      setNote("");
+      setPeriodEnd("");
+      await qc.invalidateQueries({ queryKey: ["admin", "savings"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="gap-1">
+          <PlayCircle className="h-3.5 w-3.5" /> Run interest accrual
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Run monthly interest accrual</DialogTitle></DialogHeader>
+        <form
+          className="space-y-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!note.trim() || note.trim().length < 3) return toast.error("Provide a note (≥3 chars) for the audit trail.");
+            mut.mutate();
+          }}
+        >
+          <p className="text-xs text-muted-foreground">
+            Runs the accrual for the given period end date (defaults to end of last month). Idempotent per (account, period).
+          </p>
+          <div>
+            <label className="text-[11px] uppercase tracking-widest text-muted-foreground">Period end (optional)</label>
+            <input
+              type="date"
+              value={periodEnd}
+              onChange={(e) => setPeriodEnd(e.target.value)}
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-[11px] uppercase tracking-widest text-muted-foreground">Audit note</label>
+            <Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} required />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Running…" : "Run accrual"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
