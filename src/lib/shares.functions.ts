@@ -642,18 +642,37 @@ export const upsertShareProduct = createServerFn({ method: "POST" })
       max_units_per_member: data.max_units_per_member ?? null,
       is_active: data.is_active,
     };
+    let resultId: string;
+    let action: "shares.product.update" | "shares.product.create";
+    let before: any = null;
     if (data.id) {
+      const { data: prev } = await context.supabase
+        .from("share_products")
+        .select("code, name, description, unit_price, currency, dividend_rate_annual, min_units, max_units_per_member, is_active")
+        .eq("id", data.id)
+        .maybeSingle();
+      before = prev ?? null;
       const { error } = await context.supabase.from("share_products").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
-      return { id: data.id };
+      resultId = data.id;
+      action = "shares.product.update";
+    } else {
+      const { data: row, error } = await context.supabase
+        .from("share_products")
+        .insert({ ...payload, created_by: context.userId })
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      resultId = row!.id as string;
+      action = "shares.product.create";
     }
-    const { data: row, error } = await context.supabase
-      .from("share_products")
-      .insert({ ...payload, created_by: context.userId })
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    return { id: row!.id as string };
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action,
+      target: resultId,
+      meta: { before, after: payload },
+    });
+    return { id: resultId };
   });
 
 const CreateRunSchema = z.object({
