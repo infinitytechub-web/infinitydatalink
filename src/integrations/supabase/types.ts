@@ -2689,6 +2689,21 @@ export type Database = {
               isSetofReturn: false
             }
           }
+      transfer_shares: {
+        Args: {
+          _actor_id: string
+          _note: string
+          _product_id: string
+          _to_member_no: string
+          _units: number
+        }
+        Returns: {
+          in_txn_id: string
+          out_txn_id: string
+          to_full_name: string
+          to_user_id: string
+        }[]
+      }
       upsert_fx_rate: {
         Args: { _base: string; _quote: string; _rate: number }
         Returns: undefined
