@@ -562,3 +562,110 @@ function friendlyError(err: unknown) {
   for (const key of Object.keys(ERRORS)) if (raw.includes(key)) return ERRORS[key];
   return raw;
 }
+
+function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: () => void }) {
+  const qc = useQueryClient();
+  const bulkCancel = useServerFn(adminBulkCancelWithdrawals);
+  const { ensure, dialog } = useStepUp();
+  const [open, setOpen] = useState(false);
+  const [shared, setShared] = useState("");
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const reasonFor = (id: string) => (notes[id] ?? "").trim() || shared.trim();
+  const ready = rows.every((r) => reasonFor(r.id).length >= 5);
+  const total = rows.reduce((sum, r) => sum + r.amount, 0);
+
+  const run = useMutation({
+    mutationFn: async () => {
+      const step_up_token = await ensure(`cancel ${rows.length} withdrawal requests`);
+      return bulkCancel({
+        data: {
+          items: rows.map((r) => ({ id: r.id, note: reasonFor(r.id) })),
+          step_up_token,
+        },
+      });
+    },
+    onSuccess: (res) => {
+      if (res.ok.length) toast.success(`Cancelled ${res.ok.length} request(s)`);
+      if (res.failed.length)
+        toast.error(`${res.failed.length} could not be cancelled: ${friendlyError(res.failed[0].error)}`);
+      setOpen(false);
+      setNotes({});
+      setShared("");
+      onDone();
+      qc.invalidateQueries({ queryKey: ["admin", "withdrawals"] });
+    },
+    onError: (e) => {
+      if (e instanceof Error && /cancelled/i.test(e.message)) return;
+      toast.error(friendlyError(e));
+    },
+  });
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
+      {dialog}
+      <div className="text-sm">
+        <span className="font-semibold">{rows.length} selected</span>{" "}
+        <span className="text-muted-foreground">
+          · total <Money amount={total} />
+        </span>
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" variant="ghost" onClick={onDone}>
+          Clear selection
+        </Button>
+        <Button size="sm" variant="destructive" onClick={() => setOpen(true)}>
+          <X className="mr-1 size-4" /> Cancel selected
+        </Button>
+      </div>
+
+      <Dialog open={open} onOpenChange={(o) => !o && setOpen(false)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Cancel {rows.length} withdrawal requests</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="bulk-shared-reason">Reason applied to all (required unless set per request)</Label>
+              <Textarea
+                id="bulk-shared-reason"
+                value={shared}
+                maxLength={500}
+                onChange={(e) => setShared(e.target.value)}
+                placeholder="Minimum 5 characters — recorded in the audit log for each request"
+              />
+            </div>
+            <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+              {rows.map((r) => (
+                <div key={r.id} className="rounded-lg border border-border/60 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                    <span className="font-mono text-xs">{r.ref}</span>
+                    <span className="text-muted-foreground">
+                      {r.member_name ?? "Member"} · <Money amount={r.amount} />
+                    </span>
+                    <StatusPill status={pillStatus(r.status)} />
+                  </div>
+                  <Input
+                    aria-label={`Cancellation reason for ${r.ref}`}
+                    value={notes[r.id] ?? ""}
+                    maxLength={500}
+                    onChange={(e) => setNotes((p) => ({ ...p, [r.id]: e.target.value }))}
+                    placeholder="Override reason for this request (optional)"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Back
+            </Button>
+            <Button variant="destructive" disabled={!ready || run.isPending} onClick={() => run.mutate()}>
+              {run.isPending ? "Cancelling…" : `Cancel ${rows.length} requests`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
