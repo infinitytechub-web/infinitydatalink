@@ -48,6 +48,14 @@ export type ShareTxn = {
   created_at: string;
 };
 
+export type DividendRunStatus =
+  | "draft"
+  | "pending_approval"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "executed";
+
 export type DividendRun = {
   id: string;
   ref: string;
@@ -59,10 +67,19 @@ export type DividendRun = {
   units_paid: number;
   members_paid: number;
   total_paid: number;
-  status: "draft" | "executed" | "cancelled";
+  status: DividendRunStatus;
   note: string | null;
   executed_at: string | null;
   created_at: string;
+  created_by: string | null;
+  submitted_by: string | null;
+  submitted_at: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  approval_note: string | null;
+  rejected_by: string | null;
+  rejected_at: string | null;
+  rejection_reason: string | null;
 };
 
 export type MemberInvestmentSummary = {
