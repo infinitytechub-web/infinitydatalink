@@ -539,22 +539,7 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
       created_at: p.created_at,
     }));
 
-    const runList: DividendRun[] = (runs ?? []).map((r: any) => ({
-      id: r.id,
-      ref: r.ref,
-      product_id: r.product_id,
-      product_name: r.share_products?.name ?? "Share",
-      period_start: r.period_start,
-      period_end: r.period_end,
-      per_unit_amount: Number(r.per_unit_amount ?? 0),
-      units_paid: r.units_paid,
-      members_paid: r.members_paid,
-      total_paid: Number(r.total_paid ?? 0),
-      status: r.status,
-      note: r.note,
-      executed_at: r.executed_at,
-      created_at: r.created_at,
-    }));
+    const runList: DividendRun[] = (runs ?? []).map((r: any) => mapDividendRun(r));
 
     const yearStart = new Date();
     yearStart.setUTCMonth(0, 1);
