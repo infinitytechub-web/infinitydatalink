@@ -106,6 +106,8 @@ export const listMySweeps = createServerFn({ method: "GET" })
       to_account_id: r.to_account_id,
       to_label: labelMap.get(r.to_account_id) ?? "Savings",
       amount: Number(r.amount),
+      min_balance: Number(r.min_balance ?? 0),
+      max_amount: r.max_amount == null ? null : Number(r.max_amount),
       frequency: r.frequency,
       day_of_week: r.day_of_week,
       day_of_month: r.day_of_month,
@@ -114,6 +116,7 @@ export const listMySweeps = createServerFn({ method: "GET" })
       last_run_at: r.last_run_at,
       last_run_status: r.last_run_status,
       last_run_error: r.last_run_error,
+      last_run_amount: r.last_run_amount == null ? null : Number(r.last_run_amount),
       runs_completed: r.runs_completed,
       note: r.note,
     }));
