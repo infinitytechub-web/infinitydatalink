@@ -54,6 +54,12 @@ function AdminSavings() {
           <div className="flex items-center gap-2">
             <AccrualDialog />
             <Link
+              to="/admin/savings/reconciliation"
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              <Scale className="h-3.5 w-3.5" /> Reconciliation
+            </Link>
+            <Link
               to="/admin/savings/plans"
               className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
             >

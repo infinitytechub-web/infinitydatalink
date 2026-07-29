@@ -68,6 +68,7 @@ import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.
 import { Route as MemberAppLoansLoanIdRouteImport } from './routes/_member.app.loans.$loanId'
 import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.app.entities.register'
 import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
+import { Route as AdminAdminSavingsReconciliationRouteImport } from './routes/_admin.admin.savings.reconciliation'
 import { Route as AdminAdminSavingsPlansRouteImport } from './routes/_admin.admin.savings.plans'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
 import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
@@ -387,6 +388,12 @@ const AdminAdminSuperAdminsHistoryRoute =
     path: '/history',
     getParentRoute: () => AdminAdminSuperAdminsRoute,
   } as any)
+const AdminAdminSavingsReconciliationRoute =
+  AdminAdminSavingsReconciliationRouteImport.update({
+    id: '/reconciliation',
+    path: '/reconciliation',
+    getParentRoute: () => AdminAdminSavingsRoute,
+  } as any)
 const AdminAdminSavingsPlansRoute = AdminAdminSavingsPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
@@ -538,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/admin/savings/plans': typeof AdminAdminSavingsPlansRoute
+  '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
@@ -608,6 +616,7 @@ export interface FileRoutesByTo {
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/admin/savings/plans': typeof AdminAdminSavingsPlansRoute
+  '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
@@ -686,6 +695,7 @@ export interface FileRoutesById {
   '/_admin/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/_admin/admin/savings/plans': typeof AdminAdminSavingsPlansRoute
+  '/_admin/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/_admin/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/_member/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/_member/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
@@ -763,6 +773,7 @@ export interface FileRouteTypes {
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/admin/savings/plans'
+    | '/admin/savings/reconciliation'
     | '/admin/super-admins/history'
     | '/app/entities/register'
     | '/app/loans/$loanId'
@@ -833,6 +844,7 @@ export interface FileRouteTypes {
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/admin/savings/plans'
+    | '/admin/savings/reconciliation'
     | '/admin/super-admins/history'
     | '/app/entities/register'
     | '/app/loans/$loanId'
@@ -910,6 +922,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/loans/$loanId'
     | '/_admin/admin/members/$id'
     | '/_admin/admin/savings/plans'
+    | '/_admin/admin/savings/reconciliation'
     | '/_admin/admin/super-admins/history'
     | '/_member/app/entities/register'
     | '/_member/app/loans/$loanId'
@@ -1361,6 +1374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSuperAdminsHistoryRouteImport
       parentRoute: typeof AdminAdminSuperAdminsRoute
     }
+    '/_admin/admin/savings/reconciliation': {
+      id: '/_admin/admin/savings/reconciliation'
+      path: '/reconciliation'
+      fullPath: '/admin/savings/reconciliation'
+      preLoaderRoute: typeof AdminAdminSavingsReconciliationRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
     '/_admin/admin/savings/plans': {
       id: '/_admin/admin/savings/plans'
       path: '/plans'
@@ -1579,10 +1599,12 @@ const AdminAdminMembersRouteWithChildren =
 
 interface AdminAdminSavingsRouteChildren {
   AdminAdminSavingsPlansRoute: typeof AdminAdminSavingsPlansRoute
+  AdminAdminSavingsReconciliationRoute: typeof AdminAdminSavingsReconciliationRoute
 }
 
 const AdminAdminSavingsRouteChildren: AdminAdminSavingsRouteChildren = {
   AdminAdminSavingsPlansRoute: AdminAdminSavingsPlansRoute,
+  AdminAdminSavingsReconciliationRoute: AdminAdminSavingsReconciliationRoute,
 }
 
 const AdminAdminSavingsRouteWithChildren =
