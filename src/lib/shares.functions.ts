@@ -897,7 +897,7 @@ export type DividendAuditEntry = {
   actor_id: string | null;
   actor_email: string | null;
   actor_role: string | null;
-  meta: unknown;
+  meta: Record<string, any> | null;
 };
 
 export type DividendAuditListResult = {
