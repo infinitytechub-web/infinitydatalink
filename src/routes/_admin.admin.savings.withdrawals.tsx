@@ -169,6 +169,14 @@ function QueueBody({ search }: { search: SearchParams }) {
   const list = data as AdminWithdrawalList;
   const pages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
 
+  const cancellable = list.rows.filter((r) => r.status === "pending" || r.status === "approved");
+  const [selected, setSelected] = useState<string[]>([]);
+  const selectedRows = cancellable.filter((r) => selected.includes(r.id));
+  const allSelected = cancellable.length > 0 && selectedRows.length === cancellable.length;
+
+  const toggle = (id: string, on: boolean) =>
+    setSelected((prev) => (on ? [...new Set([...prev, id])] : prev.filter((x) => x !== id)));
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -181,6 +189,10 @@ function QueueBody({ search }: { search: SearchParams }) {
           tone="teal"
         />
       </div>
+
+      {selectedRows.length > 0 ? (
+        <BulkCancelBar rows={selectedRows} onDone={() => setSelected([])} />
+      ) : null}
 
       <SectionCard title={`Requests (${list.total})`} accent="gold">
         {list.rows.length === 0 ? (
@@ -196,6 +208,14 @@ function QueueBody({ search }: { search: SearchParams }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <th className="py-2 pr-3 font-semibold">
+                    <Checkbox
+                      aria-label="Select all cancellable requests on this page"
+                      checked={allSelected}
+                      disabled={cancellable.length === 0}
+                      onCheckedChange={(v) => setSelected(v ? cancellable.map((r) => r.id) : [])}
+                    />
+                  </th>
                   <th className="py-2 pr-4 font-semibold">Reference</th>
                   <th className="py-2 pr-4 font-semibold">Member</th>
                   <th className="py-2 pr-4 font-semibold">Account</th>
@@ -207,7 +227,13 @@ function QueueBody({ search }: { search: SearchParams }) {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {list.rows.map((row) => (
-                  <RequestRow key={row.id} row={row} />
+                  <RequestRow
+                    key={row.id}
+                    row={row}
+                    selectable={row.status === "pending" || row.status === "approved"}
+                    selected={selected.includes(row.id)}
+                    onSelectedChange={(on) => toggle(row.id, on)}
+                  />
                 ))}
               </tbody>
             </table>
