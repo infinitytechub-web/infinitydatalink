@@ -307,12 +307,11 @@ function InvestmentsPage() {
           onCancel={() => setTradeState(null)}
           submitting={purchaseMut.isPending || sellMut.isPending}
           error={(purchaseMut.error as Error | null)?.message ?? (sellMut.error as Error | null)?.message ?? null}
-          onSubmit={(v) => {
-            if (tradeState.mode === "buy") {
-              purchaseMut.mutate({ product_id: tradeState.product.id, ...v });
-            } else {
-              sellMut.mutate({ product_id: tradeState.product.id, ...v });
-            }
+          onSubmit={async (v) => {
+            const args = { product_id: tradeState.product.id, ...v };
+            return tradeState.mode === "buy"
+              ? await purchaseMut.mutateAsync(args)
+              : await sellMut.mutateAsync(args);
           }}
         />
       )}
