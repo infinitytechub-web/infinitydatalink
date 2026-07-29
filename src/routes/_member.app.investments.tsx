@@ -505,3 +505,195 @@ function TradeDialog({
     </div>
   );
 }
+
+function TransferDialog({
+  state,
+  onCancel,
+  onSubmit,
+  submitting,
+  error,
+  result,
+}: {
+  state: { holding: ShareHolding; product: ShareProduct };
+  onCancel: () => void;
+  onSubmit: (v: { to_member_no: string; units: number; note: string | null }) => void;
+  submitting: boolean;
+  error: string | null;
+  result: { to_full_name: string | null; to_user_id: string } | null;
+}) {
+  const [memberNo, setMemberNo] = useState("");
+  const [units, setUnits] = useState(1);
+  const [note, setNote] = useState("");
+  const [step, setStep] = useState<"edit" | "review">("edit");
+  const maxUnits = state.holding.units;
+  const price = state.product.unit_price;
+  const ccy = state.product.currency;
+  const value = Math.max(0, price * units);
+  const canReview = memberNo.trim().length > 0 && units >= 1 && units <= maxUnits;
+
+  if (result) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-emerald-950">
+          <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+            Transfer complete
+          </h3>
+          <p className="mt-3 text-sm">
+            {units.toLocaleString()} units of{" "}
+            <span className="font-semibold">{state.product.name}</span> transferred to{" "}
+            <span className="font-semibold">{result.to_full_name ?? "member"}</span>.
+          </p>
+          <div className="mt-5 flex justify-end">
+            <button
+              onClick={onCancel}
+              className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-emerald-950">
+        <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+          Transfer — {state.product.name}
+        </h3>
+        <p className="mt-1 text-xs uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/50">
+          Step {step === "edit" ? "1 of 2 · Recipient & units" : "2 of 2 · Review & confirm"}
+        </p>
+
+        {step === "edit" ? (
+          <div className="mt-4 space-y-3">
+            <label className="block text-sm">
+              <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+                Recipient member number
+              </span>
+              <input
+                value={memberNo}
+                onChange={(e) => setMemberNo(e.target.value)}
+                placeholder="e.g. M-000123"
+                className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2 font-mono"
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+                Units (max {maxUnits.toLocaleString()})
+              </span>
+              <input
+                type="number"
+                min={1}
+                max={maxUnits}
+                value={units}
+                onChange={(e) =>
+                  setUnits(Math.min(maxUnits, Math.max(1, Number(e.target.value) || 0)))
+                }
+                className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-emerald-deep/70 dark:text-emerald-200/70">Note (optional)</span>
+              <input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
+              />
+            </label>
+            <div className="rounded-md bg-emerald-deep/5 p-3 text-sm dark:bg-emerald-100/5">
+              <div className="flex justify-between">
+                <span>Unit price</span>
+                <span className="font-semibold">
+                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(price)}
+                </span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span>Reference value</span>
+                <span className="font-semibold">
+                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(value)}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+                No cash moves between savings accounts. A proportional share of your cost basis moves
+                with the units.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
+              <div className="flex justify-between">
+                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Recipient</span>
+                <span className="font-mono font-semibold">{memberNo.trim()}</span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Units</span>
+                <span className="font-semibold">{units.toLocaleString()}</span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+                  Reference value
+                </span>
+                <span className="font-semibold">
+                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(value)}
+                </span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+                  Your remaining units
+                </span>
+                <span className="font-semibold">{(maxUnits - units).toLocaleString()}</span>
+              </div>
+            </div>
+            {note && (
+              <p className="rounded-md bg-emerald-deep/5 p-3 text-xs italic dark:bg-emerald-100/5">
+                Note: {note}
+              </p>
+            )}
+            <p className="text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+              This transfer is final. Please confirm the recipient's member number matches the
+              person you intend to send units to.
+            </p>
+          </div>
+        )}
+
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            onClick={step === "review" ? () => setStep("edit") : onCancel}
+            disabled={submitting}
+            className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100 disabled:opacity-50"
+          >
+            {step === "review" ? "Back" : "Cancel"}
+          </button>
+          {step === "edit" ? (
+            <button
+              disabled={!canReview}
+              onClick={() => setStep("review")}
+              className="rounded-md bg-royal px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+            >
+              Review
+            </button>
+          ) : (
+            <button
+              disabled={submitting}
+              onClick={() =>
+                onSubmit({
+                  to_member_no: memberNo.trim(),
+                  units,
+                  note: note.trim() ? note.trim() : null,
+                })
+              }
+              className="rounded-md bg-royal px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+            >
+              {submitting ? "Transferring…" : "Confirm transfer"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
