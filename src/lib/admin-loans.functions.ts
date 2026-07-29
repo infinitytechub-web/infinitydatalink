@@ -2,6 +2,8 @@ import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { loadRoleSet } from "@/lib/role-guards";
+import { assertDecisionPermission } from "@/lib/rbac-matrix";
 
 const ADMIN_ROLES = new Set([
   "super_admin",
@@ -87,11 +89,20 @@ export const decideLoan = createServerFn({ method: "POST" })
           .trim()
           .min(5, "A decision note of at least 5 characters is required")
           .max(1000),
+        step_up_token: z.string().min(16).max(200),
       })
       .parse(data),
   )
   .handler(async ({ data, context }): Promise<AdminLoanRow> => {
     const role = await assertAdmin(context.supabase, context.userId);
+    const roles = await loadRoleSet(context.supabase, context.userId);
+    assertDecisionPermission(roles, "loan", data.decision);
+    const { assertStepUp } = await import("@/lib/step-up.server");
+    const proof = await assertStepUp(
+      context.userId,
+      data.step_up_token,
+      `${data.decision === "approved" ? "approve" : "reject"} loan`,
+    );
 
     const { data: current, error: fetchErr } = await context.supabase
       .from("loans")
@@ -121,7 +132,13 @@ export const decideLoan = createServerFn({ method: "POST" })
       actor_role: role,
       action: data.decision === "approved" ? "loan.approved" : "loan.rejected",
       target: updated.id,
-      meta: { ref: updated.ref, note: data.note, amount: Number(updated.amount), member_id: updated.user_id },
+      meta: {
+        ref: updated.ref,
+        note: data.note,
+        amount: Number(updated.amount),
+        member_id: updated.user_id,
+        step_up: { method: proof.method, session_id: proof.id },
+      },
     });
 
     return {
