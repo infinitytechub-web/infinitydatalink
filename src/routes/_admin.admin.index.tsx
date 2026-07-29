@@ -22,6 +22,8 @@ import { decideLoan } from "@/lib/admin-loans.functions";
 import { RefreshCw, Sparkles } from "lucide-react";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
 import { PurgeControlsWidget } from "@/components/purge-controls-widget";
+import { RealtimeNotifications } from "@/components/realtime-notifications";
+import { OnlineUsersWidget } from "@/components/online-users-widget";
 
 const overviewQuery = queryOptions({
   queryKey: ["admin", "overview"],
