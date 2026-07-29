@@ -12,6 +12,7 @@ import { writeAudit } from "@/lib/audit-log";
 
 export const DECISION_MODULES = [
   "loan",
+  "payment",
   "withdrawal",
   "kyc",
   "user",
