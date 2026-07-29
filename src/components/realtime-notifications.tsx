@@ -309,12 +309,14 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
         <>
           <p className="sr-only" id="notifications-feed-help">
             Use the arrow keys to move between notifications, Home or End to jump to the first or last item, Enter to
-            open a notification, and the R key to mark it as read.
+            open a notification, and the R key to mark it as read. Pressing the down arrow on the last item loads older
+            notifications.
           </p>
           <ul
             ref={listRef}
             role="feed"
-            aria-busy={markAll.isPending}
+            aria-busy={markAll.isPending || isFetchingNextPage}
+
             aria-label={feedLabel}
             aria-describedby="notifications-feed-help"
             className="divide-y divide-border"
