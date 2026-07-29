@@ -123,6 +123,8 @@ function Dashboard() {
 
         {/* Right column */}
         <aside className="space-y-6">
+          <RealtimeNotifications limit={6} />
+          <OnlineUsersWidget />
           {/* AI insight */}
           <div className="relative overflow-hidden rounded bg-emerald-deep p-6 text-cream shadow-lg">
             <div className="pointer-events-none absolute right-0 top-0 p-8 opacity-10">
