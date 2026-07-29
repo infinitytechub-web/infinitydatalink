@@ -230,7 +230,7 @@ function RepaymentsContent() {
                       )}
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">{row.channel ?? "—"}</td>
-                    <td className="px-6 py-3"><StatusPill status={row.status} /></td>
+                    <td className="px-6 py-3"><StatusPill status={row.status as "cleared" | "pending" | "failed"} /></td>
                     <td className="px-6 py-3 text-right tabular-nums"><Money amount={row.amount} /></td>
                   </tr>
                 ))}
