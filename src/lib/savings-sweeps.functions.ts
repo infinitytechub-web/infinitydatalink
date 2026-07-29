@@ -10,6 +10,8 @@ export type Sweep = {
   to_account_id: string;
   to_label: string;
   amount: number;
+  min_balance: number;
+  max_amount: number | null;
   frequency: "daily" | "weekly" | "monthly";
   day_of_week: number | null;
   day_of_month: number | null;
@@ -18,20 +20,30 @@ export type Sweep = {
   last_run_at: string | null;
   last_run_status: string | null;
   last_run_error: string | null;
+  last_run_amount: number | null;
   runs_completed: number;
   note: string | null;
+};
+
+const RuleFields = {
+  amount: z.number().positive().max(10_000_000),
+  frequency: z.enum(["daily", "weekly", "monthly"]),
+  day_of_week: z.number().int().min(0).max(6).optional().nullable(),
+  day_of_month: z.number().int().min(1).max(28).optional().nullable(),
+  min_balance: z.number().min(0).max(10_000_000).default(0),
+  max_amount: z.number().positive().max(10_000_000).optional().nullable(),
+  note: z.string().max(500).optional().nullable(),
 };
 
 const CreateSchema = z.object({
   from_account_id: z.string().uuid(),
   to_account_id: z.string().uuid(),
-  amount: z.number().positive().max(10_000_000),
-  frequency: z.enum(["daily", "weekly", "monthly"]),
-  day_of_week: z.number().int().min(0).max(6).optional().nullable(),
-  day_of_month: z.number().int().min(1).max(28).optional().nullable(),
-  note: z.string().max(500).optional().nullable(),
+  ...RuleFields,
   start_at: z.string().datetime().optional().nullable(),
 });
+
+const UpdateSchema = z.object({ id: z.string().uuid(), ...RuleFields });
+
 
 function firstRun(frequency: string, dow: number | null | undefined, dom: number | null | undefined, start?: string | null): string {
   const base = start ? new Date(start) : new Date(Date.now() + 60_000);
@@ -67,7 +79,7 @@ export const listMySweeps = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("savings_sweeps")
       .select(
-        "id, from_account_id, to_account_id, amount, frequency, day_of_week, day_of_month, status, next_run_at, last_run_at, last_run_status, last_run_error, runs_completed, note",
+        "id, from_account_id, to_account_id, amount, min_balance, max_amount, frequency, day_of_week, day_of_month, status, next_run_at, last_run_at, last_run_status, last_run_error, last_run_amount, runs_completed, note",
       )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
@@ -94,6 +106,8 @@ export const listMySweeps = createServerFn({ method: "GET" })
       to_account_id: r.to_account_id,
       to_label: labelMap.get(r.to_account_id) ?? "Savings",
       amount: Number(r.amount),
+      min_balance: Number(r.min_balance ?? 0),
+      max_amount: r.max_amount == null ? null : Number(r.max_amount),
       frequency: r.frequency,
       day_of_week: r.day_of_week,
       day_of_month: r.day_of_month,
@@ -102,6 +116,7 @@ export const listMySweeps = createServerFn({ method: "GET" })
       last_run_at: r.last_run_at,
       last_run_status: r.last_run_status,
       last_run_error: r.last_run_error,
+      last_run_amount: r.last_run_amount == null ? null : Number(r.last_run_amount),
       runs_completed: r.runs_completed,
       note: r.note,
     }));
@@ -120,6 +135,8 @@ export const createSweep = createServerFn({ method: "POST" })
         from_account_id: data.from_account_id,
         to_account_id: data.to_account_id,
         amount: data.amount,
+        min_balance: data.min_balance,
+        max_amount: data.max_amount ?? null,
         frequency: data.frequency,
         day_of_week: data.frequency === "weekly" ? data.day_of_week ?? 1 : null,
         day_of_month: data.frequency === "monthly" ? data.day_of_month ?? 1 : null,
@@ -130,6 +147,45 @@ export const createSweep = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return { id: inserted!.id };
+  });
+
+/** Edit the rule set (amount, cadence, min balance, max per run) of an existing sweep. */
+export const updateSweep = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UpdateSchema.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { data: existing, error: readErr } = await context.supabase
+      .from("savings_sweeps")
+      .select("id, next_run_at, frequency, day_of_week, day_of_month")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!existing) throw new Error("sweep_not_found");
+
+    const dow = data.frequency === "weekly" ? data.day_of_week ?? 1 : null;
+    const dom = data.frequency === "monthly" ? data.day_of_month ?? 1 : null;
+    const cadenceChanged =
+      existing.frequency !== data.frequency ||
+      (existing.day_of_week ?? null) !== dow ||
+      (existing.day_of_month ?? null) !== dom;
+
+    const { error } = await context.supabase
+      .from("savings_sweeps")
+      .update({
+        amount: data.amount,
+        min_balance: data.min_balance,
+        max_amount: data.max_amount ?? null,
+        frequency: data.frequency,
+        day_of_week: dow,
+        day_of_month: dom,
+        note: data.note ?? null,
+        ...(cadenceChanged ? { next_run_at: firstRun(data.frequency, dow, dom, null) } : {}),
+      })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const setSweepStatus = createServerFn({ method: "POST" })
