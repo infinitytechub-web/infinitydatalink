@@ -135,6 +135,8 @@ export const createSweep = createServerFn({ method: "POST" })
         from_account_id: data.from_account_id,
         to_account_id: data.to_account_id,
         amount: data.amount,
+        min_balance: data.min_balance,
+        max_amount: data.max_amount ?? null,
         frequency: data.frequency,
         day_of_week: data.frequency === "weekly" ? data.day_of_week ?? 1 : null,
         day_of_month: data.frequency === "monthly" ? data.day_of_month ?? 1 : null,
@@ -145,6 +147,45 @@ export const createSweep = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return { id: inserted!.id };
+  });
+
+/** Edit the rule set (amount, cadence, min balance, max per run) of an existing sweep. */
+export const updateSweep = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UpdateSchema.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { data: existing, error: readErr } = await context.supabase
+      .from("savings_sweeps")
+      .select("id, next_run_at, frequency, day_of_week, day_of_month")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!existing) throw new Error("sweep_not_found");
+
+    const dow = data.frequency === "weekly" ? data.day_of_week ?? 1 : null;
+    const dom = data.frequency === "monthly" ? data.day_of_month ?? 1 : null;
+    const cadenceChanged =
+      existing.frequency !== data.frequency ||
+      (existing.day_of_week ?? null) !== dow ||
+      (existing.day_of_month ?? null) !== dom;
+
+    const { error } = await context.supabase
+      .from("savings_sweeps")
+      .update({
+        amount: data.amount,
+        min_balance: data.min_balance,
+        max_amount: data.max_amount ?? null,
+        frequency: data.frequency,
+        day_of_week: dow,
+        day_of_month: dom,
+        note: data.note ?? null,
+        ...(cadenceChanged ? { next_run_at: firstRun(data.frequency, dow, dom, null) } : {}),
+      })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const setSweepStatus = createServerFn({ method: "POST" })
