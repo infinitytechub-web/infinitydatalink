@@ -79,7 +79,7 @@ export const listMySweeps = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("savings_sweeps")
       .select(
-        "id, from_account_id, to_account_id, amount, frequency, day_of_week, day_of_month, status, next_run_at, last_run_at, last_run_status, last_run_error, runs_completed, note",
+        "id, from_account_id, to_account_id, amount, min_balance, max_amount, frequency, day_of_week, day_of_month, status, next_run_at, last_run_at, last_run_status, last_run_error, last_run_amount, runs_completed, note",
       )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
