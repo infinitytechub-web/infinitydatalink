@@ -47,9 +47,12 @@ function StatementsPage() {
           </Link>
         }
       />
-      <Suspense fallback={<SectionCardSkeleton title="Statements" rows={5} cols={6} />}>
-        <Body />
-      </Suspense>
+      <div className="space-y-6">
+        <StatementGenerator />
+        <Suspense fallback={<SectionCardSkeleton title="Statements" rows={5} cols={6} />}>
+          <Body />
+        </Suspense>
+      </div>
     </>
   );
 }
