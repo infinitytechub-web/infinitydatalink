@@ -268,7 +268,10 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
       setNote("");
       invalidate();
     },
-    onError: (e) => toast.error(friendlyError(e)),
+    onError: (e) => {
+      if (e instanceof Error && /cancelled/i.test(e.message)) return;
+      toast.error(friendlyError(e));
+    },
   });
 
   const payout = useMutation({
@@ -280,7 +283,10 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
       toast.success("Payout posted to the member's account");
       invalidate();
     },
-    onError: (e) => toast.error(friendlyError(e)),
+    onError: (e) => {
+      if (e instanceof Error && /cancelled/i.test(e.message)) return;
+      toast.error(friendlyError(e));
+    },
   });
 
   return (
