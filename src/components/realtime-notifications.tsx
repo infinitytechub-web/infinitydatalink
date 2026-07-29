@@ -208,7 +208,7 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
       event.preventDefault();
       if (next !== null) focusItem(next);
     },
-    [rows.length, focusItem, markOne],
+    [rows.length, focusItem, markOne, hasNextPage, loadMore],
   );
 
   const jumpToNewest = useCallback(() => {
