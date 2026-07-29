@@ -221,6 +221,8 @@ export const adminListWithdrawals = createServerFn({ method: "POST" })
       .from("savings_withdrawal_requests")
       .select(SELECT_COLS, { count: "exact" });
     if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.date_from) q = q.gte("created_at", `${data.date_from}T00:00:00Z`);
+    if (data.date_to) q = q.lte("created_at", `${data.date_to}T23:59:59.999Z`);
     q = q.order("created_at", { ascending: false }).range(from, to);
 
     const { data: rows, error, count } = await q;
