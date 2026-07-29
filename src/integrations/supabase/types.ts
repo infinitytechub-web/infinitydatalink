@@ -171,6 +171,9 @@ export type Database = {
       }
       dividend_runs: {
         Row: {
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           created_by: string | null
           executed_at: string | null
@@ -183,12 +186,20 @@ export type Database = {
           period_start: string
           product_id: string
           ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           status: string
+          submitted_at: string | null
+          submitted_by: string | null
           total_paid: number
           units_paid: number
           updated_at: string
         }
         Insert: {
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           created_by?: string | null
           executed_at?: string | null
@@ -201,12 +212,20 @@ export type Database = {
           period_start: string
           product_id: string
           ref: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           total_paid?: number
           units_paid?: number
           updated_at?: string
         }
         Update: {
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           created_by?: string | null
           executed_at?: string | null
@@ -219,7 +238,12 @@ export type Database = {
           period_start?: string
           product_id?: string
           ref?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           total_paid?: number
           units_paid?: number
           updated_at?: string
@@ -1849,6 +1873,41 @@ export type Database = {
         }
         Returns: string
       }
+      approve_dividend_run: {
+        Args: { _actor_id: string; _note?: string; _run_id: string }
+        Returns: {
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          members_paid: number
+          note: string | null
+          per_unit_amount: number
+          period_end: string
+          period_start: string
+          product_id: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          total_paid: number
+          units_paid: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "dividend_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_entity:
         | {
             Args: { _entity_id: string; _note: string }
@@ -2057,6 +2116,9 @@ export type Database = {
       execute_dividend_run: {
         Args: { _actor_id: string; _run_id: string }
         Returns: {
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           created_by: string | null
           executed_at: string | null
@@ -2069,7 +2131,12 @@ export type Database = {
           period_start: string
           product_id: string
           ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           status: string
+          submitted_at: string | null
+          submitted_by: string | null
           total_paid: number
           units_paid: number
           updated_at: string
@@ -2455,6 +2522,41 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reject_dividend_run: {
+        Args: { _actor_id: string; _reason: string; _run_id: string }
+        Returns: {
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          members_paid: number
+          note: string | null
+          per_unit_amount: number
+          period_end: string
+          period_start: string
+          product_id: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          total_paid: number
+          units_paid: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "dividend_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reject_expense: {
         Args: { _actor_id: string; _expense_id: string; _reason: string }
         Returns: {
@@ -2629,6 +2731,41 @@ export type Database = {
       set_user_active: {
         Args: { _active: boolean; _reason?: string; _uid: string }
         Returns: undefined
+      }
+      submit_dividend_run_for_approval: {
+        Args: { _actor_id: string; _run_id: string }
+        Returns: {
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          members_paid: number
+          note: string | null
+          per_unit_amount: number
+          period_end: string
+          period_start: string
+          product_id: string
+          ref: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          total_paid: number
+          units_paid: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "dividend_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       suspend_entity:
         | {
