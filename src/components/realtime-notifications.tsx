@@ -53,11 +53,22 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
   const markFn = useServerFn(markNotificationRead);
   const markAllFn = useServerFn(markAllNotificationsRead);
 
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    error: feedError,
+  } = useInfiniteQuery({
     queryKey: ["notifications", "feed", limit],
-    queryFn: () => listFn({ data: { limit } }),
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => listFn({ data: { limit, before: pageParam } }),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: 30_000,
   });
+
 
   const markAll = useMutation({
     mutationFn: () => markAllFn({}),
