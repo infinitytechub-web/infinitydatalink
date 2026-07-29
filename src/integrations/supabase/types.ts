@@ -645,6 +645,165 @@ export type Database = {
           },
         ]
       }
+      fixed_deposit_products: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          early_break_penalty_pct: number
+          id: string
+          is_active: boolean
+          max_amount: number | null
+          min_amount: number
+          name: string
+          rate_annual: number
+          sort_order: number
+          term_months: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          early_break_penalty_pct?: number
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name: string
+          rate_annual: number
+          sort_order?: number
+          term_months: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          early_break_penalty_pct?: number
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name?: string
+          rate_annual?: number
+          sort_order?: number
+          term_months?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fixed_deposits: {
+        Row: {
+          break_reason: string | null
+          broken_at: string | null
+          close_txn_id: string | null
+          closed_at: string | null
+          created_at: string
+          id: string
+          interest_expected: number
+          interest_paid: number
+          maturity_date: string
+          open_txn_id: string | null
+          penalty_amount: number
+          principal: number
+          product_id: string
+          rate_annual: number
+          ref: string
+          rollover: string
+          source_account_id: string
+          start_date: string
+          status: Database["public"]["Enums"]["fixed_deposit_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          break_reason?: string | null
+          broken_at?: string | null
+          close_txn_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          interest_expected?: number
+          interest_paid?: number
+          maturity_date: string
+          open_txn_id?: string | null
+          penalty_amount?: number
+          principal: number
+          product_id: string
+          rate_annual: number
+          ref: string
+          rollover?: string
+          source_account_id: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["fixed_deposit_status"]
+          term_months: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          break_reason?: string | null
+          broken_at?: string | null
+          close_txn_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          interest_expected?: number
+          interest_paid?: number
+          maturity_date?: string
+          open_txn_id?: string | null
+          penalty_amount?: number
+          principal?: number
+          product_id?: string
+          rate_annual?: number
+          ref?: string
+          rollover?: string
+          source_account_id?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["fixed_deposit_status"]
+          term_months?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixed_deposits_close_txn_id_fkey"
+            columns: ["close_txn_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_deposits_open_txn_id_fkey"
+            columns: ["open_txn_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_deposits_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_deposit_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_deposits_source_account_id_fkey"
+            columns: ["source_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_deposits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fx_rates: {
         Row: {
           base: string
@@ -668,6 +827,243 @@ export type Database = {
           source?: string
         }
         Relationships: []
+      }
+      group_pot_contributions: {
+        Row: {
+          amount: number
+          created_at: string
+          cycle: number
+          id: string
+          note: string | null
+          pot_id: string
+          profile_id: string
+          savings_account_id: string | null
+          txn_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          cycle?: number
+          id?: string
+          note?: string | null
+          pot_id: string
+          profile_id: string
+          savings_account_id?: string | null
+          txn_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          cycle?: number
+          id?: string
+          note?: string | null
+          pot_id?: string
+          profile_id?: string
+          savings_account_id?: string | null
+          txn_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_pot_contributions_pot_id_fkey"
+            columns: ["pot_id"]
+            isOneToOne: false
+            referencedRelation: "group_pots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_pot_contributions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_pot_contributions_savings_account_id_fkey"
+            columns: ["savings_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_pot_contributions_txn_id_fkey"
+            columns: ["txn_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_pot_members: {
+        Row: {
+          id: string
+          joined_at: string
+          payout_position: number
+          pot_id: string
+          profile_id: string
+          status: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          payout_position?: number
+          pot_id: string
+          profile_id: string
+          status?: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          payout_position?: number
+          pot_id?: string
+          profile_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_pot_members_pot_id_fkey"
+            columns: ["pot_id"]
+            isOneToOne: false
+            referencedRelation: "group_pots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_pot_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_pot_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          cycle: number
+          id: string
+          note: string | null
+          paid_at: string | null
+          paid_by: string | null
+          pot_id: string
+          profile_id: string
+          savings_account_id: string | null
+          status: Database["public"]["Enums"]["pot_payout_status"]
+          txn_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          cycle: number
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          pot_id: string
+          profile_id: string
+          savings_account_id?: string | null
+          status?: Database["public"]["Enums"]["pot_payout_status"]
+          txn_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          cycle?: number
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          pot_id?: string
+          profile_id?: string
+          savings_account_id?: string | null
+          status?: Database["public"]["Enums"]["pot_payout_status"]
+          txn_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_pot_payouts_pot_id_fkey"
+            columns: ["pot_id"]
+            isOneToOne: false
+            referencedRelation: "group_pots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_pot_payouts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_pot_payouts_savings_account_id_fkey"
+            columns: ["savings_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_pot_payouts_txn_id_fkey"
+            columns: ["txn_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_pots: {
+        Row: {
+          balance: number
+          contribution_amount: number
+          created_at: string
+          created_by: string | null
+          current_cycle: number
+          description: string | null
+          entity_id: string
+          frequency: Database["public"]["Enums"]["recurring_frequency"]
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          contribution_amount: number
+          created_at?: string
+          created_by?: string | null
+          current_cycle?: number
+          description?: string | null
+          entity_id: string
+          frequency?: Database["public"]["Enums"]["recurring_frequency"]
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          contribution_amount?: number
+          created_at?: string
+          created_by?: string | null
+          current_cycle?: number
+          description?: string | null
+          entity_id?: string
+          frequency?: Database["public"]["Enums"]["recurring_frequency"]
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_pots_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kyc_documents: {
         Row: {
@@ -1263,6 +1659,79 @@ export type Database = {
           },
           {
             foreignKeyName: "savings_accounts_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_holds: {
+        Row: {
+          account_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          created_by_role: string | null
+          id: string
+          loan_id: string | null
+          reason: string
+          release_reason: string | null
+          released_at: string | null
+          released_by: string | null
+          status: Database["public"]["Enums"]["savings_hold_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          created_by_role?: string | null
+          id?: string
+          loan_id?: string | null
+          reason: string
+          release_reason?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          status?: Database["public"]["Enums"]["savings_hold_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          created_by_role?: string | null
+          id?: string
+          loan_id?: string | null
+          reason?: string
+          release_reason?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          status?: Database["public"]["Enums"]["savings_hold_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_holds_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_holds_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_holds_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -2425,6 +2894,39 @@ export type Database = {
         Args: { _note?: string; _uid: string }
         Returns: undefined
       }
+      break_fixed_deposit: {
+        Args: { _actor_id?: string; _id: string; _reason: string }
+        Returns: {
+          break_reason: string | null
+          broken_at: string | null
+          close_txn_id: string | null
+          closed_at: string | null
+          created_at: string
+          id: string
+          interest_expected: number
+          interest_paid: number
+          maturity_date: string
+          open_txn_id: string | null
+          penalty_amount: number
+          principal: number
+          product_id: string
+          rate_annual: number
+          ref: string
+          rollover: string
+          source_account_id: string
+          start_date: string
+          status: Database["public"]["Enums"]["fixed_deposit_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "fixed_deposits"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancel_savings_withdrawal: {
         Args: { _id: string; _reason?: string }
         Returns: {
@@ -2482,6 +2984,32 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "transfers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      contribute_to_pot: {
+        Args: {
+          _account_id: string
+          _actor_id?: string
+          _amount: number
+          _note: string
+          _pot_id: string
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          cycle: number
+          id: string
+          note: string | null
+          pot_id: string
+          profile_id: string
+          savings_account_id: string | null
+          txn_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "group_pot_contributions"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2655,6 +3183,7 @@ export type Database = {
               user_id: string
             }[]
           }
+      mature_fixed_deposits: { Args: never; Returns: number }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2663,6 +3192,45 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      open_fixed_deposit: {
+        Args: {
+          _account_id: string
+          _actor_id?: string
+          _amount: number
+          _product_id: string
+          _rollover: string
+        }
+        Returns: {
+          break_reason: string | null
+          broken_at: string | null
+          close_txn_id: string | null
+          closed_at: string | null
+          created_at: string
+          id: string
+          interest_expected: number
+          interest_paid: number
+          maturity_date: string
+          open_txn_id: string | null
+          penalty_amount: number
+          principal: number
+          product_id: string
+          rate_annual: number
+          ref: string
+          rollover: string
+          source_account_id: string
+          start_date: string
+          status: Database["public"]["Enums"]["fixed_deposit_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "fixed_deposits"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       pay_expense: {
         Args: {
@@ -2698,6 +3266,30 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      pay_pot_payout: {
+        Args: { _actor_id: string; _payout_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          cycle: number
+          id: string
+          note: string | null
+          paid_at: string | null
+          paid_by: string | null
+          pot_id: string
+          profile_id: string
+          savings_account_id: string | null
+          status: Database["public"]["Enums"]["pot_payout_status"]
+          txn_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "group_pot_payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       pay_savings_withdrawal: {
         Args: { _actor_id: string; _id: string }
         Returns: {
@@ -2729,6 +3321,38 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "savings_withdrawal_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      place_savings_hold: {
+        Args: {
+          _account_id: string
+          _actor_id: string
+          _actor_role: string
+          _amount: number
+          _loan_id: string
+          _reason: string
+        }
+        Returns: {
+          account_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          created_by_role: string | null
+          id: string
+          loan_id: string | null
+          reason: string
+          release_reason: string | null
+          released_at: string | null
+          released_by: string | null
+          status: Database["public"]["Enums"]["savings_hold_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_holds"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -3146,6 +3770,31 @@ export type Database = {
         Args: { _reason: string; _uid: string }
         Returns: undefined
       }
+      release_savings_hold: {
+        Args: { _actor_id: string; _id: string; _reason: string }
+        Returns: {
+          account_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          created_by_role: string | null
+          id: string
+          loan_id: string | null
+          reason: string
+          release_reason: string | null
+          released_at: string | null
+          released_by: string | null
+          status: Database["public"]["Enums"]["savings_hold_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_holds"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       request_savings_withdrawal: {
         Args: {
           _account_id: string
@@ -3413,6 +4062,7 @@ export type Database = {
       entity_status: "pending" | "active" | "suspended" | "closed"
       entity_type: "group" | "department" | "institution"
       expense_status: "pending" | "approved" | "paid" | "rejected"
+      fixed_deposit_status: "active" | "matured" | "redeemed" | "broken"
       kyc_doc_status: "pending" | "approved" | "rejected"
       kyc_doc_type:
         | "national_id_front"
@@ -3424,8 +4074,10 @@ export type Database = {
       kyc_status: "pending" | "active" | "rejected"
       loan_status: "pending" | "approved" | "rejected" | "active" | "closed"
       member_tier: "standard" | "premium"
+      pot_payout_status: "scheduled" | "paid" | "skipped"
       recurring_frequency: "daily" | "weekly" | "monthly"
       recurring_status: "active" | "paused"
+      savings_hold_status: "active" | "released"
       settings_change_kind:
         | "branding"
         | "institution"
@@ -3597,6 +4249,7 @@ export const Constants = {
       entity_status: ["pending", "active", "suspended", "closed"],
       entity_type: ["group", "department", "institution"],
       expense_status: ["pending", "approved", "paid", "rejected"],
+      fixed_deposit_status: ["active", "matured", "redeemed", "broken"],
       kyc_doc_status: ["pending", "approved", "rejected"],
       kyc_doc_type: [
         "national_id_front",
@@ -3609,8 +4262,10 @@ export const Constants = {
       kyc_status: ["pending", "active", "rejected"],
       loan_status: ["pending", "approved", "rejected", "active", "closed"],
       member_tier: ["standard", "premium"],
+      pot_payout_status: ["scheduled", "paid", "skipped"],
       recurring_frequency: ["daily", "weekly", "monthly"],
       recurring_status: ["active", "paused"],
+      savings_hold_status: ["active", "released"],
       settings_change_kind: [
         "branding",
         "institution",
