@@ -509,7 +509,7 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
         supabase
           .from("dividend_runs")
           .select(
-            "id, ref, product_id, period_start, period_end, per_unit_amount, units_paid, members_paid, total_paid, status, note, executed_at, created_at, share_products(name)",
+            "id, ref, product_id, period_start, period_end, per_unit_amount, units_paid, members_paid, total_paid, status, note, executed_at, created_at, created_by, submitted_by, submitted_at, approved_by, approved_at, approval_note, rejected_by, rejected_at, rejection_reason, share_products(name)",
           )
           .order("created_at", { ascending: false })
           .limit(50),
