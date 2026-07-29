@@ -10,17 +10,26 @@ export const Route = createFileRoute("/api/public/hooks/monthly-interest")({
           if (!auth) return new Response("unauthorized", { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data, error } = await supabaseAdmin.rpc("accrue_monthly_interest", { _period_end: undefined } as never);
+        const { data, error } = await supabaseAdmin.rpc("post_savings_interest", {
+          _period_end: undefined,
+          _dry_run: false,
+          _actor: undefined,
+          _note: "scheduled run",
+        } as never);
         if (error) {
           return new Response(JSON.stringify({ success: false, error: error.message }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
           });
         }
-        const rows = (data ?? []) as Array<{ interest: number }>;
-        const total = rows.reduce((s, r) => s + Number(r.interest ?? 0), 0);
+        const row: any = Array.isArray(data) ? data[0] : data;
         return new Response(
-          JSON.stringify({ success: true, accounts: rows.length, total_interest: total }),
+          JSON.stringify({
+            success: true,
+            accounts: Number(row?.accounts_processed ?? 0),
+            credited: Number(row?.accounts_credited ?? 0),
+            total_interest: Number(row?.total_interest ?? 0),
+          }),
           { headers: { "Content-Type": "application/json" } },
         );
       },
