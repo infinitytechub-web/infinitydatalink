@@ -243,7 +243,12 @@ function InvestmentsPage() {
       </section>
 
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-        <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Recent activity</h2>
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Investment activity</h2>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/60">
+            Immutable audit log
+          </span>
+        </div>
         {data.recent.length === 0 ? (
           <p className="mt-3 text-sm text-emerald-deep/60 dark:text-emerald-200/60">No share transactions yet.</p>
         ) : (
@@ -253,31 +258,49 @@ function InvestmentsPage() {
                 <tr>
                   <th className="py-2">Ref</th>
                   <th>Date</th>
-                  <th>Kind</th>
+                  <th>Action</th>
                   <th>Product</th>
                   <th>Units</th>
                   <th className="text-right">Amount</th>
+                  <th>Note</th>
                 </tr>
               </thead>
               <tbody>
-                {data.recent.map((t) => (
-                  <tr key={t.id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
-                    <td className="py-2 font-mono text-xs">{t.ref}</td>
-                    <td>{new Date(t.created_at).toLocaleDateString()}</td>
-                    <td className="capitalize">{t.kind}</td>
-                    <td>{t.product_name}</td>
-                    <td>{t.units.toLocaleString()}</td>
-                    <td className="text-right font-semibold">
-                      {t.kind === "purchase" ? "-" : "+"}
-                      {money(t.amount)}
-                    </td>
-                  </tr>
-                ))}
+                {data.recent.map((t) => {
+                  const isTransfer = /transfer/i.test(t.note ?? "");
+                  const label = isTransfer
+                    ? t.kind === "sale" ? "Transfer out" : "Transfer in"
+                    : t.kind === "purchase" ? "Buy"
+                    : t.kind === "sale" ? "Sell"
+                    : "Dividend";
+                  const sign = t.kind === "purchase" ? "-" : "+";
+                  return (
+                    <tr key={t.id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
+                      <td className="py-2 font-mono text-xs">{t.ref}</td>
+                      <td className="tabular whitespace-nowrap">{new Date(t.created_at).toLocaleString()}</td>
+                      <td>
+                        <span className="rounded-full border border-emerald-deep/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 dark:border-emerald-100/20 dark:text-emerald-100/80">
+                          {label}
+                        </span>
+                      </td>
+                      <td>{t.product_name}</td>
+                      <td className="tabular">{t.units.toLocaleString()}</td>
+                      <td className="tabular text-right font-semibold">
+                        {sign}
+                        {money(t.amount)}
+                      </td>
+                      <td className="max-w-xs truncate text-xs text-emerald-deep/70 dark:text-emerald-200/70" title={t.note ?? ""}>
+                        {t.note || "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </section>
+
 
       {tradeState && (
         <TradeDialog

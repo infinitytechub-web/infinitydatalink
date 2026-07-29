@@ -387,6 +387,18 @@ export const purchaseShares = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     const r = Array.isArray(row) ? row[0] : row;
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.purchase",
+      target: r.id,
+      meta: {
+        ref: r.ref,
+        product_id: data.product_id,
+        units: data.units,
+        savings_account_id: data.savings_account_id,
+        note: data.note ?? null,
+      },
+    });
     return { id: r.id, ref: r.ref };
   });
 
@@ -403,6 +415,18 @@ export const sellShares = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     const r = Array.isArray(row) ? row[0] : row;
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.sale",
+      target: r.id,
+      meta: {
+        ref: r.ref,
+        product_id: data.product_id,
+        units: data.units,
+        savings_account_id: data.savings_account_id,
+        note: data.note ?? null,
+      },
+    });
     return { id: r.id, ref: r.ref };
   });
 
@@ -447,6 +471,21 @@ export const transferShares = createServerFn({ method: "POST" })
       throw new Error(map[error.message] ?? error.message);
     }
     const r = Array.isArray(row) ? row[0] : row;
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.transfer",
+      target: r.out_txn_id,
+      meta: {
+        product_id: data.product_id,
+        units: data.units,
+        to_member_no: data.to_member_no,
+        to_user_id: r.to_user_id,
+        to_full_name: r.to_full_name ?? null,
+        out_txn_id: r.out_txn_id,
+        in_txn_id: r.in_txn_id,
+        note: data.note ?? null,
+      },
+    });
     return {
       out_txn_id: r.out_txn_id,
       in_txn_id: r.in_txn_id,
@@ -454,6 +493,7 @@ export const transferShares = createServerFn({ method: "POST" })
       to_full_name: r.to_full_name ?? null,
     };
   });
+
 
 // ============================================================================
 // Admin: products, holdings, dividend runs
