@@ -597,7 +597,7 @@ export const listSavingsLedger = createServerFn({ method: "GET" })
       .range(from, from + data.page_size - 1);
     if (error) throw new Error(error.message);
 
-    let list = (rows ?? []).map((r: any) => {
+    let list: LedgerEntry[] = ((rows ?? []) as any[]).map((r: any): LedgerEntry => {
       const signed = signedAmount(r.kind, Number(r.amount ?? 0));
       return {
         id: r.id as string,
@@ -616,7 +616,7 @@ export const listSavingsLedger = createServerFn({ method: "GET" })
       };
     });
 
-    if (data.direction) list = list.filter((r) => r.direction === data.direction);
+    if (data.direction) list = list.filter((r: LedgerEntry) => r.direction === data.direction);
 
     // Aggregate totals across the whole filtered set (not just this page).
     const { data: allRows, error: sErr } = await applyFilters(
