@@ -376,14 +376,15 @@ function TradeDialog({
     | { mode: "sell"; holding: ShareHolding; product: ShareProduct };
   accounts: Array<{ id: string; nickname: string | null; balance: number; plan_name: string }>;
   onCancel: () => void;
-  onSubmit: (v: { savings_account_id: string; units: number; note: string | null }) => void;
+  onSubmit: (v: { savings_account_id: string; units: number; note: string | null }) => Promise<{ id: string; ref: string }>;
   submitting: boolean;
   error: string | null;
 }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [units, setUnits] = useState(state.mode === "buy" ? state.product.min_units : 1);
   const [note, setNote] = useState("");
-  const [step, setStep] = useState<"edit" | "review">("edit");
+  const [step, setStep] = useState<"edit" | "review" | "receipt">("edit");
+  const [receipt, setReceipt] = useState<{ ref: string; timestamp: string } | null>(null);
   const price = state.product.unit_price;
   const maxUnits = state.mode === "sell" ? state.holding.units : undefined;
 
