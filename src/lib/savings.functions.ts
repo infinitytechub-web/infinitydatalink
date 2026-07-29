@@ -206,7 +206,7 @@ export const getMyAccountDetail = createServerFn({ method: "GET" })
     const { data: acct, error } = await context.supabase
       .from("savings_accounts")
       .select(
-        "id, plan_id, balance, nickname, goal_amount, goal_target_date, status, created_at, updated_at, savings_plans(name, schedule, interest_rate)",
+        "id, plan_id, balance, nickname, goal_amount, goal_target_date, status, created_at, updated_at, savings_plans(name, schedule, interest_rate, min_contribution)",
       )
       .eq("id", data.id)
       .eq("user_id", context.userId)
@@ -230,6 +230,7 @@ export const getMyAccountDetail = createServerFn({ method: "GET" })
         plan_name: a.savings_plans?.name ?? "Savings Plan",
         plan_schedule: a.savings_plans?.schedule ?? "—",
         plan_interest_rate: Number(a.savings_plans?.interest_rate ?? 0),
+        plan_min_contribution: Number(a.savings_plans?.min_contribution ?? 0),
         balance,
         nickname: a.nickname,
         goal_amount: goal,
