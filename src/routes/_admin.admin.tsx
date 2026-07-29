@@ -39,6 +39,7 @@ const groups: NavGroup[] = [
     label: "Overview",
     items: [
       { to: "/admin", label: "Analytics", icon: <BarChart3 /> },
+      { to: "/admin/analytics", label: "Analytics Dashboards", icon: <TrendingUp /> },
       { to: "/admin/reports", label: "Reports", icon: <FileBarChart /> },
       { to: "/admin/audit", label: "Audit & Activity", icon: <History /> },
       { to: "/admin/activity", label: "Activity Timeline", icon: <Activity /> },
