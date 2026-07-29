@@ -159,12 +159,20 @@ function InvestmentsPage() {
                       <td>{money(h.total_dividends)}</td>
                       <td className="text-right">
                         {product && (
-                          <button
-                            onClick={() => setTradeState({ mode: "sell", holding: h, product })}
-                            className="rounded bg-emerald-deep/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-deep hover:bg-emerald-deep/20 dark:bg-emerald-100/10 dark:text-emerald-100"
-                          >
-                            Sell
-                          </button>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => setTransferState({ holding: h, product })}
+                              className="rounded bg-royal/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-royal hover:bg-royal/20 dark:bg-royal/20 dark:text-cream"
+                            >
+                              Transfer
+                            </button>
+                            <button
+                              onClick={() => setTradeState({ mode: "sell", holding: h, product })}
+                              className="rounded bg-emerald-deep/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-deep hover:bg-emerald-deep/20 dark:bg-emerald-100/10 dark:text-emerald-100"
+                            >
+                              Sell
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
