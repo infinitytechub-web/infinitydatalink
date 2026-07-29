@@ -19,6 +19,7 @@ import { formatMoney } from "@/lib/org-config";
 import { generateBusinessInsights } from "@/lib/ai-insights.functions";
 import { getAdminOverview, type ActivityEntry, type PendingApproval } from "@/lib/admin-analytics.functions";
 import { decideLoan } from "@/lib/admin-loans.functions";
+import { useStepUp } from "@/components/step-up-dialog";
 import { RefreshCw, Sparkles } from "lucide-react";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
 import { PurgeControlsWidget } from "@/components/purge-controls-widget";
@@ -151,16 +152,24 @@ function formatCompact(n: number) {
 function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
   const qc = useQueryClient();
   const decide = useServerFn(decideLoan);
+  const { ensure, dialog } = useStepUp();
   const mutation = useMutation({
-    mutationFn: (input: { loan_id: string; decision: "approved" | "rejected"; note: string }) =>
-      decide({ data: input }),
+    mutationFn: async (input: { loan_id: string; decision: "approved" | "rejected"; note: string }) => {
+      const step_up_token = await ensure(
+        `${input.decision === "approved" ? "approve" : "reject"} pending loan`,
+      );
+      return decide({ data: { ...input, step_up_token } });
+    },
     onSuccess: (_d, vars) => {
       toast.success(`Loan ${vars.decision}`);
       qc.invalidateQueries({ queryKey: ["admin", "overview"] });
       qc.invalidateQueries({ queryKey: ["admin", "loans"] });
       qc.invalidateQueries({ queryKey: ["admin", "loan-audit"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      if (/cancelled/i.test(e.message)) return;
+      toast.error(e.message);
+    },
   });
 
   const act = (loan_id: string, decision: "approved" | "rejected") => {
