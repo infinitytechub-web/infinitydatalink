@@ -3,7 +3,7 @@ import { Suspense, useState } from "react";
 import { useSuspenseQuery, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { CheckCircle2, PlayCircle, Settings, XCircle } from "lucide-react";
+import { CheckCircle2, PlayCircle, Scale, Settings, XCircle } from "lucide-react";
 import { ErrorState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
