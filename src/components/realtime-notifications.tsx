@@ -165,8 +165,14 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
       let next: number | null = null;
       switch (event.key) {
         case "ArrowDown":
+          if (index === last && hasNextPage) {
+            event.preventDefault();
+            loadMore(true);
+            return;
+          }
           next = Math.min(index + 1, last);
           break;
+
         case "ArrowUp":
           next = Math.max(index - 1, 0);
           break;
