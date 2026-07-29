@@ -248,8 +248,9 @@ function AccountCard({ a }: { a: SavingsAccount }) {
         ) : null}
       </Link>
       {a.status === "active" ? (
-        <div className="mt-4 flex items-center gap-2 border-t border-emerald-deep/5 pt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-emerald-deep/5 pt-4">
           <QuickDepositButton accountId={a.id} accountLabel={a.nickname || a.plan_name} />
+          <GoalDialog accountId={a.id} currentAmount={a.goal_amount} currentDate={a.goal_target_date} />
           <Link
             to="/app/savings/$accountId"
             params={{ accountId: a.id }}
