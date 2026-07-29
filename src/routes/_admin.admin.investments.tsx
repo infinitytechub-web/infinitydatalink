@@ -43,6 +43,7 @@ const money = (n: number, ccy = "GHS") =>
 
 function AdminInvestments() {
   const { data } = useSuspenseQuery(overviewQO);
+  const { data: series } = useSuspenseQuery(adminSeriesQO);
   const qc = useQueryClient();
   const upsert = useServerFn(upsertShareProduct);
   const createRun = useServerFn(createDividendRun);
