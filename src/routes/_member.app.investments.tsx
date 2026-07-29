@@ -280,6 +280,19 @@ function InvestmentsPage() {
           }}
         />
       )}
+
+      {transferState && (
+        <TransferDialog
+          state={transferState}
+          onCancel={() => setTransferState(null)}
+          submitting={transferMut.isPending}
+          error={(transferMut.error as Error | null)?.message ?? null}
+          result={transferMut.data ?? null}
+          onSubmit={(v) =>
+            transferMut.mutate({ product_id: transferState.product.id, ...v })
+          }
+        />
+      )}
     </div>
   );
 }
