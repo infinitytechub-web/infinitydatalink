@@ -41,6 +41,73 @@ export const Route = createFileRoute("/_member/app/investments")({
 const money = (n: number, ccy = "GHS") =>
   new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(n);
 
+type TradeReceipt = {
+  ref: string;
+  timestamp: string;
+  mode: "buy" | "sell";
+  product_name: string;
+  product_code: string;
+  currency: string;
+  units: number;
+  unit_price: number;
+  gross: number;
+  feeRate: number;
+  fee: number;
+  net: number;
+  account_label: string;
+  note: string | null;
+};
+
+function downloadTradeReceipt(r: TradeReceipt) {
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("en-GH", { style: "currency", currency: r.currency }).format(n);
+  const esc = (s: string) =>
+    s.replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+    );
+  const title = `${r.mode === "buy" ? "Purchase" : "Sale"} Receipt — ${r.ref}`;
+  const html = `<!doctype html>
+<html><head><meta charset="utf-8"><title>${esc(title)}</title>
+<style>
+  body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#0f2b23;margin:40px;max-width:640px}
+  h1{font-family:Georgia,serif;font-size:22px;margin:0 0 4px}
+  .muted{color:#5c7a72;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;margin-top:20px}
+  td{padding:8px 0;border-bottom:1px solid #e5efe9;font-variant-numeric:tabular-nums}
+  td.label{color:#5c7a72}
+  td.val{text-align:right;font-weight:600}
+  .total td{border-top:2px solid #0f2b23;border-bottom:none;padding-top:12px;font-size:16px}
+  .foot{margin-top:24px;font-size:11px;color:#5c7a72}
+  @media print{body{margin:20mm}}
+</style></head>
+<body>
+  <h1>IT-360 CashApp — Trade Receipt</h1>
+  <div class="muted">${r.mode === "buy" ? "Share Purchase" : "Share Sale"} · Ref ${esc(r.ref)}</div>
+  <table>
+    <tr><td class="label">Timestamp</td><td class="val">${esc(new Date(r.timestamp).toLocaleString())}</td></tr>
+    <tr><td class="label">Product</td><td class="val">${esc(r.product_name)} (${esc(r.product_code)})</td></tr>
+    <tr><td class="label">Savings account</td><td class="val">${esc(r.account_label)}</td></tr>
+    <tr><td class="label">Units</td><td class="val">${r.units.toLocaleString()}</td></tr>
+    <tr><td class="label">Unit price</td><td class="val">${esc(fmt(r.unit_price))}</td></tr>
+    <tr><td class="label">Gross amount</td><td class="val">${esc(fmt(r.gross))}</td></tr>
+    <tr><td class="label">Transaction fee (${(r.feeRate * 100).toFixed(2)}%)</td><td class="val">${r.mode === "buy" ? "+" : "−"} ${esc(fmt(r.fee))}</td></tr>
+    <tr class="total"><td class="label">${r.mode === "buy" ? "Total debited" : "Net credited"}</td><td class="val">${esc(fmt(r.net))}</td></tr>
+    ${r.note ? `<tr><td class="label">Note</td><td class="val">${esc(r.note)}</td></tr>` : ""}
+  </table>
+  <p class="foot">Generated ${esc(new Date().toLocaleString())}. Retain this receipt for your records; a matching entry is filed in the immutable audit log.</p>
+</body></html>`;
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `receipt-${r.ref}.html`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+
 function InvestmentsPage() {
   const { data } = useSuspenseQuery(investmentsQO);
   const { data: series } = useSuspenseQuery(seriesQO);
