@@ -74,6 +74,7 @@ const groups: NavGroup[] = [
       { to: "/admin/recurring", label: "Recurring schedules", icon: <RefreshCw /> },
       { to: "/admin/loans", label: "Loans & Approvals", icon: <BadgeDollarSign /> },
       { to: "/admin/payments", label: "Payments", icon: <CreditCard /> },
+      { to: "/admin/investments", label: "Investments & Shares", icon: <TrendingUp /> },
     ],
   },
   {
@@ -117,6 +118,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/recurring": "Recurring schedules",
   "/admin/loans": "Loans & Approvals",
   "/admin/payments": "Payments",
+  "/admin/investments": "Investments & Shares",
   "/admin/security": "Security Centre",
   "/admin/logs": "Runtime Logs",
   "/admin/health": "Integration Health",

@@ -169,6 +169,71 @@ export type Database = {
         }
         Relationships: []
       }
+      dividend_runs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          members_paid: number
+          note: string | null
+          per_unit_amount: number
+          period_end: string
+          period_start: string
+          product_id: string
+          ref: string
+          status: string
+          total_paid: number
+          units_paid: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          members_paid?: number
+          note?: string | null
+          per_unit_amount: number
+          period_end: string
+          period_start: string
+          product_id: string
+          ref: string
+          status?: string
+          total_paid?: number
+          units_paid?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          members_paid?: number
+          note?: string | null
+          per_unit_amount?: number
+          period_end?: string
+          period_start?: string
+          product_id?: string
+          ref?: string
+          status?: string
+          total_paid?: number
+          units_paid?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dividend_runs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "share_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1312,6 +1377,202 @@ export type Database = {
         }
         Relationships: []
       }
+      share_holdings: {
+        Row: {
+          cost_basis: number
+          created_at: string
+          id: string
+          product_id: string
+          total_dividends: number
+          units: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cost_basis?: number
+          created_at?: string
+          id?: string
+          product_id: string
+          total_dividends?: number
+          units?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cost_basis?: number
+          created_at?: string
+          id?: string
+          product_id?: string
+          total_dividends?: number
+          units?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_holdings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "share_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_holdings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      share_products: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          dividend_rate_annual: number
+          id: string
+          is_active: boolean
+          max_units_per_member: number | null
+          min_units: number
+          name: string
+          total_units_issued: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          dividend_rate_annual?: number
+          id?: string
+          is_active?: boolean
+          max_units_per_member?: number | null
+          min_units?: number
+          name: string
+          total_units_issued?: number
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          dividend_rate_annual?: number
+          id?: string
+          is_active?: boolean
+          max_units_per_member?: number | null
+          min_units?: number
+          name?: string
+          total_units_issued?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      share_transactions: {
+        Row: {
+          actor_id: string | null
+          amount: number
+          created_at: string
+          dividend_run_id: string | null
+          holding_id: string
+          id: string
+          kind: Database["public"]["Enums"]["share_txn_kind"]
+          note: string | null
+          product_id: string
+          ref: string
+          savings_account_id: string | null
+          txn_id: string | null
+          unit_price: number
+          units: number
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          amount: number
+          created_at?: string
+          dividend_run_id?: string | null
+          holding_id: string
+          id?: string
+          kind: Database["public"]["Enums"]["share_txn_kind"]
+          note?: string | null
+          product_id: string
+          ref: string
+          savings_account_id?: string | null
+          txn_id?: string | null
+          unit_price: number
+          units: number
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          amount?: number
+          created_at?: string
+          dividend_run_id?: string | null
+          holding_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["share_txn_kind"]
+          note?: string | null
+          product_id?: string
+          ref?: string
+          savings_account_id?: string | null
+          txn_id?: string | null
+          unit_price?: number
+          units?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_transactions_dividend_run_id_fkey"
+            columns: ["dividend_run_id"]
+            isOneToOne: false
+            referencedRelation: "dividend_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_holding_id_fkey"
+            columns: ["holding_id"]
+            isOneToOne: false
+            referencedRelation: "share_holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "share_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_savings_account_id_fkey"
+            columns: ["savings_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_txn_id_fkey"
+            columns: ["txn_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       super_admin_seed_emails: {
         Row: {
           created_at: string
@@ -1793,6 +2054,33 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      execute_dividend_run: {
+        Args: { _actor_id: string; _run_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          members_paid: number
+          note: string | null
+          per_unit_amount: number
+          period_end: string
+          period_start: string
+          product_id: string
+          ref: string
+          status: string
+          total_paid: number
+          units_paid: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "dividend_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       finalize_transaction: {
         Args: {
           _actor_id: string
@@ -2043,6 +2331,38 @@ export type Database = {
           severity: string
         }[]
       }
+      purchase_shares: {
+        Args: {
+          _actor_id: string
+          _note: string
+          _product_id: string
+          _savings_account_id: string
+          _units: number
+        }
+        Returns: {
+          actor_id: string | null
+          amount: number
+          created_at: string
+          dividend_run_id: string | null
+          holding_id: string
+          id: string
+          kind: Database["public"]["Enums"]["share_txn_kind"]
+          note: string | null
+          product_id: string
+          ref: string
+          savings_account_id: string | null
+          txn_id: string | null
+          unit_price: number
+          units: number
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "share_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       purge_audit_log: { Args: { _before: string }; Returns: number }
       purge_notifications: {
         Args: { _before?: string; _scope?: string }
@@ -2274,6 +2594,38 @@ export type Database = {
           schedule_id: string
         }[]
       }
+      sell_shares: {
+        Args: {
+          _actor_id: string
+          _note: string
+          _product_id: string
+          _savings_account_id: string
+          _units: number
+        }
+        Returns: {
+          actor_id: string | null
+          amount: number
+          created_at: string
+          dividend_run_id: string | null
+          holding_id: string
+          id: string
+          kind: Database["public"]["Enums"]["share_txn_kind"]
+          note: string | null
+          product_id: string
+          ref: string
+          savings_account_id: string | null
+          txn_id: string | null
+          unit_price: number
+          units: number
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "share_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_user_active: {
         Args: { _active: boolean; _reason?: string; _uid: string }
         Returns: undefined
@@ -2379,6 +2731,7 @@ export type Database = {
         | "rejected"
         | "applied"
         | "failed"
+      share_txn_kind: "purchase" | "sale" | "dividend"
       transfer_status: "pending" | "cleared" | "failed" | "reversed"
       txn_kind:
         | "deposit"
@@ -2559,6 +2912,7 @@ export const Constants = {
         "applied",
         "failed",
       ],
+      share_txn_kind: ["purchase", "sale", "dividend"],
       transfer_status: ["pending", "cleared", "failed", "reversed"],
       txn_kind: [
         "deposit",
