@@ -478,3 +478,202 @@ export const adminSettleTransaction = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ============================================================================
+// Member: full savings ledger (deposits, withdrawals, running balance)
+// ============================================================================
+
+/** Kinds that increase a savings balance. `adjustment` is signed by amount. */
+const CREDIT_KINDS = new Set(["deposit", "interest", "transfer_in", "loan_disbursement"]);
+
+function signedAmount(kind: string, amount: number): number {
+  const abs = Math.abs(Number(amount ?? 0));
+  if (kind === "adjustment") return Number(amount ?? 0);
+  return CREDIT_KINDS.has(kind) ? abs : -abs;
+}
+
+export type LedgerEntry = SavingsTxn & {
+  account_id: string | null;
+  account_label: string;
+  direction: "credit" | "debit";
+  signed_amount: number;
+  /** Balance after this entry (cleared entries only); null while sorted by amount. */
+  running_balance: number | null;
+};
+
+export type LedgerResult = {
+  rows: LedgerEntry[];
+  total: number;
+  page: number;
+  page_size: number;
+  opening_balance: number;
+  closing_balance: number;
+  totals: {
+    deposits: number;
+    withdrawals: number;
+    net: number;
+    pending_count: number;
+  };
+  accounts: Array<{ id: string; label: string; balance: number }>;
+};
+
+const LedgerSchema = z.object({
+  account_id: z.string().uuid().optional().nullable(),
+  kind: z.string().max(40).optional().nullable(),
+  status: z.enum(["pending", "cleared", "failed"]).optional().nullable(),
+  direction: z.enum(["credit", "debit"]).optional().nullable(),
+  from: z.string().max(30).optional().nullable(),
+  to: z.string().max(30).optional().nullable(),
+  search: z.string().max(120).optional().nullable(),
+  sort_by: z.enum(["created_at", "amount"]).default("created_at"),
+  sort_dir: z.enum(["asc", "desc"]).default("desc"),
+  page: z.number().int().min(1).max(10_000).default(1),
+  page_size: z.number().int().min(5).max(200).default(25),
+});
+
+export const listSavingsLedger = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => LedgerSchema.parse(d ?? {}))
+  .handler(async ({ data, context }): Promise<LedgerResult> => {
+    const { data: accts, error: aErr } = await context.supabase
+      .from("savings_accounts")
+      .select("id, balance, nickname, savings_plans(name)")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: true });
+    if (aErr) throw new Error(aErr.message);
+
+    const accounts = (accts ?? []).map((r: any) => ({
+      id: r.id as string,
+      label: (r.nickname as string | null) || r.savings_plans?.name || "Savings account",
+      balance: Number(r.balance ?? 0),
+    }));
+    const labelById = new Map(accounts.map((a) => [a.id, a.label]));
+
+    const scopeIds = data.account_id
+      ? accounts.filter((a) => a.id === data.account_id).map((a) => a.id)
+      : accounts.map((a) => a.id);
+
+    const empty: LedgerResult = {
+      rows: [],
+      total: 0,
+      page: data.page,
+      page_size: data.page_size,
+      opening_balance: 0,
+      closing_balance: 0,
+      totals: { deposits: 0, withdrawals: 0, net: 0, pending_count: 0 },
+      accounts,
+    };
+    if (scopeIds.length === 0) return empty;
+
+    const applyFilters = (q: any) => {
+      let out = q.eq("user_id", context.userId).in("savings_account_id", scopeIds);
+      if (data.kind) out = out.eq("kind", data.kind);
+      if (data.status) out = out.eq("status", data.status);
+      if (data.from) out = out.gte("created_at", new Date(data.from).toISOString());
+      if (data.to) {
+        const end = new Date(data.to);
+        end.setHours(23, 59, 59, 999);
+        out = out.lte("created_at", end.toISOString());
+      }
+      if (data.search) {
+        // Escape PostgREST filter metacharacters before interpolating user text.
+        const term = data.search.replace(/[%,()*\\]/g, "").slice(0, 60);
+        if (term) out = out.or(`ref.ilike.%${term}%,note.ilike.%${term}%,channel.ilike.%${term}%`);
+      }
+      return out;
+    };
+
+    // Page of entries
+    const from = (data.page - 1) * data.page_size;
+    const { data: rows, error, count } = await applyFilters(
+      context.supabase
+        .from("transactions")
+        .select("id, ref, kind, amount, status, channel, note, created_at, savings_account_id", {
+          count: "exact",
+        }),
+    )
+      .order(data.sort_by, { ascending: data.sort_dir === "asc" })
+      .order("id", { ascending: true })
+      .range(from, from + data.page_size - 1);
+    if (error) throw new Error(error.message);
+
+    let list: LedgerEntry[] = ((rows ?? []) as any[]).map((r: any): LedgerEntry => {
+      const signed = signedAmount(r.kind, Number(r.amount ?? 0));
+      return {
+        id: r.id as string,
+        ref: r.ref as string,
+        kind: r.kind as string,
+        amount: Math.abs(Number(r.amount ?? 0)),
+        status: r.status as SavingsTxn["status"],
+        channel: r.channel as string | null,
+        note: r.note as string | null,
+        created_at: r.created_at as string,
+        account_id: r.savings_account_id as string | null,
+        account_label: labelById.get(r.savings_account_id) ?? "—",
+        direction: (signed >= 0 ? "credit" : "debit") as "credit" | "debit",
+        signed_amount: signed,
+        running_balance: null as number | null,
+      };
+    });
+
+    if (data.direction) list = list.filter((r: LedgerEntry) => r.direction === data.direction);
+
+    // Aggregate totals across the whole filtered set (not just this page).
+    const { data: allRows, error: sErr } = await applyFilters(
+      context.supabase.from("transactions").select("kind, amount, status"),
+    ).limit(20_000);
+    if (sErr) throw new Error(sErr.message);
+
+    let deposits = 0;
+    let withdrawals = 0;
+    let pendingCount = 0;
+    for (const r of (allRows ?? []) as any[]) {
+      if (r.status === "pending") pendingCount += 1;
+      if (r.status !== "cleared") continue;
+      const s = signedAmount(r.kind, Number(r.amount ?? 0));
+      if (s >= 0) deposits += s;
+      else withdrawals += Math.abs(s);
+    }
+
+    const closing = accounts
+      .filter((a) => scopeIds.includes(a.id))
+      .reduce((sum, a) => sum + a.balance, 0);
+
+    // Running balance: walk from the balance carried into the page window.
+    let openingForPage = 0;
+    if (data.sort_by === "created_at" && list.length > 0) {
+      const oldest = data.sort_dir === "desc" ? list[list.length - 1] : list[0];
+      const { data: priorRows, error: pErr } = await context.supabase
+        .from("transactions")
+        .select("kind, amount")
+        .eq("user_id", context.userId)
+        .in("savings_account_id", scopeIds)
+        .eq("status", "cleared")
+        .lt("created_at", oldest.created_at)
+        .limit(20_000);
+      if (pErr) throw new Error(pErr.message);
+      openingForPage = (priorRows ?? []).reduce(
+        (sum: number, r: any) => sum + signedAmount(r.kind, Number(r.amount ?? 0)),
+        0,
+      );
+
+      // Accumulate oldest → newest, then restore the requested order.
+      const chrono = data.sort_dir === "desc" ? [...list].reverse() : list;
+      let bal = openingForPage;
+      for (const r of chrono) {
+        if (r.status === "cleared") bal += r.signed_amount;
+        r.running_balance = bal;
+      }
+    }
+
+    return {
+      rows: list,
+      total: count ?? list.length,
+      page: data.page,
+      page_size: data.page_size,
+      opening_balance: openingForPage,
+      closing_balance: closing,
+      totals: { deposits, withdrawals, net: deposits - withdrawals, pending_count: pendingCount },
+      accounts,
+    };
+  });

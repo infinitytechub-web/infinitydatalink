@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { PiggyBank, Plus, TrendingUp, Zap } from "lucide-react";
+import { ListOrdered, PiggyBank, Plus, TrendingUp, Zap } from "lucide-react";
 import {
   EmptyState,
   KPIStat,
@@ -73,6 +73,12 @@ function SavingsPage() {
         description="Track balances, goal progress and contributions across every plan you're enrolled in."
         action={
           <div className="flex items-center gap-2">
+            <Link
+              to="/app/savings/ledger"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              <ListOrdered className="h-4 w-4" /> Full ledger
+            </Link>
             <Link
               to="/app/savings/deposit"
               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"

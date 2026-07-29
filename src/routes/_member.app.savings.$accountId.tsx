@@ -108,7 +108,18 @@ function Body({ accountId }: { accountId: string }) {
           </div>
         </SectionCard>
 
-        <SectionCard title="Recent activity">
+        <SectionCard
+          title="Recent activity"
+          action={
+            <Link
+              to="/app/savings/ledger"
+              search={{ account: a.id, sortBy: "created_at", sortDir: "desc", page: 1, pageSize: 25 }}
+              className="text-xs font-semibold underline-offset-2 hover:underline"
+            >
+              View full ledger →
+            </Link>
+          }
+        >
           {data.transactions.length === 0 ? (
             <div className="p-6 text-sm text-emerald-deep/60">No transactions yet — add your first contribution to get going.</div>
           ) : (
