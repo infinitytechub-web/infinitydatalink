@@ -14,6 +14,7 @@ import {
   SidebarWidgetEmpty,
   SidebarWidgetSkeleton,
 } from "@/components/sidebar-widgets";
+import { OnlinePresencePill, SidebarOnlinePanel } from "@/components/online-presence-indicators";
 import type { NavGroup, NavItem } from "@/components/portal-shell.types";
 
 export type { NavGroup, NavItem };
@@ -213,6 +214,10 @@ export function PortalShell({
           )}
         </nav>
 
+        <div className={cn("px-3 pb-3", collapsed && "lg:px-2")}>
+          <SidebarOnlinePanel collapsed={collapsed} />
+        </div>
+
 
         <div className={cn("border-t border-white/10 p-4", collapsed && "lg:p-2")}>
           <div className={cn("flex items-center gap-3", collapsed && "lg:justify-center")}>
@@ -281,6 +286,7 @@ export function PortalShell({
               <Search className="size-3.5" />
               <span>Search…</span>
             </div>
+            <OnlinePresencePill />
             <ThemeToggle />
             {action}
           </div>
