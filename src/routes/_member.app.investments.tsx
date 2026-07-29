@@ -170,7 +170,7 @@ function InvestmentsPage() {
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => setBreakdownState({ holding: h, product })}
-                              className="rounded bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold-deep hover:bg-gold/20 dark:bg-gold/20 dark:text-cream"
+                              className="rounded border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold hover:bg-gold/20 dark:bg-gold/20 dark:text-cream"
                             >
                               Details
                             </button>
