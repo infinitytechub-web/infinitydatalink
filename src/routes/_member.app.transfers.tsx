@@ -456,16 +456,27 @@ function SweepRow({ s }: { s: Sweep }) {
     <tr>
       <td className="px-3 py-2">{s.from_label} → {s.to_label}</td>
       <td className="px-3 py-2 text-right"><Money amount={s.amount} /></td>
+      <td className="px-3 py-2 text-[11px] text-muted-foreground">
+        <div>Keep ≥ <Money amount={s.min_balance} /></div>
+        <div>{s.max_amount != null ? <>Cap <Money amount={s.max_amount} /></> : "No cap"}</div>
+      </td>
       <td className="px-3 py-2 capitalize">{s.frequency}</td>
       <td className="px-3 py-2 text-muted-foreground">{new Date(s.next_run_at).toLocaleString()}</td>
       <td className="px-3 py-2">
         <span className={"rounded px-2 py-0.5 text-[10px] " + (s.status === "active" ? "bg-emerald-mid/10 text-emerald-mid" : "bg-muted text-muted-foreground")}>
           {s.status}
         </span>
-        {s.last_run_error ? <div className="mt-1 text-[10px] text-destructive">Last: {s.last_run_error}</div> : null}
+        {s.last_run_status === "skipped" ? (
+          <div className="mt-1 text-[10px] text-amber-600">Last run skipped — balance below minimum</div>
+        ) : s.last_run_error ? (
+          <div className="mt-1 text-[10px] text-destructive">Last: {s.last_run_error}</div>
+        ) : s.last_run_amount != null ? (
+          <div className="mt-1 text-[10px] text-muted-foreground">Last swept <Money amount={s.last_run_amount} /></div>
+        ) : null}
       </td>
       <td className="px-3 py-2 text-right">
         <div className="inline-flex gap-1">
+          <SweepDialog accounts={[]} sweep={s} />
           <Button size="sm" variant="outline" onClick={() => toggle.mutate()} disabled={toggle.isPending}>
             {s.status === "active" ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
           </Button>
