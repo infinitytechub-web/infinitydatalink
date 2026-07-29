@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getStatement, listMyStatements, type Statement } from "@/lib/savings-statements.functions";
 import { formatMoney } from "@/lib/org-config";
+import { StatementGenerator } from "@/components/statement-generator";
 
 const statementsQuery = queryOptions({
   queryKey: ["member", "savings", "statements"],
@@ -47,9 +48,12 @@ function StatementsPage() {
           </Link>
         }
       />
-      <Suspense fallback={<SectionCardSkeleton title="Statements" rows={5} cols={6} />}>
-        <Body />
-      </Suspense>
+      <div className="space-y-6">
+        <StatementGenerator />
+        <Suspense fallback={<SectionCardSkeleton title="Statements" rows={5} cols={6} />}>
+          <Body />
+        </Suspense>
+      </div>
     </>
   );
 }
