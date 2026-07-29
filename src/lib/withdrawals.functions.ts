@@ -440,19 +440,57 @@ export type BulkCancelResult = {
   failed: { id: string; error: string }[];
 };
 
-const BulkCancelSchema = z.object({
-  items: z
-    .array(z.object({ id: z.string().uuid(), note: z.string().trim().min(5).max(500) }))
-    .min(1)
-    .max(50),
-  step_up_token: z.string().min(16).max(200),
-});
+const MIN_BULK_REASON = 5;
+
+const BulkCancelSchema = z
+  .object({
+    items: z
+      .array(
+        z.object({
+          id: z.string().uuid(),
+          // Every request carries its own reason — no shared/blank fallback.
+          note: z
+            .string({ message: "Each selected request needs its own cancellation reason." })
+            .trim()
+            .min(MIN_BULK_REASON, {
+              message: `Each cancellation reason must be at least ${MIN_BULK_REASON} characters.`,
+            })
+            .max(500),
+        }),
+      )
+      .min(1)
+      .max(50),
+    step_up_token: z.string().min(16).max(200),
+  })
+  .superRefine((val, ctx) => {
+    const ids = new Set<string>();
+    for (const item of val.items) {
+      if (ids.has(item.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["items"],
+          message: "Duplicate requests in the batch — each request may appear only once.",
+        });
+        return;
+      }
+      ids.add(item.id);
+    }
+  });
 
 /** Cancel many pending/approved withdrawal requests with one step-up proof and per-request reasons. */
 export const adminBulkCancelWithdrawals = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => BulkCancelSchema.parse(d))
   .handler(async ({ data, context }): Promise<BulkCancelResult> => {
+    // Atomic gate: if any single reason is missing or too short the whole batch
+    // is rejected before a single cancellation is attempted.
+    const invalid = data.items.filter((i) => i.note.trim().length < MIN_BULK_REASON).map((i) => i.id);
+    if (invalid.length > 0) {
+      throw new Error(
+        `Batch blocked: ${invalid.length} request(s) are missing a cancellation reason of at least ${MIN_BULK_REASON} characters.`,
+      );
+    }
+
     const { actorRole, proof } = await requireDecisionAuthority(
       context,
       "cancelled",
