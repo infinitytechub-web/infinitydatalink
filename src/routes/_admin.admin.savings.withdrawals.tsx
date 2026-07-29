@@ -568,11 +568,12 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
   const bulkCancel = useServerFn(adminBulkCancelWithdrawals);
   const { ensure, dialog } = useStepUp();
   const [open, setOpen] = useState(false);
-  const [shared, setShared] = useState("");
   const [notes, setNotes] = useState<Record<string, string>>({});
 
-  const reasonFor = (id: string) => (notes[id] ?? "").trim() || shared.trim();
-  const ready = rows.every((r) => reasonFor(r.id).length >= 5);
+  const MIN_REASON = 5;
+  const reasonFor = (id: string) => (notes[id] ?? "").trim();
+  const missing = rows.filter((r) => reasonFor(r.id).length < MIN_REASON);
+  const ready = missing.length === 0;
   const total = rows.reduce((sum, r) => sum + r.amount, 0);
 
   const run = useMutation({
