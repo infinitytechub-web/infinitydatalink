@@ -100,7 +100,7 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
     const todayKey = today.toISOString().slice(0, 10);
     const monthStart = `${todayKey.slice(0, 7)}-01`;
 
-    const schedule = (schedRes.data ?? []).map((r: any) => {
+    const schedule: UpcomingInstallment[] = (schedRes.data ?? []).map((r: any): UpcomingInstallment => {
       const total = Number(r.total_due ?? 0);
       const paid = Number(r.paid_amount ?? 0);
       const remaining = Math.max(0, total - paid);
@@ -115,7 +115,7 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
         remaining,
         status: String(r.status ?? "due"),
         overdue: remaining > 0.005 && String(r.due_date) < todayKey,
-      } satisfies UpcomingInstallment;
+      };
     });
 
     const history: RepaymentHistoryRow[] = (txnRes.data ?? []).map((t: any) => ({
