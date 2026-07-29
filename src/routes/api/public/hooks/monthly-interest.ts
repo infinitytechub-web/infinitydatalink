@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/public/hooks/monthly-interest")({
           if (!auth) return new Response("unauthorized", { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data, error } = await supabaseAdmin.rpc("accrue_monthly_interest", { _period_end: null });
+        const { data, error } = await supabaseAdmin.rpc("accrue_monthly_interest", { _period_end: undefined } as never);
         if (error) {
           return new Response(JSON.stringify({ success: false, error: error.message }), {
             status: 500,
