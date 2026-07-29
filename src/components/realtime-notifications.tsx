@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -52,11 +53,22 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
   const markFn = useServerFn(markNotificationRead);
   const markAllFn = useServerFn(markAllNotificationsRead);
 
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    error: feedError,
+  } = useInfiniteQuery({
     queryKey: ["notifications", "feed", limit],
-    queryFn: () => listFn({ data: { limit } }),
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => listFn({ data: { limit, before: pageParam } }),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: 30_000,
   });
+
 
   const markAll = useMutation({
     mutationFn: () => markAllFn({}),
@@ -102,11 +114,16 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
     };
   }, [user?.id, qc]);
 
-  const rows = useMemo(() => data?.rows ?? [], [data?.rows]);
-  const unread = data?.unread ?? 0;
+  const rows = useMemo<NotificationRow[]>(
+    () => (data?.pages ?? []).flatMap((p) => p.rows),
+    [data?.pages],
+  );
+  const unread = data?.pages?.[0]?.unread ?? 0;
 
   // Keep the roving tabindex target inside bounds as the feed changes.
+  // Appending a page never shifts existing indexes, so focus is preserved.
   useEffect(() => {
+    itemRefs.current.length = rows.length;
     setActiveIndex((i) => Math.min(Math.max(i, 0), Math.max(rows.length - 1, 0)));
   }, [rows.length]);
 
@@ -117,14 +134,63 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
     el.focus();
   }, []);
 
+  // When more items are requested from the keyboard, move focus to the first
+  // appended item once it renders.
+  const pendingFocusRef = useRef<number | null>(null);
+  useEffect(() => {
+    const target = pendingFocusRef.current;
+    if (target === null || isFetchingNextPage) return;
+    if (target < rows.length && itemRefs.current[target]) {
+      pendingFocusRef.current = null;
+      focusItem(target);
+      setAnnouncement(`Loaded more notifications. ${rows.length} of your notifications are shown.`);
+    } else if (!isFetchingNextPage) {
+      pendingFocusRef.current = null;
+    }
+  }, [rows.length, isFetchingNextPage, focusItem]);
+
+  const loadMore = useCallback(
+    (fromKeyboard: boolean) => {
+      if (!hasNextPage || isFetchingNextPage) return;
+      if (fromKeyboard) pendingFocusRef.current = rows.length;
+      void fetchNextPage();
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage, rows.length],
+  );
+
+  // Auto-load the next page when the sentinel scrolls into view. Appending
+  // never reorders existing items, so the focused element stays focused.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadMore(false);
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, loadMore]);
+
+
+
+
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLElement>, index: number, row: NotificationRow) => {
       const last = rows.length - 1;
       let next: number | null = null;
       switch (event.key) {
         case "ArrowDown":
+          if (index === last && hasNextPage) {
+            event.preventDefault();
+            loadMore(true);
+            return;
+          }
           next = Math.min(index + 1, last);
           break;
+
         case "ArrowUp":
           next = Math.max(index - 1, 0);
           break;
@@ -136,7 +202,13 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
           break;
         case "PageDown":
           next = Math.min(index + 3, last);
+          if (index === last && hasNextPage) {
+            event.preventDefault();
+            loadMore(true);
+            return;
+          }
           break;
+
         case "PageUp":
           next = Math.max(index - 3, 0);
           break;
@@ -154,7 +226,7 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
       event.preventDefault();
       if (next !== null) focusItem(next);
     },
-    [rows.length, focusItem, markOne],
+    [rows.length, focusItem, markOne, hasNextPage, loadMore],
   );
 
   const jumpToNewest = useCallback(() => {
@@ -237,12 +309,14 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
         <>
           <p className="sr-only" id="notifications-feed-help">
             Use the arrow keys to move between notifications, Home or End to jump to the first or last item, Enter to
-            open a notification, and the R key to mark it as read.
+            open a notification, and the R key to mark it as read. Pressing the down arrow on the last item loads older
+            notifications.
           </p>
           <ul
             ref={listRef}
             role="feed"
-            aria-busy={markAll.isPending}
+            aria-busy={markAll.isPending || isFetchingNextPage}
+
             aria-label={feedLabel}
             aria-describedby="notifications-feed-help"
             className="divide-y divide-border"
@@ -319,7 +393,38 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
               );
             })}
           </ul>
+
+          {/* Infinite scroll sentinel + accessible fallback control. */}
+          <div className="px-4 py-3">
+            <div ref={sentinelRef} aria-hidden="true" className="h-px w-full" />
+            {isFetchingNextPage ? (
+              <div className="space-y-2" role="status" aria-live="polite">
+                <span className="sr-only">Loading more notifications…</span>
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-lg bg-muted/60" aria-hidden="true" />
+                ))}
+              </div>
+            ) : isFetchNextPageError ? (
+              <div className="space-y-2" role="alert">
+                <p className="text-xs text-destructive">
+                  Couldn’t load more notifications{feedError instanceof Error ? `: ${feedError.message}` : "."}
+                </p>
+                <Button size="sm" variant="outline" className="w-full" onClick={() => loadMore(true)}>
+                  Try again
+                </Button>
+              </div>
+            ) : hasNextPage ? (
+              <Button size="sm" variant="ghost" className="w-full" onClick={() => loadMore(true)}>
+                Load older notifications
+              </Button>
+            ) : (
+              <p className="text-center text-[10px] uppercase tracking-wider text-muted-foreground" role="status">
+                You’re all caught up — end of feed
+              </p>
+            )}
+          </div>
         </>
+
       )}
     </SectionCard>
   );
