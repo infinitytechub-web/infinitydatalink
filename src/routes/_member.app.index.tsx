@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KPIStat, Money, StatusPill } from "@/components/primitives";
+import { RealtimeNotifications } from "@/components/realtime-notifications";
+import { OnlineUsersWidget } from "@/components/online-users-widget";
 
 export const Route = createFileRoute("/_member/app/")({
   head: () => ({
