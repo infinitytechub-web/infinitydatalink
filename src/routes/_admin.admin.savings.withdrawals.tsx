@@ -207,6 +207,62 @@ function WithdrawalsPage() {
   );
 }
 
+function ExportWindowButton({ search }: { search: SearchParams }) {
+  const exportFn = useServerFn(exportAdminWithdrawals);
+  const [loading, setLoading] = useState(false);
+
+  const hasWindow = Boolean(search.date_from || search.date_to);
+  const label = hasWindow ? "Export window" : "Export all";
+
+  const run = async () => {
+    setLoading(true);
+    try {
+      const rows = await exportFn({
+        data: {
+          status: search.status,
+          search: search.q ?? null,
+          page: 1,
+          page_size: 100,
+          date_from: search.date_from ?? null,
+          date_to: search.date_to ?? null,
+        },
+      });
+      if (rows.length === 0) {
+        toast.info("No withdrawal requests match the selected filters.");
+        return;
+      }
+      exportCsv({
+        title: "Withdrawal Requests Export",
+        subtitle: hasWindow
+          ? `${rows.length} request(s) from ${search.date_from ?? "any date"} to ${search.date_to ?? "any date"}`
+          : `${rows.length} request(s)`,
+        filename: `withdrawal_requests_${search.date_from ?? "start"}_to_${search.date_to ?? "end"}`,
+        columns: WITHDRAWAL_EXPORT_COLUMNS,
+        rows,
+      });
+      toast.success(`Exported ${rows.length} request(s).`);
+    } catch (e) {
+      if (e instanceof Error && /cancelled/i.test(e.message)) return;
+      toast.error(friendlyError(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button
+      size="default"
+      variant="secondary"
+      onClick={() => void run()}
+      disabled={loading}
+      aria-label="Export all withdrawal requests matching the current filters"
+    >
+      <FileDown className="mr-1 size-4" />
+      {loading ? "Exporting…" : label}
+    </Button>
+  );
+}
+
 function QueueBody({ search }: { search: SearchParams }) {
   const navigate = Route.useNavigate();
   const { data } = useSuspenseQuery(listQuery(search));
