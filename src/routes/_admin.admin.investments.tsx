@@ -10,7 +10,11 @@ import {
   executeDividendRun,
   cancelDividendRun,
   previewDividendRun,
+  submitDividendRunForApproval,
+  approveDividendRun,
+  rejectDividendRun,
   type AdminInvestmentsOverview,
+  type DividendRun,
   type DividendRunPreview,
   type ShareProduct,
   type InvestmentSeriesPoint,
@@ -49,10 +53,14 @@ function AdminInvestments() {
   const createRun = useServerFn(createDividendRun);
   const executeRun = useServerFn(executeDividendRun);
   const cancelRun = useServerFn(cancelDividendRun);
+  const submitRun = useServerFn(submitDividendRunForApproval);
+  const approveRun = useServerFn(approveDividendRun);
+  const rejectRun = useServerFn(rejectDividendRun);
 
   const [editing, setEditing] = useState<ShareProduct | null>(null);
   const [showNewProduct, setShowNewProduct] = useState(false);
   const [showNewRun, setShowNewRun] = useState(false);
+  const [reviewing, setReviewing] = useState<{ run: DividendRun; mode: "approve" | "reject" } | null>(null);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "investments"] });
 
@@ -80,6 +88,20 @@ function AdminInvestments() {
   const cancelRunMut = useMutation({
     mutationFn: (run_id: string) => cancelRun({ data: { run_id } }),
     onSuccess: invalidate,
+  });
+  const submitRunMut = useMutation({
+    mutationFn: (run_id: string) => submitRun({ data: { run_id } }),
+    onSuccess: invalidate,
+  });
+  const reviewMut = useMutation({
+    mutationFn: async (v: { run_id: string; mode: "approve" | "reject"; text: string }) => {
+      if (v.mode === "approve") return approveRun({ data: { run_id: v.run_id, note: v.text || null } });
+      return rejectRun({ data: { run_id: v.run_id, reason: v.text } });
+    },
+    onSuccess: async () => {
+      await invalidate();
+      setReviewing(null);
+    },
   });
 
   return (
@@ -228,31 +250,40 @@ function AdminInvestments() {
                           ? "bg-emerald-deep/10 text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100"
                           : r.status === "draft"
                             ? "bg-gold/20 text-emerald-deep"
-                            : "bg-gray-200 text-gray-700"
+                            : r.status === "pending_approval"
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
+                              : r.status === "approved"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200"
+                                : r.status === "rejected"
+                                  ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200"
+                                  : "bg-gray-200 text-gray-700"
                       }`}
+                      title={
+                        r.status === "rejected" && r.rejection_reason
+                          ? `Rejected: ${r.rejection_reason}`
+                          : r.status === "approved" && r.approval_note
+                            ? `Approved: ${r.approval_note}`
+                            : undefined
+                      }
                     >
-                      {r.status}
+                      {r.status.replace("_", " ")}
                     </span>
                   </td>
                   <td className="text-right">
-                    {r.status === "draft" && (
-                      <div className="inline-flex gap-1">
-                        <button
-                          disabled={executeRunMut.isPending}
-                          onClick={() => executeRunMut.mutate(r.id)}
-                          className="rounded bg-emerald-deep px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
-                        >
-                          Execute
-                        </button>
-                        <button
-                          disabled={cancelRunMut.isPending}
-                          onClick={() => cancelRunMut.mutate(r.id)}
-                          className="rounded border border-emerald-deep/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
+                    <RunActions
+                      run={r}
+                      viewer={data.viewer}
+                      pending={
+                        submitRunMut.isPending ||
+                        executeRunMut.isPending ||
+                        cancelRunMut.isPending ||
+                        reviewMut.isPending
+                      }
+                      onSubmit={() => submitRunMut.mutate(r.id)}
+                      onCancel={() => cancelRunMut.mutate(r.id)}
+                      onExecute={() => executeRunMut.mutate(r.id)}
+                      onReview={(mode) => setReviewing({ run: r, mode })}
+                    />
                   </td>
                 </tr>
               ))}
@@ -266,9 +297,21 @@ function AdminInvestments() {
             </tbody>
           </table>
         </div>
-        {executeRunMut.error && (
-          <p className="mt-3 text-sm text-red-600">{(executeRunMut.error as Error).message}</p>
+        {(executeRunMut.error || submitRunMut.error || cancelRunMut.error) && (
+          <p className="mt-3 text-sm text-red-600">
+            {(
+              (executeRunMut.error as Error | null) ??
+              (submitRunMut.error as Error | null) ??
+              (cancelRunMut.error as Error | null)
+            )?.message}
+          </p>
         )}
+        <p className="mt-3 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+          Dividend runs require dual control: after submission, an approver
+          (super admin or compliance officer) other than the creator must
+          approve the run before a finance officer can execute payouts, and
+          the executor cannot be the same person who approved.
+        </p>
       </section>
 
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
@@ -327,6 +370,158 @@ function AdminInvestments() {
           error={(createRunMut.error as Error | null)?.message ?? null}
         />
       )}
+      {reviewing && (
+        <ReviewDialog
+          run={reviewing.run}
+          mode={reviewing.mode}
+          onCancel={() => setReviewing(null)}
+          onSubmit={(text) =>
+            reviewMut.mutate({ run_id: reviewing.run.id, mode: reviewing.mode, text })
+          }
+          submitting={reviewMut.isPending}
+          error={(reviewMut.error as Error | null)?.message ?? null}
+        />
+      )}
+    </div>
+  );
+}
+
+function RunActions({
+  run,
+  viewer,
+  pending,
+  onSubmit,
+  onCancel,
+  onExecute,
+  onReview,
+}: {
+  run: DividendRun;
+  viewer: AdminInvestmentsOverview["viewer"];
+  pending: boolean;
+  onSubmit: () => void;
+  onCancel: () => void;
+  onExecute: () => void;
+  onReview: (mode: "approve" | "reject") => void;
+}) {
+  const isCreator = run.created_by === viewer.user_id || run.submitted_by === viewer.user_id;
+  const isApprover = run.approved_by === viewer.user_id;
+  const btnPrimary =
+    "rounded bg-emerald-deep px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50";
+  const btnGhost =
+    "rounded border border-emerald-deep/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100 disabled:opacity-50";
+  const btnDanger =
+    "rounded bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white hover:bg-red-700 disabled:opacity-50";
+
+  if (run.status === "draft" && viewer.can_execute) {
+    return (
+      <div className="inline-flex gap-1">
+        <button disabled={pending} onClick={onSubmit} className={btnPrimary}>
+          Submit for approval
+        </button>
+        <button disabled={pending} onClick={onCancel} className={btnGhost}>
+          Cancel
+        </button>
+      </div>
+    );
+  }
+  if (run.status === "pending_approval" && viewer.can_approve) {
+    if (isCreator) {
+      return (
+        <span className="text-xs italic text-emerald-deep/60">Awaiting second reviewer</span>
+      );
+    }
+    return (
+      <div className="inline-flex gap-1">
+        <button disabled={pending} onClick={() => onReview("approve")} className={btnPrimary}>
+          Approve
+        </button>
+        <button disabled={pending} onClick={() => onReview("reject")} className={btnDanger}>
+          Reject
+        </button>
+      </div>
+    );
+  }
+  if (run.status === "approved" && viewer.can_execute) {
+    if (isApprover) {
+      return (
+        <span className="text-xs italic text-emerald-deep/60">
+          Awaiting a different officer
+        </span>
+      );
+    }
+    return (
+      <button disabled={pending} onClick={onExecute} className={btnPrimary}>
+        Execute payouts
+      </button>
+    );
+  }
+  return <span className="text-xs text-emerald-deep/40">—</span>;
+}
+
+function ReviewDialog({
+  run,
+  mode,
+  onCancel,
+  onSubmit,
+  submitting,
+  error,
+}: {
+  run: DividendRun;
+  mode: "approve" | "reject";
+  onCancel: () => void;
+  onSubmit: (text: string) => void;
+  submitting: boolean;
+  error: string | null;
+}) {
+  const [text, setText] = useState("");
+  const isReject = mode === "reject";
+  const canSubmit = isReject ? text.trim().length >= 3 : true;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-emerald-950">
+        <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+          {isReject ? "Reject" : "Approve"} dividend run {run.ref}
+        </h3>
+        <p className="mt-1 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+          {run.product_name} · {run.period_start} → {run.period_end} · per unit{" "}
+          {run.per_unit_amount}
+        </p>
+        <div className="mt-4 text-sm">
+          <label className="block text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+            {isReject ? "Rejection reason (required)" : "Approval note (optional)"}
+          </label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={4}
+            maxLength={500}
+            className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
+            placeholder={
+              isReject
+                ? "Explain why this run cannot proceed…"
+                : "Optional context for the approval audit trail"
+            }
+          />
+        </div>
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={onCancel}
+            className="rounded border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100"
+          >
+            Cancel
+          </button>
+          <button
+            disabled={submitting || !canSubmit}
+            onClick={() => onSubmit(text.trim())}
+            className={`rounded px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50 ${
+              isReject ? "bg-red-600 hover:bg-red-700" : "bg-emerald-deep hover:bg-emerald-mid"
+            }`}
+          >
+            {submitting ? "Submitting…" : isReject ? "Reject run" : "Approve run"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

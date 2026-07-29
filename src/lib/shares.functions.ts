@@ -48,6 +48,14 @@ export type ShareTxn = {
   created_at: string;
 };
 
+export type DividendRunStatus =
+  | "draft"
+  | "pending_approval"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "executed";
+
 export type DividendRun = {
   id: string;
   ref: string;
@@ -59,10 +67,19 @@ export type DividendRun = {
   units_paid: number;
   members_paid: number;
   total_paid: number;
-  status: "draft" | "executed" | "cancelled";
+  status: DividendRunStatus;
   note: string | null;
   executed_at: string | null;
   created_at: string;
+  created_by: string | null;
+  submitted_by: string | null;
+  submitted_at: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  approval_note: string | null;
+  rejected_by: string | null;
+  rejected_at: string | null;
+  rejection_reason: string | null;
 };
 
 export type MemberInvestmentSummary = {
@@ -473,12 +490,18 @@ export type AdminInvestmentsOverview = {
     cost_basis: number;
     market_value: number;
   }>;
+  viewer: {
+    user_id: string;
+    roles: string[];
+    can_approve: boolean;
+    can_execute: boolean;
+  };
 };
 
 export const getAdminInvestments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AdminInvestmentsOverview> => {
-    await assertStaff(context.supabase, context.userId);
+    const roles = await assertStaff(context.supabase, context.userId);
     const { supabase } = context;
 
     const [{ data: products, error: pErr }, { data: runs, error: rErr }, { data: holdings, error: hErr }] =
@@ -492,7 +515,7 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
         supabase
           .from("dividend_runs")
           .select(
-            "id, ref, product_id, period_start, period_end, per_unit_amount, units_paid, members_paid, total_paid, status, note, executed_at, created_at, share_products(name)",
+            "id, ref, product_id, period_start, period_end, per_unit_amount, units_paid, members_paid, total_paid, status, note, executed_at, created_at, created_by, submitted_by, submitted_at, approved_by, approved_at, approval_note, rejected_by, rejected_at, rejection_reason, share_products(name)",
           )
           .order("created_at", { ascending: false })
           .limit(50),
@@ -522,22 +545,7 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
       created_at: p.created_at,
     }));
 
-    const runList: DividendRun[] = (runs ?? []).map((r: any) => ({
-      id: r.id,
-      ref: r.ref,
-      product_id: r.product_id,
-      product_name: r.share_products?.name ?? "Share",
-      period_start: r.period_start,
-      period_end: r.period_end,
-      per_unit_amount: Number(r.per_unit_amount ?? 0),
-      units_paid: r.units_paid,
-      members_paid: r.members_paid,
-      total_paid: Number(r.total_paid ?? 0),
-      status: r.status,
-      note: r.note,
-      executed_at: r.executed_at,
-      created_at: r.created_at,
-    }));
+    const runList: DividendRun[] = (runs ?? []).map((r: any) => mapDividendRun(r));
 
     const yearStart = new Date();
     yearStart.setUTCMonth(0, 1);
@@ -583,6 +591,7 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
       .sort((a, b) => b.market_value - a.market_value)
       .slice(0, 10);
 
+    const roleList = Array.from(roles);
     return {
       products: productList,
       runs: runList,
@@ -594,6 +603,12 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
         dividends_paid_ytd: dividendsPaid,
         active_products: productList.filter((p) => p.is_active).length,
         holders: holdersByUser.size,
+      },
+      viewer: {
+        user_id: context.userId,
+        roles: roleList,
+        can_approve: hasAnyRole(roles, ["super_admin", "compliance_officer"]),
+        can_execute: hasAnyRole(roles, FINANCE_ROLES),
       },
     };
   });
@@ -716,6 +731,34 @@ export const createDividendRun = createServerFn({ method: "POST" })
     return { id: row!.id as string, ref: row!.ref as string };
   });
 
+function mapDividendRun(r: any): DividendRun {
+  return {
+    id: r.id,
+    ref: r.ref,
+    product_id: r.product_id,
+    product_name: r.share_products?.name ?? "",
+    period_start: r.period_start,
+    period_end: r.period_end,
+    per_unit_amount: Number(r.per_unit_amount ?? 0),
+    units_paid: r.units_paid ?? 0,
+    members_paid: r.members_paid ?? 0,
+    total_paid: Number(r.total_paid ?? 0),
+    status: r.status,
+    note: r.note ?? null,
+    executed_at: r.executed_at ?? null,
+    created_at: r.created_at,
+    created_by: r.created_by ?? null,
+    submitted_by: r.submitted_by ?? null,
+    submitted_at: r.submitted_at ?? null,
+    approved_by: r.approved_by ?? null,
+    approved_at: r.approved_at ?? null,
+    approval_note: r.approval_note ?? null,
+    rejected_by: r.rejected_by ?? null,
+    rejected_at: r.rejected_at ?? null,
+    rejection_reason: r.rejection_reason ?? null,
+  };
+}
+
 export const executeDividendRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ run_id: z.string().uuid() }).parse(data))
@@ -727,22 +770,60 @@ export const executeDividendRun = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     const r = Array.isArray(row) ? row[0] : row;
-    return {
-      id: r.id,
-      ref: r.ref,
-      product_id: r.product_id,
-      product_name: "",
-      period_start: r.period_start,
-      period_end: r.period_end,
-      per_unit_amount: Number(r.per_unit_amount ?? 0),
-      units_paid: r.units_paid,
-      members_paid: r.members_paid,
-      total_paid: Number(r.total_paid ?? 0),
-      status: r.status,
-      note: r.note,
-      executed_at: r.executed_at,
-      created_at: r.created_at,
-    };
+    return mapDividendRun(r);
+  });
+
+const SubmitApprovalSchema = z.object({ run_id: z.string().uuid() });
+const ApproveSchema = z.object({
+  run_id: z.string().uuid(),
+  note: z.string().trim().max(500).optional().nullable(),
+});
+const RejectSchema = z.object({
+  run_id: z.string().uuid(),
+  reason: z.string().trim().min(3, "Reason is required").max(500),
+});
+
+export const submitDividendRunForApproval = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => SubmitApprovalSchema.parse(data))
+  .handler(async ({ data, context }): Promise<DividendRun> => {
+    await assertFinanceStaff(context.supabase, context.userId);
+    const { data: row, error } = await (context.supabase as any).rpc("submit_dividend_run_for_approval", {
+      _run_id: data.run_id,
+      _actor_id: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    return mapDividendRun(Array.isArray(row) ? row[0] : row);
+  });
+
+export const approveDividendRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => ApproveSchema.parse(data))
+  .handler(async ({ data, context }): Promise<DividendRun> => {
+    const roles = await loadRoleSet(context.supabase, context.userId);
+    if (!hasAnyRole(roles, ["super_admin", "compliance_officer"])) throw new Error("forbidden");
+    const { data: row, error } = await (context.supabase as any).rpc("approve_dividend_run", {
+      _run_id: data.run_id,
+      _actor_id: context.userId,
+      _note: data.note ?? null,
+    });
+    if (error) throw new Error(error.message);
+    return mapDividendRun(Array.isArray(row) ? row[0] : row);
+  });
+
+export const rejectDividendRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => RejectSchema.parse(data))
+  .handler(async ({ data, context }): Promise<DividendRun> => {
+    const roles = await loadRoleSet(context.supabase, context.userId);
+    if (!hasAnyRole(roles, ["super_admin", "compliance_officer"])) throw new Error("forbidden");
+    const { data: row, error } = await (context.supabase as any).rpc("reject_dividend_run", {
+      _run_id: data.run_id,
+      _actor_id: context.userId,
+      _reason: data.reason,
+    });
+    if (error) throw new Error(error.message);
+    return mapDividendRun(Array.isArray(row) ? row[0] : row);
   });
 
 export const cancelDividendRun = createServerFn({ method: "POST" })
