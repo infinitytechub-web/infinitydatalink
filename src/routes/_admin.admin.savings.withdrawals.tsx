@@ -45,6 +45,7 @@ import {
   adminBulkCancelWithdrawals,
   adminRejectWithdrawal,
   adminUpdateWithdrawalSettings,
+  exportAdminWithdrawals,
   type AdminWithdrawalList,
   type WithdrawalRequest,
   type WithdrawalStatus,
