@@ -4,21 +4,32 @@ import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   getMyInvestments,
+  getMyInvestmentSeries,
   purchaseShares,
   sellShares,
   type MemberInvestmentSummary,
   type ShareProduct,
   type ShareHolding,
+  type InvestmentSeriesPoint,
 } from "@/lib/shares.functions";
+import { TrendChart } from "@/components/charts";
 
 const investmentsQO = queryOptions<MemberInvestmentSummary>({
   queryKey: ["member", "investments"],
   queryFn: () => getMyInvestments(),
 });
 
+const seriesQO = queryOptions<InvestmentSeriesPoint[]>({
+  queryKey: ["member", "investments", "series"],
+  queryFn: () => getMyInvestmentSeries(),
+});
+
 export const Route = createFileRoute("/_member/app/investments")({
   head: () => ({ meta: [{ title: "Investments & Shares — IT-360 CashApp" }] }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(investmentsQO),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(investmentsQO);
+    context.queryClient.ensureQueryData(seriesQO);
+  },
   component: InvestmentsPage,
 });
 
@@ -27,6 +38,7 @@ const money = (n: number, ccy = "GHS") =>
 
 function InvestmentsPage() {
   const { data } = useSuspenseQuery(investmentsQO);
+  const { data: series } = useSuspenseQuery(seriesQO);
   const qc = useQueryClient();
   const purchase = useServerFn(purchaseShares);
   const sell = useServerFn(sellShares);
@@ -69,6 +81,36 @@ function InvestmentsPage() {
         <SummaryCard label="Market value" value={money(data.totals.market_value)} tone="gold" />
         <SummaryCard label="Dividends earned" value={money(data.totals.dividends)} tone="teal" />
       </section>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-emerald-deep/10 bg-white p-4 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
+          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">Portfolio value (12 months)</h2>
+          <TrendChart
+            title="Portfolio value over time"
+            data={series}
+            xKey="month"
+            height={260}
+            series={[
+              { key: "portfolio_value", label: "Market value", format: (v) => money(v) },
+            ]}
+          />
+        </div>
+        <div className="rounded-2xl border border-emerald-deep/10 bg-white p-4 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
+          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">Contributions, returns & dividends</h2>
+          <TrendChart
+            title="Contributions, returns and cumulative dividends"
+            data={series}
+            xKey="month"
+            height={260}
+            series={[
+              { key: "contributions", label: "Net contributions", format: (v) => money(v) },
+              { key: "returns", label: "Dividends this month", format: (v) => money(v) },
+              { key: "dividends_cum", label: "Cumulative dividends", format: (v) => money(v) },
+            ]}
+          />
+        </div>
+      </section>
+
 
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
         <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Your holdings</h2>

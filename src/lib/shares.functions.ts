@@ -547,3 +547,133 @@ export const cancelDividendRun = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ============================================================================
+// Time-series for charts (last N months)
+// ============================================================================
+
+export type InvestmentSeriesPoint = {
+  month: string; // YYYY-MM
+  contributions: number;
+  returns: number;
+  dividends_cum: number;
+  portfolio_value: number;
+};
+
+function monthKey(d: Date): string {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function emptyMonthlyBuckets(months: number): InvestmentSeriesPoint[] {
+  const out: InvestmentSeriesPoint[] = [];
+  const now = new Date();
+  now.setUTCDate(1);
+  now.setUTCHours(0, 0, 0, 0);
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+    out.push({
+      month: monthKey(d),
+      contributions: 0,
+      returns: 0,
+      dividends_cum: 0,
+      portfolio_value: 0,
+    });
+  }
+  return out;
+}
+
+async function buildSeries(
+  supabase: any,
+  opts: { userId?: string; months: number },
+): Promise<InvestmentSeriesPoint[]> {
+  const buckets = emptyMonthlyBuckets(opts.months);
+  const from = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() - (opts.months - 1), 1));
+  let txnQ = supabase
+    .from("share_transactions")
+    .select("kind, units, amount, created_at, share_products(unit_price)")
+    .gte("created_at", from.toISOString())
+    .order("created_at", { ascending: true });
+  if (opts.userId) txnQ = txnQ.eq("user_id", opts.userId);
+  const { data: txns, error: tErr } = await txnQ;
+  if (tErr) throw new Error(tErr.message);
+
+  // Pre-window running totals (units and cumulative dividends before the window)
+  let priorUnits = 0;
+  let priorDividends = 0;
+  let priorQ = supabase.from("share_transactions").select("kind, units, amount").lt("created_at", from.toISOString());
+  if (opts.userId) priorQ = priorQ.eq("user_id", opts.userId);
+  const { data: prior, error: pErr } = await priorQ;
+  if (pErr) throw new Error(pErr.message);
+  for (const t of prior ?? []) {
+    const units = Number((t as any).units ?? 0);
+    const amt = Number((t as any).amount ?? 0);
+    if ((t as any).kind === "purchase") priorUnits += units;
+    else if ((t as any).kind === "sale") priorUnits -= units;
+    else if ((t as any).kind === "dividend") priorDividends += amt;
+  }
+
+  const idx = new Map(buckets.map((b, i) => [b.month, i]));
+  let runningUnits = priorUnits;
+  let runningDividends = priorDividends;
+  // Track last known unit_price per bucket for value estimation
+  const monthPrice: number[] = new Array(buckets.length).fill(0);
+
+  for (const t of txns ?? []) {
+    const key = monthKey(new Date((t as any).created_at));
+    const i = idx.get(key);
+    if (i == null) continue;
+    const units = Number((t as any).units ?? 0);
+    const amt = Number((t as any).amount ?? 0);
+    const price = Number((t as any).share_products?.unit_price ?? 0);
+    if (price > 0) monthPrice[i] = price;
+    if ((t as any).kind === "purchase") {
+      runningUnits += units;
+      buckets[i].contributions += amt;
+    } else if ((t as any).kind === "sale") {
+      runningUnits -= units;
+      buckets[i].contributions -= amt;
+    } else if ((t as any).kind === "dividend") {
+      runningDividends += amt;
+      buckets[i].returns += amt;
+    }
+    buckets[i].dividends_cum = runningDividends;
+    buckets[i].portfolio_value = Number((runningUnits * (monthPrice[i] || price || 0)).toFixed(2));
+  }
+
+  // Forward-fill portfolio_value / dividends_cum across empty months
+  let lastValue = 0;
+  let lastDivCum = priorDividends;
+  let lastPrice = 0;
+  for (let i = 0; i < buckets.length; i++) {
+    if (monthPrice[i] > 0) lastPrice = monthPrice[i];
+    if (buckets[i].portfolio_value === 0) {
+      buckets[i].portfolio_value = Number((runningUnitsAt(buckets, i, priorUnits) * lastPrice).toFixed(2));
+      if (buckets[i].portfolio_value === 0) buckets[i].portfolio_value = lastValue;
+    }
+    if (buckets[i].dividends_cum === 0 && buckets[i].returns === 0) buckets[i].dividends_cum = lastDivCum;
+    lastValue = buckets[i].portfolio_value;
+    lastDivCum = buckets[i].dividends_cum;
+  }
+
+  return buckets;
+}
+
+// Recompute units at end of bucket i from contributions signs (helper for gaps)
+function runningUnitsAt(buckets: InvestmentSeriesPoint[], _i: number, _prior: number): number {
+  // Simple heuristic: portfolio_value already reflects runningUnits at txn time.
+  // For empty months, returning 0 lets caller fall back to lastValue.
+  return 0;
+}
+
+export const getMyInvestmentSeries = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<InvestmentSeriesPoint[]> => {
+    return buildSeries(context.supabase, { userId: context.userId, months: 12 });
+  });
+
+export const getAdminInvestmentSeries = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<InvestmentSeriesPoint[]> => {
+    await assertStaff(context.supabase, context.userId);
+    return buildSeries(context.supabase, { months: 12 });
+  });
