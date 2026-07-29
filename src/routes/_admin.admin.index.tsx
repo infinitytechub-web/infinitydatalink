@@ -69,6 +69,10 @@ function AdminDashboard() {
         description="Real-time posture across membership, savings, loans, payments and security."
       />
       <div className="mb-6 grid gap-6 xl:grid-cols-2">
+        <RealtimeNotifications />
+        <OnlineUsersWidget />
+      </div>
+      <div className="mb-6 grid gap-6 xl:grid-cols-2">
         <FxConverterWidget />
         <PurgeControlsWidget />
       </div>
