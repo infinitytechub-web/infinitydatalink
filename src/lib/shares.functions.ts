@@ -642,18 +642,37 @@ export const upsertShareProduct = createServerFn({ method: "POST" })
       max_units_per_member: data.max_units_per_member ?? null,
       is_active: data.is_active,
     };
+    let resultId: string;
+    let action: "shares.product.update" | "shares.product.create";
+    let before: any = null;
     if (data.id) {
+      const { data: prev } = await context.supabase
+        .from("share_products")
+        .select("code, name, description, unit_price, currency, dividend_rate_annual, min_units, max_units_per_member, is_active")
+        .eq("id", data.id)
+        .maybeSingle();
+      before = prev ?? null;
       const { error } = await context.supabase.from("share_products").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
-      return { id: data.id };
+      resultId = data.id;
+      action = "shares.product.update";
+    } else {
+      const { data: row, error } = await context.supabase
+        .from("share_products")
+        .insert({ ...payload, created_by: context.userId })
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      resultId = row!.id as string;
+      action = "shares.product.create";
     }
-    const { data: row, error } = await context.supabase
-      .from("share_products")
-      .insert({ ...payload, created_by: context.userId })
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    return { id: row!.id as string };
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action,
+      target: resultId,
+      meta: { before, after: payload },
+    });
+    return { id: resultId };
   });
 
 const CreateRunSchema = z.object({
@@ -698,13 +717,20 @@ export const previewDividendRun = createServerFn({ method: "POST" })
       holders.add((h as any).user_id);
       totalUnits += Number((h as any).units ?? 0);
     }
-    return {
+    const result: DividendRunPreview = {
       eligible_members: holders.size,
       total_units: totalUnits,
       per_unit_amount: data.per_unit_amount,
       estimated_total: Number((totalUnits * data.per_unit_amount).toFixed(2)),
       currency: (prod as any)?.currency ?? "GHS",
     };
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.dividend_run.preview",
+      target: data.product_id,
+      meta: { input: data, result },
+    });
+    return result;
   });
 
 export const createDividendRun = createServerFn({ method: "POST" })
@@ -728,6 +754,19 @@ export const createDividendRun = createServerFn({ method: "POST" })
       .select("id, ref")
       .single();
     if (error) throw new Error(error.message);
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.dividend_run.create",
+      target: (row!.id as string),
+      meta: {
+        ref: row!.ref,
+        product_id: data.product_id,
+        period_start: data.period_start,
+        period_end: data.period_end,
+        per_unit_amount: data.per_unit_amount,
+        note: data.note ?? null,
+      },
+    });
     return { id: row!.id as string, ref: row!.ref as string };
   });
 
@@ -837,8 +876,88 @@ export const cancelDividendRun = createServerFn({ method: "POST" })
       .eq("id", data.run_id)
       .eq("status", "draft");
     if (error) throw new Error(error.message);
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.dividend_run.cancel",
+      target: data.run_id,
+      meta: { run_id: data.run_id },
+    });
     return { ok: true };
   });
+
+// ============================================================================
+// Immutable audit trail viewer for dividend runs & product config
+// ============================================================================
+
+export type DividendAuditEntry = {
+  id: string;
+  created_at: string;
+  action: string;
+  target: string | null;
+  actor_id: string | null;
+  actor_email: string | null;
+  actor_role: string | null;
+  meta: Record<string, any> | null;
+};
+
+export type DividendAuditListResult = {
+  rows: DividendAuditEntry[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+const DIVIDEND_AUDIT_ACTIONS = [
+  "shares.product.create",
+  "shares.product.update",
+  "shares.dividend_run.preview",
+  "shares.dividend_run.create",
+  "shares.dividend_run.submit",
+  "shares.dividend_run.approve",
+  "shares.dividend_run.reject",
+  "shares.dividend_run.cancel",
+  "shares.dividend_run.execute",
+] as const;
+
+export const listDividendAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        action: z.string().optional(),
+        target: z.string().optional(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(1).max(200).default(50),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }): Promise<DividendAuditListResult> => {
+    await assertStaff(context.supabase, context.userId);
+    let q = context.supabase
+      .from("audit_log")
+      .select("id, created_at, action, target, actor_id, actor_email, actor_role, meta", {
+        count: "exact",
+      })
+      .in("action", DIVIDEND_AUDIT_ACTIONS as unknown as string[])
+      .order("created_at", { ascending: false });
+    if (data.action && data.action !== "all") q = q.eq("action", data.action);
+    if (data.target) q = q.eq("target", data.target);
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const { data: rows, count, error } = await q.range(from, to);
+    if (error) throw new Error(error.message);
+    return {
+      rows: (rows ?? []) as DividendAuditEntry[],
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
+  });
+
 
 export type DividendRunExportRow = {
   member_no: string | null;
