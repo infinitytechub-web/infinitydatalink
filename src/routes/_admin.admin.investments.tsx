@@ -13,6 +13,7 @@ import {
   submitDividendRunForApproval,
   approveDividendRun,
   rejectDividendRun,
+  getDividendRunExport,
   type AdminInvestmentsOverview,
   type DividendRun,
   type DividendRunPreview,
@@ -56,6 +57,60 @@ function AdminInvestments() {
   const submitRun = useServerFn(submitDividendRunForApproval);
   const approveRun = useServerFn(approveDividendRun);
   const rejectRun = useServerFn(rejectDividendRun);
+  const exportRun = useServerFn(getDividendRunExport);
+  const [exportingId, setExportingId] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const csvEscape = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    // Prevent CSV formula injection
+    const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
+
+  const downloadRunCsv = async (run: DividendRun) => {
+    setExportingId(run.id);
+    setExportError(null);
+    try {
+      const { rows } = await exportRun({ data: { run_id: run.id } });
+      const header = [
+        "member_no",
+        "full_name",
+        "units",
+        "per_unit_amount",
+        "amount",
+        "currency",
+        "status",
+      ];
+      const lines = [header.join(",")];
+      for (const r of rows) {
+        lines.push(
+          [
+            csvEscape(r.member_no ?? ""),
+            csvEscape(r.full_name ?? ""),
+            csvEscape(r.units),
+            csvEscape(r.per_unit_amount),
+            csvEscape(r.amount.toFixed(2)),
+            csvEscape(r.currency),
+            csvEscape(r.status),
+          ].join(","),
+        );
+      }
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dividend-run-${run.ref}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setExportError((e as Error).message);
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const [editing, setEditing] = useState<ShareProduct | null>(null);
   const [showNewProduct, setShowNewProduct] = useState(false);
@@ -279,10 +334,12 @@ function AdminInvestments() {
                         cancelRunMut.isPending ||
                         reviewMut.isPending
                       }
+                      exporting={exportingId === r.id}
                       onSubmit={() => submitRunMut.mutate(r.id)}
                       onCancel={() => cancelRunMut.mutate(r.id)}
                       onExecute={() => executeRunMut.mutate(r.id)}
                       onReview={(mode) => setReviewing({ run: r, mode })}
+                      onExport={() => downloadRunCsv(r)}
                     />
                   </td>
                 </tr>
@@ -306,6 +363,7 @@ function AdminInvestments() {
             )?.message}
           </p>
         )}
+        {exportError && <p className="mt-3 text-sm text-red-600">Export failed: {exportError}</p>}
         <p className="mt-3 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
           Dividend runs require dual control: after submission, an approver
           (super admin or compliance officer) other than the creator must
@@ -390,18 +448,22 @@ function RunActions({
   run,
   viewer,
   pending,
+  exporting,
   onSubmit,
   onCancel,
   onExecute,
   onReview,
+  onExport,
 }: {
   run: DividendRun;
   viewer: AdminInvestmentsOverview["viewer"];
   pending: boolean;
+  exporting: boolean;
   onSubmit: () => void;
   onCancel: () => void;
   onExecute: () => void;
   onReview: (mode: "approve" | "reject") => void;
+  onExport: () => void;
 }) {
   const isCreator = run.created_by === viewer.user_id || run.submitted_by === viewer.user_id;
   const isApprover = run.approved_by === viewer.user_id;
@@ -412,6 +474,21 @@ function RunActions({
   const btnDanger =
     "rounded bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white hover:bg-red-700 disabled:opacity-50";
 
+  const exportBtn = (
+    <button
+      disabled={exporting}
+      onClick={onExport}
+      className={btnGhost}
+      title={
+        run.status === "executed"
+          ? "Download recorded payouts as CSV"
+          : "Download estimated payout list as CSV"
+      }
+    >
+      {exporting ? "Exporting…" : "Export CSV"}
+    </button>
+  );
+
   if (run.status === "draft" && viewer.can_execute) {
     return (
       <div className="inline-flex gap-1">
@@ -421,13 +498,17 @@ function RunActions({
         <button disabled={pending} onClick={onCancel} className={btnGhost}>
           Cancel
         </button>
+        {exportBtn}
       </div>
     );
   }
   if (run.status === "pending_approval" && viewer.can_approve) {
     if (isCreator) {
       return (
-        <span className="text-xs italic text-emerald-deep/60">Awaiting second reviewer</span>
+        <div className="inline-flex items-center gap-2">
+          <span className="text-xs italic text-emerald-deep/60">Awaiting second reviewer</span>
+          {exportBtn}
+        </div>
       );
     }
     return (
@@ -438,24 +519,31 @@ function RunActions({
         <button disabled={pending} onClick={() => onReview("reject")} className={btnDanger}>
           Reject
         </button>
+        {exportBtn}
       </div>
     );
   }
   if (run.status === "approved" && viewer.can_execute) {
     if (isApprover) {
       return (
-        <span className="text-xs italic text-emerald-deep/60">
-          Awaiting a different officer
-        </span>
+        <div className="inline-flex items-center gap-2">
+          <span className="text-xs italic text-emerald-deep/60">
+            Awaiting a different officer
+          </span>
+          {exportBtn}
+        </div>
       );
     }
     return (
-      <button disabled={pending} onClick={onExecute} className={btnPrimary}>
-        Execute payouts
-      </button>
+      <div className="inline-flex gap-1">
+        <button disabled={pending} onClick={onExecute} className={btnPrimary}>
+          Execute payouts
+        </button>
+        {exportBtn}
+      </div>
     );
   }
-  return <span className="text-xs text-emerald-deep/40">—</span>;
+  return <div className="inline-flex gap-1">{exportBtn}</div>;
 }
 
 function ReviewDialog({
