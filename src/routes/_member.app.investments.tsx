@@ -306,9 +306,23 @@ function TradeDialog({
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [units, setUnits] = useState(state.mode === "buy" ? state.product.min_units : 1);
   const [note, setNote] = useState("");
+  const [step, setStep] = useState<"edit" | "review">("edit");
   const price = state.product.unit_price;
-  const amount = useMemo(() => Math.max(0, price * units), [price, units]);
   const maxUnits = state.mode === "sell" ? state.holding.units : undefined;
+
+  const quote = useMemo(() => {
+    const gross = Math.max(0, price * units);
+    // Simple fee schedule: buys 1.0%, sells 0.5%, capped at 50 of product currency.
+    const feeRate = state.mode === "buy" ? 0.01 : 0.005;
+    const fee = Math.min(50, Number((gross * feeRate).toFixed(2)));
+    const net = state.mode === "buy" ? gross + fee : gross - fee;
+    return { gross, fee, feeRate, net };
+  }, [price, units, state.mode]);
+
+  const account = accounts.find((a) => a.id === accountId);
+  const insufficient = state.mode === "buy" && account ? account.balance < quote.net : false;
+  const canReview = accountId && units >= 1 && (maxUnits == null || units <= maxUnits);
+  const ccy = state.product.currency;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -316,70 +330,142 @@ function TradeDialog({
         <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
           {state.mode === "buy" ? "Buy" : "Sell"} — {state.product.name}
         </h3>
-        <div className="mt-4 space-y-3">
-          <label className="block text-sm">
-            <span className="text-emerald-deep/70 dark:text-emerald-200/70">Savings account</span>
-            <select
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
-            >
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nickname ?? a.plan_name} — {money(a.balance)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block text-sm">
-            <span className="text-emerald-deep/70 dark:text-emerald-200/70">
-              Units {maxUnits != null && `(max ${maxUnits})`}
-            </span>
-            <input
-              type="number"
-              min={state.mode === "buy" ? state.product.min_units : 1}
-              max={maxUnits}
-              value={units}
-              onChange={(e) => setUnits(Math.max(1, Number(e.target.value) || 0))}
-              className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
-            />
-          </label>
-          <label className="block text-sm">
-            <span className="text-emerald-deep/70 dark:text-emerald-200/70">Note (optional)</span>
-            <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
-            />
-          </label>
-          <div className="rounded-md bg-emerald-deep/5 p-3 text-sm dark:bg-emerald-100/5">
-            <div className="flex justify-between">
-              <span>Unit price</span>
-              <span className="font-semibold">{money(price, state.product.currency)}</span>
-            </div>
-            <div className="mt-1 flex justify-between">
-              <span>{state.mode === "buy" ? "Amount to debit" : "Amount to credit"}</span>
-              <span className="font-semibold">{money(amount, state.product.currency)}</span>
+        <p className="mt-1 text-xs uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/50">
+          Step {step === "edit" ? "1 of 2 · Details" : "2 of 2 · Review & confirm"}
+        </p>
+
+        {step === "edit" ? (
+          <div className="mt-4 space-y-3">
+            <label className="block text-sm">
+              <span className="text-emerald-deep/70 dark:text-emerald-200/70">Savings account</span>
+              <select
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+                className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
+              >
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nickname ?? a.plan_name} — {money(a.balance)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+                Units {maxUnits != null && `(max ${maxUnits})`}
+              </span>
+              <input
+                type="number"
+                min={state.mode === "buy" ? state.product.min_units : 1}
+                max={maxUnits}
+                value={units}
+                onChange={(e) => setUnits(Math.max(1, Number(e.target.value) || 0))}
+                className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-emerald-deep/70 dark:text-emerald-200/70">Note (optional)</span>
+              <input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="mt-1 w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
+              />
+            </label>
+            <div className="rounded-md bg-emerald-deep/5 p-3 text-sm dark:bg-emerald-100/5">
+              <div className="flex justify-between">
+                <span>Unit price</span>
+                <span className="font-semibold">{money(price, ccy)}</span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span>Estimated gross</span>
+                <span className="font-semibold">{money(quote.gross, ccy)}</span>
+              </div>
             </div>
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-        </div>
+        ) : (
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
+              <div className="flex justify-between">
+                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Action</span>
+                <span className="font-semibold">
+                  {state.mode === "buy" ? "Purchase" : "Sale"} · {units.toLocaleString()} units
+                </span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Unit price</span>
+                <span className="font-semibold">{money(price, ccy)}</span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Savings account</span>
+                <span className="font-semibold">
+                  {account?.nickname ?? account?.plan_name ?? "—"}
+                </span>
+              </div>
+            </div>
+            <div className="rounded-md bg-emerald-deep/5 p-3 dark:bg-emerald-100/5">
+              <div className="flex justify-between">
+                <span>Gross amount</span>
+                <span className="font-semibold">{money(quote.gross, ccy)}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-emerald-deep/80 dark:text-emerald-200/80">
+                <span>Transaction fee ({(quote.feeRate * 100).toFixed(2)}%)</span>
+                <span>
+                  {state.mode === "buy" ? "+" : "−"} {money(quote.fee, ccy)}
+                </span>
+              </div>
+              <div className="mt-2 flex justify-between border-t border-emerald-deep/10 pt-2 dark:border-emerald-100/10">
+                <span className="font-semibold">
+                  {state.mode === "buy" ? "Total to debit" : "Net to credit"}
+                </span>
+                <span className="font-serif text-base">{money(quote.net, ccy)}</span>
+              </div>
+            </div>
+            {note && (
+              <p className="rounded-md bg-emerald-deep/5 p-3 text-xs italic dark:bg-emerald-100/5">
+                Note: {note}
+              </p>
+            )}
+            {insufficient && (
+              <p className="text-sm text-amber-600">
+                Selected savings account balance is below the total to debit.
+              </p>
+            )}
+            <p className="text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+              Fees are estimates and applied by the system at settlement. Final posted amount may
+              vary slightly if the unit price changes before confirmation.
+            </p>
+          </div>
+        )}
+
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
         <div className="mt-5 flex justify-end gap-2">
           <button
-            onClick={onCancel}
-            className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100"
+            onClick={step === "review" ? () => setStep("edit") : onCancel}
+            disabled={submitting}
+            className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100 disabled:opacity-50"
           >
-            Cancel
+            {step === "review" ? "Back" : "Cancel"}
           </button>
-          <button
-            disabled={submitting || !accountId || units < 1}
-            onClick={() =>
-              onSubmit({ savings_account_id: accountId, units, note: note.trim() ? note.trim() : null })
-            }
-            className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
-          >
-            {submitting ? "Working…" : state.mode === "buy" ? "Confirm purchase" : "Confirm sale"}
-          </button>
+          {step === "edit" ? (
+            <button
+              disabled={!canReview}
+              onClick={() => setStep("review")}
+              className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+            >
+              Review
+            </button>
+          ) : (
+            <button
+              disabled={submitting || insufficient}
+              onClick={() =>
+                onSubmit({ savings_account_id: accountId, units, note: note.trim() ? note.trim() : null })
+              }
+              className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+            >
+              {submitting ? "Working…" : state.mode === "buy" ? "Confirm purchase" : "Confirm sale"}
+            </button>
+          )}
         </div>
       </div>
     </div>
