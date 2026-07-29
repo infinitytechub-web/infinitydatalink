@@ -1164,8 +1164,11 @@ export type Database = {
           balance: number
           created_at: string
           goal_amount: number | null
+          goal_completed_at: string | null
+          goal_started_at: string | null
           goal_target_date: string | null
           id: string
+          last_milestone_pct: number
           nickname: string | null
           plan_id: string
           status: string
@@ -1176,8 +1179,11 @@ export type Database = {
           balance?: number
           created_at?: string
           goal_amount?: number | null
+          goal_completed_at?: string | null
+          goal_started_at?: string | null
           goal_target_date?: string | null
           id?: string
+          last_milestone_pct?: number
           nickname?: string | null
           plan_id: string
           status?: string
@@ -1188,8 +1194,11 @@ export type Database = {
           balance?: number
           created_at?: string
           goal_amount?: number | null
+          goal_completed_at?: string | null
+          goal_started_at?: string | null
           goal_target_date?: string | null
           id?: string
+          last_milestone_pct?: number
           nickname?: string | null
           plan_id?: string
           status?: string
@@ -1317,6 +1326,131 @@ export type Database = {
           {
             foreignKeyName: "savings_recurring_contributions_account_id_fkey"
             columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_statements: {
+        Row: {
+          account_id: string
+          closing_balance: number
+          deposits_total: number
+          generated_at: string
+          id: string
+          interest_credited: number
+          opening_balance: number
+          period_end: string
+          period_start: string
+          user_id: string
+          withdrawals_total: number
+        }
+        Insert: {
+          account_id: string
+          closing_balance: number
+          deposits_total?: number
+          generated_at?: string
+          id?: string
+          interest_credited?: number
+          opening_balance: number
+          period_end: string
+          period_start: string
+          user_id: string
+          withdrawals_total?: number
+        }
+        Update: {
+          account_id?: string
+          closing_balance?: number
+          deposits_total?: number
+          generated_at?: string
+          id?: string
+          interest_credited?: number
+          opening_balance?: number
+          period_end?: string
+          period_start?: string
+          user_id?: string
+          withdrawals_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_statements_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_sweeps: {
+        Row: {
+          amount: number
+          created_at: string
+          day_of_month: number | null
+          day_of_week: number | null
+          frequency: Database["public"]["Enums"]["recurring_frequency"]
+          from_account_id: string
+          id: string
+          last_run_at: string | null
+          last_run_error: string | null
+          last_run_status: string | null
+          next_run_at: string
+          note: string | null
+          runs_completed: number
+          status: Database["public"]["Enums"]["recurring_status"]
+          to_account_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency: Database["public"]["Enums"]["recurring_frequency"]
+          from_account_id: string
+          id?: string
+          last_run_at?: string | null
+          last_run_error?: string | null
+          last_run_status?: string | null
+          next_run_at?: string
+          note?: string | null
+          runs_completed?: number
+          status?: Database["public"]["Enums"]["recurring_status"]
+          to_account_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency?: Database["public"]["Enums"]["recurring_frequency"]
+          from_account_id?: string
+          id?: string
+          last_run_at?: string | null
+          last_run_error?: string | null
+          last_run_status?: string | null
+          next_run_at?: string
+          note?: string | null
+          runs_completed?: number
+          status?: Database["public"]["Enums"]["recurring_status"]
+          to_account_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_sweeps_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_sweeps_to_account_id_fkey"
+            columns: ["to_account_id"]
             isOneToOne: false
             referencedRelation: "savings_accounts"
             referencedColumns: ["id"]
@@ -1846,6 +1980,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accrue_monthly_interest: {
+        Args: { _period_end?: string }
+        Returns: {
+          account_id: string
+          closing_balance: number
+          interest: number
+        }[]
+      }
       admin_assign_role: {
         Args: {
           _actor_id: string
@@ -2694,6 +2836,14 @@ export type Database = {
           error: string
           outcome: string
           schedule_id: string
+        }[]
+      }
+      run_savings_sweeps: {
+        Args: never
+        Returns: {
+          error: string
+          outcome: string
+          sweep_id: string
         }[]
       }
       sell_shares: {
