@@ -8,6 +8,8 @@ import {
   DECISION_OUTCOMES,
 } from "@/lib/decision-audit";
 
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue };
+
 export type DecisionRow = {
   id: string;
   created_at: string;
@@ -24,7 +26,7 @@ export type DecisionRow = {
   actor_id: string | null;
   actor_email: string | null;
   actor_role: string | null;
-  meta: Record<string, unknown>;
+  meta: { [k: string]: JsonValue };
 };
 
 export type DecisionListResult = {
@@ -148,7 +150,7 @@ export const listDecisionAudit = createServerFn({ method: "GET" })
 
     return {
       rows: list.map((r) => {
-        const meta = (r.meta ?? {}) as Record<string, unknown>;
+        const meta = (r.meta ?? {}) as { [k: string]: JsonValue };
         const [mod, out] = String(r.action).split(".");
         const subjectId = (meta.subject_id as string | null) ?? null;
         const prof = subjectId ? profiles.get(subjectId) : undefined;
