@@ -3,7 +3,7 @@ import { Suspense, useState } from "react";
 import { useSuspenseQuery, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { CheckCircle2, PlayCircle, Scale, Settings, XCircle } from "lucide-react";
+import { CheckCircle2, Percent, PlayCircle, Scale, Settings, XCircle } from "lucide-react";
 import { ErrorState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -81,6 +81,12 @@ function AdminSavings() {
               className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
             >
               <Scale className="h-3.5 w-3.5" /> Reconciliation
+            </Link>
+            <Link
+              to="/admin/savings/interest"
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              <Percent className="h-3.5 w-3.5" /> Interest rules
             </Link>
             <Link
               to="/admin/savings/plans"
