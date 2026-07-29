@@ -169,6 +169,12 @@ function AdminInvestments() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Link
+            to="/admin/investments/audit"
+            className="rounded-md border border-emerald-deep/20 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-emerald-deep hover:bg-cream/40 dark:text-emerald-100"
+          >
+            Audit trail
+          </Link>
           <button
             onClick={() => setShowNewProduct(true)}
             className="rounded-md bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
