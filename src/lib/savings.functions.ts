@@ -25,6 +25,7 @@ export type SavingsAccount = {
   plan_name: string;
   plan_schedule: string;
   plan_interest_rate: number;
+  plan_min_contribution: number;
   balance: number;
   nickname: string | null;
   goal_amount: number | null;
@@ -92,7 +93,7 @@ export const listMyAccounts = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("savings_accounts")
       .select(
-        "id, plan_id, balance, nickname, goal_amount, goal_target_date, status, created_at, updated_at, savings_plans(name, schedule, interest_rate)",
+        "id, plan_id, balance, nickname, goal_amount, goal_target_date, status, created_at, updated_at, savings_plans(name, schedule, interest_rate, min_contribution)",
       )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: true });
@@ -106,6 +107,7 @@ export const listMyAccounts = createServerFn({ method: "GET" })
         plan_name: r.savings_plans?.name ?? "Savings Plan",
         plan_schedule: r.savings_plans?.schedule ?? "—",
         plan_interest_rate: Number(r.savings_plans?.interest_rate ?? 0),
+        plan_min_contribution: Number(r.savings_plans?.min_contribution ?? 0),
         balance,
         nickname: r.nickname,
         goal_amount: goal,
@@ -204,7 +206,7 @@ export const getMyAccountDetail = createServerFn({ method: "GET" })
     const { data: acct, error } = await context.supabase
       .from("savings_accounts")
       .select(
-        "id, plan_id, balance, nickname, goal_amount, goal_target_date, status, created_at, updated_at, savings_plans(name, schedule, interest_rate)",
+        "id, plan_id, balance, nickname, goal_amount, goal_target_date, status, created_at, updated_at, savings_plans(name, schedule, interest_rate, min_contribution)",
       )
       .eq("id", data.id)
       .eq("user_id", context.userId)
@@ -228,6 +230,7 @@ export const getMyAccountDetail = createServerFn({ method: "GET" })
         plan_name: a.savings_plans?.name ?? "Savings Plan",
         plan_schedule: a.savings_plans?.schedule ?? "—",
         plan_interest_rate: Number(a.savings_plans?.interest_rate ?? 0),
+        plan_min_contribution: Number(a.savings_plans?.min_contribution ?? 0),
         balance,
         nickname: a.nickname,
         goal_amount: goal,
@@ -261,10 +264,21 @@ const MoveSchema = z.object({
   note: z.string().max(500).optional().nullable(),
 });
 
+export type DepositReceipt = {
+  txn_id: string;
+  ref: string;
+  amount: number;
+  channel: string | null;
+  status: string;
+  note: string | null;
+  created_at: string;
+  account_id: string;
+};
+
 export const submitContribution = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => MoveSchema.parse(d))
-  .handler(async ({ data, context }): Promise<{ txn_id: string }> => {
+  .handler(async ({ data, context }): Promise<DepositReceipt> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: id, error } = await supabaseAdmin.rpc("post_savings_contribution", {
       _account_id: data.account_id,
@@ -274,7 +288,24 @@ export const submitContribution = createServerFn({ method: "POST" })
       _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
-    return { txn_id: id as string };
+
+    // Read the ledger row back so the member gets a receipt for the entry.
+    const { data: txn } = await context.supabase
+      .from("transactions")
+      .select("id, ref, amount, channel, status, note, created_at, savings_account_id")
+      .eq("id", id as string)
+      .maybeSingle();
+
+    return {
+      txn_id: id as string,
+      ref: (txn as any)?.ref ?? "—",
+      amount: Number((txn as any)?.amount ?? data.amount),
+      channel: (txn as any)?.channel ?? data.channel,
+      status: (txn as any)?.status ?? "pending",
+      note: (txn as any)?.note ?? data.note ?? null,
+      created_at: (txn as any)?.created_at ?? new Date().toISOString(),
+      account_id: (txn as any)?.savings_account_id ?? data.account_id,
+    };
   });
 
 export const submitWithdrawal = createServerFn({ method: "POST" })

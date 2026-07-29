@@ -64,6 +64,7 @@ import { Route as ApiPublicHooksSavingsSweepsRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/public/hooks/monthly-interest'
 import { Route as MemberAppSavingsStatementsRouteImport } from './routes/_member.app.savings.statements'
 import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
+import { Route as MemberAppSavingsDepositRouteImport } from './routes/_member.app.savings.deposit'
 import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
 import { Route as MemberAppLoansLoanIdRouteImport } from './routes/_member.app.loans.$loanId'
 import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.app.entities.register'
@@ -367,6 +368,11 @@ const MemberAppSavingsEnrollRoute = MemberAppSavingsEnrollRouteImport.update({
   path: '/enroll',
   getParentRoute: () => MemberAppSavingsRoute,
 } as any)
+const MemberAppSavingsDepositRoute = MemberAppSavingsDepositRouteImport.update({
+  id: '/deposit',
+  path: '/deposit',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
 const MemberAppSavingsAccountIdRoute =
   MemberAppSavingsAccountIdRouteImport.update({
     id: '/$accountId',
@@ -566,6 +572,7 @@ export interface FileRoutesByFullPath {
   '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
+  '/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
@@ -639,6 +646,7 @@ export interface FileRoutesByTo {
   '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
+  '/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
@@ -720,6 +728,7 @@ export interface FileRoutesById {
   '/_member/app/entities/register': typeof MemberAppEntitiesRegisterRoute
   '/_member/app/loans/$loanId': typeof MemberAppLoansLoanIdRoute
   '/_member/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
+  '/_member/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/_member/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/_member/app/savings/statements': typeof MemberAppSavingsStatementsRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
@@ -800,6 +809,7 @@ export interface FileRouteTypes {
     | '/app/entities/register'
     | '/app/loans/$loanId'
     | '/app/savings/$accountId'
+    | '/app/savings/deposit'
     | '/app/savings/enroll'
     | '/app/savings/statements'
     | '/api/public/hooks/monthly-interest'
@@ -873,6 +883,7 @@ export interface FileRouteTypes {
     | '/app/entities/register'
     | '/app/loans/$loanId'
     | '/app/savings/$accountId'
+    | '/app/savings/deposit'
     | '/app/savings/enroll'
     | '/app/savings/statements'
     | '/api/public/hooks/monthly-interest'
@@ -953,6 +964,7 @@ export interface FileRouteTypes {
     | '/_member/app/entities/register'
     | '/_member/app/loans/$loanId'
     | '/_member/app/savings/$accountId'
+    | '/_member/app/savings/deposit'
     | '/_member/app/savings/enroll'
     | '/_member/app/savings/statements'
     | '/api/public/hooks/monthly-interest'
@@ -1372,6 +1384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppSavingsEnrollRouteImport
       parentRoute: typeof MemberAppSavingsRoute
     }
+    '/_member/app/savings/deposit': {
+      id: '/_member/app/savings/deposit'
+      path: '/deposit'
+      fullPath: '/app/savings/deposit'
+      preLoaderRoute: typeof MemberAppSavingsDepositRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
     '/_member/app/savings/$accountId': {
       id: '/_member/app/savings/$accountId'
       path: '/$accountId'
@@ -1743,6 +1762,7 @@ const MemberAppLoansRouteWithChildren = MemberAppLoansRoute._addFileChildren(
 
 interface MemberAppSavingsRouteChildren {
   MemberAppSavingsAccountIdRoute: typeof MemberAppSavingsAccountIdRoute
+  MemberAppSavingsDepositRoute: typeof MemberAppSavingsDepositRoute
   MemberAppSavingsEnrollRoute: typeof MemberAppSavingsEnrollRoute
   MemberAppSavingsStatementsRoute: typeof MemberAppSavingsStatementsRoute
   MemberAppSavingsIndexRoute: typeof MemberAppSavingsIndexRoute
@@ -1750,6 +1770,7 @@ interface MemberAppSavingsRouteChildren {
 
 const MemberAppSavingsRouteChildren: MemberAppSavingsRouteChildren = {
   MemberAppSavingsAccountIdRoute: MemberAppSavingsAccountIdRoute,
+  MemberAppSavingsDepositRoute: MemberAppSavingsDepositRoute,
   MemberAppSavingsEnrollRoute: MemberAppSavingsEnrollRoute,
   MemberAppSavingsStatementsRoute: MemberAppSavingsStatementsRoute,
   MemberAppSavingsIndexRoute: MemberAppSavingsIndexRoute,

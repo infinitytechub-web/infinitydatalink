@@ -74,6 +74,12 @@ function SavingsPage() {
         action={
           <div className="flex items-center gap-2">
             <Link
+              to="/app/savings/deposit"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              <Zap className="h-4 w-4" /> Top up
+            </Link>
+            <Link
               to="/app/savings/statements"
               className="rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
             >
@@ -170,7 +176,7 @@ function Body() {
             {recent.isLoading ? (
               <div className="p-6"><Skeleton className="h-40 w-full" /></div>
             ) : clearedDeposits.length === 0 && pendingDeposits.length === 0 ? (
-              <div className="p-6"><EmptyState title="No contributions yet" hint="Use Quick deposit on any account to get started." /></div>
+              <div className="p-6"><EmptyState title="No contributions yet" hint="Use Top up to fund an account and it will appear here." /></div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
