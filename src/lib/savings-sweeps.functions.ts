@@ -204,8 +204,8 @@ export const adminRunMonthlyAccrual = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: result, error } = await supabaseAdmin.rpc("accrue_monthly_interest", {
-      _period_end: data.period_end ?? null,
-    });
+      _period_end: data.period_end ?? undefined,
+    } as never);
     if (error) throw new Error(error.message);
     const rows = (result ?? []) as Array<{ interest: number }>;
     const total = rows.reduce((s, r) => s + Number(r.interest ?? 0), 0);
