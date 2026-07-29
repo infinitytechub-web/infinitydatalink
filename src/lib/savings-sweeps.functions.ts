@@ -1,3 +1,4 @@
+import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -210,7 +211,7 @@ export const adminRunMonthlyAccrual = createServerFn({ method: "POST" })
     const rows = (result ?? []) as Array<{ interest: number }>;
     const total = rows.reduce((s, r) => s + Number(r.interest ?? 0), 0);
 
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       actor_role: "super_admin",
       action: "savings.interest_accrual.manual",

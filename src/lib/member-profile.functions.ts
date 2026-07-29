@@ -1,3 +1,4 @@
+import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -269,7 +270,7 @@ export const registerKycDocument = createServerFn({ method: "POST" })
     // non-staff callers.
     await sb.rpc("reset_own_kyc_pending");
 
-    await sb.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: "member",

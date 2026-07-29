@@ -1,3 +1,4 @@
+import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -27,7 +28,7 @@ async function assertPlanAdmin(supabase: any, userId: string) {
 }
 
 async function auditLog(supabase: any, userId: string, roles: string[], action: string, target: string, meta: Record<string, any>) {
-  await supabase.from("audit_log").insert({
+  await writeAudit({
     actor_id: userId,
     actor_role: roles.includes("super_admin") ? "super_admin" : "finance_officer",
     action,

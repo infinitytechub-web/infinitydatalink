@@ -1,3 +1,4 @@
+import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -298,7 +299,7 @@ export const decideKyc = createServerFn({ method: "POST" })
       .eq("status", "pending");
     if (dErr) throw new Error(dErr.message);
 
-    await sb.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: role,
@@ -317,7 +318,7 @@ export const decideKyc = createServerFn({ method: "POST" })
         reviewedAt: now,
       });
       if (!res.ok) {
-        await sb.from("audit_log").insert({
+        await writeAudit({
           actor_id: context.userId,
           actor_email: (context.claims as any)?.email ?? null,
           actor_role: role,
@@ -519,7 +520,7 @@ export const assignKyc = createServerFn({ method: "POST" })
       target: id,
       meta: { assignee_id: data.assignee_id },
     }));
-    await sb.from("audit_log").insert(auditRows);
+    await writeAudit(auditRows);
 
     return { updated: data.member_ids.length };
   });
@@ -581,7 +582,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           .eq("member_id", memberId)
           .eq("status", "pending");
 
-        await sb.from("audit_log").insert({
+        await writeAudit({
           actor_id: context.userId,
           actor_email: (context.claims as any)?.email ?? null,
           actor_role: role,
@@ -599,7 +600,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
             reviewedAt: now,
           });
           if (!res.ok) {
-            await sb.from("audit_log").insert({
+            await writeAudit({
               actor_id: context.userId,
               actor_email: (context.claims as any)?.email ?? null,
               actor_role: role,

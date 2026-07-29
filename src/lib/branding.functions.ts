@@ -1,3 +1,4 @@
+import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
@@ -167,7 +168,7 @@ export const updateBranding = createServerFn({ method: "POST" })
       .update(patch)
       .eq("id", 1);
     if (error) throw new Error(error.message);
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: "super_admin",
@@ -230,7 +231,7 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
     if (oldPath) {
       await (supabaseAdmin as any).storage.from(BUCKET).remove([oldPath]).catch(() => {});
     }
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: "super_admin",
@@ -261,7 +262,7 @@ export const clearBrandingAsset = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await (supabaseAdmin as any).storage.from(BUCKET).remove([oldPath]).catch(() => {});
     }
-    await context.supabase.from("audit_log").insert({
+    await writeAudit({
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: "super_admin",
