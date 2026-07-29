@@ -409,7 +409,11 @@ function TradeDialog({
           {state.mode === "buy" ? "Buy" : "Sell"} — {state.product.name}
         </h3>
         <p className="mt-1 text-xs uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/50">
-          Step {step === "edit" ? "1 of 2 · Details" : "2 of 2 · Review & confirm"}
+          {step === "edit"
+            ? "Step 1 of 2 · Details"
+            : step === "review"
+            ? "Step 2 of 2 · Review & confirm"
+            : "Trade completed · Receipt"}
         </p>
 
         {step === "edit" ? (
