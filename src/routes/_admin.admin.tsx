@@ -31,6 +31,7 @@ import {
   Palette,
   Settings2,
   Bug,
+  BellRing,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 
@@ -40,6 +41,7 @@ const groups: NavGroup[] = [
     items: [
       { to: "/admin", label: "Analytics", icon: <BarChart3 /> },
       { to: "/admin/analytics", label: "Analytics Dashboards", icon: <TrendingUp /> },
+      { to: "/admin/notifications", label: "Notification Delivery", icon: <BellRing /> },
       { to: "/admin/reports", label: "Reports", icon: <FileBarChart /> },
       { to: "/admin/audit", label: "Audit & Activity", icon: <History /> },
       { to: "/admin/activity", label: "Activity Timeline", icon: <Activity /> },
@@ -103,6 +105,7 @@ const groups: NavGroup[] = [
 const CRUMBS: Record<string, string> = {
   "/admin": "Analytics",
   "/admin/analytics": "Analytics Dashboards",
+  "/admin/notifications": "Notification Delivery",
   "/admin/reports": "Reports",
   "/admin/audit": "Audit & Activity",
   "/admin/activity": "Activity Timeline",

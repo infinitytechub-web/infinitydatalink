@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Building2,
   LifeBuoy,
+  BellRing,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
@@ -36,6 +37,7 @@ const groups: NavGroup[] = [
   {
     label: "Support",
     items: [
+      { to: "/app/notifications", label: "Alerts & notifications", icon: <BellRing /> },
       { to: "/app/support", label: "Help Centre", icon: <LifeBuoy /> },
     ],
   },
@@ -58,6 +60,7 @@ const CRUMBS: Record<string, string> = {
   "/app/profile": "Profile & KYC",
   "/app/kyc": "Verification status",
   "/app/entities/register": "Register organization",
+  "/app/notifications": "Alerts & notifications",
   "/app/support": "Help Centre",
 };
 
