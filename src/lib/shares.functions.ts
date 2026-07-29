@@ -754,6 +754,19 @@ export const createDividendRun = createServerFn({ method: "POST" })
       .select("id, ref")
       .single();
     if (error) throw new Error(error.message);
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.dividend_run.create",
+      target: (row!.id as string),
+      meta: {
+        ref: row!.ref,
+        product_id: data.product_id,
+        period_start: data.period_start,
+        period_end: data.period_end,
+        per_unit_amount: data.per_unit_amount,
+        note: data.note ?? null,
+      },
+    });
     return { id: row!.id as string, ref: row!.ref as string };
   });
 
