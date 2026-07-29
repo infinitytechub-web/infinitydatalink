@@ -57,6 +57,8 @@ const SearchSchema = z.object({
   status: z.enum(STATUSES).catch("pending").default("pending"),
   q: z.string().max(120).optional().catch(undefined),
   page: z.coerce.number().int().min(1).catch(1).default(1),
+  date_from: z.string().date().optional().catch(undefined),
+  date_to: z.string().date().optional().catch(undefined),
 });
 type SearchParams = z.infer<typeof SearchSchema>;
 
