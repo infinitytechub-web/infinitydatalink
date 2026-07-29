@@ -203,6 +203,8 @@ const FilterSchema = z.object({
   search: z.string().trim().max(120).optional().nullable(),
   page: z.number().int().min(1).default(1),
   page_size: z.number().int().min(5).max(100).default(25),
+  date_from: z.string().date().optional().nullable(),
+  date_to: z.string().date().optional().nullable(),
 });
 
 export const adminListWithdrawals = createServerFn({ method: "POST" })
@@ -219,6 +221,8 @@ export const adminListWithdrawals = createServerFn({ method: "POST" })
       .from("savings_withdrawal_requests")
       .select(SELECT_COLS, { count: "exact" });
     if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.date_from) q = q.gte("created_at", `${data.date_from}T00:00:00Z`);
+    if (data.date_to) q = q.lte("created_at", `${data.date_to}T23:59:59.999Z`);
     q = q.order("created_at", { ascending: false }).range(from, to);
 
     const { data: rows, error, count } = await q;
@@ -286,6 +290,51 @@ export const adminListWithdrawals = createServerFn({ method: "POST" })
         0,
       ),
     };
+  });
+
+export const exportAdminWithdrawals = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => FilterSchema.parse(d ?? {}))
+  .handler(async ({ data, context }): Promise<WithdrawalRequest[]> => {
+    const roles = await loadRoleSet(context.supabase, context.userId);
+    assertAnyRole(roles, [...FINANCE_ROLES, "auditor"], "finance");
+
+    let q = context.supabase
+      .from("savings_withdrawal_requests")
+      .select(SELECT_COLS);
+    if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.date_from) q = q.gte("created_at", `${data.date_from}T00:00:00Z`);
+    if (data.date_to) q = q.lte("created_at", `${data.date_to}T23:59:59.999Z`);
+    q = q.order("created_at", { ascending: false });
+
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.user_id as string)));
+    const profiles = new Map<string, { full_name: string | null; member_no: string | null }>();
+    if (ids.length > 0) {
+      const { data: profs, error: pErr } = await context.supabase
+        .from("profiles")
+        .select("id, full_name, member_no")
+        .in("id", ids);
+      if (pErr) throw new Error(pErr.message);
+      for (const p of (profs ?? []) as any[]) {
+        profiles.set(p.id, { full_name: p.full_name ?? null, member_no: p.member_no ?? null });
+      }
+    }
+
+    let mapped = (rows ?? []).map((r: any) => mapRow(r, profiles.get(r.user_id)));
+    if (data.search) {
+      const s = data.search.toLowerCase();
+      mapped = mapped.filter(
+        (r) =>
+          r.ref.toLowerCase().includes(s) ||
+          (r.member_name ?? "").toLowerCase().includes(s) ||
+          (r.member_no ?? "").toLowerCase().includes(s) ||
+          r.account_label.toLowerCase().includes(s),
+      );
+    }
+    return mapped;
   });
 
 const DecisionSchema = z.object({

@@ -4,7 +4,7 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { z } from "zod";
-import { BanknoteArrowDown, Check, FileDown, Search, Settings2, X } from "lucide-react";
+import { BanknoteArrowDown, Calendar, Check, FileDown, Search, Settings2, X } from "lucide-react";
 import {
   EmptyState,
   ErrorState,
@@ -45,6 +45,7 @@ import {
   adminBulkCancelWithdrawals,
   adminRejectWithdrawal,
   adminUpdateWithdrawalSettings,
+  exportAdminWithdrawals,
   type AdminWithdrawalList,
   type WithdrawalRequest,
   type WithdrawalStatus,
@@ -56,6 +57,8 @@ const SearchSchema = z.object({
   status: z.enum(STATUSES).catch("pending").default("pending"),
   q: z.string().max(120).optional().catch(undefined),
   page: z.coerce.number().int().min(1).catch(1).default(1),
+  date_from: z.string().date().optional().catch(undefined),
+  date_to: z.string().date().optional().catch(undefined),
 });
 type SearchParams = z.infer<typeof SearchSchema>;
 
@@ -66,7 +69,14 @@ const listQuery = (s: SearchParams) =>
     queryKey: ["admin", "withdrawals", s],
     queryFn: () =>
       adminListWithdrawals({
-        data: { status: s.status, search: s.q ?? null, page: s.page, page_size: PAGE_SIZE },
+        data: {
+          status: s.status,
+          search: s.q ?? null,
+          page: s.page,
+          page_size: PAGE_SIZE,
+          date_from: s.date_from ?? null,
+          date_to: s.date_to ?? null,
+        },
       }),
     staleTime: 10_000,
   });
@@ -137,6 +147,34 @@ function WithdrawalsPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex items-end gap-2">
+          <div>
+            <Label className="mb-1.5 block text-xs flex items-center gap-1">
+              <Calendar className="size-3" /> From
+            </Label>
+            <input
+              type="date"
+              value={search.date_from ?? ""}
+              onChange={(e) =>
+                navigate({ search: (p: SearchParams) => ({ ...p, date_from: e.target.value || undefined, page: 1 }) })
+              }
+              className="block h-9 rounded-md border border-border bg-background px-2 text-sm"
+            />
+          </div>
+          <div>
+            <Label className="mb-1.5 block text-xs flex items-center gap-1">
+              <Calendar className="size-3" /> To
+            </Label>
+            <input
+              type="date"
+              value={search.date_to ?? ""}
+              onChange={(e) =>
+                navigate({ search: (p: SearchParams) => ({ ...p, date_to: e.target.value || undefined, page: 1 }) })
+              }
+              className="block h-9 rounded-md border border-border bg-background px-2 text-sm"
+            />
+          </div>
+        </div>
         <div className="w-64">
           <Label className="mb-1.5 block text-xs">Search</Label>
           <div className="flex gap-2">
@@ -157,12 +195,71 @@ function WithdrawalsPage() {
             </Button>
           </div>
         </div>
+        <div className="ml-auto">
+          <ExportWindowButton search={search} />
+        </div>
       </div>
 
       <Suspense fallback={<SectionCardSkeleton />}>
         <QueueBody search={search} />
       </Suspense>
     </div>
+  );
+}
+
+function ExportWindowButton({ search }: { search: SearchParams }) {
+  const exportFn = useServerFn(exportAdminWithdrawals);
+  const [loading, setLoading] = useState(false);
+
+  const hasWindow = Boolean(search.date_from || search.date_to);
+  const label = hasWindow ? "Export window" : "Export all";
+
+  const run = async () => {
+    setLoading(true);
+    try {
+      const rows = await exportFn({
+        data: {
+          status: search.status,
+          search: search.q ?? null,
+          page: 1,
+          page_size: 100,
+          date_from: search.date_from ?? null,
+          date_to: search.date_to ?? null,
+        },
+      });
+      if (rows.length === 0) {
+        toast.info("No withdrawal requests match the selected filters.");
+        return;
+      }
+      exportCsv({
+        title: "Withdrawal Requests Export",
+        subtitle: hasWindow
+          ? `${rows.length} request(s) from ${search.date_from ?? "any date"} to ${search.date_to ?? "any date"}`
+          : `${rows.length} request(s)`,
+        filename: `withdrawal_requests_${search.date_from ?? "start"}_to_${search.date_to ?? "end"}`,
+        columns: WITHDRAWAL_EXPORT_COLUMNS,
+        rows,
+      });
+      toast.success(`Exported ${rows.length} request(s).`);
+    } catch (e) {
+      if (e instanceof Error && /cancelled/i.test(e.message)) return;
+      toast.error(friendlyError(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button
+      size="default"
+      variant="secondary"
+      onClick={() => void run()}
+      disabled={loading}
+      aria-label="Export all withdrawal requests matching the current filters"
+    >
+      <FileDown className="mr-1 size-4" />
+      {loading ? "Exporting…" : label}
+    </Button>
   );
 }
 
