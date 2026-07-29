@@ -1391,9 +1391,12 @@ export type Database = {
           frequency: Database["public"]["Enums"]["recurring_frequency"]
           from_account_id: string
           id: string
+          last_run_amount: number | null
           last_run_at: string | null
           last_run_error: string | null
           last_run_status: string | null
+          max_amount: number | null
+          min_balance: number
           next_run_at: string
           note: string | null
           runs_completed: number
@@ -1410,9 +1413,12 @@ export type Database = {
           frequency: Database["public"]["Enums"]["recurring_frequency"]
           from_account_id: string
           id?: string
+          last_run_amount?: number | null
           last_run_at?: string | null
           last_run_error?: string | null
           last_run_status?: string | null
+          max_amount?: number | null
+          min_balance?: number
           next_run_at?: string
           note?: string | null
           runs_completed?: number
@@ -1429,9 +1435,12 @@ export type Database = {
           frequency?: Database["public"]["Enums"]["recurring_frequency"]
           from_account_id?: string
           id?: string
+          last_run_amount?: number | null
           last_run_at?: string | null
           last_run_error?: string | null
           last_run_status?: string | null
+          max_amount?: number | null
+          min_balance?: number
           next_run_at?: string
           note?: string | null
           runs_completed?: number
