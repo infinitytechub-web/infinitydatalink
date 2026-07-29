@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   getMyInvestments,
   getMyInvestmentSeries,
+  getMyHoldingBreakdown,
   purchaseShares,
   sellShares,
   transferShares,
@@ -12,8 +13,11 @@ import {
   type ShareProduct,
   type ShareHolding,
   type InvestmentSeriesPoint,
+  type HoldingBreakdown,
 } from "@/lib/shares.functions";
+import { useQuery } from "@tanstack/react-query";
 import { TrendChart } from "@/components/charts";
+
 
 const investmentsQO = queryOptions<MemberInvestmentSummary>({
   queryKey: ["member", "investments"],
