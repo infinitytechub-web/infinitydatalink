@@ -4,7 +4,7 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { z } from "zod";
-import { BanknoteArrowDown, Check, Search, Settings2, X } from "lucide-react";
+import { BanknoteArrowDown, Check, FileDown, Search, Settings2, X } from "lucide-react";
 import {
   EmptyState,
   ErrorState,
@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useStepUp } from "@/components/step-up-dialog";
+import { exportCsv, type ExportColumn } from "@/lib/exports";
 import {
   adminApproveWithdrawal,
   adminListWithdrawals,
@@ -563,6 +564,51 @@ function friendlyError(err: unknown) {
   return raw;
 }
 
+const WITHDRAWAL_EXPORT_COLUMNS: ExportColumn<WithdrawalRequest>[] = [
+  { header: "Reference", accessor: (r) => r.ref },
+  { header: "Member", accessor: (r) => r.member_name ?? "" },
+  { header: "Member No", accessor: (r) => r.member_no ?? "" },
+  { header: "Account", accessor: (r) => r.account_label },
+  { header: "Channel", accessor: (r) => r.channel.replace(/_/g, " ") },
+  { header: "Amount", accessor: (r) => r.amount, align: "right" },
+  { header: "Reason", accessor: (r) => r.reason },
+  { header: "Status", accessor: (r) => r.status },
+  { header: "Balance at Request", accessor: (r) => r.balance_at_request, align: "right" },
+  { header: "Created at", accessor: (r) => formatDate(r.created_at) },
+  { header: "Approved at", accessor: (r) => formatDate(r.approved_at) },
+  { header: "Approved by", accessor: (r) => r.approved_by ?? "" },
+  { header: "Approval note", accessor: (r) => r.approval_note ?? "" },
+  { header: "Paid at", accessor: (r) => formatDate(r.paid_at) },
+  { header: "Paid by", accessor: (r) => r.paid_by ?? "" },
+  { header: "Rejected at", accessor: (r) => formatDate(r.rejected_at) },
+  { header: "Rejection reason", accessor: (r) => r.rejection_reason ?? "" },
+  { header: "Cancelled at", accessor: (r) => formatDate(r.cancelled_at) },
+  { header: "Cancelled by", accessor: (r) => r.cancelled_by ?? "" },
+  { header: "Cancelled by role", accessor: (r) => r.cancelled_by_role ?? "" },
+  { header: "Cancellation reason", accessor: (r) => r.cancellation_reason ?? "" },
+  { header: "Transaction ID", accessor: (r) => r.txn_id ?? "" },
+];
+
+function formatDate(value: string | null) {
+  if (!value) return "";
+  try {
+    return new Date(value).toISOString();
+  } catch {
+    return value;
+  }
+}
+
+function exportSelectedWithdrawals(rows: WithdrawalRequest[]) {
+  if (rows.length === 0) return;
+  exportCsv({
+    title: "Withdrawal Requests Export",
+    subtitle: `${rows.length} selected request(s)`,
+    filename: `withdrawal_requests_${rows.length}_selected`,
+    columns: WITHDRAWAL_EXPORT_COLUMNS,
+    rows,
+  });
+}
+
 function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: () => void }) {
   const qc = useQueryClient();
   const bulkCancel = useServerFn(adminBulkCancelWithdrawals);
@@ -615,9 +661,17 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
           · total <Money amount={total} />
         </span>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="ghost" onClick={onDone}>
           Clear selection
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => exportSelectedWithdrawals(rows)}
+          aria-label="Export selected withdrawal requests as CSV"
+        >
+          <FileDown className="mr-1 size-4" /> CSV export
         </Button>
         <Button size="sm" variant="destructive" onClick={() => setOpen(true)}>
           <X className="mr-1 size-4" /> Cancel selected
