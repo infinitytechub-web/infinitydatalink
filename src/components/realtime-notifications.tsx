@@ -373,7 +373,38 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
               );
             })}
           </ul>
+
+          {/* Infinite scroll sentinel + accessible fallback control. */}
+          <div className="px-4 py-3">
+            <div ref={sentinelRef} aria-hidden="true" className="h-px w-full" />
+            {isFetchingNextPage ? (
+              <div className="space-y-2" role="status" aria-live="polite">
+                <span className="sr-only">Loading more notifications…</span>
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-lg bg-muted/60" aria-hidden="true" />
+                ))}
+              </div>
+            ) : isFetchNextPageError ? (
+              <div className="space-y-2" role="alert">
+                <p className="text-xs text-destructive">
+                  Couldn’t load more notifications{feedError instanceof Error ? `: ${feedError.message}` : "."}
+                </p>
+                <Button size="sm" variant="outline" className="w-full" onClick={() => loadMore(true)}>
+                  Try again
+                </Button>
+              </div>
+            ) : hasNextPage ? (
+              <Button size="sm" variant="ghost" className="w-full" onClick={() => loadMore(true)}>
+                Load older notifications
+              </Button>
+            ) : (
+              <p className="text-center text-[10px] uppercase tracking-wider text-muted-foreground" role="status">
+                You’re all caught up — end of feed
+              </p>
+            )}
+          </div>
         </>
+
       )}
     </SectionCard>
   );
