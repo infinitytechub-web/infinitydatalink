@@ -71,12 +71,20 @@ function SavingsPage() {
         title="My Savings"
         description="Track balances, goal progress and contributions across every plan you're enrolled in."
         action={
-          <Link
-            to="/app/savings/enroll"
-            className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
-          >
-            <Plus className="h-4 w-4" /> Enroll in plan
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/app/savings/statements"
+              className="rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              Statements
+            </Link>
+            <Link
+              to="/app/savings/enroll"
+              className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+            >
+              <Plus className="h-4 w-4" /> Enroll in plan
+            </Link>
+          </div>
         }
       />
       <Suspense fallback={<Skeleton className="h-64 w-full" />}>
