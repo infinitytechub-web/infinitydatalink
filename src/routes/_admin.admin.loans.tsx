@@ -42,7 +42,6 @@ const loansQuery = (status?: string) =>
 function AdminLoans() {
   return (
     <>
-      {dialog}
       <PageHeader
         eyebrow="Administrator"
         title="Loans & Approvals"
@@ -183,6 +182,7 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
 
   return (
     <>
+      {dialog}
       <tr>
         <td className="tabular px-6 py-4 text-sm font-semibold">{loan.ref}</td>
         <td className="px-6 py-4 text-sm">
