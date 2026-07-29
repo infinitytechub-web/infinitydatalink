@@ -574,15 +574,15 @@ const WITHDRAWAL_EXPORT_COLUMNS: ExportColumn<WithdrawalRequest>[] = [
   { header: "Reason", accessor: (r) => r.reason },
   { header: "Status", accessor: (r) => r.status },
   { header: "Balance at Request", accessor: (r) => r.balance_at_request, align: "right" },
-  { header: "Created at", accessor: (r) => r.created_at },
-  { header: "Approved at", accessor: (r) => r.approved_at ?? "" },
+  { header: "Created at", accessor: (r) => formatDate(r.created_at) },
+  { header: "Approved at", accessor: (r) => formatDate(r.approved_at) },
   { header: "Approved by", accessor: (r) => r.approved_by ?? "" },
   { header: "Approval note", accessor: (r) => r.approval_note ?? "" },
-  { header: "Paid at", accessor: (r) => r.paid_at ?? "" },
+  { header: "Paid at", accessor: (r) => formatDate(r.paid_at) },
   { header: "Paid by", accessor: (r) => r.paid_by ?? "" },
-  { header: "Rejected at", accessor: (r) => r.rejected_at ?? "" },
+  { header: "Rejected at", accessor: (r) => formatDate(r.rejected_at) },
   { header: "Rejection reason", accessor: (r) => r.rejection_reason ?? "" },
-  { header: "Cancelled at", accessor: (r) => r.cancelled_at ?? "" },
+  { header: "Cancelled at", accessor: (r) => formatDate(r.cancelled_at) },
   { header: "Cancelled by", accessor: (r) => r.cancelled_by ?? "" },
   { header: "Cancelled by role", accessor: (r) => r.cancelled_by_role ?? "" },
   { header: "Cancellation reason", accessor: (r) => r.cancellation_reason ?? "" },
@@ -596,6 +596,17 @@ function formatDate(value: string | null) {
   } catch {
     return value;
   }
+}
+
+function exportSelectedWithdrawals(rows: WithdrawalRequest[]) {
+  if (rows.length === 0) return;
+  exportCsv({
+    title: "Withdrawal Requests Export",
+    subtitle: `${rows.length} selected request(s)`,
+    filename: `withdrawal_requests_${rows.length}_selected`,
+    columns: WITHDRAWAL_EXPORT_COLUMNS,
+    rows,
+  });
 }
 
 function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: () => void }) {
