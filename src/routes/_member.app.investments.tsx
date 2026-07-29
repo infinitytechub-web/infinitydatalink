@@ -7,6 +7,7 @@ import {
   getMyInvestmentSeries,
   purchaseShares,
   sellShares,
+  transferShares,
   type MemberInvestmentSummary,
   type ShareProduct,
   type ShareHolding,
