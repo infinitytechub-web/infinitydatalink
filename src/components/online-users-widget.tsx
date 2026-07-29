@@ -1,16 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
 import { Users } from "lucide-react";
 import { EmptyState, SectionCard } from "@/components/primitives";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
-
-type PresenceUser = {
-  user_id: string;
-  name: string;
-  role: string;
-  online_at: string;
-};
+import { useOnlinePresence } from "@/lib/online-presence";
+import { LiveDot } from "@/components/online-presence-indicators";
 
 function initials(name: string) {
   return name
@@ -21,47 +13,9 @@ function initials(name: string) {
     .join("") || "?";
 }
 
-/**
- * Live roster of everyone currently using the app, backed by a Realtime
- * presence channel. Each session tracks itself and is dropped automatically
- * when the tab closes.
- */
+/** Live roster of everyone currently using the app (shared presence channel). */
 export function OnlineUsersWidget({ className }: { className?: string }) {
-  const { user, isAdmin } = useAuth();
-  const [users, setUsers] = useState<PresenceUser[]>([]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    const channel = supabase.channel("presence:online-users", {
-      config: { presence: { key: user.id } },
-    });
-
-    channel
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState<PresenceUser>();
-        const flat = Object.values(state)
-          .map((entries) => entries[0])
-          .filter(Boolean) as PresenceUser[];
-        flat.sort((a, b) => a.name.localeCompare(b.name));
-        setUsers(flat);
-      })
-      .subscribe(async (status) => {
-        if (status !== "SUBSCRIBED") return;
-        await channel.track({
-          user_id: user.id,
-          name: user.fullName || user.email || "Member",
-          role: isAdmin ? "Staff" : "Member",
-          online_at: new Date().toISOString(),
-        } satisfies PresenceUser);
-      });
-
-    return () => {
-      setUsers([]);
-      void supabase.removeChannel(channel);
-    };
-  }, [user?.id, user?.fullName, user?.email, isAdmin]);
-
-  const staff = useMemo(() => users.filter((u) => u.role === "Staff").length, [users]);
+  const { users, staff, meId } = useOnlinePresence();
 
   return (
     <SectionCard
@@ -70,10 +24,7 @@ export function OnlineUsersWidget({ className }: { className?: string }) {
       className={className}
       action={
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-mid/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-mid">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-mid opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-mid" />
-          </span>
+          <LiveDot />
           {users.length} online{staff ? ` · ${staff} staff` : ""}
         </span>
       }
@@ -93,7 +44,7 @@ export function OnlineUsersWidget({ className }: { className?: string }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">
                   {u.name}
-                  {u.user_id === user?.id ? <span className="ml-1 text-xs text-muted-foreground">(you)</span> : null}
+                  {u.user_id === meId ? <span className="ml-1 text-xs text-muted-foreground">(you)</span> : null}
                 </p>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   {u.role} · since {new Date(u.online_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
