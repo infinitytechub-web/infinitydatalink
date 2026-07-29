@@ -102,6 +102,7 @@ const groups: NavGroup[] = [
 
 const CRUMBS: Record<string, string> = {
   "/admin": "Analytics",
+  "/admin/analytics": "Analytics Dashboards",
   "/admin/reports": "Reports",
   "/admin/audit": "Audit & Activity",
   "/admin/activity": "Activity Timeline",
