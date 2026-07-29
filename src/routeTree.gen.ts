@@ -67,6 +67,7 @@ import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.
 import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
 import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
+import { Route as AdminAdminInvestmentsAuditRouteImport } from './routes/_admin.admin.investments.audit'
 import { Route as AdminAdminFinanceTransfersRouteImport } from './routes/_admin.admin.finance.transfers'
 import { Route as AdminAdminFinanceSummaryRouteImport } from './routes/_admin.admin.finance.summary'
 import { Route as AdminAdminFinanceIncomeRouteImport } from './routes/_admin.admin.finance.income'
@@ -374,6 +375,12 @@ const AdminAdminLoansLoanIdRoute = AdminAdminLoansLoanIdRouteImport.update({
   path: '/$loanId',
   getParentRoute: () => AdminAdminLoansRoute,
 } as any)
+const AdminAdminInvestmentsAuditRoute =
+  AdminAdminInvestmentsAuditRouteImport.update({
+    id: '/audit',
+    path: '/audit',
+    getParentRoute: () => AdminAdminInvestmentsRoute,
+  } as any)
 const AdminAdminFinanceTransfersRoute =
   AdminAdminFinanceTransfersRouteImport.update({
     id: '/transfers',
@@ -464,7 +471,7 @@ export interface FileRoutesByFullPath {
   '/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/admin/health': typeof AdminAdminHealthRoute
-  '/admin/investments': typeof AdminAdminInvestmentsRoute
+  '/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
@@ -500,6 +507,7 @@ export interface FileRoutesByFullPath {
   '/admin/finance/income': typeof AdminAdminFinanceIncomeRoute
   '/admin/finance/summary': typeof AdminAdminFinanceSummaryRoute
   '/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
+  '/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
@@ -530,7 +538,7 @@ export interface FileRoutesByTo {
   '/admin/branding': typeof AdminAdminBrandingRoute
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/health': typeof AdminAdminHealthRoute
-  '/admin/investments': typeof AdminAdminInvestmentsRoute
+  '/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
@@ -565,6 +573,7 @@ export interface FileRoutesByTo {
   '/admin/finance/income': typeof AdminAdminFinanceIncomeRoute
   '/admin/finance/summary': typeof AdminAdminFinanceSummaryRoute
   '/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
+  '/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
@@ -602,7 +611,7 @@ export interface FileRoutesById {
   '/_admin/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/_admin/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/_admin/admin/health': typeof AdminAdminHealthRoute
-  '/_admin/admin/investments': typeof AdminAdminInvestmentsRoute
+  '/_admin/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
   '/_admin/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/_admin/admin/logs': typeof AdminAdminLogsRoute
   '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
@@ -638,6 +647,7 @@ export interface FileRoutesById {
   '/_admin/admin/finance/income': typeof AdminAdminFinanceIncomeRoute
   '/_admin/admin/finance/summary': typeof AdminAdminFinanceSummaryRoute
   '/_admin/admin/finance/transfers': typeof AdminAdminFinanceTransfersRoute
+  '/_admin/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/_admin/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
   '/_admin/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
@@ -710,6 +720,7 @@ export interface FileRouteTypes {
     | '/admin/finance/income'
     | '/admin/finance/summary'
     | '/admin/finance/transfers'
+    | '/admin/investments/audit'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/admin/super-admins/history'
@@ -775,6 +786,7 @@ export interface FileRouteTypes {
     | '/admin/finance/income'
     | '/admin/finance/summary'
     | '/admin/finance/transfers'
+    | '/admin/investments/audit'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
     | '/admin/super-admins/history'
@@ -847,6 +859,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/finance/income'
     | '/_admin/admin/finance/summary'
     | '/_admin/admin/finance/transfers'
+    | '/_admin/admin/investments/audit'
     | '/_admin/admin/loans/$loanId'
     | '/_admin/admin/members/$id'
     | '/_admin/admin/super-admins/history'
@@ -1288,6 +1301,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLoansLoanIdRouteImport
       parentRoute: typeof AdminAdminLoansRoute
     }
+    '/_admin/admin/investments/audit': {
+      id: '/_admin/admin/investments/audit'
+      path: '/audit'
+      fullPath: '/admin/investments/audit'
+      preLoaderRoute: typeof AdminAdminInvestmentsAuditRouteImport
+      parentRoute: typeof AdminAdminInvestmentsRoute
+    }
     '/_admin/admin/finance/transfers': {
       id: '/_admin/admin/finance/transfers'
       path: '/transfers'
@@ -1440,6 +1460,19 @@ const AdminAdminFinanceRouteChildren: AdminAdminFinanceRouteChildren = {
 const AdminAdminFinanceRouteWithChildren =
   AdminAdminFinanceRoute._addFileChildren(AdminAdminFinanceRouteChildren)
 
+interface AdminAdminInvestmentsRouteChildren {
+  AdminAdminInvestmentsAuditRoute: typeof AdminAdminInvestmentsAuditRoute
+}
+
+const AdminAdminInvestmentsRouteChildren: AdminAdminInvestmentsRouteChildren = {
+  AdminAdminInvestmentsAuditRoute: AdminAdminInvestmentsAuditRoute,
+}
+
+const AdminAdminInvestmentsRouteWithChildren =
+  AdminAdminInvestmentsRoute._addFileChildren(
+    AdminAdminInvestmentsRouteChildren,
+  )
+
 interface AdminAdminLoansRouteChildren {
   AdminAdminLoansLoanIdRoute: typeof AdminAdminLoansLoanIdRoute
 }
@@ -1485,7 +1518,7 @@ interface AdminAdminRouteChildren {
   AdminAdminEntitiesRoute: typeof AdminAdminEntitiesRouteWithChildren
   AdminAdminFinanceRoute: typeof AdminAdminFinanceRouteWithChildren
   AdminAdminHealthRoute: typeof AdminAdminHealthRoute
-  AdminAdminInvestmentsRoute: typeof AdminAdminInvestmentsRoute
+  AdminAdminInvestmentsRoute: typeof AdminAdminInvestmentsRouteWithChildren
   AdminAdminLoansRoute: typeof AdminAdminLoansRouteWithChildren
   AdminAdminLogsRoute: typeof AdminAdminLogsRoute
   AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
@@ -1509,7 +1542,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminEntitiesRoute: AdminAdminEntitiesRouteWithChildren,
   AdminAdminFinanceRoute: AdminAdminFinanceRouteWithChildren,
   AdminAdminHealthRoute: AdminAdminHealthRoute,
-  AdminAdminInvestmentsRoute: AdminAdminInvestmentsRoute,
+  AdminAdminInvestmentsRoute: AdminAdminInvestmentsRouteWithChildren,
   AdminAdminLoansRoute: AdminAdminLoansRouteWithChildren,
   AdminAdminLogsRoute: AdminAdminLogsRoute,
   AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
