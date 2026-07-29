@@ -57,6 +57,60 @@ function AdminInvestments() {
   const submitRun = useServerFn(submitDividendRunForApproval);
   const approveRun = useServerFn(approveDividendRun);
   const rejectRun = useServerFn(rejectDividendRun);
+  const exportRun = useServerFn(getDividendRunExport);
+  const [exportingId, setExportingId] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const csvEscape = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    // Prevent CSV formula injection
+    const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
+
+  const downloadRunCsv = async (run: DividendRun) => {
+    setExportingId(run.id);
+    setExportError(null);
+    try {
+      const { rows } = await exportRun({ data: { run_id: run.id } });
+      const header = [
+        "member_no",
+        "full_name",
+        "units",
+        "per_unit_amount",
+        "amount",
+        "currency",
+        "status",
+      ];
+      const lines = [header.join(",")];
+      for (const r of rows) {
+        lines.push(
+          [
+            csvEscape(r.member_no ?? ""),
+            csvEscape(r.full_name ?? ""),
+            csvEscape(r.units),
+            csvEscape(r.per_unit_amount),
+            csvEscape(r.amount.toFixed(2)),
+            csvEscape(r.currency),
+            csvEscape(r.status),
+          ].join(","),
+        );
+      }
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dividend-run-${run.ref}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setExportError((e as Error).message);
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const [editing, setEditing] = useState<ShareProduct | null>(null);
   const [showNewProduct, setShowNewProduct] = useState(false);
