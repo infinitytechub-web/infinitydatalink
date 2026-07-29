@@ -363,6 +363,7 @@ function AdminInvestments() {
             )?.message}
           </p>
         )}
+        {exportError && <p className="mt-3 text-sm text-red-600">Export failed: {exportError}</p>}
         <p className="mt-3 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
           Dividend runs require dual control: after submission, an approver
           (super admin or compliance officer) other than the creator must
