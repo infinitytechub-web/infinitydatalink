@@ -74,6 +74,7 @@ export function WithdrawalRequestsSection({
   const cancel = useServerFn(cancelWithdrawalRequest);
 
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [amount, setAmount] = useState("");
   const [channel, setChannel] = useState("bank_transfer");
@@ -212,7 +213,7 @@ export function WithdrawalRequestsSection({
                             aria-controls={`wd-timeline-${r.id}`}
                             onClick={() => setExpanded((cur) => (cur === r.id ? null : r.id))}
                           >
-                            <History className="mr-1 size-4" />
+                            <HistoryIcon className="mr-1 size-4" />
                             {expanded === r.id ? "Hide timeline" : "Timeline"}
                           </Button>
                           {r.status === "pending" ? (
