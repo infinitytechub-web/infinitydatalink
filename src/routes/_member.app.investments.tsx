@@ -308,6 +308,14 @@ function InvestmentsPage() {
           }
         />
       )}
+
+      {breakdownState && (
+        <BreakdownDialog
+          state={breakdownState}
+          onClose={() => setBreakdownState(null)}
+        />
+      )}
+
     </div>
   );
 }
