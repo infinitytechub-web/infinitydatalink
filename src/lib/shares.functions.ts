@@ -591,6 +591,7 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
       .sort((a, b) => b.market_value - a.market_value)
       .slice(0, 10);
 
+    const roleList = Array.from(roles);
     return {
       products: productList,
       runs: runList,
@@ -602,6 +603,12 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
         dividends_paid_ytd: dividendsPaid,
         active_products: productList.filter((p) => p.is_active).length,
         holders: holdersByUser.size,
+      },
+      viewer: {
+        user_id: context.userId,
+        roles: roleList,
+        can_approve: hasAnyRole(roles, ["super_admin", "compliance_officer"]),
+        can_execute: hasAnyRole(roles, FINANCE_ROLES),
       },
     };
   });
