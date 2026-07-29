@@ -37,6 +37,7 @@ import {
 } from "@/lib/savings.functions";
 import { getMyTransactions } from "@/lib/member-data.functions";
 import { RecurringContributionsSection } from "@/components/recurring-contributions";
+import { GoalDialog } from "@/components/goal-dialog";
 
 const accountsQuery = queryOptions({
   queryKey: ["member", "savings", "accounts"],
