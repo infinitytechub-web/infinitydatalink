@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { PiggyBank, Plus, TrendingUp, Zap } from "lucide-react";
+import { ListOrdered, PiggyBank, Plus, TrendingUp, Zap } from "lucide-react";
 import {
   EmptyState,
   KPIStat,
