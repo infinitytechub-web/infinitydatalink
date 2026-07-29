@@ -65,6 +65,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicHooksSavingsSweepsRouteImport } from './routes/api/public/hooks/savings-sweeps'
 import { Route as ApiPublicHooksNotificationDispatchRouteImport } from './routes/api/public/hooks/notification-dispatch'
 import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/public/hooks/monthly-interest'
+import { Route as ApiPublicHooksLoanRemindersRouteImport } from './routes/api/public/hooks/loan-reminders'
 import { Route as MemberAppSavingsStatementsRouteImport } from './routes/_member.app.savings.statements'
 import { Route as MemberAppSavingsPotsRouteImport } from './routes/_member.app.savings.pots'
 import { Route as MemberAppSavingsLedgerRouteImport } from './routes/_member.app.savings.ledger'
@@ -384,6 +385,12 @@ const ApiPublicHooksMonthlyInterestRoute =
     path: '/api/public/hooks/monthly-interest',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksLoanRemindersRoute =
+  ApiPublicHooksLoanRemindersRouteImport.update({
+    id: '/api/public/hooks/loan-reminders',
+    path: '/api/public/hooks/loan-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MemberAppSavingsStatementsRoute =
   MemberAppSavingsStatementsRouteImport.update({
     id: '/statements',
@@ -654,6 +661,7 @@ export interface FileRoutesByFullPath {
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/loan-reminders': typeof ApiPublicHooksLoanRemindersRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
@@ -739,6 +747,7 @@ export interface FileRoutesByTo {
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/loan-reminders': typeof ApiPublicHooksLoanRemindersRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
@@ -832,6 +841,7 @@ export interface FileRoutesById {
   '/_member/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/_member/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/_member/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/loan-reminders': typeof ApiPublicHooksLoanRemindersRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
@@ -924,6 +934,7 @@ export interface FileRouteTypes {
     | '/app/savings/ledger'
     | '/app/savings/pots'
     | '/app/savings/statements'
+    | '/api/public/hooks/loan-reminders'
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
@@ -1009,6 +1020,7 @@ export interface FileRouteTypes {
     | '/app/savings/ledger'
     | '/app/savings/pots'
     | '/app/savings/statements'
+    | '/api/public/hooks/loan-reminders'
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
@@ -1101,6 +1113,7 @@ export interface FileRouteTypes {
     | '/_member/app/savings/ledger'
     | '/_member/app/savings/pots'
     | '/_member/app/savings/statements'
+    | '/api/public/hooks/loan-reminders'
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
@@ -1123,6 +1136,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksLoanRemindersRoute: typeof ApiPublicHooksLoanRemindersRoute
   ApiPublicHooksMonthlyInterestRoute: typeof ApiPublicHooksMonthlyInterestRoute
   ApiPublicHooksNotificationDispatchRoute: typeof ApiPublicHooksNotificationDispatchRoute
   ApiPublicHooksSavingsSweepsRoute: typeof ApiPublicHooksSavingsSweepsRoute
@@ -1525,6 +1539,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/monthly-interest'
       fullPath: '/api/public/hooks/monthly-interest'
       preLoaderRoute: typeof ApiPublicHooksMonthlyInterestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/loan-reminders': {
+      id: '/api/public/hooks/loan-reminders'
+      path: '/api/public/hooks/loan-reminders'
+      fullPath: '/api/public/hooks/loan-reminders'
+      preLoaderRoute: typeof ApiPublicHooksLoanRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_member/app/savings/statements': {
@@ -2076,6 +2097,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksLoanRemindersRoute: ApiPublicHooksLoanRemindersRoute,
   ApiPublicHooksMonthlyInterestRoute: ApiPublicHooksMonthlyInterestRoute,
   ApiPublicHooksNotificationDispatchRoute:
     ApiPublicHooksNotificationDispatchRoute,
