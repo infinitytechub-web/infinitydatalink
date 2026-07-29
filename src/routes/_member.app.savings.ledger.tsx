@@ -94,7 +94,7 @@ function LedgerPage() {
 
   const setSearch = (patch: Partial<Search>, resetPage = true) =>
     navigate({
-      search: (prev) => ({ ...prev, ...patch, ...(resetPage ? { page: 1 } : {}) }),
+      search: (prev: Search) => ({ ...prev, ...patch, ...(resetPage ? { page: 1 } : {}) }),
       replace: true,
     });
 
@@ -264,7 +264,7 @@ function LedgerPage() {
                   page={data.page}
                   pageSize={data.page_size}
                   total={data.total}
-                  onPage={(n) => navigate({ search: (p) => ({ ...p, page: n }), replace: true })}
+                  onPage={(n) => navigate({ search: (p: Search) => ({ ...p, page: n }), replace: true })}
                   onPageSize={(n) => setSearch({ pageSize: n })}
                 />
               </>
