@@ -203,6 +203,8 @@ const FilterSchema = z.object({
   search: z.string().trim().max(120).optional().nullable(),
   page: z.number().int().min(1).default(1),
   page_size: z.number().int().min(5).max(100).default(25),
+  date_from: z.string().date().optional().nullable(),
+  date_to: z.string().date().optional().nullable(),
 });
 
 export const adminListWithdrawals = createServerFn({ method: "POST" })
