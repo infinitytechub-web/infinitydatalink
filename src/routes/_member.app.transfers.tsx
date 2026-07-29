@@ -21,6 +21,10 @@ import {
   type MyTransferRow,
 } from "@/lib/member-transfers.functions";
 import { formatMoney } from "@/lib/org-config";
+import { deleteSweep, listMySweeps, setSweepStatus, submitOwnAccountTransfer, type Sweep } from "@/lib/savings-sweeps.functions";
+import { SweepDialog } from "@/components/sweep-dialog";
+import { Button } from "@/components/ui/button";
+import { Pause, Play, Trash2, Zap } from "lucide-react";
 
 const myTransfersQuery = (status: "all" | "pending" | "cleared" | "failed") =>
   queryOptions({
@@ -107,6 +111,8 @@ function TransfersBody({
       </section>
 
       <NewTransferForm accounts={accounts} onDone={() => qc.invalidateQueries({ queryKey: ["member", "transfers"] })} />
+
+      <SweepsSection accounts={accounts} />
 
       <SectionCard
         title="My transfers"
@@ -338,5 +344,135 @@ function NewTransferForm({
         </div>
       </form>
     </SectionCard>
+  );
+}
+
+const sweepsQuery = queryOptions({
+  queryKey: ["member", "sweeps"],
+  queryFn: () => listMySweeps(),
+  staleTime: 15_000,
+});
+
+function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listMyTransferAccounts>> }) {
+  const { data: sweeps = [] } = useSuspenseQuery(sweepsQuery);
+  const own = accounts.map((a) => ({ id: a.id, label: `${a.plan_name ?? "Savings"} · ${formatMoney(a.balance)}`, balance: a.balance }));
+  const qc = useQueryClient();
+  const owner = useServerFn(submitOwnAccountTransfer);
+  const [openQuick, setOpenQuick] = useState(false);
+  const [from, setFrom] = useState(own[0]?.id ?? "");
+  const [to, setTo] = useState(own[1]?.id ?? "");
+  const [amt, setAmt] = useState("");
+  const quick = useMutation({
+    mutationFn: () => owner({ data: { from_account_id: from, to_account_id: to, amount: Number(amt), note: null } }),
+    onSuccess: async () => {
+      toast.success("Transfer completed");
+      setAmt("");
+      setOpenQuick(false);
+      await qc.invalidateQueries({ queryKey: ["member"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <SectionCard
+      title="Between my accounts & scheduled sweeps"
+      action={<SweepDialog accounts={own} />}
+    >
+      <div className="space-y-4 p-6">
+        {own.length >= 2 ? (
+          <div className="rounded-md border border-border bg-muted/20 p-4">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-deep/60">
+              <Zap className="h-3.5 w-3.5" /> Quick own-account transfer (auto-clears)
+            </div>
+            <div className="grid gap-2 md:grid-cols-4">
+              <select value={from} onChange={(e) => setFrom(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {own.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+              </select>
+              <select value={to} onChange={(e) => setTo(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {own.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+              </select>
+              <input type="number" min="0" step="0.01" value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+              <Button
+                onClick={() => {
+                  if (!from || !to || from === to || !amt || Number(amt) <= 0) return toast.error("Fill all fields");
+                  quick.mutate();
+                }}
+                disabled={quick.isPending}
+                size="sm"
+              >
+                {quick.isPending ? "Sending…" : "Transfer now"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">Enroll in a second savings plan to enable own-account transfers and sweeps.</p>
+        )}
+
+        {sweeps.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No scheduled sweeps yet. Use "Schedule sweep" to automate transfers between your accounts.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-left">From → To</th>
+                  <th className="px-3 py-2 text-right">Amount</th>
+                  <th className="px-3 py-2 text-left">Frequency</th>
+                  <th className="px-3 py-2 text-left">Next run</th>
+                  <th className="px-3 py-2 text-left">Status</th>
+                  <th className="px-3 py-2 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {sweeps.map((s) => <SweepRow key={s.id} s={s} />)}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </SectionCard>
+  );
+}
+
+function SweepRow({ s }: { s: Sweep }) {
+  const qc = useQueryClient();
+  const statusFn = useServerFn(setSweepStatus);
+  const delFn = useServerFn(deleteSweep);
+  const toggle = useMutation({
+    mutationFn: () => statusFn({ data: { id: s.id, status: s.status === "active" ? "paused" : "active" } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["member", "sweeps"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const del = useMutation({
+    mutationFn: () => delFn({ data: { id: s.id } }),
+    onSuccess: () => {
+      toast.success("Sweep deleted");
+      qc.invalidateQueries({ queryKey: ["member", "sweeps"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <tr>
+      <td className="px-3 py-2">{s.from_label} → {s.to_label}</td>
+      <td className="px-3 py-2 text-right"><Money amount={s.amount} /></td>
+      <td className="px-3 py-2 capitalize">{s.frequency}</td>
+      <td className="px-3 py-2 text-muted-foreground">{new Date(s.next_run_at).toLocaleString()}</td>
+      <td className="px-3 py-2">
+        <span className={"rounded px-2 py-0.5 text-[10px] " + (s.status === "active" ? "bg-emerald-mid/10 text-emerald-mid" : "bg-muted text-muted-foreground")}>
+          {s.status}
+        </span>
+        {s.last_run_error ? <div className="mt-1 text-[10px] text-destructive">Last: {s.last_run_error}</div> : null}
+      </td>
+      <td className="px-3 py-2 text-right">
+        <div className="inline-flex gap-1">
+          <Button size="sm" variant="outline" onClick={() => toggle.mutate()} disabled={toggle.isPending}>
+            {s.status === "active" ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => del.mutate()} disabled={del.isPending} className="text-destructive">
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </td>
+    </tr>
   );
 }

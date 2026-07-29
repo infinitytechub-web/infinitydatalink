@@ -37,6 +37,7 @@ import {
 } from "@/lib/savings.functions";
 import { getMyTransactions } from "@/lib/member-data.functions";
 import { RecurringContributionsSection } from "@/components/recurring-contributions";
+import { GoalDialog } from "@/components/goal-dialog";
 
 const accountsQuery = queryOptions({
   queryKey: ["member", "savings", "accounts"],
@@ -70,12 +71,20 @@ function SavingsPage() {
         title="My Savings"
         description="Track balances, goal progress and contributions across every plan you're enrolled in."
         action={
-          <Link
-            to="/app/savings/enroll"
-            className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
-          >
-            <Plus className="h-4 w-4" /> Enroll in plan
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/app/savings/statements"
+              className="rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              Statements
+            </Link>
+            <Link
+              to="/app/savings/enroll"
+              className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+            >
+              <Plus className="h-4 w-4" /> Enroll in plan
+            </Link>
+          </div>
         }
       />
       <Suspense fallback={<Skeleton className="h-64 w-full" />}>
@@ -239,8 +248,9 @@ function AccountCard({ a }: { a: SavingsAccount }) {
         ) : null}
       </Link>
       {a.status === "active" ? (
-        <div className="mt-4 flex items-center gap-2 border-t border-emerald-deep/5 pt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-emerald-deep/5 pt-4">
           <QuickDepositButton accountId={a.id} accountLabel={a.nickname || a.plan_name} />
+          <GoalDialog accountId={a.id} currentAmount={a.goal_amount} currentDate={a.goal_target_date} />
           <Link
             to="/app/savings/$accountId"
             params={{ accountId: a.id }}
