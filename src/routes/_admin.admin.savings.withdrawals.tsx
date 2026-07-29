@@ -213,7 +213,9 @@ function QueueBody({ search }: { search: SearchParams }) {
                       aria-label="Select all cancellable requests on this page"
                       checked={allSelected}
                       disabled={cancellable.length === 0}
-                      onCheckedChange={(v) => setSelected(v ? cancellable.map((r) => r.id) : [])}
+                      onCheckedChange={(v: boolean | "indeterminate") =>
+                        setSelected(v === true ? cancellable.map((r) => r.id) : [])
+                      }
                     />
                   </th>
                   <th className="py-2 pr-4 font-semibold">Reference</th>
