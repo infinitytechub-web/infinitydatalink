@@ -630,37 +630,50 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
             <DialogTitle>Cancel {rows.length} withdrawal requests</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="bulk-shared-reason">Reason applied to all (required unless set per request)</Label>
-              <Textarea
-                id="bulk-shared-reason"
-                value={shared}
-                maxLength={500}
-                onChange={(e) => setShared(e.target.value)}
-                placeholder="Minimum 5 characters — recorded in the audit log for each request"
-              />
-            </div>
+            <p
+              className={`text-sm ${ready ? "text-muted-foreground" : "text-destructive"}`}
+              role={ready ? undefined : "alert"}
+            >
+              {ready
+                ? "Every request has its own reason — the batch is ready."
+                : `${missing.length} of ${rows.length} request(s) still need a reason of at least ${MIN_REASON} characters. The batch is blocked until all are filled.`}
+            </p>
             <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-              {rows.map((r) => (
-                <div key={r.id} className="rounded-lg border border-border/60 p-3">
-                  <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                    <span className="font-mono text-xs">{r.ref}</span>
-                    <span className="text-muted-foreground">
-                      {r.member_name ?? "Member"} · <Money amount={r.amount} />
-                    </span>
-                    <StatusPill status={pillStatus(r.status)} />
+              {rows.map((r) => {
+                const value = notes[r.id] ?? "";
+                const invalid = value.trim().length < MIN_REASON;
+                return (
+                  <div
+                    key={r.id}
+                    className={`rounded-lg border p-3 ${invalid ? "border-destructive/60" : "border-border/60"}`}
+                  >
+                    <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                      <span className="font-mono text-xs">{r.ref}</span>
+                      <span className="text-muted-foreground">
+                        {r.member_name ?? "Member"} · <Money amount={r.amount} />
+                      </span>
+                      <StatusPill status={pillStatus(r.status)} />
+                    </div>
+                    <Input
+                      aria-label={`Cancellation reason for ${r.ref}`}
+                      aria-invalid={invalid}
+                      aria-describedby={invalid ? `bulk-reason-err-${r.id}` : undefined}
+                      value={value}
+                      maxLength={500}
+                      onChange={(e) => setNotes((p) => ({ ...p, [r.id]: e.target.value }))}
+                      placeholder={`Required — reason for ${r.ref} (min ${MIN_REASON} characters)`}
+                    />
+                    {invalid && (
+                      <p id={`bulk-reason-err-${r.id}`} className="mt-1 text-xs text-destructive">
+                        Reason required (at least {MIN_REASON} characters).
+                      </p>
+                    )}
                   </div>
-                  <Input
-                    aria-label={`Cancellation reason for ${r.ref}`}
-                    value={notes[r.id] ?? ""}
-                    maxLength={500}
-                    onChange={(e) => setNotes((p) => ({ ...p, [r.id]: e.target.value }))}
-                    placeholder="Override reason for this request (optional)"
-                  />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
+
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>
               Back
