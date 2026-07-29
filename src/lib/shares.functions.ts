@@ -2,6 +2,7 @@ import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { recordDecision } from "@/lib/decision-audit";
 import { ADMIN_ROLES, FINANCE_ROLES, hasAnyRole, loadRoleSet } from "@/lib/role-guards";
 
 // ============================================================================
@@ -888,7 +889,19 @@ export const approveDividendRun = createServerFn({ method: "POST" })
       _note: data.note ?? null,
     });
     if (error) throw new Error(error.message);
-    return mapDividendRun(Array.isArray(row) ? row[0] : row);
+    const run = mapDividendRun(Array.isArray(row) ? row[0] : row);
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole: roles.has("super_admin") ? "super_admin" : "compliance_officer",
+      module: "dividend",
+      outcome: "approved",
+      target: data.run_id,
+      note: data.note ?? null,
+      reference: (run as any)?.ref ?? null,
+      amount: (run as any)?.total_paid ?? null,
+    });
+    return run;
   });
 
 export const rejectDividendRun = createServerFn({ method: "POST" })
@@ -903,7 +916,18 @@ export const rejectDividendRun = createServerFn({ method: "POST" })
       _reason: data.reason,
     });
     if (error) throw new Error(error.message);
-    return mapDividendRun(Array.isArray(row) ? row[0] : row);
+    const run = mapDividendRun(Array.isArray(row) ? row[0] : row);
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole: roles.has("super_admin") ? "super_admin" : "compliance_officer",
+      module: "dividend",
+      outcome: "rejected",
+      target: data.run_id,
+      note: data.reason,
+      reference: (run as any)?.ref ?? null,
+    });
+    return run;
   });
 
 export const cancelDividendRun = createServerFn({ method: "POST" })

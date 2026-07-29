@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { recordDecision } from "@/lib/decision-audit";
 
 export type PendingUserRow = {
   user_id: string;
@@ -19,6 +20,16 @@ async function assertReviewer(supabase: any, userId: string) {
   if (!(roles.includes("super_admin") || roles.includes("compliance_officer"))) {
     throw new Error("Forbidden: super_admin or compliance_officer required");
   }
+}
+
+/** Role-checks the caller and returns the role used for the audit trail. */
+async function assertReviewerRole(supabase: any, userId: string): Promise<string> {
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  if (error) throw new Error(error.message);
+  const roles = (data ?? []).map((r: any) => r.role as string);
+  if (roles.includes("super_admin")) return "super_admin";
+  if (roles.includes("compliance_officer")) return "compliance_officer";
+  throw new Error("Forbidden: super_admin or compliance_officer required");
 }
 
 export const listPendingUsers = createServerFn({ method: "GET" })
@@ -75,11 +86,22 @@ export const approveUser = createServerFn({ method: "POST" })
     z.object({ user_id: z.string().uuid(), note: z.string().trim().max(500).optional() }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    const actorRole = await assertReviewerRole(context.supabase, context.userId);
     const { error } = await context.supabase.rpc("approve_user", {
       _uid: data.user_id,
       _note: data.note ?? undefined,
     });
     if (error) throw new Error(error.message);
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole,
+      module: "user",
+      outcome: "approved",
+      target: data.user_id,
+      subjectId: data.user_id,
+      note: data.note ?? null,
+    });
     return { ok: true as const };
   });
 
@@ -91,11 +113,22 @@ export const rejectUser = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    const actorRole = await assertReviewerRole(context.supabase, context.userId);
     const { error } = await context.supabase.rpc("reject_user", {
       _uid: data.user_id,
       _reason: data.reason,
     });
     if (error) throw new Error(error.message);
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole,
+      module: "user",
+      outcome: "rejected",
+      target: data.user_id,
+      subjectId: data.user_id,
+      note: data.reason,
+    });
     return { ok: true as const };
   });
 
@@ -111,12 +144,23 @@ export const setUserActive = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    const actorRole = await assertReviewerRole(context.supabase, context.userId);
     const { error } = await context.supabase.rpc("set_user_active", {
       _uid: data.user_id,
       _active: data.active,
       _reason: data.reason ?? undefined,
     });
     if (error) throw new Error(error.message);
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole,
+      module: "user",
+      outcome: data.active ? "activated" : "deactivated",
+      target: data.user_id,
+      subjectId: data.user_id,
+      note: data.reason ?? null,
+    });
     return { ok: true as const };
   });
 

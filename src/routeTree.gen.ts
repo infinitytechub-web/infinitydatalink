@@ -85,6 +85,7 @@ import { Route as AdminAdminEntitiesRegisterRouteImport } from './routes/_admin.
 import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
 import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.admin.console.snapshots'
 import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
+import { Route as AdminAdminComplianceApprovalsRouteImport } from './routes/_admin.admin.compliance.approvals'
 import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -487,6 +488,12 @@ const AdminAdminConsoleApprovalsRoute =
     path: '/approvals',
     getParentRoute: () => AdminAdminConsoleRoute,
   } as any)
+const AdminAdminComplianceApprovalsRoute =
+  AdminAdminComplianceApprovalsRouteImport.update({
+    id: '/compliance/approvals',
+    path: '/compliance/approvals',
+    getParentRoute: () => AdminAdminRoute,
+  } as any)
 const AdminAdminAuditTransfersRoute =
   AdminAdminAuditTransfersRouteImport.update({
     id: '/transfers',
@@ -537,6 +544,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
+  '/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
   '/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
@@ -609,6 +617,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
+  '/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
   '/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
   '/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
@@ -689,6 +698,7 @@ export interface FileRoutesById {
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
   '/_admin/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
+  '/_admin/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/_admin/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
   '/_admin/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
   '/_admin/admin/entities/$entityId': typeof AdminAdminEntitiesEntityIdRoute
@@ -768,6 +778,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/admin/audit/transfers'
+    | '/admin/compliance/approvals'
     | '/admin/console/approvals'
     | '/admin/console/snapshots'
     | '/admin/entities/$entityId'
@@ -840,6 +851,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/admin/audit/transfers'
+    | '/admin/compliance/approvals'
     | '/admin/console/approvals'
     | '/admin/console/snapshots'
     | '/admin/entities/$entityId'
@@ -919,6 +931,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/'
     | '/_member/app/'
     | '/_admin/admin/audit/transfers'
+    | '/_admin/admin/compliance/approvals'
     | '/_admin/admin/console/approvals'
     | '/_admin/admin/console/snapshots'
     | '/_admin/admin/entities/$entityId'
@@ -1506,6 +1519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminConsoleApprovalsRouteImport
       parentRoute: typeof AdminAdminConsoleRoute
     }
+    '/_admin/admin/compliance/approvals': {
+      id: '/_admin/admin/compliance/approvals'
+      path: '/compliance/approvals'
+      fullPath: '/admin/compliance/approvals'
+      preLoaderRoute: typeof AdminAdminComplianceApprovalsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/audit/transfers': {
       id: '/_admin/admin/audit/transfers'
       path: '/transfers'
@@ -1667,6 +1687,7 @@ interface AdminAdminRouteChildren {
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
   AdminAdminSuperAdminsRoute: typeof AdminAdminSuperAdminsRouteWithChildren
   AdminAdminIndexRoute: typeof AdminAdminIndexRoute
+  AdminAdminComplianceApprovalsRoute: typeof AdminAdminComplianceApprovalsRoute
 }
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
@@ -1691,6 +1712,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
   AdminAdminSuperAdminsRoute: AdminAdminSuperAdminsRouteWithChildren,
   AdminAdminIndexRoute: AdminAdminIndexRoute,
+  AdminAdminComplianceApprovalsRoute: AdminAdminComplianceApprovalsRoute,
 }
 
 const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
