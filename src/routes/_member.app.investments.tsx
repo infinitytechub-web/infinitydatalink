@@ -67,7 +67,6 @@ function InvestmentsPage() {
       purchase({ data: v }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
-      setTradeState(null);
     },
   });
   const sellMut = useMutation({
@@ -75,7 +74,6 @@ function InvestmentsPage() {
       sell({ data: v }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
-      setTradeState(null);
     },
   });
   const transferMut = useMutation({
