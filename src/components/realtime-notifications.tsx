@@ -114,11 +114,16 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
     };
   }, [user?.id, qc]);
 
-  const rows = useMemo(() => data?.rows ?? [], [data?.rows]);
-  const unread = data?.unread ?? 0;
+  const rows = useMemo<NotificationRow[]>(
+    () => (data?.pages ?? []).flatMap((p) => p.rows),
+    [data?.pages],
+  );
+  const unread = data?.pages?.[0]?.unread ?? 0;
 
   // Keep the roving tabindex target inside bounds as the feed changes.
+  // Appending a page never shifts existing indexes, so focus is preserved.
   useEffect(() => {
+    itemRefs.current.length = rows.length;
     setActiveIndex((i) => Math.min(Math.max(i, 0), Math.max(rows.length - 1, 0)));
   }, [rows.length]);
 
@@ -128,6 +133,31 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
     setActiveIndex(index);
     el.focus();
   }, []);
+
+  // When more items are requested from the keyboard, move focus to the first
+  // appended item once it renders.
+  const pendingFocusRef = useRef<number | null>(null);
+  useEffect(() => {
+    const target = pendingFocusRef.current;
+    if (target === null || isFetchingNextPage) return;
+    if (target < rows.length && itemRefs.current[target]) {
+      pendingFocusRef.current = null;
+      focusItem(target);
+      setAnnouncement(`Loaded more notifications. ${rows.length} of your notifications are shown.`);
+    } else if (!isFetchingNextPage) {
+      pendingFocusRef.current = null;
+    }
+  }, [rows.length, isFetchingNextPage, focusItem]);
+
+  const loadMore = useCallback(
+    (fromKeyboard: boolean) => {
+      if (!hasNextPage || isFetchingNextPage) return;
+      if (fromKeyboard) pendingFocusRef.current = rows.length;
+      void fetchNextPage();
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage, rows.length],
+  );
+
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLElement>, index: number, row: NotificationRow) => {
