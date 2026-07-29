@@ -135,16 +135,16 @@ function Body() {
             permission="export:audit"
             rows={data.rows}
             columns={[
-              { header: "Timestamp", value: (r: DecisionRow) => new Date(r.created_at).toISOString() },
-              { header: "Module", value: (r: DecisionRow) => r.module },
-              { header: "Decision", value: (r: DecisionRow) => r.outcome },
-              { header: "Reference", value: (r: DecisionRow) => r.reference ?? "" },
-              { header: "Record", value: (r: DecisionRow) => r.target ?? "" },
-              { header: "Member", value: (r: DecisionRow) => r.subject_name ?? r.subject_id ?? "" },
-              { header: "Officer", value: (r: DecisionRow) => r.actor_email ?? r.actor_id ?? "" },
-              { header: "Role", value: (r: DecisionRow) => r.actor_role ?? "" },
-              { header: "Amount", value: (r: DecisionRow) => (r.amount == null ? "" : String(r.amount)) },
-              { header: "Note", value: (r: DecisionRow) => r.note ?? "" },
+              { header: "Timestamp", accessor: (r: DecisionRow) => new Date(r.created_at).toISOString() },
+              { header: "Module", accessor: (r: DecisionRow) => r.module },
+              { header: "Decision", accessor: (r: DecisionRow) => r.outcome },
+              { header: "Reference", accessor: (r: DecisionRow) => r.reference ?? "" },
+              { header: "Record", accessor: (r: DecisionRow) => r.target ?? "" },
+              { header: "Member", accessor: (r: DecisionRow) => r.subject_name ?? r.subject_id ?? "" },
+              { header: "Officer", accessor: (r: DecisionRow) => r.actor_email ?? r.actor_id ?? "" },
+              { header: "Role", accessor: (r: DecisionRow) => r.actor_role ?? "" },
+              { header: "Amount", accessor: (r: DecisionRow) => (r.amount == null ? "" : String(r.amount)) },
+              { header: "Note", accessor: (r: DecisionRow) => r.note ?? "" },
             ]}
           />
         }
@@ -234,7 +234,7 @@ function Body() {
           <EmptyState
             icon={<ShieldCheck />}
             title="No decisions recorded"
-            description="No approval or rejection actions match the current filters."
+            hint="No approval or rejection actions match the current filters."
           />
         ) : (
           <div className="overflow-x-auto">
@@ -268,7 +268,7 @@ function Body() {
                     <td className="p-3 font-mono text-[11px]">{new Date(r.created_at).toLocaleString()}</td>
                     <td className="p-3 capitalize">{r.module}</td>
                     <td className="p-3">
-                      <StatusPill status={r.outcome} />
+                      <StatusPill status={pillStatus(r.outcome)} />
                     </td>
                     <td className="p-3 font-mono text-[11px]">{r.reference ?? r.target ?? "—"}</td>
                     <td className="p-3">
@@ -312,6 +312,24 @@ function Body() {
       {selected && <DecisionDetails row={selected} onClose={() => setSelected(null)} />}
     </>
   );
+}
+
+type PillStatus = "cleared" | "closed" | "pending" | "failed" | "approved" | "rejected" | "active";
+function pillStatus(outcome: string): PillStatus {
+  switch (outcome) {
+    case "approved":
+    case "paid":
+    case "activated":
+      return "approved";
+    case "rejected":
+      return "rejected";
+    case "deactivated":
+      return "failed";
+    case "cleared":
+      return "cleared";
+    default:
+      return "pending";
+  }
 }
 
 function DecisionDetails({ row, onClose }: { row: DecisionRow; onClose: () => void }) {
