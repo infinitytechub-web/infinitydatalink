@@ -4,16 +4,24 @@ import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   getMyInvestments,
+  getMyInvestmentSeries,
   purchaseShares,
   sellShares,
   type MemberInvestmentSummary,
   type ShareProduct,
   type ShareHolding,
+  type InvestmentSeriesPoint,
 } from "@/lib/shares.functions";
+import { TrendChart } from "@/components/charts";
 
 const investmentsQO = queryOptions<MemberInvestmentSummary>({
   queryKey: ["member", "investments"],
   queryFn: () => getMyInvestments(),
+});
+
+const seriesQO = queryOptions<InvestmentSeriesPoint[]>({
+  queryKey: ["member", "investments", "series"],
+  queryFn: () => getMyInvestmentSeries(),
 });
 
 export const Route = createFileRoute("/_member/app/investments")({
