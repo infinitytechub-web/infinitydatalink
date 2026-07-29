@@ -43,11 +43,15 @@ function InvestmentsPage() {
   const qc = useQueryClient();
   const purchase = useServerFn(purchaseShares);
   const sell = useServerFn(sellShares);
+  const transfer = useServerFn(transferShares);
 
   const [tradeState, setTradeState] = useState<
     | { mode: "buy"; product: ShareProduct }
     | { mode: "sell"; holding: ShareHolding; product: ShareProduct }
     | null
+  >(null);
+  const [transferState, setTransferState] = useState<
+    { holding: ShareHolding; product: ShareProduct } | null
   >(null);
 
   const purchaseMut = useMutation({
@@ -64,6 +68,14 @@ function InvestmentsPage() {
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
       setTradeState(null);
+    },
+  });
+  const transferMut = useMutation({
+    mutationFn: (v: { product_id: string; to_member_no: string; units: number; note: string | null }) =>
+      transfer({ data: v }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["member", "investments"] });
+      setTransferState(null);
     },
   });
 
