@@ -717,13 +717,20 @@ export const previewDividendRun = createServerFn({ method: "POST" })
       holders.add((h as any).user_id);
       totalUnits += Number((h as any).units ?? 0);
     }
-    return {
+    const result: DividendRunPreview = {
       eligible_members: holders.size,
       total_units: totalUnits,
       per_unit_amount: data.per_unit_amount,
       estimated_total: Number((totalUnits * data.per_unit_amount).toFixed(2)),
       currency: (prod as any)?.currency ?? "GHS",
     };
+    await context.supabase.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "shares.dividend_run.preview",
+      target: data.product_id,
+      meta: { input: data, result },
+    });
+    return result;
   });
 
 export const createDividendRun = createServerFn({ method: "POST" })
