@@ -4,7 +4,7 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { z } from "zod";
-import { BanknoteArrowDown, Check, Search, Settings2, Wallet, X } from "lucide-react";
+import { BanknoteArrowDown, Check, Search, Settings2, X } from "lucide-react";
 import {
   EmptyState,
   ErrorState,
@@ -117,7 +117,7 @@ function WithdrawalsPage() {
           <Select
             value={search.status}
             onValueChange={(v) =>
-              navigate({ search: (p) => ({ ...p, status: v as SearchParams["status"], page: 1 }) })
+              navigate({ search: (p: SearchParams) => ({ ...p, status: v as SearchParams["status"], page: 1 }) })
             }
           >
             <SelectTrigger>
@@ -141,12 +141,12 @@ function WithdrawalsPage() {
               onChange={(e) => setTerm(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter")
-                  navigate({ search: (p) => ({ ...p, q: term || undefined, page: 1 }) });
+                  navigate({ search: (p: SearchParams) => ({ ...p, q: term || undefined, page: 1 }) });
               }}
             />
             <Button
               variant="secondary"
-              onClick={() => navigate({ search: (p) => ({ ...p, q: term || undefined, page: 1 }) })}
+              onClick={() => navigate({ search: (p: SearchParams) => ({ ...p, q: term || undefined, page: 1 }) })}
             >
               <Search className="size-4" />
             </Button>
@@ -170,14 +170,13 @@ function QueueBody({ search }: { search: SearchParams }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KPIStat label="Pending review" value={String(list.counts.pending)} tone="gold" icon={<BanknoteArrowDown />} />
-        <KPIStat label="Approved, awaiting payout" value={String(list.counts.approved)} tone="royal" icon={<Check />} />
-        <KPIStat label="Paid out" value={String(list.counts.paid)} tone="emerald" icon={<Wallet />} />
+        <KPIStat label="Pending review" value={String(list.counts.pending)} tone="gold" />
+        <KPIStat label="Approved, awaiting payout" value={String(list.counts.approved)} tone="royal" />
+        <KPIStat label="Paid out" value={String(list.counts.paid)} tone="emerald" />
         <KPIStat
           label="Value on hold"
           value={list.pending_value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           tone="teal"
-          icon={<Wallet />}
         />
       </div>
 
@@ -223,7 +222,7 @@ function QueueBody({ search }: { search: SearchParams }) {
             variant="secondary"
             size="sm"
             disabled={search.page <= 1}
-            onClick={() => navigate({ search: (p) => ({ ...p, page: p.page - 1 }) })}
+            onClick={() => navigate({ search: (p: SearchParams) => ({ ...p, page: p.page - 1 }) })}
           >
             Previous
           </Button>
@@ -231,7 +230,7 @@ function QueueBody({ search }: { search: SearchParams }) {
             variant="secondary"
             size="sm"
             disabled={search.page >= pages}
-            onClick={() => navigate({ search: (p) => ({ ...p, page: p.page + 1 }) })}
+            onClick={() => navigate({ search: (p: SearchParams) => ({ ...p, page: p.page + 1 }) })}
           >
             Next
           </Button>
