@@ -250,31 +250,40 @@ function AdminInvestments() {
                           ? "bg-emerald-deep/10 text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100"
                           : r.status === "draft"
                             ? "bg-gold/20 text-emerald-deep"
-                            : "bg-gray-200 text-gray-700"
+                            : r.status === "pending_approval"
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
+                              : r.status === "approved"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200"
+                                : r.status === "rejected"
+                                  ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200"
+                                  : "bg-gray-200 text-gray-700"
                       }`}
+                      title={
+                        r.status === "rejected" && r.rejection_reason
+                          ? `Rejected: ${r.rejection_reason}`
+                          : r.status === "approved" && r.approval_note
+                            ? `Approved: ${r.approval_note}`
+                            : undefined
+                      }
                     >
-                      {r.status}
+                      {r.status.replace("_", " ")}
                     </span>
                   </td>
                   <td className="text-right">
-                    {r.status === "draft" && (
-                      <div className="inline-flex gap-1">
-                        <button
-                          disabled={executeRunMut.isPending}
-                          onClick={() => executeRunMut.mutate(r.id)}
-                          className="rounded bg-emerald-deep px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
-                        >
-                          Execute
-                        </button>
-                        <button
-                          disabled={cancelRunMut.isPending}
-                          onClick={() => cancelRunMut.mutate(r.id)}
-                          className="rounded border border-emerald-deep/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
+                    <RunActions
+                      run={r}
+                      viewer={data.viewer}
+                      pending={
+                        submitRunMut.isPending ||
+                        executeRunMut.isPending ||
+                        cancelRunMut.isPending ||
+                        reviewMut.isPending
+                      }
+                      onSubmit={() => submitRunMut.mutate(r.id)}
+                      onCancel={() => cancelRunMut.mutate(r.id)}
+                      onExecute={() => executeRunMut.mutate(r.id)}
+                      onReview={(mode) => setReviewing({ run: r, mode })}
+                    />
                   </td>
                 </tr>
               ))}
