@@ -169,6 +169,13 @@ function InvestmentsPage() {
                         {product && (
                           <div className="flex justify-end gap-2">
                             <button
+                              onClick={() => setBreakdownState({ holding: h, product })}
+                              className="rounded bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold-deep hover:bg-gold/20 dark:bg-gold/20 dark:text-cream"
+                            >
+                              Details
+                            </button>
+
+                            <button
                               onClick={() => setTransferState({ holding: h, product })}
                               className="rounded bg-royal/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-royal hover:bg-royal/20 dark:bg-royal/20 dark:text-cream"
                             >
