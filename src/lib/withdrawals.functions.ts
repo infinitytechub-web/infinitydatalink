@@ -435,6 +435,80 @@ export const adminCancelWithdrawal = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export type BulkCancelResult = {
+  ok: string[];
+  failed: { id: string; error: string }[];
+};
+
+const BulkCancelSchema = z.object({
+  items: z
+    .array(z.object({ id: z.string().uuid(), note: z.string().trim().min(5).max(500) }))
+    .min(1)
+    .max(50),
+  step_up_token: z.string().min(16).max(200),
+});
+
+/** Cancel many pending/approved withdrawal requests with one step-up proof and per-request reasons. */
+export const adminBulkCancelWithdrawals = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => BulkCancelSchema.parse(d))
+  .handler(async ({ data, context }): Promise<BulkCancelResult> => {
+    const { actorRole, proof } = await requireDecisionAuthority(
+      context,
+      "cancelled",
+      data.step_up_token,
+      "bulk cancel withdrawals",
+    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const result: BulkCancelResult = { ok: [], failed: [] };
+
+    for (const item of data.items) {
+      const { data: row, error } = await supabaseAdmin.rpc("admin_cancel_savings_withdrawal", {
+        _id: item.id,
+        _reason: item.note,
+        _actor_id: context.userId,
+        _actor_role: actorRole,
+      });
+      if (error) {
+        result.failed.push({ id: item.id, error: error.message });
+        continue;
+      }
+      const r = (Array.isArray(row) ? row[0] : row) as any;
+      result.ok.push(item.id);
+      await writeAudit({
+        actor_id: context.userId,
+        actor_role: actorRole,
+        action: "withdrawal.cancelled",
+        target: item.id,
+        meta: {
+          ref: r?.ref,
+          amount: r?.amount,
+          reason: item.note,
+          cancelled_by_role: actorRole,
+          bulk: true,
+          bulk_size: data.items.length,
+          step_up: { method: proof.method, session_id: proof.id },
+        },
+      });
+    }
+
+    if (result.ok.length > 0) {
+      await writeAudit({
+        actor_id: context.userId,
+        actor_role: actorRole,
+        action: "withdrawal.bulk_cancelled",
+        target: `${result.ok.length} requests`,
+        meta: {
+          cancelled: result.ok,
+          failed: result.failed,
+          step_up: { method: proof.method, session_id: proof.id },
+        },
+      });
+    }
+
+    return result;
+  });
+
 const SettingsSchema = z.object({
   min_amount: z.number().min(0).max(10_000_000),
   max_amount: z.number().positive().max(10_000_000),

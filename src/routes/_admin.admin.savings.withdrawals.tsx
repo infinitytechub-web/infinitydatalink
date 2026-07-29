@@ -17,6 +17,7 @@ import {
 } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -40,6 +41,7 @@ import {
   adminListWithdrawals,
   adminPayWithdrawal,
   adminCancelWithdrawal,
+  adminBulkCancelWithdrawals,
   adminRejectWithdrawal,
   adminUpdateWithdrawalSettings,
   type AdminWithdrawalList,
@@ -169,6 +171,14 @@ function QueueBody({ search }: { search: SearchParams }) {
   const list = data as AdminWithdrawalList;
   const pages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
 
+  const cancellable = list.rows.filter((r) => r.status === "pending" || r.status === "approved");
+  const [selected, setSelected] = useState<string[]>([]);
+  const selectedRows = cancellable.filter((r) => selected.includes(r.id));
+  const allSelected = cancellable.length > 0 && selectedRows.length === cancellable.length;
+
+  const toggle = (id: string, on: boolean) =>
+    setSelected((prev) => (on ? [...new Set([...prev, id])] : prev.filter((x) => x !== id)));
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -181,6 +191,10 @@ function QueueBody({ search }: { search: SearchParams }) {
           tone="teal"
         />
       </div>
+
+      {selectedRows.length > 0 ? (
+        <BulkCancelBar rows={selectedRows} onDone={() => setSelected([])} />
+      ) : null}
 
       <SectionCard title={`Requests (${list.total})`} accent="gold">
         {list.rows.length === 0 ? (
@@ -196,6 +210,16 @@ function QueueBody({ search }: { search: SearchParams }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <th className="py-2 pr-3 font-semibold">
+                    <Checkbox
+                      aria-label="Select all cancellable requests on this page"
+                      checked={allSelected}
+                      disabled={cancellable.length === 0}
+                      onCheckedChange={(v: boolean | "indeterminate") =>
+                        setSelected(v === true ? cancellable.map((r) => r.id) : [])
+                      }
+                    />
+                  </th>
                   <th className="py-2 pr-4 font-semibold">Reference</th>
                   <th className="py-2 pr-4 font-semibold">Member</th>
                   <th className="py-2 pr-4 font-semibold">Account</th>
@@ -207,7 +231,13 @@ function QueueBody({ search }: { search: SearchParams }) {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {list.rows.map((row) => (
-                  <RequestRow key={row.id} row={row} />
+                  <RequestRow
+                    key={row.id}
+                    row={row}
+                    selectable={row.status === "pending" || row.status === "approved"}
+                    selected={selected.includes(row.id)}
+                    onSelectedChange={(on) => toggle(row.id, on)}
+                  />
                 ))}
               </tbody>
             </table>
@@ -242,7 +272,17 @@ function QueueBody({ search }: { search: SearchParams }) {
   );
 }
 
-function RequestRow({ row }: { row: WithdrawalRequest }) {
+function RequestRow({
+  row,
+  selectable = false,
+  selected = false,
+  onSelectedChange,
+}: {
+  row: WithdrawalRequest;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectedChange?: (on: boolean) => void;
+}) {
   const qc = useQueryClient();
   const approve = useServerFn(adminApproveWithdrawal);
   const reject = useServerFn(adminRejectWithdrawal);
@@ -299,6 +339,15 @@ function RequestRow({ row }: { row: WithdrawalRequest }) {
 
   return (
     <tr>
+      <td className="py-3 pr-3 align-top">
+        {selectable ? (
+          <Checkbox
+            aria-label={`Select withdrawal ${row.ref}`}
+            checked={selected}
+            onCheckedChange={(v: boolean | "indeterminate") => onSelectedChange?.(v === true)}
+          />
+        ) : null}
+      </td>
       <td className="py-3 pr-4 font-mono text-xs">
         {dialog}
         {row.ref}
@@ -512,4 +561,111 @@ function friendlyError(err: unknown) {
   const raw = err instanceof Error ? err.message : String(err);
   for (const key of Object.keys(ERRORS)) if (raw.includes(key)) return ERRORS[key];
   return raw;
+}
+
+function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: () => void }) {
+  const qc = useQueryClient();
+  const bulkCancel = useServerFn(adminBulkCancelWithdrawals);
+  const { ensure, dialog } = useStepUp();
+  const [open, setOpen] = useState(false);
+  const [shared, setShared] = useState("");
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const reasonFor = (id: string) => (notes[id] ?? "").trim() || shared.trim();
+  const ready = rows.every((r) => reasonFor(r.id).length >= 5);
+  const total = rows.reduce((sum, r) => sum + r.amount, 0);
+
+  const run = useMutation({
+    mutationFn: async () => {
+      const step_up_token = await ensure(`cancel ${rows.length} withdrawal requests`);
+      return bulkCancel({
+        data: {
+          items: rows.map((r) => ({ id: r.id, note: reasonFor(r.id) })),
+          step_up_token,
+        },
+      });
+    },
+    onSuccess: (res) => {
+      if (res.ok.length) toast.success(`Cancelled ${res.ok.length} request(s)`);
+      if (res.failed.length)
+        toast.error(`${res.failed.length} could not be cancelled: ${friendlyError(res.failed[0].error)}`);
+      setOpen(false);
+      setNotes({});
+      setShared("");
+      onDone();
+      qc.invalidateQueries({ queryKey: ["admin", "withdrawals"] });
+    },
+    onError: (e) => {
+      if (e instanceof Error && /cancelled/i.test(e.message)) return;
+      toast.error(friendlyError(e));
+    },
+  });
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
+      {dialog}
+      <div className="text-sm">
+        <span className="font-semibold">{rows.length} selected</span>{" "}
+        <span className="text-muted-foreground">
+          · total <Money amount={total} />
+        </span>
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" variant="ghost" onClick={onDone}>
+          Clear selection
+        </Button>
+        <Button size="sm" variant="destructive" onClick={() => setOpen(true)}>
+          <X className="mr-1 size-4" /> Cancel selected
+        </Button>
+      </div>
+
+      <Dialog open={open} onOpenChange={(o) => !o && setOpen(false)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Cancel {rows.length} withdrawal requests</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="bulk-shared-reason">Reason applied to all (required unless set per request)</Label>
+              <Textarea
+                id="bulk-shared-reason"
+                value={shared}
+                maxLength={500}
+                onChange={(e) => setShared(e.target.value)}
+                placeholder="Minimum 5 characters — recorded in the audit log for each request"
+              />
+            </div>
+            <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+              {rows.map((r) => (
+                <div key={r.id} className="rounded-lg border border-border/60 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                    <span className="font-mono text-xs">{r.ref}</span>
+                    <span className="text-muted-foreground">
+                      {r.member_name ?? "Member"} · <Money amount={r.amount} />
+                    </span>
+                    <StatusPill status={pillStatus(r.status)} />
+                  </div>
+                  <Input
+                    aria-label={`Cancellation reason for ${r.ref}`}
+                    value={notes[r.id] ?? ""}
+                    maxLength={500}
+                    onChange={(e) => setNotes((p) => ({ ...p, [r.id]: e.target.value }))}
+                    placeholder="Override reason for this request (optional)"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Back
+            </Button>
+            <Button variant="destructive" disabled={!ready || run.isPending} onClick={() => run.mutate()}>
+              {run.isPending ? "Cancelling…" : `Cancel ${rows.length} requests`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
