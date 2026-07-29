@@ -13,6 +13,7 @@ import {
   submitDividendRunForApproval,
   approveDividendRun,
   rejectDividendRun,
+  getDividendRunExport,
   type AdminInvestmentsOverview,
   type DividendRun,
   type DividendRunPreview,
