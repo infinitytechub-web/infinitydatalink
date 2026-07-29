@@ -43,8 +43,8 @@ function AdminInvestments() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "investments"] });
 
   const upsertMut = useMutation({
-    mutationFn: (v: Parameters<typeof upsert>[0] extends { data: infer D } ? D : never) =>
-      upsert({ data: v } as Parameters<typeof upsert>[0]),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: (v: any) => upsert({ data: v }),
     onSuccess: async () => {
       await invalidate();
       setEditing(null);
@@ -52,8 +52,8 @@ function AdminInvestments() {
     },
   });
   const createRunMut = useMutation({
-    mutationFn: (v: Parameters<typeof createRun>[0] extends { data: infer D } ? D : never) =>
-      createRun({ data: v } as Parameters<typeof createRun>[0]),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: (v: any) => createRun({ data: v }),
     onSuccess: async () => {
       await invalidate();
       setShowNewRun(false);
