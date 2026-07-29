@@ -1,62 +1,67 @@
-# Application Health Audit — Findings Report
+## Savings — Next 4 Modules
 
-You asked for the audit report first, so this plan is the deliverable. No code will change until you pick items to fix in a follow-up.
+Building all four selected capabilities on top of existing tables (`savings_accounts`, `savings_plans`, `transfers`, `transactions`). No breaking changes to existing UI.
 
-## Method
+### 1) Savings goals & progress
 
-- TypeScript strict compile (`tsgo --noEmit`)
-- HTTP probe across 20 representative admin/member routes
-- Dev-server log + browser console scan
-- Static scans: 61 route files, 25 server functions, dependency graph, SSR patterns, heavy imports
+- Add `goal_started_at`, `goal_completed_at`, `last_milestone_pct` columns to `savings_accounts` (goal_amount/target_date already exist).
+- New server fns: `setGoal`, `clearGoal`, `getGoalProgress` (includes projected completion date from avg monthly contribution).
+- UI: `<GoalCard/>` with animated SVG progress ring, target vs. current, projected date, on-track badge.
+- Add `GoalDialog` on `_member.app.savings.index.tsx` and account detail page.
+- After each cleared deposit, DB trigger notifies member at 25/50/75/100% milestones via `notifications` table (writes once per threshold using `last_milestone_pct`).
 
-## 1. Runtime & Build Health — GREEN
+### 2) Admin plan management
 
-- **TypeScript:** 0 errors under strict mode.
-- **HTTP probe:** every sampled route returns 200 (public/authed content) or 307 (auth redirect on protected routes). No 500s.
-- **Console / dev-server logs:** clean, no active errors or warnings.
-- **AsyncBoundary + Suspense:** wired at root and used in 38 route locations; 42 routes use TanStack Query for data.
-- **SSR crashes:** none reproducible. Prior realtime-js and `@simplewebauthn` SSR issues are patched; only 2 routes still opt out with `ssr:false` (member app + admin gate — intentional).
-- **Static heavy imports:** `xlsx` / `jspdf` are already dynamic-imported through `src/lib/exports.ts`. Good.
+- New route `_admin.admin.savings.plans.tsx` (CRUD for `savings_plans`).
+- Server fns in new `src/lib/admin-savings-plans.functions.ts`: `listPlans`, `createPlan`, `updatePlan`, `togglePlanActive`, `reorderPlans`. All gated by super_admin/finance_officer and write `audit_log` rows (`savings_plan.created|updated|activated|deactivated`).
+- Form with name, schedule, rate, min contribution, contribution amount, lock days, description, sort order, active flag.
+- Guard: prevent deactivating a plan that has active accounts (soft warn + require reason).
 
-Conclusion: no “Page Error” / rendering / runtime failures are currently reproducible.
+### 3) Own-account transfers & sweeps
 
-## 2. Areas Worth Improving (ranked by impact)
+- New table `savings_sweeps`: id, user_id, from_account_id, to_account_id, amount, frequency (weekly/monthly), day_of_week/day_of_month, next_run_at, status, last_run_status/error, runs_completed.
+- Reuse existing `request_transfer` RPC for instant own-account transfers; add server fn `submitOwnAccountTransfer` that verifies both accounts belong to caller and skips 2-step approval (calls `clear_transfer` if same owner).
+- Server fns: `listMySweeps`, `createSweep`, `pauseSweep`, `resumeSweep`, `deleteSweep`.
+- Cron: DB function `run_savings_sweeps()` + `pg_cron` hourly. Runs due sweeps by calling `post_transfer` + auto-clear when both accounts share owner.
+- UI additions on `_member.app.transfers.tsx`: "Between my accounts" quick action + "Scheduled sweeps" section with pause/resume/edit.
 
-### P1 — User-visible perf
+### 4) Statements & interest accrual
 
-1. **`lucide-react` icon imports.** Barrel imports (`import { X, Y } from "lucide-react"`) balloon route chunks. Sample routes import 15–30 icons each. Switching to `lucide-react/icons/x` per-icon imports (or centralizing a small allowlist) can shave meaningful JS on first paint.
-2. **`recharts` on the admin dashboard.** Large synchronous chart lib on `/admin` and `/admin/finance/*`. Lazy-loading the chart components behind `React.lazy` + `AsyncBoundary` would speed the first admin paint noticeably on mobile (your current viewport is 428px).
-3. **`AuthProvider` hydration cost.** On sign-in the provider fires two sequential Supabase reads (`user_roles`, `profiles`) then hydrates on every `SIGNED_IN`/`USER_UPDATED`. Combining into one RPC or caching per session would remove a visible flash on protected routes.
-4. **Direct `supabase.from(...)` in 3 client components.** Should route through TanStack Query with a stable `queryKey` to avoid duplicate fetches on remount.
+- New table `savings_statements`: id, account_id, user_id, period_start, period_end, opening_balance, closing_balance, deposits_total, withdrawals_total, interest_credited, generated_at.
+- DB function `accrue_monthly_interest(_period_end date)`:
+  - For each active account, compute monthly interest = balance × (rate/12), post an `interest` transaction (cleared), update balance, and upsert a `savings_statements` row summarizing the period.
+  - Writes `audit_log` (`savings.interest_accrual`).
+- Cron: 1st of each month at 02:00 UTC calls `accrue_monthly_interest`.
+- Server fns: `listMyStatements`, `getStatement` (returns line items for the period).
+- Route `_member.app.savings.statements.tsx`: table of statements with download buttons (CSV + PDF via dynamic `jspdf` import). PDF header uses `branding_settings`.
+- Admin manual trigger button on `_admin.admin.savings.tsx` (super_admin only) to re-run current period accrual with confirmation and audit note.
 
-### P2 — Robustness
+### Technical details
 
-5. **`AsyncBoundary` retry** clears React error state but does not always call `router.invalidate()` in nested placements — a stuck error inside a leaf can require a full refresh. Standardize the retry contract.
-6. **`ssr:false` on `_admin` and `_member`** avoids prerender 401s but disables SSR entirely for those subtrees. Fine for authed shells, but any public-ish leaf that ends up under them loses SSR. Worth documenting the boundary.
-7. **`profiles`/`user_roles` reads** in `src/lib/auth.tsx` swallow errors silently (`if (error || !data) return []`). A one-time console warn (dev only) would surface RLS/permission regressions faster.
+- All server fns follow existing pattern: `createServerFn().middleware([requireSupabaseAuth]).inputValidator().handler(...)`, RLS-scoped queries via `context.supabase`, privileged RPCs via `supabaseAdmin`.
+- Migrations follow the CREATE TABLE → GRANT → ENABLE RLS → CREATE POLICY sequence; `authenticated` gets scoped access, `service_role` all, no `anon`.
+- All new admin actions log to `audit_log` with actor role.
+- CSV export uses existing `src/lib/exports.ts` (formula-injection safe). PDF import is dynamic to keep SSR safe.
+- No changes to auto-generated Supabase files or branding pipeline.
 
-### P3 — Hygiene
+### File map
 
-8. **1 `TODO`/`FIXME`** remaining in `src/`.
-9. **19 `useEffect` call sites**; a few in `PortalShell`/`BrandingProvider` re-run on every render because dependency arrays include object literals. Low impact, easy fix.
-10. **No web-vitals telemetry** in the runtime error logger — you have error capture but no perf capture, so “feels slow” reports have no data behind them.
-11. **Bundle analyzer not wired** in `vite.config.ts`; adding `rollup-plugin-visualizer` behind a flag would let you verify P1.1/P1.2 wins.
+New:
+- `src/lib/admin-savings-plans.functions.ts`
+- `src/lib/savings-goals.functions.ts`
+- `src/lib/savings-sweeps.functions.ts`
+- `src/lib/savings-statements.functions.ts`
+- `src/components/goal-card.tsx`, `src/components/goal-dialog.tsx`, `src/components/sweep-dialog.tsx`
+- `src/routes/_admin.admin.savings.plans.tsx`
+- `src/routes/_member.app.savings.statements.tsx`
+- `src/routes/api/public/hooks/monthly-interest.ts`
+- `src/routes/api/public/hooks/savings-sweeps.ts`
+- 2 migrations (schema + cron)
 
-## 3. Not Issues (verified, do not touch)
+Edited:
+- `src/routes/_member.app.savings.index.tsx` (goal card + goal dialog + statements link)
+- `src/routes/_member.app.savings.$accountId.tsx` (goal panel)
+- `src/routes/_member.app.transfers.tsx` (own-account quick action + sweeps section)
+- `src/routes/_admin.admin.savings.tsx` (plans link + manual accrual button)
 
-- Realtime SSR stub (`src/integrations/supabase/realtime-ssr-stub.ts`) — working as designed.
-- Server-fn `.functions.ts` layout and `client.server` isolation — clean.
-- Root SEO/head metadata — present and per-route where required.
-- `AsyncBoundary` + Query error reset — correct pattern.
-- Security-definer allowlist + CI gates — in place.
-
-## 4. What I Recommend Next
-
-Pick any subset and I'll implement in build mode:
-
-- **A.** P1 perf pack: per-icon `lucide-react`, lazy `recharts`, single-RPC auth hydration, migrate the 3 stray `supabase.from` calls to Query.
-- **B.** P2 robustness pack: unify `AsyncBoundary` retry contract, add dev-mode warns to auth loaders, document SSR boundary.
-- **C.** Observability pack: web-vitals reporting into `runtime_error_logs`, wire bundle visualizer, add a `/admin/health` perf tab.
-- **D.** Just fix the one page you're actually seeing break — tell me which and I'll diagnose it directly.
-
-Reply with A / B / C / D (or any combination) and I'll produce the implementation plan.
+Proceeding with implementation.
