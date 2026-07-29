@@ -41,6 +41,73 @@ export const Route = createFileRoute("/_member/app/investments")({
 const money = (n: number, ccy = "GHS") =>
   new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(n);
 
+type TradeReceipt = {
+  ref: string;
+  timestamp: string;
+  mode: "buy" | "sell";
+  product_name: string;
+  product_code: string;
+  currency: string;
+  units: number;
+  unit_price: number;
+  gross: number;
+  feeRate: number;
+  fee: number;
+  net: number;
+  account_label: string;
+  note: string | null;
+};
+
+function downloadTradeReceipt(r: TradeReceipt) {
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("en-GH", { style: "currency", currency: r.currency }).format(n);
+  const esc = (s: string) =>
+    s.replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+    );
+  const title = `${r.mode === "buy" ? "Purchase" : "Sale"} Receipt — ${r.ref}`;
+  const html = `<!doctype html>
+<html><head><meta charset="utf-8"><title>${esc(title)}</title>
+<style>
+  body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#0f2b23;margin:40px;max-width:640px}
+  h1{font-family:Georgia,serif;font-size:22px;margin:0 0 4px}
+  .muted{color:#5c7a72;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;margin-top:20px}
+  td{padding:8px 0;border-bottom:1px solid #e5efe9;font-variant-numeric:tabular-nums}
+  td.label{color:#5c7a72}
+  td.val{text-align:right;font-weight:600}
+  .total td{border-top:2px solid #0f2b23;border-bottom:none;padding-top:12px;font-size:16px}
+  .foot{margin-top:24px;font-size:11px;color:#5c7a72}
+  @media print{body{margin:20mm}}
+</style></head>
+<body>
+  <h1>IT-360 CashApp — Trade Receipt</h1>
+  <div class="muted">${r.mode === "buy" ? "Share Purchase" : "Share Sale"} · Ref ${esc(r.ref)}</div>
+  <table>
+    <tr><td class="label">Timestamp</td><td class="val">${esc(new Date(r.timestamp).toLocaleString())}</td></tr>
+    <tr><td class="label">Product</td><td class="val">${esc(r.product_name)} (${esc(r.product_code)})</td></tr>
+    <tr><td class="label">Savings account</td><td class="val">${esc(r.account_label)}</td></tr>
+    <tr><td class="label">Units</td><td class="val">${r.units.toLocaleString()}</td></tr>
+    <tr><td class="label">Unit price</td><td class="val">${esc(fmt(r.unit_price))}</td></tr>
+    <tr><td class="label">Gross amount</td><td class="val">${esc(fmt(r.gross))}</td></tr>
+    <tr><td class="label">Transaction fee (${(r.feeRate * 100).toFixed(2)}%)</td><td class="val">${r.mode === "buy" ? "+" : "−"} ${esc(fmt(r.fee))}</td></tr>
+    <tr class="total"><td class="label">${r.mode === "buy" ? "Total debited" : "Net credited"}</td><td class="val">${esc(fmt(r.net))}</td></tr>
+    ${r.note ? `<tr><td class="label">Note</td><td class="val">${esc(r.note)}</td></tr>` : ""}
+  </table>
+  <p class="foot">Generated ${esc(new Date().toLocaleString())}. Retain this receipt for your records; a matching entry is filed in the immutable audit log.</p>
+</body></html>`;
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `receipt-${r.ref}.html`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+
 function InvestmentsPage() {
   const { data } = useSuspenseQuery(investmentsQO);
   const { data: series } = useSuspenseQuery(seriesQO);
@@ -67,7 +134,6 @@ function InvestmentsPage() {
       purchase({ data: v }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
-      setTradeState(null);
     },
   });
   const sellMut = useMutation({
@@ -75,7 +141,6 @@ function InvestmentsPage() {
       sell({ data: v }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
-      setTradeState(null);
     },
   });
   const transferMut = useMutation({
@@ -309,12 +374,11 @@ function InvestmentsPage() {
           onCancel={() => setTradeState(null)}
           submitting={purchaseMut.isPending || sellMut.isPending}
           error={(purchaseMut.error as Error | null)?.message ?? (sellMut.error as Error | null)?.message ?? null}
-          onSubmit={(v) => {
-            if (tradeState.mode === "buy") {
-              purchaseMut.mutate({ product_id: tradeState.product.id, ...v });
-            } else {
-              sellMut.mutate({ product_id: tradeState.product.id, ...v });
-            }
+          onSubmit={async (v) => {
+            const args = { product_id: tradeState.product.id, ...v };
+            return tradeState.mode === "buy"
+              ? await purchaseMut.mutateAsync(args)
+              : await sellMut.mutateAsync(args);
           }}
         />
       )}
@@ -379,14 +443,15 @@ function TradeDialog({
     | { mode: "sell"; holding: ShareHolding; product: ShareProduct };
   accounts: Array<{ id: string; nickname: string | null; balance: number; plan_name: string }>;
   onCancel: () => void;
-  onSubmit: (v: { savings_account_id: string; units: number; note: string | null }) => void;
+  onSubmit: (v: { savings_account_id: string; units: number; note: string | null }) => Promise<{ id: string; ref: string }>;
   submitting: boolean;
   error: string | null;
 }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [units, setUnits] = useState(state.mode === "buy" ? state.product.min_units : 1);
   const [note, setNote] = useState("");
-  const [step, setStep] = useState<"edit" | "review">("edit");
+  const [step, setStep] = useState<"edit" | "review" | "receipt">("edit");
+  const [receipt, setReceipt] = useState<{ ref: string; timestamp: string } | null>(null);
   const price = state.product.unit_price;
   const maxUnits = state.mode === "sell" ? state.holding.units : undefined;
 
@@ -411,7 +476,11 @@ function TradeDialog({
           {state.mode === "buy" ? "Buy" : "Sell"} — {state.product.name}
         </h3>
         <p className="mt-1 text-xs uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/50">
-          Step {step === "edit" ? "1 of 2 · Details" : "2 of 2 · Review & confirm"}
+          {step === "edit"
+            ? "Step 1 of 2 · Details"
+            : step === "review"
+            ? "Step 2 of 2 · Review & confirm"
+            : "Trade completed · Receipt"}
         </p>
 
         {step === "edit" ? (
@@ -462,7 +531,7 @@ function TradeDialog({
               </div>
             </div>
           </div>
-        ) : (
+        ) : step === "review" ? (
           <div className="mt-4 space-y-3 text-sm">
             <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
               <div className="flex justify-between">
@@ -515,42 +584,134 @@ function TradeDialog({
               vary slightly if the unit price changes before confirmation.
             </p>
           </div>
+        ) : (
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-mid/10 px-3 py-2 text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-mid text-cream">✓</span>
+              <span className="text-sm font-semibold">
+                {state.mode === "buy" ? "Purchase" : "Sale"} confirmed
+              </span>
+            </div>
+            <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
+              <div className="flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Reference</span>
+                <span className="font-mono">{receipt?.ref}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Timestamp</span>
+                <span className="tabular">{receipt ? new Date(receipt.timestamp).toLocaleString() : ""}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Product</span>
+                <span>{state.product.name}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-xs">
+                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Units</span>
+                <span className="tabular">{units.toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="rounded-md bg-emerald-deep/5 p-3 dark:bg-emerald-100/5">
+              <div className="flex justify-between">
+                <span>Gross amount</span>
+                <span className="tabular font-semibold">{money(quote.gross, ccy)}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-emerald-deep/80 dark:text-emerald-200/80">
+                <span>Transaction fee ({(quote.feeRate * 100).toFixed(2)}%)</span>
+                <span className="tabular">
+                  {state.mode === "buy" ? "+" : "−"} {money(quote.fee, ccy)}
+                </span>
+              </div>
+              <div className="mt-2 flex justify-between border-t border-emerald-deep/10 pt-2 dark:border-emerald-100/10">
+                <span className="font-semibold">
+                  {state.mode === "buy" ? "Net debited" : "Net credited"}
+                </span>
+                <span className="tabular font-serif text-base">{money(quote.net, ccy)}</span>
+              </div>
+            </div>
+            <p className="text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+              This receipt is your permanent record of the trade. A matching entry is filed in the immutable audit log.
+            </p>
+          </div>
         )}
 
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
         <div className="mt-5 flex justify-end gap-2">
-          <button
-            onClick={step === "review" ? () => setStep("edit") : onCancel}
-            disabled={submitting}
-            className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100 disabled:opacity-50"
-          >
-            {step === "review" ? "Back" : "Cancel"}
-          </button>
-          {step === "edit" ? (
-            <button
-              disabled={!canReview}
-              onClick={() => setStep("review")}
-              className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
-            >
-              Review
-            </button>
+          {step === "receipt" ? (
+            <>
+              <button
+                onClick={() =>
+                  receipt &&
+                  downloadTradeReceipt({
+                    ref: receipt.ref,
+                    timestamp: receipt.timestamp,
+                    mode: state.mode,
+                    product_name: state.product.name,
+                    product_code: state.product.code,
+                    currency: ccy,
+                    units,
+                    unit_price: price,
+                    gross: quote.gross,
+                    feeRate: quote.feeRate,
+                    fee: quote.fee,
+                    net: quote.net,
+                    account_label: account?.nickname ?? account?.plan_name ?? "—",
+                    note: note.trim() || null,
+                  })
+                }
+                className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100"
+              >
+                Download receipt
+              </button>
+              <button
+                onClick={onCancel}
+                className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream"
+              >
+                Done
+              </button>
+            </>
           ) : (
-            <button
-              disabled={submitting || insufficient}
-              onClick={() =>
-                onSubmit({ savings_account_id: accountId, units, note: note.trim() ? note.trim() : null })
-              }
-              className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
-            >
-              {submitting ? "Working…" : state.mode === "buy" ? "Confirm purchase" : "Confirm sale"}
-            </button>
+            <>
+              <button
+                onClick={step === "review" ? () => setStep("edit") : onCancel}
+                disabled={submitting}
+                className="rounded-md border border-emerald-deep/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-emerald-deep dark:text-emerald-100 disabled:opacity-50"
+              >
+                {step === "review" ? "Back" : "Cancel"}
+              </button>
+              {step === "edit" ? (
+                <button
+                  disabled={!canReview}
+                  onClick={() => setStep("review")}
+                  className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+                >
+                  Review
+                </button>
+              ) : (
+                <button
+                  disabled={submitting || insufficient}
+                  onClick={async () => {
+                    const res = await onSubmit({
+                      savings_account_id: accountId,
+                      units,
+                      note: note.trim() ? note.trim() : null,
+                    });
+                    setReceipt({ ref: res.ref, timestamp: new Date().toISOString() });
+                    setStep("receipt");
+                  }}
+                  className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
+                >
+                  {submitting ? "Working…" : state.mode === "buy" ? "Confirm purchase" : "Confirm sale"}
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
     </div>
   );
 }
+
 
 function TransferDialog({
   state,
