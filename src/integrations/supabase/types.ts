@@ -1175,10 +1175,12 @@ export type Database = {
         Row: {
           created_at: string
           due_date: string
+          due_notified_at: string | null
           id: string
           installment_no: number
           interest_due: number
           loan_id: string
+          overdue_notified_at: string | null
           paid_amount: number
           paid_at: string | null
           principal_due: number
@@ -1189,10 +1191,12 @@ export type Database = {
         Insert: {
           created_at?: string
           due_date: string
+          due_notified_at?: string | null
           id?: string
           installment_no: number
           interest_due: number
           loan_id: string
+          overdue_notified_at?: string | null
           paid_amount?: number
           paid_at?: string | null
           principal_due: number
@@ -1203,10 +1207,12 @@ export type Database = {
         Update: {
           created_at?: string
           due_date?: string
+          due_notified_at?: string | null
           id?: string
           installment_no?: number
           interest_due?: number
           loan_id?: string
+          overdue_notified_at?: string | null
           paid_amount?: number
           paid_at?: string | null
           principal_due?: number
@@ -1347,6 +1353,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_outbox: {
+        Row: {
+          attempts: number
+          body: string | null
+          category: string
+          channel: string
+          created_at: string
+          dedupe_key: string | null
+          error: string | null
+          id: string
+          link: string | null
+          meta: Json
+          sent_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          body?: string | null
+          category: string
+          channel: string
+          created_at?: string
+          dedupe_key?: string | null
+          error?: string | null
+          id?: string
+          link?: string | null
+          meta?: Json
+          sent_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          body?: string | null
+          category?: string
+          channel?: string
+          created_at?: string
+          dedupe_key?: string | null
+          error?: string | null
+          id?: string
+          link?: string | null
+          meta?: Json
+          sent_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email: boolean
+          in_app: boolean
+          muted_categories: string[]
+          sms: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: boolean
+          in_app?: boolean
+          muted_categories?: string[]
+          sms?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: boolean
+          in_app?: boolean
+          muted_categories?: string[]
+          sms?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -3286,6 +3376,18 @@ export type Database = {
         }
         Returns: number
       }
+      notify_user: {
+        Args: {
+          _body?: string
+          _category: string
+          _dedupe_key?: string
+          _link?: string
+          _meta?: Json
+          _title: string
+          _user_id: string
+        }
+        Returns: string
+      }
       open_fixed_deposit: {
         Args: {
           _account_id: string
@@ -3992,6 +4094,13 @@ export type Database = {
             Args: { _actor_id?: string; _reason?: string; _user_id: string }
             Returns: undefined
           }
+      run_loan_repayment_reminders: {
+        Args: { _days_ahead?: number }
+        Returns: {
+          due_soon: number
+          overdue: number
+        }[]
+      }
       run_recurring_savings_contributions: {
         Args: never
         Returns: {
