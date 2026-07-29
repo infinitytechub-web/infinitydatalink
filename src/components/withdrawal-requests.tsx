@@ -95,6 +95,9 @@ export function WithdrawalRequestsSection({
   const selected = accounts.find((a) => a.id === accountId);
   const available = selected ? selected.balance - (holds.get(selected.id) ?? 0) : 0;
 
+  const [cancelTarget, setCancelTarget] = useState<{ id: string; ref: string } | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["member", "withdrawals"] });
     qc.invalidateQueries({ queryKey: ["member", "savings"] });
@@ -121,9 +124,12 @@ export function WithdrawalRequestsSection({
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (id: string) => cancel({ data: { id } }),
+    mutationFn: (vars: { id: string; reason: string }) =>
+      cancel({ data: { id: vars.id, reason: vars.reason } }),
     onSuccess: () => {
       toast.success("Request cancelled");
+      setCancelTarget(null);
+      setCancelReason("");
       invalidate();
     },
     onError: (e) => toast.error(friendly(e)),
@@ -200,6 +206,14 @@ export function WithdrawalRequestsSection({
                             {r.rejection_reason}
                           </span>
                         ) : null}
+                        {r.status === "cancelled" && r.cancellation_reason ? (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {r.cancelled_by_role && r.cancelled_by_role !== "member"
+                              ? `Cancelled by staff: `
+                              : ""}
+                            {r.cancellation_reason}
+                          </span>
+                        ) : null}
                       </td>
                       <td className="py-3 pr-4 text-xs text-muted-foreground">
                         {new Date(r.created_at).toLocaleString()}
@@ -220,7 +234,10 @@ export function WithdrawalRequestsSection({
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => cancelMutation.mutate(r.id)}
+                              onClick={() => {
+                                setCancelReason("");
+                                setCancelTarget({ id: r.id, ref: r.ref });
+                              }}
                               disabled={cancelMutation.isPending}
                             >
                               <XCircle className="mr-1 size-4" /> Cancel
@@ -325,6 +342,47 @@ export function WithdrawalRequestsSection({
             </Button>
             <Button onClick={() => createMutation.mutate()} disabled={!canSubmit}>
               {createMutation.isPending ? "Submitting…" : "Submit request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={cancelTarget !== null}
+        onOpenChange={(o) => {
+          if (!o) setCancelTarget(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel withdrawal {cancelTarget?.ref}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="wd-cancel-reason">Why are you cancelling? (required)</Label>
+            <Textarea
+              id="wd-cancel-reason"
+              value={cancelReason}
+              maxLength={500}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="e.g. No longer needed — min 5 characters"
+            />
+            <p className="text-xs text-muted-foreground">
+              The reason and timestamp are recorded on the request timeline.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCancelTarget(null)}>
+              Keep request
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={cancelReason.trim().length < 5 || cancelMutation.isPending}
+              onClick={() =>
+                cancelTarget &&
+                cancelMutation.mutate({ id: cancelTarget.id, reason: cancelReason.trim() })
+              }
+            >
+              {cancelMutation.isPending ? "Cancelling…" : "Cancel request"}
             </Button>
           </DialogFooter>
         </DialogContent>
