@@ -73,7 +73,7 @@ function NotificationsContent() {
 
   return (
     <div className="space-y-6">
-      <SectionCard title="Delivery channels" description="In-app alerts always appear in your notification bell when enabled.">
+      <SectionCard title="Delivery channels" hint="In-app alerts always appear in your notification bell when enabled.">
         <div className="space-y-4">
           <ChannelRow
             icon={<BellRing className="h-4 w-4" />}
@@ -106,7 +106,7 @@ function NotificationsContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Event types" description="Turn off any event you don't want to be alerted about.">
+      <SectionCard title="Event types" hint="Turn off any event you don't want to be alerted about.">
         <div className="grid gap-3 sm:grid-cols-2">
           {NOTIFICATION_CATEGORIES.map((cat) => {
             const muted = prefs.muted_categories.includes(cat.key);
@@ -128,9 +128,9 @@ function NotificationsContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Recent deliveries" description="Email and SMS copies queued for your alerts.">
+      <SectionCard title="Recent deliveries" hint="Email and SMS copies queued for your alerts.">
         {data.deliveries.length === 0 ? (
-          <EmptyState title="No deliveries yet" description="Email and SMS alerts will appear here once events occur." />
+          <EmptyState title="No deliveries yet" hint="Email and SMS alerts will appear here once events occur." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -151,7 +151,7 @@ function NotificationsContent() {
                     </td>
                     <td className="py-2 uppercase text-xs">{d.channel}</td>
                     <td className="py-2">
-                      <StatusPill status={d.status} />
+                      <StatusPill status={d.status === "sent" ? "cleared" : d.status === "skipped" ? "rejected" : "pending"} />
                       {d.error ? <div className="mt-1 text-xs text-muted-foreground">{d.error}</div> : null}
                     </td>
                     <td className="py-2 text-xs text-muted-foreground">
