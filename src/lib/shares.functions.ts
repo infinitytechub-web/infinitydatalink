@@ -185,6 +185,168 @@ export const getMyInvestments = createServerFn({ method: "GET" })
   });
 
 // ============================================================================
+// Member: cost-basis breakdown for a single holding
+// ============================================================================
+
+export type HoldingLot = {
+  id: string;
+  ref: string;
+  kind: "purchase" | "sale" | "dividend";
+  is_transfer: boolean;
+  direction: "in" | "out" | "dividend";
+  units: number;
+  unit_price: number;
+  amount: number;
+  running_units: number;
+  running_cost_basis: number;
+  running_avg_cost: number;
+  realized_gain: number | null;
+  note: string | null;
+  created_at: string;
+};
+
+export type HoldingBreakdown = {
+  product: ShareProduct;
+  units: number;
+  cost_basis: number;
+  average_cost: number;
+  market_value: number;
+  unrealized_gain: number;
+  unrealized_gain_pct: number;
+  realized_gain: number;
+  total_dividends: number;
+  total_units_purchased: number;
+  total_units_sold: number;
+  lots: HoldingLot[];
+};
+
+const BreakdownSchema = z.object({ product_id: z.string().uuid() });
+
+export const getMyHoldingBreakdown = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => BreakdownSchema.parse(data))
+  .handler(async ({ data, context }): Promise<HoldingBreakdown> => {
+    const { supabase, userId } = context;
+    const [{ data: product, error: pErr }, { data: txns, error: tErr }] = await Promise.all([
+      supabase
+        .from("share_products")
+        .select(
+          "id, code, name, description, unit_price, currency, dividend_rate_annual, min_units, max_units_per_member, total_units_issued, is_active, created_at",
+        )
+        .eq("id", data.product_id)
+        .single(),
+      supabase
+        .from("share_transactions")
+        .select("id, ref, kind, units, unit_price, amount, note, created_at")
+        .eq("user_id", userId)
+        .eq("product_id", data.product_id)
+        .order("created_at", { ascending: true }),
+    ]);
+    if (pErr) throw new Error(pErr.message);
+    if (tErr) throw new Error(tErr.message);
+
+    const prod: ShareProduct = {
+      id: (product as any).id,
+      code: (product as any).code,
+      name: (product as any).name,
+      description: (product as any).description,
+      unit_price: Number((product as any).unit_price ?? 0),
+      currency: (product as any).currency,
+      dividend_rate_annual: Number((product as any).dividend_rate_annual ?? 0),
+      min_units: (product as any).min_units,
+      max_units_per_member: (product as any).max_units_per_member,
+      total_units_issued: (product as any).total_units_issued,
+      is_active: (product as any).is_active,
+      created_at: (product as any).created_at,
+    };
+
+    let units = 0;
+    let basis = 0;
+    let realized = 0;
+    let dividends = 0;
+    let unitsBought = 0;
+    let unitsSold = 0;
+    const lots: HoldingLot[] = [];
+
+    for (const t of txns ?? []) {
+      const row = t as any;
+      const u = Number(row.units ?? 0);
+      const amt = Number(row.amount ?? 0);
+      const price = Number(row.unit_price ?? 0);
+      const note = (row.note ?? null) as string | null;
+      const isTransfer = !!note && /^Transfer (out|in)/i.test(note);
+      let realizedForLot: number | null = null;
+      let direction: HoldingLot["direction"] = "in";
+
+      if (row.kind === "purchase") {
+        // buy or transfer-in — increases basis by amount (proxy: unit_price * units)
+        units += u;
+        basis += amt;
+        unitsBought += u;
+        direction = "in";
+      } else if (row.kind === "sale") {
+        // sell or transfer-out — removes basis proportional to average cost
+        const avg = units > 0 ? basis / units : 0;
+        const costOut = Number((avg * u).toFixed(2));
+        // For real sales, realized = proceeds - cost removed. Transfers have no real proceeds.
+        if (!isTransfer) {
+          realizedForLot = Number((amt - costOut).toFixed(2));
+          realized += realizedForLot;
+        }
+        units = Math.max(0, units - u);
+        basis = Math.max(0, Number((basis - costOut).toFixed(2)));
+        unitsSold += u;
+        direction = "out";
+      } else if (row.kind === "dividend") {
+        dividends += amt;
+        direction = "dividend";
+      }
+
+      const avgAfter = units > 0 ? Number((basis / units).toFixed(4)) : 0;
+      lots.push({
+        id: row.id,
+        ref: row.ref,
+        kind: row.kind,
+        is_transfer: isTransfer,
+        direction,
+        units: u,
+        unit_price: price,
+        amount: amt,
+        running_units: units,
+        running_cost_basis: Number(basis.toFixed(2)),
+        running_avg_cost: avgAfter,
+        realized_gain: realizedForLot,
+        note,
+        created_at: row.created_at,
+      });
+    }
+
+    const marketValue = Number((prod.unit_price * units).toFixed(2));
+    const unrealized = Number((marketValue - basis).toFixed(2));
+    const unrealizedPct = basis > 0 ? Number(((unrealized / basis) * 100).toFixed(2)) : 0;
+
+    // Show lots newest first for the UI.
+    lots.reverse();
+
+    return {
+      product: prod,
+      units,
+      cost_basis: Number(basis.toFixed(2)),
+      average_cost: units > 0 ? Number((basis / units).toFixed(4)) : 0,
+      market_value: marketValue,
+      unrealized_gain: unrealized,
+      unrealized_gain_pct: unrealizedPct,
+      realized_gain: Number(realized.toFixed(2)),
+      total_dividends: Number(dividends.toFixed(2)),
+      total_units_purchased: unitsBought,
+      total_units_sold: unitsSold,
+      lots,
+    };
+  });
+
+
+
+// ============================================================================
 // Member: purchase / sell
 // ============================================================================
 
