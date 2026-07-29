@@ -46,7 +46,22 @@ export const Route = createFileRoute("/_admin/admin/savings")({
 function AdminSavings() {
   return (
     <>
-      <PageHeader eyebrow="Administrator" title="Savings" description="Institution-wide savings positions, plans and pending settlements." />
+      <PageHeader
+        eyebrow="Administrator"
+        title="Savings"
+        description="Institution-wide savings positions, plans and pending settlements."
+        action={
+          <div className="flex items-center gap-2">
+            <AccrualDialog />
+            <Link
+              to="/admin/savings/plans"
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              <Settings className="h-3.5 w-3.5" /> Manage plans
+            </Link>
+          </div>
+        }
+      />
       <Suspense fallback={<SectionCardSkeleton title="Savings positions" rows={6} cols={5} />}>
         <Body />
       </Suspense>
