@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { useSuspenseQuery, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -44,6 +44,11 @@ export const Route = createFileRoute("/_admin/admin/savings")({
 });
 
 function AdminSavings() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Flat child routes (/admin/savings/plans, /withdrawals, /reconciliation) render
+  // through this layout; show only the child when one is active.
+  if (pathname.replace(/\/$/, "") !== "/admin/savings") return <Outlet />;
+
   return (
     <>
       <PageHeader

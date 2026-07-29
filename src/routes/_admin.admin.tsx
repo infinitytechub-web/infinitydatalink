@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import {
+  BanknoteArrowDown,
   BarChart3,
   FileBarChart,
   History,
@@ -71,6 +72,7 @@ const groups: NavGroup[] = [
     label: "Operations",
     items: [
       { to: "/admin/savings", label: "Savings", icon: <PiggyBank /> },
+      { to: "/admin/savings/withdrawals", label: "Withdrawal approvals", icon: <BanknoteArrowDown /> },
       { to: "/admin/recurring", label: "Recurring schedules", icon: <RefreshCw /> },
       { to: "/admin/loans", label: "Loans & Approvals", icon: <BadgeDollarSign /> },
       { to: "/admin/payments", label: "Payments", icon: <CreditCard /> },

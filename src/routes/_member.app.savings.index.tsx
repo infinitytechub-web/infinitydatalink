@@ -38,6 +38,7 @@ import {
 import { getMyTransactions } from "@/lib/member-data.functions";
 import { RecurringContributionsSection } from "@/components/recurring-contributions";
 import { GoalDialog } from "@/components/goal-dialog";
+import { WithdrawalRequestsSection } from "@/components/withdrawal-requests";
 
 const accountsQuery = queryOptions({
   queryKey: ["member", "savings", "accounts"],
@@ -152,6 +153,16 @@ function Body() {
           </div>
 
           <RecurringContributionsSection accounts={accounts} />
+
+          <WithdrawalRequestsSection
+            accounts={active.map((a) => ({
+              id: a.id,
+              label: a.nickname || a.plan_name,
+              balance: a.balance,
+            }))}
+          />
+
+
 
 
 
