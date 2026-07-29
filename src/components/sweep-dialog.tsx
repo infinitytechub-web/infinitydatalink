@@ -39,11 +39,11 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
     day_of_month: freq === "monthly" ? dom : null,
   };
 
-  const mut = useMutation({
-    mutationFn: () =>
-      editing
-        ? updateFn({ data: { id: sweep!.id, ...rules } })
-        : createFn({ data: { from_account_id: from, to_account_id: to, ...rules } }),
+  const mut = useMutation<unknown, Error, void>({
+    mutationFn: async () => {
+      if (editing) return await updateFn({ data: { id: sweep!.id, ...rules } });
+      return await createFn({ data: { from_account_id: from, to_account_id: to, ...rules } });
+    },
     onSuccess: async () => {
       toast.success(editing ? "Sweep rules updated" : "Sweep scheduled");
       setOpen(false);
