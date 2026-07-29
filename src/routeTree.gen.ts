@@ -63,7 +63,10 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicHooksSavingsSweepsRouteImport } from './routes/api/public/hooks/savings-sweeps'
 import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/public/hooks/monthly-interest'
 import { Route as MemberAppSavingsStatementsRouteImport } from './routes/_member.app.savings.statements'
+import { Route as MemberAppSavingsPotsRouteImport } from './routes/_member.app.savings.pots'
 import { Route as MemberAppSavingsLedgerRouteImport } from './routes/_member.app.savings.ledger'
+import { Route as MemberAppSavingsInsightsRouteImport } from './routes/_member.app.savings.insights'
+import { Route as MemberAppSavingsFixedRouteImport } from './routes/_member.app.savings.fixed'
 import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
 import { Route as MemberAppSavingsDepositRouteImport } from './routes/_member.app.savings.deposit'
 import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
@@ -72,7 +75,10 @@ import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.
 import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
 import { Route as AdminAdminSavingsWithdrawalsRouteImport } from './routes/_admin.admin.savings.withdrawals'
 import { Route as AdminAdminSavingsReconciliationRouteImport } from './routes/_admin.admin.savings.reconciliation'
+import { Route as AdminAdminSavingsPotsRouteImport } from './routes/_admin.admin.savings.pots'
 import { Route as AdminAdminSavingsPlansRouteImport } from './routes/_admin.admin.savings.plans'
+import { Route as AdminAdminSavingsHoldsRouteImport } from './routes/_admin.admin.savings.holds'
+import { Route as AdminAdminSavingsFixedRouteImport } from './routes/_admin.admin.savings.fixed'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
 import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
 import { Route as AdminAdminInvestmentsAuditRouteImport } from './routes/_admin.admin.investments.audit'
@@ -364,9 +370,25 @@ const MemberAppSavingsStatementsRoute =
     path: '/statements',
     getParentRoute: () => MemberAppSavingsRoute,
   } as any)
+const MemberAppSavingsPotsRoute = MemberAppSavingsPotsRouteImport.update({
+  id: '/pots',
+  path: '/pots',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
 const MemberAppSavingsLedgerRoute = MemberAppSavingsLedgerRouteImport.update({
   id: '/ledger',
   path: '/ledger',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsInsightsRoute =
+  MemberAppSavingsInsightsRouteImport.update({
+    id: '/insights',
+    path: '/insights',
+    getParentRoute: () => MemberAppSavingsRoute,
+  } as any)
+const MemberAppSavingsFixedRoute = MemberAppSavingsFixedRouteImport.update({
+  id: '/fixed',
+  path: '/fixed',
   getParentRoute: () => MemberAppSavingsRoute,
 } as any)
 const MemberAppSavingsEnrollRoute = MemberAppSavingsEnrollRouteImport.update({
@@ -414,9 +436,24 @@ const AdminAdminSavingsReconciliationRoute =
     path: '/reconciliation',
     getParentRoute: () => AdminAdminSavingsRoute,
   } as any)
+const AdminAdminSavingsPotsRoute = AdminAdminSavingsPotsRouteImport.update({
+  id: '/pots',
+  path: '/pots',
+  getParentRoute: () => AdminAdminSavingsRoute,
+} as any)
 const AdminAdminSavingsPlansRoute = AdminAdminSavingsPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
+  getParentRoute: () => AdminAdminSavingsRoute,
+} as any)
+const AdminAdminSavingsHoldsRoute = AdminAdminSavingsHoldsRouteImport.update({
+  id: '/holds',
+  path: '/holds',
+  getParentRoute: () => AdminAdminSavingsRoute,
+} as any)
+const AdminAdminSavingsFixedRoute = AdminAdminSavingsFixedRouteImport.update({
+  id: '/fixed',
+  path: '/fixed',
   getParentRoute: () => AdminAdminSavingsRoute,
 } as any)
 const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
@@ -571,7 +608,10 @@ export interface FileRoutesByFullPath {
   '/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/admin/savings/fixed': typeof AdminAdminSavingsFixedRoute
+  '/admin/savings/holds': typeof AdminAdminSavingsHoldsRoute
   '/admin/savings/plans': typeof AdminAdminSavingsPlansRoute
+  '/admin/savings/pots': typeof AdminAdminSavingsPotsRoute
   '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
@@ -580,7 +620,10 @@ export interface FileRoutesByFullPath {
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
+  '/app/savings/fixed': typeof MemberAppSavingsFixedRoute
+  '/app/savings/insights': typeof MemberAppSavingsInsightsRoute
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
+  '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
@@ -646,7 +689,10 @@ export interface FileRoutesByTo {
   '/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/admin/savings/fixed': typeof AdminAdminSavingsFixedRoute
+  '/admin/savings/holds': typeof AdminAdminSavingsHoldsRoute
   '/admin/savings/plans': typeof AdminAdminSavingsPlansRoute
+  '/admin/savings/pots': typeof AdminAdminSavingsPotsRoute
   '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
@@ -655,7 +701,10 @@ export interface FileRoutesByTo {
   '/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
+  '/app/savings/fixed': typeof MemberAppSavingsFixedRoute
+  '/app/savings/insights': typeof MemberAppSavingsInsightsRoute
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
+  '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
@@ -729,7 +778,10 @@ export interface FileRoutesById {
   '/_admin/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/_admin/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/_admin/admin/savings/fixed': typeof AdminAdminSavingsFixedRoute
+  '/_admin/admin/savings/holds': typeof AdminAdminSavingsHoldsRoute
   '/_admin/admin/savings/plans': typeof AdminAdminSavingsPlansRoute
+  '/_admin/admin/savings/pots': typeof AdminAdminSavingsPotsRoute
   '/_admin/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/_admin/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
   '/_admin/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
@@ -738,7 +790,10 @@ export interface FileRoutesById {
   '/_member/app/savings/$accountId': typeof MemberAppSavingsAccountIdRoute
   '/_member/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/_member/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
+  '/_member/app/savings/fixed': typeof MemberAppSavingsFixedRoute
+  '/_member/app/savings/insights': typeof MemberAppSavingsInsightsRoute
   '/_member/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
+  '/_member/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/_member/app/savings/statements': typeof MemberAppSavingsStatementsRoute
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
@@ -811,7 +866,10 @@ export interface FileRouteTypes {
     | '/admin/investments/audit'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
+    | '/admin/savings/fixed'
+    | '/admin/savings/holds'
     | '/admin/savings/plans'
+    | '/admin/savings/pots'
     | '/admin/savings/reconciliation'
     | '/admin/savings/withdrawals'
     | '/admin/super-admins/history'
@@ -820,7 +878,10 @@ export interface FileRouteTypes {
     | '/app/savings/$accountId'
     | '/app/savings/deposit'
     | '/app/savings/enroll'
+    | '/app/savings/fixed'
+    | '/app/savings/insights'
     | '/app/savings/ledger'
+    | '/app/savings/pots'
     | '/app/savings/statements'
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/savings-sweeps'
@@ -886,7 +947,10 @@ export interface FileRouteTypes {
     | '/admin/investments/audit'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
+    | '/admin/savings/fixed'
+    | '/admin/savings/holds'
     | '/admin/savings/plans'
+    | '/admin/savings/pots'
     | '/admin/savings/reconciliation'
     | '/admin/savings/withdrawals'
     | '/admin/super-admins/history'
@@ -895,7 +959,10 @@ export interface FileRouteTypes {
     | '/app/savings/$accountId'
     | '/app/savings/deposit'
     | '/app/savings/enroll'
+    | '/app/savings/fixed'
+    | '/app/savings/insights'
     | '/app/savings/ledger'
+    | '/app/savings/pots'
     | '/app/savings/statements'
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/savings-sweeps'
@@ -968,7 +1035,10 @@ export interface FileRouteTypes {
     | '/_admin/admin/investments/audit'
     | '/_admin/admin/loans/$loanId'
     | '/_admin/admin/members/$id'
+    | '/_admin/admin/savings/fixed'
+    | '/_admin/admin/savings/holds'
     | '/_admin/admin/savings/plans'
+    | '/_admin/admin/savings/pots'
     | '/_admin/admin/savings/reconciliation'
     | '/_admin/admin/savings/withdrawals'
     | '/_admin/admin/super-admins/history'
@@ -977,7 +1047,10 @@ export interface FileRouteTypes {
     | '/_member/app/savings/$accountId'
     | '/_member/app/savings/deposit'
     | '/_member/app/savings/enroll'
+    | '/_member/app/savings/fixed'
+    | '/_member/app/savings/insights'
     | '/_member/app/savings/ledger'
+    | '/_member/app/savings/pots'
     | '/_member/app/savings/statements'
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/savings-sweeps'
@@ -1389,11 +1462,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppSavingsStatementsRouteImport
       parentRoute: typeof MemberAppSavingsRoute
     }
+    '/_member/app/savings/pots': {
+      id: '/_member/app/savings/pots'
+      path: '/pots'
+      fullPath: '/app/savings/pots'
+      preLoaderRoute: typeof MemberAppSavingsPotsRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
     '/_member/app/savings/ledger': {
       id: '/_member/app/savings/ledger'
       path: '/ledger'
       fullPath: '/app/savings/ledger'
       preLoaderRoute: typeof MemberAppSavingsLedgerRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/insights': {
+      id: '/_member/app/savings/insights'
+      path: '/insights'
+      fullPath: '/app/savings/insights'
+      preLoaderRoute: typeof MemberAppSavingsInsightsRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/fixed': {
+      id: '/_member/app/savings/fixed'
+      path: '/fixed'
+      fullPath: '/app/savings/fixed'
+      preLoaderRoute: typeof MemberAppSavingsFixedRouteImport
       parentRoute: typeof MemberAppSavingsRoute
     }
     '/_member/app/savings/enroll': {
@@ -1452,11 +1546,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSavingsReconciliationRouteImport
       parentRoute: typeof AdminAdminSavingsRoute
     }
+    '/_admin/admin/savings/pots': {
+      id: '/_admin/admin/savings/pots'
+      path: '/pots'
+      fullPath: '/admin/savings/pots'
+      preLoaderRoute: typeof AdminAdminSavingsPotsRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
     '/_admin/admin/savings/plans': {
       id: '/_admin/admin/savings/plans'
       path: '/plans'
       fullPath: '/admin/savings/plans'
       preLoaderRoute: typeof AdminAdminSavingsPlansRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/holds': {
+      id: '/_admin/admin/savings/holds'
+      path: '/holds'
+      fullPath: '/admin/savings/holds'
+      preLoaderRoute: typeof AdminAdminSavingsHoldsRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/fixed': {
+      id: '/_admin/admin/savings/fixed'
+      path: '/fixed'
+      fullPath: '/admin/savings/fixed'
+      preLoaderRoute: typeof AdminAdminSavingsFixedRouteImport
       parentRoute: typeof AdminAdminSavingsRoute
     }
     '/_admin/admin/members/$id': {
@@ -1676,13 +1791,19 @@ const AdminAdminMembersRouteWithChildren =
   AdminAdminMembersRoute._addFileChildren(AdminAdminMembersRouteChildren)
 
 interface AdminAdminSavingsRouteChildren {
+  AdminAdminSavingsFixedRoute: typeof AdminAdminSavingsFixedRoute
+  AdminAdminSavingsHoldsRoute: typeof AdminAdminSavingsHoldsRoute
   AdminAdminSavingsPlansRoute: typeof AdminAdminSavingsPlansRoute
+  AdminAdminSavingsPotsRoute: typeof AdminAdminSavingsPotsRoute
   AdminAdminSavingsReconciliationRoute: typeof AdminAdminSavingsReconciliationRoute
   AdminAdminSavingsWithdrawalsRoute: typeof AdminAdminSavingsWithdrawalsRoute
 }
 
 const AdminAdminSavingsRouteChildren: AdminAdminSavingsRouteChildren = {
+  AdminAdminSavingsFixedRoute: AdminAdminSavingsFixedRoute,
+  AdminAdminSavingsHoldsRoute: AdminAdminSavingsHoldsRoute,
   AdminAdminSavingsPlansRoute: AdminAdminSavingsPlansRoute,
+  AdminAdminSavingsPotsRoute: AdminAdminSavingsPotsRoute,
   AdminAdminSavingsReconciliationRoute: AdminAdminSavingsReconciliationRoute,
   AdminAdminSavingsWithdrawalsRoute: AdminAdminSavingsWithdrawalsRoute,
 }
@@ -1783,7 +1904,10 @@ interface MemberAppSavingsRouteChildren {
   MemberAppSavingsAccountIdRoute: typeof MemberAppSavingsAccountIdRoute
   MemberAppSavingsDepositRoute: typeof MemberAppSavingsDepositRoute
   MemberAppSavingsEnrollRoute: typeof MemberAppSavingsEnrollRoute
+  MemberAppSavingsFixedRoute: typeof MemberAppSavingsFixedRoute
+  MemberAppSavingsInsightsRoute: typeof MemberAppSavingsInsightsRoute
   MemberAppSavingsLedgerRoute: typeof MemberAppSavingsLedgerRoute
+  MemberAppSavingsPotsRoute: typeof MemberAppSavingsPotsRoute
   MemberAppSavingsStatementsRoute: typeof MemberAppSavingsStatementsRoute
   MemberAppSavingsIndexRoute: typeof MemberAppSavingsIndexRoute
 }
@@ -1792,7 +1916,10 @@ const MemberAppSavingsRouteChildren: MemberAppSavingsRouteChildren = {
   MemberAppSavingsAccountIdRoute: MemberAppSavingsAccountIdRoute,
   MemberAppSavingsDepositRoute: MemberAppSavingsDepositRoute,
   MemberAppSavingsEnrollRoute: MemberAppSavingsEnrollRoute,
+  MemberAppSavingsFixedRoute: MemberAppSavingsFixedRoute,
+  MemberAppSavingsInsightsRoute: MemberAppSavingsInsightsRoute,
   MemberAppSavingsLedgerRoute: MemberAppSavingsLedgerRoute,
+  MemberAppSavingsPotsRoute: MemberAppSavingsPotsRoute,
   MemberAppSavingsStatementsRoute: MemberAppSavingsStatementsRoute,
   MemberAppSavingsIndexRoute: MemberAppSavingsIndexRoute,
 }
