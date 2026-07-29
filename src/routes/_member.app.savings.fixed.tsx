@@ -190,7 +190,17 @@ function Body() {
                   </td>
                   <td className="px-6 py-3 text-xs">{new Date(d.maturity_date).toLocaleDateString()}</td>
                   <td className="px-6 py-3">
-                    <StatusPill status={d.status} />
+                    <StatusPill
+                      status={
+                        d.status === "active"
+                          ? "active"
+                          : d.status === "broken"
+                            ? "rejected"
+                            : d.status === "matured"
+                              ? "approved"
+                              : "closed"
+                      }
+                    />
                   </td>
                   <td className="px-6 py-3 text-right">
                     {d.status === "active" && (
