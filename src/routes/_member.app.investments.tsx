@@ -57,6 +57,10 @@ function InvestmentsPage() {
   const [transferState, setTransferState] = useState<
     { holding: ShareHolding; product: ShareProduct } | null
   >(null);
+  const [breakdownState, setBreakdownState] = useState<
+    { holding: ShareHolding; product: ShareProduct } | null
+  >(null);
+
 
   const purchaseMut = useMutation({
     mutationFn: (v: { product_id: string; savings_account_id: string; units: number; note: string | null }) =>
