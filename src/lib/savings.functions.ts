@@ -261,10 +261,21 @@ const MoveSchema = z.object({
   note: z.string().max(500).optional().nullable(),
 });
 
+export type DepositReceipt = {
+  txn_id: string;
+  ref: string;
+  amount: number;
+  channel: string | null;
+  status: string;
+  note: string | null;
+  created_at: string;
+  account_id: string;
+};
+
 export const submitContribution = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => MoveSchema.parse(d))
-  .handler(async ({ data, context }): Promise<{ txn_id: string }> => {
+  .handler(async ({ data, context }): Promise<DepositReceipt> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: id, error } = await supabaseAdmin.rpc("post_savings_contribution", {
       _account_id: data.account_id,
@@ -274,7 +285,24 @@ export const submitContribution = createServerFn({ method: "POST" })
       _actor_id: context.userId,
     });
     if (error) throw new Error(error.message);
-    return { txn_id: id as string };
+
+    // Read the ledger row back so the member gets a receipt for the entry.
+    const { data: txn } = await context.supabase
+      .from("transactions")
+      .select("id, ref, amount, channel, status, note, created_at, savings_account_id")
+      .eq("id", id as string)
+      .maybeSingle();
+
+    return {
+      txn_id: id as string,
+      ref: (txn as any)?.ref ?? "—",
+      amount: Number((txn as any)?.amount ?? data.amount),
+      channel: (txn as any)?.channel ?? data.channel,
+      status: (txn as any)?.status ?? "pending",
+      note: (txn as any)?.note ?? data.note ?? null,
+      created_at: (txn as any)?.created_at ?? new Date().toISOString(),
+      account_id: (txn as any)?.savings_account_id ?? data.account_id,
+    };
   });
 
 export const submitWithdrawal = createServerFn({ method: "POST" })
