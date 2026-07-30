@@ -376,6 +376,7 @@ export const recordLoanRepayment = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    await assertLoanDisbursementRole(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: loan, error } = await supabaseAdmin.rpc("record_loan_repayment", {
       _loan_id: data.loan_id,
