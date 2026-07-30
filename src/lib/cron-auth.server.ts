@@ -7,13 +7,11 @@
  */
 
 function pickTrustedSecrets(): string[] {
-  return [
-    process.env.CRON_SECRET,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-    process.env.SUPABASE_PUBLISHABLE_KEY,
-    process.env.SUPABASE_ANON_KEY,
-    process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-  ].filter((v): v is string => typeof v === "string" && v.length > 0);
+  // Only non-public secrets may authorize scheduler runs. The Supabase
+  // publishable/anon key ships to every browser and is NOT a credential.
+  return [process.env.CRON_SECRET, process.env.SUPABASE_SERVICE_ROLE_KEY].filter(
+    (v): v is string => typeof v === "string" && v.length > 0,
+  );
 }
 
 function extractPresented(request: Request): string[] {
