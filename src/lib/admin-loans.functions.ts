@@ -21,6 +21,15 @@ async function assertAdmin(supabase: any, userId: string) {
   return roles[0] ?? "member";
 }
 
+const DISBURSEMENT_ROLES = new Set(["super_admin", "finance_officer", "loan_officer"]);
+
+async function assertLoanDisbursementRole(supabase: any, userId: string) {
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const roles = new Set((data ?? []).map((r: any) => r.role as string));
+  const ok = Array.from(roles).some((r) => DISBURSEMENT_ROLES.has(r as string));
+  if (!ok) throw new Error("Forbidden: loan or finance officer role required");
+}
+
 export type AdminLoanRow = {
   id: string;
   ref: string;
