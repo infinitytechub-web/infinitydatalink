@@ -15,6 +15,7 @@ import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BrandingProvider } from "@/components/branding-provider";
 import { AsyncBoundary } from "@/components/async-boundary";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -179,6 +180,7 @@ function RootComponent() {
             >
               <Outlet />
             </AsyncBoundary>
+            <Toaster />
           </AuthProvider>
         </BrandingProvider>
       </ThemeProvider>
