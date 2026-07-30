@@ -4,11 +4,9 @@ export const Route = createFileRoute("/api/public/hooks/monthly-interest")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const auth = request.headers.get("apikey") ?? request.headers.get("authorization")?.replace(/^Bearer /, "");
-        if (!auth || auth !== process.env.SUPABASE_ANON_KEY && auth !== process.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
-          // Accept the anon key; other callers rejected.
-          if (!auth) return new Response("unauthorized", { status: 401 });
-        }
+        const { authorizeCronRequest } = await import("@/lib/cron-auth.server");
+        const denied = authorizeCronRequest(request);
+        if (denied) return denied;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin.rpc("post_savings_interest", {
           _period_end: undefined,

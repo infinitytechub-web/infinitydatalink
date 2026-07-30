@@ -4,8 +4,9 @@ export const Route = createFileRoute("/api/public/hooks/savings-sweeps")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const auth = request.headers.get("apikey") ?? request.headers.get("authorization")?.replace(/^Bearer /, "");
-        if (!auth) return new Response("unauthorized", { status: 401 });
+        const { authorizeCronRequest } = await import("@/lib/cron-auth.server");
+        const denied = authorizeCronRequest(request);
+        if (denied) return denied;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin.rpc("run_savings_sweeps");
         if (error) {
