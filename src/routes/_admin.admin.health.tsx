@@ -60,7 +60,8 @@ function Body() {
         <KPIStat label="Failed" value={String(data.failed)} hint={data.failed === 0 ? "All green" : "Needs attention"} accent={data.failed > 0} />
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <CacheResetButton />
         <Button
           variant="outline"
           size="sm"

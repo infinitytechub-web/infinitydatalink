@@ -180,6 +180,7 @@ function RootComponent() {
             >
               <Outlet />
             </AsyncBoundary>
+            <Toaster />
           </AuthProvider>
         </BrandingProvider>
       </ThemeProvider>
