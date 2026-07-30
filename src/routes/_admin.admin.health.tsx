@@ -4,6 +4,7 @@ import { useSuspenseQuery, queryOptions, useQueryClient } from "@tanstack/react-
 import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { ErrorState, PageHeader, KPIStat, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
+import { CacheResetButton } from "@/components/cache-reset-button";
 
 import { adminRunHealthCheck, type ProbeResult, type HealthReport } from "@/lib/admin-health.functions";
 
