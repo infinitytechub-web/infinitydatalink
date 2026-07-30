@@ -160,6 +160,11 @@ function RootComponent() {
     // Preview/dev/iframe only: wipe any stale service worker + caches so the
     // preview pane always renders fresh content. No-op in production.
     void import("@/lib/preview-sw-cleanup").then((m) => m.cleanupPreviewServiceWorkers());
+    // Dev/preview only: keep the live-reload socket self-healing so the pane
+    // never appears frozen when the HMR websocket drops.
+    if (!import.meta.env.PROD) {
+      void import("@/lib/hmr-watchdog").then((m) => m.installHmrWatchdog());
+    }
   }, []);
 
   return (
