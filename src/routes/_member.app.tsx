@@ -13,6 +13,7 @@ import {
   Building2,
   LifeBuoy,
   BellRing,
+  Handshake as HandshakeIcon,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
@@ -25,6 +26,7 @@ const groups: NavGroup[] = [
       { to: "/app/savings", label: "My Savings", icon: <PiggyBank /> },
       { to: "/app/loans", label: "Active Loans", icon: <Landmark /> },
       { to: "/app/repayments", label: "Loan Repayments", icon: <ReceiptText /> },
+      { to: "/app/guarantees", label: "My Guarantees", icon: <HandshakeIcon /> },
       { to: "/app/investments", label: "Investments", icon: <TrendingUp /> },
       { to: "/app/transactions", label: "Transactions", icon: <ArrowLeftRight /> },
       { to: "/app/payments", label: "Payments", icon: <CreditCard /> },
@@ -55,6 +57,7 @@ const CRUMBS: Record<string, string> = {
 
   "/app/loans": "Active Loans",
   "/app/repayments": "Loan Repayments",
+  "/app/guarantees": "My Guarantees",
   "/app/investments": "Investments & Shares",
   "/app/transactions": "Transactions",
   "/app/payments": "Payments",
