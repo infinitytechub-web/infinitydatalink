@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRightLeft, RefreshCw, TrendingUp } from "lucide-react";
 import {
@@ -19,17 +19,24 @@ import { FxConverterWidget } from "@/components/fx-converter-widget";
 import { getFxRates, DEFAULT_BASE, SUPPORTED_QUOTES, FX_RANGES, type FxRangeKey } from "@/lib/fx.functions";
 import { FxHistoryChart } from "@/components/fx-history-chart";
 
+const DEFAULT_REFRESH_SECONDS = 60;
+
 const searchSchema = z.object({
   base: fallback(z.string(), DEFAULT_BASE).default(DEFAULT_BASE),
   range: fallback(z.string(), "30D").default("30D"),
   quotes: fallback(z.string(), "USD,EUR,GBP").default("USD,EUR,GBP"),
+  refresh: fallback(z.number(), DEFAULT_REFRESH_SECONDS).default(DEFAULT_REFRESH_SECONDS),
 });
 
+// Auto-refresh choices, in seconds (0 = off). Persisted in the URL so a chosen
+// cadence survives reloads and can be shared.
 const INTERVALS = [
-  { label: "30s", ms: 30_000 },
-  { label: "1m", ms: 60_000 },
-  { label: "5m", ms: 5 * 60_000 },
-  { label: "Off", ms: 0 },
+  { label: "10s", seconds: 10 },
+  { label: "30s", seconds: 30 },
+  { label: "1m", seconds: 60 },
+  { label: "5m", seconds: 300 },
+  { label: "15m", seconds: 900 },
+  { label: "Off", seconds: 0 },
 ] as const;
 
 export const Route = createFileRoute("/_admin/admin/fx")({
@@ -79,17 +86,56 @@ function FxDashboard() {
 
   const setBase = (value: string) =>
     void navigate({ search: (prev: typeof search) => ({ ...prev, base: value.toUpperCase() }) });
-  const [intervalMs, setIntervalMs] = useState<number>(60_000);
-  const [amount, setAmount] = useState<string>("1000");
+  const refreshSeconds = INTERVALS.some((i) => i.seconds === search.refresh)
+    ? search.refresh
+    : DEFAULT_REFRESH_SECONDS;
+  const intervalMs = refreshSeconds * 1000;
+  const setRefreshSeconds = (seconds: number) =>
+    void navigate({ search: (prev: typeof search) => ({ ...prev, refresh: seconds }) });
 
+  const [amount, setAmount] = useState<string>("1000");
+  // Ref, not state: the manual-refresh handler sets it and immediately calls
+  // refetch(), so the queryFn must see the new value in the same tick.
+  const forceNextRef = useRef(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<number>(() => Date.now());
+  const [now, setNow] = useState<number>(() => Date.now());
+
+  const queryClient = useQueryClient();
   const fetchRates = useServerFn(getFxRates);
   const q = useQuery({
     queryKey: ["fx", "board", base],
-    queryFn: () => fetchRates({ data: { base } }),
+    queryFn: async () => {
+      const force = forceNextRef.current;
+      forceNextRef.current = false;
+      const result = await fetchRates({ data: { base, force } });
+      setLastRefreshedAt(Date.now());
+      return result;
+    },
     refetchInterval: intervalMs || false,
     refetchIntervalInBackground: false,
     staleTime: 15_000,
   });
+
+  // Ticker for the "next refresh in" countdown (only while auto-refresh is on).
+  useEffect(() => {
+    if (!intervalMs) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [intervalMs]);
+
+  const secondsUntilNext = intervalMs
+    ? Math.max(0, Math.ceil((lastRefreshedAt + intervalMs - now) / 1000))
+    : null;
+
+  /** Manual refresh: bypass the server cache and refresh board + history. */
+  const refreshAll = async () => {
+    forceNextRef.current = true;
+    await Promise.all([
+      q.refetch(),
+      queryClient.invalidateQueries({ queryKey: ["fx", "history"] }),
+      queryClient.invalidateQueries({ queryKey: ["fx", "convert"] }),
+    ]);
+  };
 
   const rows = useMemo(() => {
     const list = (q.data?.rates ?? []).filter((r) => r.quote.toUpperCase() !== base.toUpperCase());
@@ -116,11 +162,12 @@ function FxDashboard() {
                 <button
                   key={i.label}
                   type="button"
-                  onClick={() => setIntervalMs(i.ms)}
-                  aria-pressed={intervalMs === i.ms}
+                  onClick={() => setRefreshSeconds(i.seconds)}
+                  aria-pressed={refreshSeconds === i.seconds}
+                  aria-label={i.seconds ? `Auto-refresh every ${i.label}` : "Turn auto-refresh off"}
                   className={
                     "px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-colors " +
-                    (intervalMs === i.ms
+                    (refreshSeconds === i.seconds
                       ? "bg-primary text-primary-foreground"
                       : "bg-background text-muted-foreground hover:bg-muted")
                   }
@@ -129,9 +176,9 @@ function FxDashboard() {
                 </button>
               ))}
             </div>
-            <Button size="sm" variant="outline" onClick={() => void q.refetch()} disabled={q.isFetching}>
+            <Button size="sm" variant="outline" onClick={() => void refreshAll()} disabled={q.isFetching}>
               <RefreshCw className={`mr-1 size-3.5 ${q.isFetching ? "animate-spin" : ""}`} />
-              Refresh
+              {q.isFetching ? "Refreshing…" : "Refresh now"}
             </Button>
           </div>
         }
@@ -147,8 +194,14 @@ function FxDashboard() {
         />
         <KPIStat
           label="Auto-refresh"
-          value={intervalMs ? INTERVALS.find((i) => i.ms === intervalMs)!.label : "Off"}
-          hint={q.isFetching ? "Syncing…" : "Live"}
+          value={refreshSeconds ? INTERVALS.find((i) => i.seconds === refreshSeconds)!.label : "Off"}
+          hint={
+            q.isFetching
+              ? "Refreshing now…"
+              : secondsUntilNext === null
+                ? `Manual only · updated ${new Date(lastRefreshedAt).toLocaleTimeString()}`
+                : `Next in ${secondsUntilNext}s`
+          }
         />
       </section>
 
@@ -158,6 +211,7 @@ function FxDashboard() {
         base={base}
         quotes={chartQuotes}
         range={range}
+        autoRefreshMs={intervalMs}
         onRangeChange={(next) => void navigate({ search: (prev: typeof search) => ({ ...prev, range: next }) })}
         onQuotesChange={(next) =>
           void navigate({ search: (prev: typeof search) => ({ ...prev, quotes: next.join(",") }) })
