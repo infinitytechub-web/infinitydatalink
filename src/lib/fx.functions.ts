@@ -67,8 +67,10 @@ async function getRates(base: string): Promise<{ rows: FxRate[]; source: "live" 
   const live = await fetchLive(B);
   if (live && live.length) {
     memoryCache.set(B, { rows: live, ts: Date.now() });
-    // Fire-and-forget DB write (best-effort)
+    // Fire-and-forget DB writes (best-effort): current snapshot + today's
+    // history point so the trend chart keeps accumulating.
     writeDbRates(live).catch(() => {});
+    recordTodayHistory(live).catch(() => {});
     return { rows: live, source: "live" };
   }
   const db = await readDbRates(B);
@@ -81,6 +83,22 @@ async function getRates(base: string): Promise<{ rows: FxRate[]; source: "live" 
     rows: [{ base: B, quote: B, rate: 1, fetched_at: new Date().toISOString() }],
     source: "fallback",
   };
+}
+
+/** Persist today's live values as the day's history point. Defined here and
+ * called from getRates; the implementation lives below with the other history
+ * helpers. */
+async function recordTodayHistory(rows: FxRate[]) {
+  const rate_date = new Date().toISOString().slice(0, 10);
+  await writeHistory(
+    rows.map((r) => ({
+      base: r.base.toUpperCase(),
+      quote: r.quote.toUpperCase(),
+      rate_date,
+      rate: r.rate,
+    })),
+    "live",
+  );
 }
 
 export const getFxRates = createServerFn({ method: "GET" })
