@@ -1,10 +1,13 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/plus-jakarta-sans";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/500.css";
+/* Latin-only subsets: the full fontsource entrypoints emit @font-face rules
+   (and shipped woff2 files) for cyrillic/greek/vietnamese subsets we never
+   render, inflating the render-blocking stylesheet. */
+@import "@fontsource-variable/inter/latin.css";
+@import "@fontsource-variable/plus-jakarta-sans/latin.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
 
 @custom-variant dark (&:is(.dark *));
 
