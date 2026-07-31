@@ -1,7 +1,16 @@
 // Supabase-backed auth context with RBAC. Roles come from the `user_roles` table.
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+
+// The Supabase client (and the whole supabase-js runtime) is loaded lazily so
+// public pages — landing, marketing routes — don't pay for it in the initial
+// JS bundle. Every consumer here awaits `getSupabase()`.
+type SupabaseModule = typeof import("@/integrations/supabase/client");
+let supabasePromise: Promise<SupabaseModule["supabase"]> | null = null;
+function getSupabase() {
+  supabasePromise ??= import("@/integrations/supabase/client").then((m) => m.supabase);
+  return supabasePromise;
+}
 
 export type AppRole =
   | "super_admin"
