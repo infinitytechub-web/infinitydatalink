@@ -1198,6 +1198,279 @@ export type Database = {
           },
         ]
       }
+      loan_collateral: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          estimated_value: number
+          id: string
+          kind: string
+          loan_id: string
+          reference_no: string | null
+          release_note: string | null
+          released_at: string | null
+          released_by: string | null
+          savings_hold_id: string | null
+          status: Database["public"]["Enums"]["collateral_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description: string
+          estimated_value: number
+          id?: string
+          kind: string
+          loan_id: string
+          reference_no?: string | null
+          release_note?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          savings_hold_id?: string | null
+          status?: Database["public"]["Enums"]["collateral_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          estimated_value?: number
+          id?: string
+          kind?: string
+          loan_id?: string
+          reference_no?: string | null
+          release_note?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          savings_hold_id?: string | null
+          status?: Database["public"]["Enums"]["collateral_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_collateral_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_collateral_savings_hold_id_fkey"
+            columns: ["savings_hold_id"]
+            isOneToOne: false
+            referencedRelation: "savings_holds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loan_guarantors: {
+        Row: {
+          consent: Database["public"]["Enums"]["guarantor_consent_status"]
+          consent_at: string | null
+          consent_note: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          guaranteed_amount: number
+          id: string
+          loan_id: string
+          member_id: string | null
+          phone: string | null
+          relationship: string | null
+          updated_at: string
+        }
+        Insert: {
+          consent?: Database["public"]["Enums"]["guarantor_consent_status"]
+          consent_at?: string | null
+          consent_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name: string
+          guaranteed_amount: number
+          id?: string
+          loan_id: string
+          member_id?: string | null
+          phone?: string | null
+          relationship?: string | null
+          updated_at?: string
+        }
+        Update: {
+          consent?: Database["public"]["Enums"]["guarantor_consent_status"]
+          consent_at?: string | null
+          consent_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name?: string
+          guaranteed_amount?: number
+          id?: string
+          loan_id?: string
+          member_id?: string | null
+          phone?: string | null
+          relationship?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_guarantors_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_guarantors_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loan_penalties: {
+        Row: {
+          amount: number
+          created_at: string
+          days_late: number
+          id: string
+          loan_id: string
+          period_month: string
+          reason: string
+          repayment_id: string | null
+          updated_at: string
+          waive_note: string | null
+          waived_at: string | null
+          waived_by: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          days_late?: number
+          id?: string
+          loan_id: string
+          period_month: string
+          reason?: string
+          repayment_id?: string | null
+          updated_at?: string
+          waive_note?: string | null
+          waived_at?: string | null
+          waived_by?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          days_late?: number
+          id?: string
+          loan_id?: string
+          period_month?: string
+          reason?: string
+          repayment_id?: string | null
+          updated_at?: string
+          waive_note?: string | null
+          waived_at?: string | null
+          waived_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_penalties_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_penalties_repayment_id_fkey"
+            columns: ["repayment_id"]
+            isOneToOne: false
+            referencedRelation: "loan_repayments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loan_products: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          interest_rate: number
+          late_fee_grace_days: number
+          late_fee_pct: number
+          max_amount: number
+          max_multiple_of_savings: number
+          max_open_loans: number
+          max_term_months: number
+          min_amount: number
+          min_guarantors: number
+          min_savings_balance: number
+          min_term_months: number
+          name: string
+          processing_fee_pct: number
+          requires_collateral: boolean
+          requires_guarantor: boolean
+          requires_verified_kyc: boolean
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          interest_rate?: number
+          late_fee_grace_days?: number
+          late_fee_pct?: number
+          max_amount?: number
+          max_multiple_of_savings?: number
+          max_open_loans?: number
+          max_term_months?: number
+          min_amount?: number
+          min_guarantors?: number
+          min_savings_balance?: number
+          min_term_months?: number
+          name: string
+          processing_fee_pct?: number
+          requires_collateral?: boolean
+          requires_guarantor?: boolean
+          requires_verified_kyc?: boolean
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          interest_rate?: number
+          late_fee_grace_days?: number
+          late_fee_pct?: number
+          max_amount?: number
+          max_multiple_of_savings?: number
+          max_open_loans?: number
+          max_term_months?: number
+          min_amount?: number
+          min_guarantors?: number
+          min_savings_balance?: number
+          min_term_months?: number
+          name?: string
+          processing_fee_pct?: number
+          requires_collateral?: boolean
+          requires_guarantor?: boolean
+          requires_verified_kyc?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       loan_repayments: {
         Row: {
           created_at: string
@@ -1257,10 +1530,85 @@ export type Database = {
           },
         ]
       }
+      loan_restructures: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          grace_months: number | null
+          id: string
+          kind: Database["public"]["Enums"]["loan_restructure_kind"]
+          loan_id: string
+          new_interest_rate: number | null
+          new_term_months: number | null
+          request_note: string
+          requested_at: string
+          requested_by: string
+          requested_by_email: string | null
+          status: Database["public"]["Enums"]["loan_restructure_status"]
+          updated_at: string
+          write_off_amount: number | null
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          grace_months?: number | null
+          id?: string
+          kind: Database["public"]["Enums"]["loan_restructure_kind"]
+          loan_id: string
+          new_interest_rate?: number | null
+          new_term_months?: number | null
+          request_note: string
+          requested_at?: string
+          requested_by: string
+          requested_by_email?: string | null
+          status?: Database["public"]["Enums"]["loan_restructure_status"]
+          updated_at?: string
+          write_off_amount?: number | null
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          grace_months?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["loan_restructure_kind"]
+          loan_id?: string
+          new_interest_rate?: number | null
+          new_term_months?: number | null
+          request_note?: string
+          requested_at?: string
+          requested_by?: string
+          requested_by_email?: string | null
+          status?: Database["public"]["Enums"]["loan_restructure_status"]
+          updated_at?: string
+          write_off_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_restructures_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loans: {
         Row: {
           amount: number
+          arrears_amount: number
+          arrears_bucket: string
+          arrears_refreshed_at: string | null
           created_at: string
+          days_past_due: number
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
@@ -1272,17 +1620,28 @@ export type Database = {
           maturity_at: string | null
           monthly_payment: number | null
           outstanding_principal: number
+          penalty_accrued: number
+          penalty_paid: number
           product: string
+          product_id: string | null
           purpose: string | null
           ref: string
+          restructure_count: number
+          restructured_at: string | null
           status: Database["public"]["Enums"]["loan_status"]
           term_months: number
           updated_at: string
           user_id: string
+          written_off_amount: number | null
+          written_off_at: string | null
         }
         Insert: {
           amount: number
+          arrears_amount?: number
+          arrears_bucket?: string
+          arrears_refreshed_at?: string | null
           created_at?: string
+          days_past_due?: number
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
@@ -1294,17 +1653,28 @@ export type Database = {
           maturity_at?: string | null
           monthly_payment?: number | null
           outstanding_principal?: number
+          penalty_accrued?: number
+          penalty_paid?: number
           product: string
+          product_id?: string | null
           purpose?: string | null
           ref: string
+          restructure_count?: number
+          restructured_at?: string | null
           status?: Database["public"]["Enums"]["loan_status"]
           term_months: number
           updated_at?: string
           user_id: string
+          written_off_amount?: number | null
+          written_off_at?: string | null
         }
         Update: {
           amount?: number
+          arrears_amount?: number
+          arrears_bucket?: string
+          arrears_refreshed_at?: string | null
           created_at?: string
+          days_past_due?: number
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
@@ -1316,15 +1686,29 @@ export type Database = {
           maturity_at?: string | null
           monthly_payment?: number | null
           outstanding_principal?: number
+          penalty_accrued?: number
+          penalty_paid?: number
           product?: string
+          product_id?: string | null
           purpose?: string | null
           ref?: string
+          restructure_count?: number
+          restructured_at?: string | null
           status?: Database["public"]["Enums"]["loan_status"]
           term_months?: number
           updated_at?: string
           user_id?: string
+          written_off_amount?: number | null
+          written_off_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "loans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "loan_products"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "loans_user_id_profiles_fkey"
             columns: ["user_id"]
@@ -2850,6 +3234,74 @@ export type Database = {
           interest: number
         }[]
       }
+      add_loan_collateral: {
+        Args: {
+          _actor_id: string
+          _description: string
+          _kind: string
+          _loan_id: string
+          _reference_no: string
+          _savings_hold_id: string
+          _value: number
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          estimated_value: number
+          id: string
+          kind: string
+          loan_id: string
+          reference_no: string | null
+          release_note: string | null
+          released_at: string | null
+          released_by: string | null
+          savings_hold_id: string | null
+          status: Database["public"]["Enums"]["collateral_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_collateral"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      add_loan_guarantor: {
+        Args: {
+          _actor_id: string
+          _amount: number
+          _email: string
+          _full_name: string
+          _loan_id: string
+          _member_id: string
+          _phone: string
+          _relationship: string
+        }
+        Returns: {
+          consent: Database["public"]["Enums"]["guarantor_consent_status"]
+          consent_at: string | null
+          consent_note: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          guaranteed_amount: number
+          id: string
+          loan_id: string
+          member_id: string | null
+          phone: string | null
+          relationship: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_guarantors"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_assign_role: {
         Args: {
           _actor_id: string
@@ -3104,6 +3556,7 @@ export type Database = {
         Args: { _note?: string; _uid: string }
         Returns: undefined
       }
+      assess_loan_penalties: { Args: never; Returns: Json }
       break_fixed_deposit: {
         Args: { _actor_id?: string; _id: string; _reason: string }
         Returns: {
@@ -3171,6 +3624,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      check_loan_eligibility: {
+        Args: {
+          _amount: number
+          _product_id: string
+          _term_months: number
+          _user_id: string
+        }
+        Returns: Json
       }
       clear_transfer: {
         Args: { _actor_id: string; _transfer_id: string }
@@ -3241,6 +3703,40 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      decide_loan_restructure: {
+        Args: {
+          _actor_id: string
+          _approve: boolean
+          _note: string
+          _request_id: string
+        }
+        Returns: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          grace_months: number | null
+          id: string
+          kind: Database["public"]["Enums"]["loan_restructure_kind"]
+          loan_id: string
+          new_interest_rate: number | null
+          new_term_months: number | null
+          request_note: string
+          requested_at: string
+          requested_by: string
+          requested_by_email: string | null
+          status: Database["public"]["Enums"]["loan_restructure_status"]
+          updated_at: string
+          write_off_amount: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_restructures"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -3254,7 +3750,11 @@ export type Database = {
         }
         Returns: {
           amount: number
+          arrears_amount: number
+          arrears_bucket: string
+          arrears_refreshed_at: string | null
           created_at: string
+          days_past_due: number
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
@@ -3266,13 +3766,20 @@ export type Database = {
           maturity_at: string | null
           monthly_payment: number | null
           outstanding_principal: number
+          penalty_accrued: number
+          penalty_paid: number
           product: string
+          product_id: string | null
           purpose: string | null
           ref: string
+          restructure_count: number
+          restructured_at: string | null
           status: Database["public"]["Enums"]["loan_status"]
           term_months: number
           updated_at: string
           user_id: string
+          written_off_amount: number | null
+          written_off_at: string | null
         }
         SetofOptions: {
           from: "*"
@@ -3788,7 +4295,11 @@ export type Database = {
         }
         Returns: {
           amount: number
+          arrears_amount: number
+          arrears_bucket: string
+          arrears_refreshed_at: string | null
           created_at: string
+          days_past_due: number
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
@@ -3800,13 +4311,20 @@ export type Database = {
           maturity_at: string | null
           monthly_payment: number | null
           outstanding_principal: number
+          penalty_accrued: number
+          penalty_paid: number
           product: string
+          product_id: string | null
           purpose: string | null
           ref: string
+          restructure_count: number
+          restructured_at: string | null
           status: Database["public"]["Enums"]["loan_status"]
           term_months: number
           updated_at: string
           user_id: string
+          written_off_amount: number | null
+          written_off_at: string | null
         }
         SetofOptions: {
           from: "*"
@@ -3815,6 +4333,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      refresh_loan_arrears: { Args: never; Returns: Json }
       register_entity: {
         Args: {
           _address_line: string
@@ -4009,6 +4528,32 @@ export type Database = {
         Args: { _reason: string; _uid: string }
         Returns: undefined
       }
+      release_loan_collateral: {
+        Args: { _actor_id: string; _collateral_id: string; _note: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          estimated_value: number
+          id: string
+          kind: string
+          loan_id: string
+          reference_no: string | null
+          release_note: string | null
+          released_at: string | null
+          released_by: string | null
+          savings_hold_id: string | null
+          status: Database["public"]["Enums"]["collateral_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_collateral"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       release_savings_hold: {
         Args: { _actor_id: string; _id: string; _reason: string }
         Returns: {
@@ -4030,6 +4575,48 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "savings_holds"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      remove_loan_guarantor: {
+        Args: { _actor_id: string; _guarantor_id: string }
+        Returns: boolean
+      }
+      request_loan_restructure: {
+        Args: {
+          _actor_id: string
+          _grace_months: number
+          _kind: string
+          _loan_id: string
+          _new_interest_rate: number
+          _new_term_months: number
+          _note: string
+          _write_off_amount: number
+        }
+        Returns: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          grace_months: number | null
+          id: string
+          kind: Database["public"]["Enums"]["loan_restructure_kind"]
+          loan_id: string
+          new_interest_rate: number | null
+          new_term_months: number | null
+          request_note: string
+          requested_at: string
+          requested_by: string
+          requested_by_email: string | null
+          status: Database["public"]["Enums"]["loan_restructure_status"]
+          updated_at: string
+          write_off_amount: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_restructures"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -4177,6 +4764,36 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_guarantor_consent: {
+        Args: {
+          _actor_id: string
+          _decision: string
+          _guarantor_id: string
+          _note: string
+        }
+        Returns: {
+          consent: Database["public"]["Enums"]["guarantor_consent_status"]
+          consent_at: string | null
+          consent_note: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          guaranteed_amount: number
+          id: string
+          loan_id: string
+          member_id: string | null
+          phone: string | null
+          relationship: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_guarantors"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_user_active: {
         Args: { _active: boolean; _reason?: string; _uid: string }
         Returns: undefined
@@ -4294,6 +4911,29 @@ export type Database = {
         Args: { _base: string; _quote: string; _rate: number }
         Returns: undefined
       }
+      waive_loan_penalty: {
+        Args: { _actor_id: string; _note: string; _penalty_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          days_late: number
+          id: string
+          loan_id: string
+          period_month: string
+          reason: string
+          repayment_id: string | null
+          updated_at: string
+          waive_note: string | null
+          waived_at: string | null
+          waived_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_penalties"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       adjustment_direction: "credit" | "debit"
@@ -4304,11 +4944,13 @@ export type Database = {
         | "finance_officer"
         | "auditor"
         | "member"
+      collateral_status: "pledged" | "released" | "seized"
       entity_role: "owner" | "admin" | "member"
       entity_status: "pending" | "active" | "suspended" | "closed"
       entity_type: "group" | "department" | "institution"
       expense_status: "pending" | "approved" | "paid" | "rejected"
       fixed_deposit_status: "active" | "matured" | "redeemed" | "broken"
+      guarantor_consent_status: "pending" | "accepted" | "declined" | "revoked"
       kyc_doc_status: "pending" | "approved" | "rejected"
       kyc_doc_type:
         | "national_id_front"
@@ -4318,6 +4960,8 @@ export type Database = {
         | "other"
       kyc_notification_channel: "email" | "sms"
       kyc_status: "pending" | "active" | "rejected"
+      loan_restructure_kind: "reschedule" | "grace_period" | "write_off"
+      loan_restructure_status: "pending" | "approved" | "rejected"
       loan_status: "pending" | "approved" | "rejected" | "active" | "closed"
       member_tier: "standard" | "premium"
       pot_payout_status: "scheduled" | "paid" | "skipped"
@@ -4491,11 +5135,13 @@ export const Constants = {
         "auditor",
         "member",
       ],
+      collateral_status: ["pledged", "released", "seized"],
       entity_role: ["owner", "admin", "member"],
       entity_status: ["pending", "active", "suspended", "closed"],
       entity_type: ["group", "department", "institution"],
       expense_status: ["pending", "approved", "paid", "rejected"],
       fixed_deposit_status: ["active", "matured", "redeemed", "broken"],
+      guarantor_consent_status: ["pending", "accepted", "declined", "revoked"],
       kyc_doc_status: ["pending", "approved", "rejected"],
       kyc_doc_type: [
         "national_id_front",
@@ -4506,6 +5152,8 @@ export const Constants = {
       ],
       kyc_notification_channel: ["email", "sms"],
       kyc_status: ["pending", "active", "rejected"],
+      loan_restructure_kind: ["reschedule", "grace_period", "write_off"],
+      loan_restructure_status: ["pending", "approved", "rejected"],
       loan_status: ["pending", "approved", "rejected", "active", "closed"],
       member_tier: ["standard", "premium"],
       pot_payout_status: ["scheduled", "paid", "skipped"],
