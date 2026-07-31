@@ -1,7 +1,16 @@
 // Supabase-backed auth context with RBAC. Roles come from the `user_roles` table.
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+
+// The Supabase client (and the whole supabase-js runtime) is loaded lazily so
+// public pages — landing, marketing routes — don't pay for it in the initial
+// JS bundle. Every consumer here awaits `getSupabase()`.
+type SupabaseModule = typeof import("@/integrations/supabase/client");
+let supabasePromise: Promise<SupabaseModule["supabase"]> | null = null;
+function getSupabase() {
+  supabasePromise ??= import("@/integrations/supabase/client").then((m) => m.supabase);
+  return supabasePromise;
+}
 
 export type AppRole =
   | "super_admin"
@@ -81,6 +90,7 @@ type AuthState = {
 const AuthCtx = createContext<AuthState | null>(null);
 
 async function loadRoles(userId: string): Promise<AppRole[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error || !data) {
     if (import.meta.env.DEV && error) {
@@ -90,10 +100,11 @@ async function loadRoles(userId: string): Promise<AppRole[]> {
     }
     return [];
   }
-  return data.map((r) => r.role as AppRole);
+  return data.map((r: { role: string }) => r.role as AppRole);
 }
 
 async function loadStatus(userId: string): Promise<{ status: AccountStatus; rejectionReason: string | null }> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("profiles")
     .select("status, rejection_reason")
@@ -151,24 +162,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    void (async () => {
+      const supabase = await getSupabase();
+      if (cancelled) return;
+
+      const { data } = await supabase.auth.getSession();
       if (cancelled) return;
       await hydrate(data.session?.user ?? null, { force: true });
+      if (cancelled) return;
       setLoading(false);
-    });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      // Defer to avoid deadlock inside the callback.
-      setTimeout(() => {
-        void hydrate(session?.user ?? null);
-      }, 0);
-    });
+      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+        // Defer to avoid deadlock inside the callback.
+        setTimeout(() => {
+          void hydrate(session?.user ?? null);
+        }, 0);
+      });
+      unsubscribe = () => sub.subscription.unsubscribe();
+      if (cancelled) unsubscribe();
+    })();
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
@@ -186,10 +205,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const hasPermission = (p: Permission) => permissions.includes(p);
     const hasAnyPermission = (ps: Permission[]) => ps.some((p) => permissions.includes(p));
     const signOut = async () => {
+      const supabase = await getSupabase();
       await supabase.auth.signOut();
       setUser(null);
     };
     const refresh = async () => {
+      const supabase = await getSupabase();
       const { data } = await supabase.auth.getSession();
       await hydrate(data.session?.user ?? null);
     };

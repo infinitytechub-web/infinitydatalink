@@ -1,10 +1,13 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/plus-jakarta-sans";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/500.css";
+/* Variable faces ship a single stylesheet whose @font-face rules are split by
+   unicode-range, so non-latin subsets are never downloaded. The static mono
+   face is pinned to its latin subset to keep the blocking CSS small. */
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/plus-jakarta-sans/wght.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
 
 @custom-variant dark (&:is(.dark *));
 
