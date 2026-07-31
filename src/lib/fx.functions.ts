@@ -58,13 +58,44 @@ async function fetchLive(base: string): Promise<FxRate[] | null> {
   }
 }
 
+/** Keyless fallback provider (same source used for history), so the live board
+ * still populates when the primary provider requires an API key. */
+async function fetchLiveFallback(base: string): Promise<FxRate[] | null> {
+  const b = base.toLowerCase();
+  const urls = [
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${b}.min.json`,
+    `https://latest.currency-api.pages.dev/v1/currencies/${b}.min.json`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: { accept: "application/json" } });
+      if (!res.ok) continue;
+      const json: any = await res.json();
+      const table = json?.[b] as Record<string, number> | undefined;
+      if (!table) continue;
+      const now = new Date().toISOString();
+      const rows: FxRate[] = [];
+      for (const quote of SUPPORTED_QUOTES) {
+        const value = quote === base.toUpperCase() ? 1 : table[quote.toLowerCase()];
+        if (typeof value === "number" && Number.isFinite(value)) {
+          rows.push({ base: base.toUpperCase(), quote, rate: value, fetched_at: now });
+        }
+      }
+      if (rows.length > 1) return rows;
+    } catch {
+      /* try next mirror */
+    }
+  }
+  return null;
+}
+
 async function getRates(base: string): Promise<{ rows: FxRate[]; source: "live" | "cache" | "db" | "fallback" }> {
   const B = base.toUpperCase();
   const cached = memoryCache.get(B);
   if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
     return { rows: cached.rows, source: "cache" };
   }
-  const live = await fetchLive(B);
+  const live = (await fetchLive(B)) ?? (await fetchLiveFallback(B));
   if (live && live.length) {
     memoryCache.set(B, { rows: live, ts: Date.now() });
     // Fire-and-forget DB writes (best-effort): current snapshot + today's
