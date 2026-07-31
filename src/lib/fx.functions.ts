@@ -95,10 +95,15 @@ async function fetchLiveFallback(base: string): Promise<FxRate[] | null> {
   return null;
 }
 
-async function getRates(base: string): Promise<{ rows: FxRate[]; source: "live" | "cache" | "db" | "fallback" }> {
+async function getRates(
+  base: string,
+  force = false,
+): Promise<{ rows: FxRate[]; source: "live" | "cache" | "db" | "fallback" }> {
   const B = base.toUpperCase();
   const cached = memoryCache.get(B);
-  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+  // `force` (manual refresh) skips the server-side cache so the user always
+  // gets a straight-from-provider quote instead of waiting out the TTL.
+  if (!force && cached && Date.now() - cached.ts < CACHE_TTL_MS) {
     return { rows: cached.rows, source: "cache" };
   }
   const live = (await fetchLive(B)) ?? (await fetchLiveFallback(B));
@@ -138,14 +143,19 @@ async function recordTodayHistory(rows: FxRate[]) {
   );
 }
 
-export const getFxRates = createServerFn({ method: "GET" })
+// POST so responses are never served from an HTTP cache — a manual refresh must
+// always reach the handler.
+export const getFxRates = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
-      .object({ base: z.string().length(3).optional().default(DEFAULT_BASE) })
+      .object({
+        base: z.string().length(3).optional().default(DEFAULT_BASE),
+        force: z.boolean().optional().default(false),
+      })
       .parse(d ?? {}),
   )
   .handler(async ({ data }) => {
-    const { rows, source } = await getRates(data.base);
+    const { rows, source } = await getRates(data.base, data.force);
     return {
       base: data.base.toUpperCase(),
       rates: rows,
@@ -301,7 +311,7 @@ async function backfill(base: string, dates: string[]): Promise<HistoryRow[]> {
   return collected;
 }
 
-export const getFxHistory = createServerFn({ method: "GET" })
+export const getFxHistory = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
       .object({

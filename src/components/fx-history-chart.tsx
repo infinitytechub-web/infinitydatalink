@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, LineChart as LineChartIcon, TrendingDown, TrendingUp } from "lucide-react";
+import { Download, LineChart as LineChartIcon, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
 import { EmptyState, SectionCard } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,12 +27,15 @@ export function FxHistoryChart({
   base,
   quotes,
   range,
+  autoRefreshMs = 0,
   onRangeChange,
   onQuotesChange,
 }: {
   base: string;
   quotes: string[];
   range: FxRangeKey;
+  /** Cadence inherited from the dashboard's auto-refresh control (0 = off). */
+  autoRefreshMs?: number;
   onRangeChange: (range: FxRangeKey) => void;
   onQuotesChange: (quotes: string[]) => void;
 }) {
@@ -41,6 +44,8 @@ export function FxHistoryChart({
     queryKey: ["fx", "history", base, range, quotes.join(",")],
     queryFn: () => fetchHistory({ data: { base, quotes, range } }),
     staleTime: 5 * 60_000,
+    refetchInterval: autoRefreshMs || false,
+    refetchIntervalInBackground: false,
   });
 
   const series = useMemo(
@@ -136,6 +141,16 @@ export function FxHistoryChart({
               ))}
             </div>
           </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => void q.refetch()}
+            disabled={q.isFetching}
+            aria-label="Refresh historical rates"
+          >
+            <RefreshCw className={`mr-1 size-3.5 ${q.isFetching ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
           <Button size="sm" variant="outline" onClick={handleExport} disabled={points.length === 0}>
             <Download className="mr-1 size-3.5" />
             Export CSV
