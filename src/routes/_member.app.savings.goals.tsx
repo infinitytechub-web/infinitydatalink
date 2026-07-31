@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { CloudOff, Target, WifiOff } from "lucide-react";
+import { CloudOff, RefreshCw, Target, WifiOff } from "lucide-react";
 import {
   EmptyState,
   ErrorState,
