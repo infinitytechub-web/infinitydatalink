@@ -29,7 +29,7 @@ export function KPIStat({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl p-6 ring-1",
+        "group relative overflow-hidden rounded-xl p-4 ring-1",
         "shadow-[0_10px_28px_-14px_rgba(15,23,42,0.35)]",
         "motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out",
         "motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.45)]",
@@ -112,7 +112,7 @@ export function SectionCard({
       )}
     >
       <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-0.5 opacity-70", SECTION_ACCENT(accent))} />
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-linear-to-b from-muted/40 to-transparent px-6 py-5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-linear-to-b from-muted/40 to-transparent px-5 py-3.5">
         <h3 className="font-display text-base font-semibold tracking-tight text-foreground">{title}</h3>
         {action}
       </header>
@@ -234,7 +234,7 @@ export function KPIStatSkeleton({ accent }: { accent?: boolean } = {}) {
       aria-busy="true"
       aria-live="polite"
       className={cn(
-        "relative overflow-hidden rounded-xl border p-6",
+        "relative overflow-hidden rounded-xl border p-4",
         "shadow-[var(--shadow-elevated)]",
         accent ? "border-primary/30 bg-linear-to-br from-primary/5 via-card to-card" : "border-border bg-card",
       )}
@@ -253,7 +253,7 @@ export function KPIGridSkeleton({ count = 4 }: { count?: number }) {
     <section
       aria-label="Loading key figures"
       className={cn(
-        "grid gap-6",
+        "grid gap-4",
         count === 2 ? "md:grid-cols-2" : count === 3 ? "md:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-4",
       )}
     >
@@ -318,7 +318,7 @@ export function SectionCardSkeleton({
 }) {
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-elevated)]">
-      <header className="flex items-center justify-between border-b border-border p-6">
+      <header className="flex items-center justify-between border-b border-border px-5 py-4">
         {title ? (
           <h3 className="font-serif text-lg text-foreground">{title}</h3>
         ) : (

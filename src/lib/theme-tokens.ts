@@ -31,13 +31,13 @@ export type ToneStyle = {
 
 const BASE_TONES = {
   royal: {
-    bg: "bg-linear-to-br from-[#1e3a8a] via-[#1e40af] to-[#312e81]",
-    ring: "ring-[#3b5bdb]/40",
+    bg: "bg-linear-to-br from-[#0a1a33] via-[#123a6b] to-[#0d9488]",
+    ring: "ring-[#0d9488]/40",
     label: "text-blue-50/85",
     value: "text-white",
     hint: "text-blue-50/75",
-    bar: "bg-linear-to-r from-[#1e3a8a] via-[#2563eb] to-[#7c3aed]",
-    chip: "from-[#1e3a8a] to-[#3b5bdb]",
+    bar: "bg-linear-to-r from-[#0a1a33] via-[#123a6b] to-[#0d9488]",
+    chip: "from-[#0a1a33] to-[#123a6b]",
   },
   emerald: {
     bg: "bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800",
@@ -49,13 +49,13 @@ const BASE_TONES = {
     chip: "from-emerald-500 to-teal-600",
   },
   gold: {
-    bg: "bg-linear-to-br from-[#a67c00] via-[#c48f00] to-[#d4af37]",
+    bg: "bg-linear-to-br from-[#8a6f1a] via-[#b08f22] to-[#c9a227]",
     ring: "ring-amber-300/50",
     label: "text-amber-50/95",
     value: "text-white",
     hint: "text-amber-50/85",
-    bar: "bg-linear-to-r from-amber-500 via-[#d4af37] to-orange-500",
-    chip: "from-[#c48f00] to-[#d4af37]",
+    bar: "bg-linear-to-r from-[#b08f22] via-[#c9a227] to-[#e0be4e]",
+    chip: "from-[#b08f22] to-[#c9a227]",
   },
   sky: {
     bg: "bg-linear-to-br from-sky-600 via-blue-700 to-indigo-800",
@@ -180,7 +180,7 @@ export const BUTTON_TONE = {
   success:
     "bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-sm ring-1 ring-emerald-400/40 hover:brightness-110",
   primary:
-    "bg-linear-to-r from-[#1e3a8a] to-[#3b5bdb] text-white shadow-sm ring-1 ring-blue-400/40 hover:brightness-110",
+    "bg-linear-to-r from-[#0a1a33] to-[#123a6b] text-white shadow-sm ring-1 ring-blue-400/40 hover:brightness-110",
 } as const;
 
 /** Chart palette — sourced from CSS variables so series colors flip with
