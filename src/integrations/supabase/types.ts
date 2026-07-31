@@ -804,6 +804,33 @@ export type Database = {
           },
         ]
       }
+      fx_rate_history: {
+        Row: {
+          base: string
+          created_at: string
+          quote: string
+          rate: number
+          rate_date: string
+          source: string
+        }
+        Insert: {
+          base: string
+          created_at?: string
+          quote: string
+          rate: number
+          rate_date: string
+          source?: string
+        }
+        Update: {
+          base?: string
+          created_at?: string
+          quote?: string
+          rate?: number
+          rate_date?: string
+          source?: string
+        }
+        Relationships: []
+      }
       fx_rates: {
         Row: {
           base: string

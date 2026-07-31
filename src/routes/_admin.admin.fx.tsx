@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,7 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
-import { getFxRates, DEFAULT_BASE, SUPPORTED_QUOTES } from "@/lib/fx.functions";
+import { getFxRates, DEFAULT_BASE, SUPPORTED_QUOTES, FX_RANGES, type FxRangeKey } from "@/lib/fx.functions";
+import { FxHistoryChart } from "@/components/fx-history-chart";
+
+const searchSchema = z.object({
+  base: fallback(z.string(), DEFAULT_BASE).default(DEFAULT_BASE),
+  range: fallback(z.string(), "30D").default("30D"),
+  quotes: fallback(z.string(), "USD,EUR,GBP").default("USD,EUR,GBP"),
+});
 
 const INTERVALS = [
   { label: "30s", ms: 30_000 },
@@ -24,6 +33,7 @@ const INTERVALS = [
 ] as const;
 
 export const Route = createFileRoute("/_admin/admin/fx")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
       { title: "Live currency converter — IT-360 Admin" },
@@ -52,7 +62,23 @@ export const Route = createFileRoute("/_admin/admin/fx")({
 });
 
 function FxDashboard() {
-  const [base, setBase] = useState<string>(DEFAULT_BASE);
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+
+  const base = (SUPPORTED_QUOTES as readonly string[]).includes(search.base.toUpperCase())
+    ? search.base.toUpperCase()
+    : DEFAULT_BASE;
+  const range = (Object.keys(FX_RANGES).includes(search.range) ? search.range : "30D") as FxRangeKey;
+  const chartQuotes = useMemo(() => {
+    const list = String(search.quotes)
+      .split(",")
+      .map((c: string) => c.trim().toUpperCase())
+      .filter((c: string) => (SUPPORTED_QUOTES as readonly string[]).includes(c) && c !== base);
+    return (list.length ? list : ["USD", "EUR", "GBP"].filter((c) => c !== base)).slice(0, 5);
+  }, [search.quotes, base]);
+
+  const setBase = (value: string) =>
+    void navigate({ search: (prev: typeof search) => ({ ...prev, base: value.toUpperCase() }) });
   const [intervalMs, setIntervalMs] = useState<number>(60_000);
   const [amount, setAmount] = useState<string>("1000");
 
@@ -127,6 +153,16 @@ function FxDashboard() {
       </section>
 
       <FxConverterWidget />
+
+      <FxHistoryChart
+        base={base}
+        quotes={chartQuotes}
+        range={range}
+        onRangeChange={(next) => void navigate({ search: (prev: typeof search) => ({ ...prev, range: next }) })}
+        onQuotesChange={(next) =>
+          void navigate({ search: (prev: typeof search) => ({ ...prev, quotes: next.join(",") }) })
+        }
+      />
 
       <SectionCard
         title="Live rate board"
