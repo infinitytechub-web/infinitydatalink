@@ -4,7 +4,7 @@
 set -uo pipefail
 LABEL="${1:-run}"
 cd "$(dirname "$0")/.."
-npx --yes wrangler@latest dev --cwd ./dist --port 4180 --local > /tmp/wrangler-perf.log 2>&1 &
+(cd dist && exec npx --yes wrangler@latest dev --port 4180 --local) > /tmp/wrangler-perf.log 2>&1 &
 WPID=$!
 code=000
 for _ in $(seq 1 40); do
