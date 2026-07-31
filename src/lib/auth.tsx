@@ -162,24 +162,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    void (async () => {
+      const supabase = await getSupabase();
+      if (cancelled) return;
+
+      const { data } = await supabase.auth.getSession();
       if (cancelled) return;
       await hydrate(data.session?.user ?? null, { force: true });
+      if (cancelled) return;
       setLoading(false);
-    });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      // Defer to avoid deadlock inside the callback.
-      setTimeout(() => {
-        void hydrate(session?.user ?? null);
-      }, 0);
-    });
+      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+        // Defer to avoid deadlock inside the callback.
+        setTimeout(() => {
+          void hydrate(session?.user ?? null);
+        }, 0);
+      });
+      unsubscribe = () => sub.subscription.unsubscribe();
+      if (cancelled) unsubscribe();
+    })();
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
