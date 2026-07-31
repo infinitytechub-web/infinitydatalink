@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { CloudOff, Target, WifiOff } from "lucide-react";
+import { CloudOff, RefreshCw, Target, WifiOff } from "lucide-react";
 import {
   EmptyState,
   ErrorState,
@@ -14,6 +14,8 @@ import {
 import { listMyGoals } from "@/lib/savings-goals.functions";
 import { withOfflineFallback } from "@/lib/offline-snapshot";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useBackgroundSync } from "@/hooks/use-background-sync";
+
 
 const GOALS_SNAPSHOT_KEY = "savings-goals";
 
@@ -81,6 +83,10 @@ function GoalsPage() {
 function Body() {
   const { data: result } = useSuspenseQuery(goalsQuery);
   const online = useOnlineStatus();
+  const { syncing, lastSyncedAt, syncNow } = useBackgroundSync({
+    queryKey: ["member", "savings", "goals"],
+    stale: result.stale,
+  });
   const data = result.data;
   const overall =
     data.total_target > 0 ? Math.min(100, Math.round((data.total_saved / data.total_target) * 100)) : 0;
@@ -89,16 +95,36 @@ function Body() {
     !online || result.stale ? (
       <div
         role="status"
-        className="flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-foreground"
+        aria-live="polite"
+        className="flex flex-wrap items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-foreground"
       >
         {online ? <CloudOff className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
         <span>
           {online ? "Live sync unavailable." : "You're offline."} Showing your last synced goal progress
-          {result.saved_at ? ` from ${new Date(result.saved_at).toLocaleString()}` : ""}. New contributions will
-          appear once you reconnect.
+          {result.saved_at ? ` from ${new Date(result.saved_at).toLocaleString()}` : ""}.{" "}
+          {online
+            ? "We keep retrying in the background and missed deposits or transfers will appear automatically."
+            : "Missed deposits and transfers sync automatically once you reconnect."}
         </span>
+        <button
+          type="button"
+          onClick={() => void syncNow()}
+          disabled={!online || syncing}
+          className="ml-auto inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 font-medium hover:bg-muted disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
+          {syncing ? "Syncing…" : "Sync now"}
+        </button>
       </div>
-    ) : null;
+    ) : (
+      <p className="flex items-center gap-2 text-[11px] text-muted-foreground" aria-live="polite">
+        <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
+        {syncing
+          ? "Syncing contributions…"
+          : `Up to date${lastSyncedAt ? ` · last synced ${new Date(lastSyncedAt).toLocaleTimeString()}` : ""}`}
+      </p>
+    );
+
 
   if (data.rows.length === 0) {
     return (
