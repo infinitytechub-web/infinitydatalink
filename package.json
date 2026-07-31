@@ -16,7 +16,9 @@
     "test:ssr-smoke": "node scripts/ssr-smoke.mjs",
     "security:audit": "node scripts/dependency-audit.mjs",
     "security:definer": "node scripts/security-definer-scan.mjs",
-    "security:gate": "node scripts/dependency-audit.mjs && node scripts/security-definer-scan.mjs"
+    "security:rls": "node scripts/rls-policy-scan.mjs --list",
+    "security:secrets": "node scripts/secret-scan.mjs",
+    "security:gate": "node scripts/dependency-audit.mjs && node scripts/security-definer-scan.mjs && node scripts/rls-policy-scan.mjs && node scripts/secret-scan.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.5",
