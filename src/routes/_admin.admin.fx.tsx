@@ -78,7 +78,7 @@ function FxDashboard() {
   }, [search.quotes, base]);
 
   const setBase = (value: string) =>
-    void navigate({ search: (prev) => ({ ...prev, base: value.toUpperCase() }) });
+    void navigate({ search: (prev: typeof search) => ({ ...prev, base: value.toUpperCase() }) });
   const [intervalMs, setIntervalMs] = useState<number>(60_000);
   const [amount, setAmount] = useState<string>("1000");
 
@@ -158,9 +158,9 @@ function FxDashboard() {
         base={base}
         quotes={chartQuotes}
         range={range}
-        onRangeChange={(next) => void navigate({ search: (prev) => ({ ...prev, range: next }) })}
+        onRangeChange={(next) => void navigate({ search: (prev: typeof search) => ({ ...prev, range: next }) })}
         onQuotesChange={(next) =>
-          void navigate({ search: (prev) => ({ ...prev, quotes: next.join(",") }) })
+          void navigate({ search: (prev: typeof search) => ({ ...prev, quotes: next.join(",") }) })
         }
       />
 
