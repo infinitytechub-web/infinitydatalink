@@ -104,11 +104,18 @@ function SavingsPage() {
               Group savings
             </Link>
             <Link
+              to="/app/savings/goals"
+              className="rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              Goals
+            </Link>
+            <Link
               to="/app/savings/insights"
               className="rounded-md border border-border bg-background px-3 py-2 text-xs font-medium hover:bg-muted"
             >
               Insights
             </Link>
+
             <Link
               to="/app/savings/enroll"
               className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
