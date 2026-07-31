@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { Target } from "lucide-react";
+import { CloudOff, Target, WifiOff } from "lucide-react";
 import {
   EmptyState,
   ErrorState,
@@ -12,12 +12,19 @@ import {
   SectionCardSkeleton,
 } from "@/components/primitives";
 import { listMyGoals } from "@/lib/savings-goals.functions";
+import { withOfflineFallback } from "@/lib/offline-snapshot";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+
+const GOALS_SNAPSHOT_KEY = "savings-goals";
 
 const goalsQuery = queryOptions({
   queryKey: ["member", "savings", "goals"],
-  queryFn: () => listMyGoals(),
+  queryFn: () => withOfflineFallback(GOALS_SNAPSHOT_KEY, () => listMyGoals()),
   staleTime: 15_000,
+  // Offline reads come from the snapshot; retrying just delays the fallback.
+  retry: 0,
 });
+
 
 export const Route = createFileRoute("/_member/app/savings/goals")({
   head: () => ({
