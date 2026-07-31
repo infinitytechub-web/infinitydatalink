@@ -217,6 +217,54 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_job_runs: {
+        Row: {
+          attempt: number
+          caller: string | null
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          job: string
+          metrics: Json
+          run_key: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempt?: number
+          caller?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          job: string
+          metrics?: Json
+          run_key: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt?: number
+          caller?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          job?: string
+          metrics?: Json
+          run_key?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dividend_runs: {
         Row: {
           approval_note: string | null
@@ -3634,6 +3682,35 @@ export type Database = {
         }
         Returns: Json
       }
+      claim_cron_run: {
+        Args: {
+          _caller?: string
+          _job: string
+          _run_key: string
+          _stale_after?: string
+        }
+        Returns: {
+          attempt: number
+          caller: string | null
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          job: string
+          metrics: Json
+          run_key: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cron_job_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       clear_transfer: {
         Args: { _actor_id: string; _transfer_id: string }
         Returns: {
@@ -3851,6 +3928,35 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      finish_cron_run: {
+        Args: {
+          _error?: string
+          _metrics?: Json
+          _run_id: string
+          _status: string
+        }
+        Returns: {
+          attempt: number
+          caller: string | null
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          job: string
+          metrics: Json
+          run_key: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cron_job_runs"
           isOneToOne: true
           isSetofReturn: false
         }
