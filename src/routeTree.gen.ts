@@ -34,6 +34,7 @@ import { Route as MemberAppNotificationsRouteImport } from './routes/_member.app
 import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
 import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
 import { Route as MemberAppInvestmentsRouteImport } from './routes/_member.app.investments'
+import { Route as MemberAppGuaranteesRouteImport } from './routes/_member.app.guarantees'
 import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
 import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
@@ -46,6 +47,7 @@ import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.adm
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
 import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
+import { Route as AdminAdminLoanWorkoutsRouteImport } from './routes/_admin.admin.loan-workouts'
 import { Route as AdminAdminLoanProductsRouteImport } from './routes/_admin.admin.loan-products'
 import { Route as AdminAdminLoanArrearsRouteImport } from './routes/_admin.admin.loan-arrears'
 import { Route as AdminAdminLiveUsersRouteImport } from './routes/_admin.admin.live-users'
@@ -231,6 +233,11 @@ const MemberAppInvestmentsRoute = MemberAppInvestmentsRouteImport.update({
   path: '/investments',
   getParentRoute: () => MemberAppRoute,
 } as any)
+const MemberAppGuaranteesRoute = MemberAppGuaranteesRouteImport.update({
+  id: '/guarantees',
+  path: '/guarantees',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 const AdminAdminSuperAdminsRoute = AdminAdminSuperAdminsRouteImport.update({
   id: '/super-admins',
   path: '/super-admins',
@@ -289,6 +296,11 @@ const AdminAdminLogsRoute = AdminAdminLogsRouteImport.update({
 const AdminAdminLoansRoute = AdminAdminLoansRouteImport.update({
   id: '/loans',
   path: '/loans',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminLoanWorkoutsRoute = AdminAdminLoanWorkoutsRouteImport.update({
+  id: '/loan-workouts',
+  path: '/loan-workouts',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminLoanProductsRoute = AdminAdminLoanProductsRouteImport.update({
@@ -649,6 +661,7 @@ export interface FileRoutesByFullPath {
   '/admin/live-users': typeof AdminAdminLiveUsersRoute
   '/admin/loan-arrears': typeof AdminAdminLoanArrearsRoute
   '/admin/loan-products': typeof AdminAdminLoanProductsRoute
+  '/admin/loan-workouts': typeof AdminAdminLoanWorkoutsRoute
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
@@ -661,6 +674,7 @@ export interface FileRoutesByFullPath {
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
@@ -743,6 +757,7 @@ export interface FileRoutesByTo {
   '/admin/live-users': typeof AdminAdminLiveUsersRoute
   '/admin/loan-arrears': typeof AdminAdminLoanArrearsRoute
   '/admin/loan-products': typeof AdminAdminLoanProductsRoute
+  '/admin/loan-workouts': typeof AdminAdminLoanWorkoutsRoute
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
@@ -755,6 +770,7 @@ export interface FileRoutesByTo {
   '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
@@ -843,6 +859,7 @@ export interface FileRoutesById {
   '/_admin/admin/live-users': typeof AdminAdminLiveUsersRoute
   '/_admin/admin/loan-arrears': typeof AdminAdminLoanArrearsRoute
   '/_admin/admin/loan-products': typeof AdminAdminLoanProductsRoute
+  '/_admin/admin/loan-workouts': typeof AdminAdminLoanWorkoutsRoute
   '/_admin/admin/loans': typeof AdminAdminLoansRouteWithChildren
   '/_admin/admin/logs': typeof AdminAdminLogsRoute
   '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
@@ -855,6 +872,7 @@ export interface FileRoutesById {
   '/_admin/admin/security': typeof AdminAdminSecurityRoute
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
   '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/_member/app/guarantees': typeof MemberAppGuaranteesRoute
   '/_member/app/investments': typeof MemberAppInvestmentsRoute
   '/_member/app/kyc': typeof MemberAppKycRoute
   '/_member/app/loans': typeof MemberAppLoansRouteWithChildren
@@ -943,6 +961,7 @@ export interface FileRouteTypes {
     | '/admin/live-users'
     | '/admin/loan-arrears'
     | '/admin/loan-products'
+    | '/admin/loan-workouts'
     | '/admin/loans'
     | '/admin/logs'
     | '/admin/members'
@@ -955,6 +974,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/settings'
     | '/admin/super-admins'
+    | '/app/guarantees'
     | '/app/investments'
     | '/app/kyc'
     | '/app/loans'
@@ -1037,6 +1057,7 @@ export interface FileRouteTypes {
     | '/admin/live-users'
     | '/admin/loan-arrears'
     | '/admin/loan-products'
+    | '/admin/loan-workouts'
     | '/admin/loans'
     | '/admin/logs'
     | '/admin/members'
@@ -1049,6 +1070,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/settings'
     | '/admin/super-admins'
+    | '/app/guarantees'
     | '/app/investments'
     | '/app/kyc'
     | '/app/loans'
@@ -1136,6 +1158,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/live-users'
     | '/_admin/admin/loan-arrears'
     | '/_admin/admin/loan-products'
+    | '/_admin/admin/loan-workouts'
     | '/_admin/admin/loans'
     | '/_admin/admin/logs'
     | '/_admin/admin/members'
@@ -1148,6 +1171,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/security'
     | '/_admin/admin/settings'
     | '/_admin/admin/super-admins'
+    | '/_member/app/guarantees'
     | '/_member/app/investments'
     | '/_member/app/kyc'
     | '/_member/app/loans'
@@ -1408,6 +1432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppInvestmentsRouteImport
       parentRoute: typeof MemberAppRoute
     }
+    '/_member/app/guarantees': {
+      id: '/_member/app/guarantees'
+      path: '/guarantees'
+      fullPath: '/app/guarantees'
+      preLoaderRoute: typeof MemberAppGuaranteesRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
     '/_admin/admin/super-admins': {
       id: '/_admin/admin/super-admins'
       path: '/super-admins'
@@ -1490,6 +1521,13 @@ declare module '@tanstack/react-router' {
       path: '/loans'
       fullPath: '/admin/loans'
       preLoaderRoute: typeof AdminAdminLoansRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/loan-workouts': {
+      id: '/_admin/admin/loan-workouts'
+      path: '/loan-workouts'
+      fullPath: '/admin/loan-workouts'
+      preLoaderRoute: typeof AdminAdminLoanWorkoutsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/loan-products': {
@@ -2074,6 +2112,7 @@ interface AdminAdminRouteChildren {
   AdminAdminLiveUsersRoute: typeof AdminAdminLiveUsersRoute
   AdminAdminLoanArrearsRoute: typeof AdminAdminLoanArrearsRoute
   AdminAdminLoanProductsRoute: typeof AdminAdminLoanProductsRoute
+  AdminAdminLoanWorkoutsRoute: typeof AdminAdminLoanWorkoutsRoute
   AdminAdminLoansRoute: typeof AdminAdminLoansRouteWithChildren
   AdminAdminLogsRoute: typeof AdminAdminLogsRoute
   AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
@@ -2105,6 +2144,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminLiveUsersRoute: AdminAdminLiveUsersRoute,
   AdminAdminLoanArrearsRoute: AdminAdminLoanArrearsRoute,
   AdminAdminLoanProductsRoute: AdminAdminLoanProductsRoute,
+  AdminAdminLoanWorkoutsRoute: AdminAdminLoanWorkoutsRoute,
   AdminAdminLoansRoute: AdminAdminLoansRouteWithChildren,
   AdminAdminLogsRoute: AdminAdminLogsRoute,
   AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
@@ -2177,6 +2217,7 @@ const MemberAppSavingsRouteWithChildren =
   MemberAppSavingsRoute._addFileChildren(MemberAppSavingsRouteChildren)
 
 interface MemberAppRouteChildren {
+  MemberAppGuaranteesRoute: typeof MemberAppGuaranteesRoute
   MemberAppInvestmentsRoute: typeof MemberAppInvestmentsRoute
   MemberAppKycRoute: typeof MemberAppKycRoute
   MemberAppLoansRoute: typeof MemberAppLoansRouteWithChildren
@@ -2193,6 +2234,7 @@ interface MemberAppRouteChildren {
 }
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
+  MemberAppGuaranteesRoute: MemberAppGuaranteesRoute,
   MemberAppInvestmentsRoute: MemberAppInvestmentsRoute,
   MemberAppKycRoute: MemberAppKycRoute,
   MemberAppLoansRoute: MemberAppLoansRouteWithChildren,
