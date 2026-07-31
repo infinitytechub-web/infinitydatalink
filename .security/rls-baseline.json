@@ -1,0 +1,4 @@
+{
+  "$schema": "Accepted RLS posture exceptions for scripts/rls-policy-scan.mjs. Each entry is the exact finding string the scanner prints. Add entries only with a review note explaining why the exception is safe.",
+  "accepted": []
+}
