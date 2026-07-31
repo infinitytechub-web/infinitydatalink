@@ -29,7 +29,7 @@ export function KPIStat({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl p-6 ring-1",
+        "group relative overflow-hidden rounded-xl p-4 ring-1",
         "shadow-[0_10px_28px_-14px_rgba(15,23,42,0.35)]",
         "motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out",
         "motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.45)]",
@@ -253,7 +253,7 @@ export function KPIGridSkeleton({ count = 4 }: { count?: number }) {
     <section
       aria-label="Loading key figures"
       className={cn(
-        "grid gap-6",
+        "grid gap-4",
         count === 2 ? "md:grid-cols-2" : count === 3 ? "md:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-4",
       )}
     >
@@ -318,7 +318,7 @@ export function SectionCardSkeleton({
 }) {
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-elevated)]">
-      <header className="flex items-center justify-between border-b border-border p-6">
+      <header className="flex items-center justify-between border-b border-border px-5 py-4">
         {title ? (
           <h3 className="font-serif text-lg text-foreground">{title}</h3>
         ) : (
