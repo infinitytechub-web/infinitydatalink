@@ -101,9 +101,7 @@ async function getRates(base: string): Promise<{ rows: FxRate[]; source: "live" 
   if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
     return { rows: cached.rows, source: "cache" };
   }
-  const primary = await fetchLive(B);
-  const live = primary ?? (await fetchLiveFallback(B));
-  console.log("[fx] getRates", B, "primary:", primary?.length ?? null, "final:", live?.length ?? null);
+  const live = (await fetchLive(B)) ?? (await fetchLiveFallback(B));
   if (live && live.length) {
     memoryCache.set(B, { rows: live, ts: Date.now() });
     // Fire-and-forget DB writes (best-effort): current snapshot + today's
