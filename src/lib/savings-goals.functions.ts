@@ -184,7 +184,7 @@ export const listMyGoals = createServerFn({ method: "GET" })
           .select("id, ref, kind, amount, created_at, savings_account_id")
           .eq("user_id", context.userId)
           .in("savings_account_id", accountIds)
-          .in("kind", CONTRIBUTION_KINDS as unknown as string[])
+          .in("kind", [...CONTRIBUTION_KINDS])
           .eq("status", "cleared")
           .order("created_at", { ascending: false })
           .limit(500);
