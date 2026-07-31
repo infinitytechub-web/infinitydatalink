@@ -205,10 +205,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const hasPermission = (p: Permission) => permissions.includes(p);
     const hasAnyPermission = (ps: Permission[]) => ps.some((p) => permissions.includes(p));
     const signOut = async () => {
+      const supabase = await getSupabase();
       await supabase.auth.signOut();
       setUser(null);
     };
     const refresh = async () => {
+      const supabase = await getSupabase();
       const { data } = await supabase.auth.getSession();
       await hydrate(data.session?.user ?? null);
     };
