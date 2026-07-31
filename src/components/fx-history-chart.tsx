@@ -48,7 +48,7 @@ export function FxHistoryChart({
     [q.data, quotes],
   );
 
-  const points = useMemo(
+  const points = useMemo<Array<Record<string, number | string>>>(
     () => (q.data?.points ?? []).map((p) => ({ ...p, label: fmtDay(String(p.date)) })),
     [q.data],
   );
