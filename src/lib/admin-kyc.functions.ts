@@ -199,9 +199,26 @@ export type MemberKycDetail = {
     tier: string;
     created_at: string;
   };
-  next_of_kin: NextOfKin[];
+  next_of_kin: NextOfKinAdminView[];
   documents: KycDocumentWithUrl[];
 };
+
+/**
+ * Staff-facing projection of a next-of-kin record. The raw `national_id` is
+ * never sent to the browser: compliance reviewers only need enough of it to
+ * match against an uploaded ID document, so the value is masked server-side.
+ */
+export type NextOfKinAdminView = Omit<NextOfKin, "national_id"> & {
+  national_id_masked: string | null;
+};
+
+function maskNationalId(value: string | null | undefined): string | null {
+  const raw = (value ?? "").trim();
+  if (!raw) return null;
+  const tail = raw.slice(-4);
+  return `•••• ${tail}`;
+}
+
 
 export const getMemberKyc = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
