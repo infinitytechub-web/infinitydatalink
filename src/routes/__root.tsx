@@ -10,6 +10,11 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+// Hashed, build-safe URLs for the two latin variable faces used above the
+// fold. Preloading them removes the CSS→font request waterfall that delayed
+// first paint of the hero text.
+import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import jakartaLatin from "@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/components/theme-provider";
