@@ -53,6 +53,16 @@ export default defineConfig({
           return null;
         },
       },
+      {
+        // Resolve every `tslib` request to its ESM build (see note above).
+        name: "tslib-esm-only",
+        enforce: "pre",
+        resolveId(source: string) {
+          if (source === "tslib" || source === "tslib/modules/index.js") return tslibEsm;
+          return null;
+        },
+      },
+
       ...(analyze
         ? [
             visualizer({
