@@ -96,7 +96,9 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
     const { data } = await client
       .from("branding_settings")
       .select(
-        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, org_legal_name, org_address, org_registration_no, footer_html, support_email, support_phone, email_from_name, email_reply_to, email_header_html, email_footer_html, updated_at",
+        // Public projection only. Registered address, registration number and
+        // outbound email branding are staff-only (anon lacks column privileges).
+        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, org_legal_name, footer_html, support_email, support_phone, updated_at",
       )
       .eq("id", 1)
       .maybeSingle();
@@ -108,6 +110,24 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
     return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
   },
 );
+
+/** Full read including staff-only org/email fields — signed-in super admins only. */
+export const getBrandingFull = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<BrandingSettings> => {
+    await assertSuperAdmin(context.supabase, context.userId);
+    const { data } = await (context.supabase as any)
+      .from("branding_settings")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+    if (!data) return DEFAULTS;
+    const [logo_url, favicon_url] = await Promise.all([
+      signBrandingUrl((data as any).logo_path),
+      signBrandingUrl((data as any).favicon_path),
+    ]);
+    return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
+  });
 
 const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 

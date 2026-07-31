@@ -22,7 +22,9 @@ function serverClient() {
 }
 
 async function readDbRates(base: string): Promise<FxRate[]> {
-  const client = serverClient();
+  // fx_rates is signed-in-only; use the trusted server client for this read.
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const client = supabaseAdmin as any;
   const { data } = await client
     .from("fx_rates")
     .select("base, quote, rate, fetched_at")
@@ -233,7 +235,8 @@ function rangeDates(range: FxRangeKey): string[] {
 type HistoryRow = { base: string; quote: string; rate_date: string; rate: number };
 
 async function readHistory(base: string, from: string, to: string): Promise<HistoryRow[]> {
-  const client = serverClient();
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const client = supabaseAdmin as any;
   const { data } = await client
     .from("fx_rate_history")
     .select("base, quote, rate_date, rate")
