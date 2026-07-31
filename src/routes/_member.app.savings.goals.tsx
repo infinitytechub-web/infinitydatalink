@@ -14,6 +14,8 @@ import {
 import { listMyGoals } from "@/lib/savings-goals.functions";
 import { withOfflineFallback } from "@/lib/offline-snapshot";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useBackgroundSync } from "@/hooks/use-background-sync";
+
 
 const GOALS_SNAPSHOT_KEY = "savings-goals";
 
