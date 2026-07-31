@@ -62,9 +62,15 @@ async function fetchLive(base: string): Promise<FxRate[] | null> {
  * still populates when the primary provider requires an API key. */
 async function fetchLiveFallback(base: string): Promise<FxRate[] | null> {
   const b = base.toLowerCase();
+  // Dated endpoints avoid the redirect that `@latest` issues (some runtimes do
+  // not follow it); today first, then yesterday if today is not published yet.
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 86_400_000);
+  const day = (d: Date) => d.toISOString().slice(0, 10);
   const urls = [
-    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${b}.min.json`,
-    `https://latest.currency-api.pages.dev/v1/currencies/${b}.min.json`,
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${day(today)}/v1/currencies/${b}.min.json`,
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${day(yesterday)}/v1/currencies/${b}.min.json`,
+    `https://${day(today)}.currency-api.pages.dev/v1/currencies/${b}.min.json`,
   ];
   for (const url of urls) {
     try {
