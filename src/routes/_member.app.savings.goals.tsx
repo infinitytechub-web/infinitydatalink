@@ -85,8 +85,6 @@ function Body() {
             Set a goal on any savings account and it will show up here with progress tracking.
           </p>
         </div>
-
-        </div>
       </SectionCard>
     );
   }
