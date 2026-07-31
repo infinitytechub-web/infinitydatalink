@@ -275,10 +275,22 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
         </button>
       }
     >
+      <div
+        role="note"
+        aria-label="Privacy notice"
+        className="mx-6 mt-4 rounded border border-emerald-deep/15 bg-cream px-3 py-2 text-[11px] leading-relaxed text-emerald-deep/80"
+      >
+        <span className="font-bold uppercase tracking-widest">Note · Private</span>
+        <br />
+        Visible only to you and compliance staff during a KYC review. Never shown to other members,
+        and identity numbers are masked in staff views. Only add details you have your contact&apos;s
+        permission to share.
+      </div>
       {rows.length === 0 ? (
         <div className="p-6 text-sm text-emerald-deep/60">
           No next of kin recorded. Add at least one trusted contact for account recovery and beneficiary purposes.
         </div>
+
       ) : (
         <ul className="divide-y divide-emerald-deep/5">
           {rows.map((r) => (

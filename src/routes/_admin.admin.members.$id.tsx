@@ -98,6 +98,17 @@ function MemberDetailBody() {
           </SectionCard>
 
           <SectionCard title="Next of kin">
+            <div
+              role="note"
+              aria-label="Data handling notice"
+              className="mx-6 mt-4 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-emerald-deep/80"
+            >
+              <span className="font-bold uppercase tracking-widest">Note · Confidential</span>
+              <br />
+              Third-party contact details, shown for KYC verification only. Identity numbers are
+              masked and this panel is limited to compliance staff — do not copy, export, or share
+              it outside a review.
+            </div>
             {next_of_kin.length === 0 ? (
               <div className="p-6 text-sm text-emerald-deep/60">None recorded.</div>
             ) : (
@@ -110,12 +121,18 @@ function MemberDetailBody() {
                       {n.phone ? ` · ${n.phone}` : ""}
                       {n.email ? ` · ${n.email}` : ""}
                     </p>
+                    {n.national_id_masked ? (
+                      <p className="text-[11px] text-emerald-deep/50">
+                        ID {n.national_id_masked} (masked)
+                      </p>
+                    ) : null}
                     {n.address ? <p className="text-[11px] text-emerald-deep/50">{n.address}</p> : null}
                   </li>
                 ))}
               </ul>
             )}
           </SectionCard>
+
         </div>
 
         <DecisionPanel memberId={profile.id} kyc={profile.kyc} />
