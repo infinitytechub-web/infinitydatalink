@@ -32,6 +32,8 @@ import {
   Settings2,
   Bug,
   BellRing,
+  Radio,
+  Coins,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 
@@ -46,6 +48,7 @@ const groups: NavGroup[] = [
       { to: "/admin/audit", label: "Audit & Activity", icon: <History /> },
       { to: "/admin/activity", label: "Activity Timeline", icon: <Activity /> },
       { to: "/admin/audit/transfers", label: "Transfer Audit", icon: <ArrowLeftRight /> },
+      { to: "/admin/live-users", label: "Live Users Online", icon: <Radio /> },
 
     ],
   },
@@ -60,6 +63,7 @@ const groups: NavGroup[] = [
       { to: "/admin/finance/expenses", label: "Expense Ledger", icon: <Receipt /> },
       { to: "/admin/finance/transfers", label: "Transfers", icon: <Send /> },
       { to: "/admin/finance/adjustments", label: "Balance Mgmt", icon: <Scale /> },
+      { to: "/admin/fx", label: "Currency Converter", icon: <Coins /> },
     ],
   },
   {
@@ -110,6 +114,8 @@ const CRUMBS: Record<string, string> = {
   "/admin/audit": "Audit & Activity",
   "/admin/activity": "Activity Timeline",
   "/admin/audit/transfers": "Transfer Audit",
+  "/admin/live-users": "Live Users Online",
+  "/admin/fx": "Currency Converter",
 
 
   "/admin/finance": "Financial Dashboard",

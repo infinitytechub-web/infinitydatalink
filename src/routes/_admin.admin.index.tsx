@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -71,6 +71,20 @@ function AdminDashboard() {
         title="Institutional analytics"
         description="Real-time posture across membership, savings, loans, payments and security."
       />
+      <div className="mb-3 flex flex-wrap gap-2">
+        <Link
+          to="/admin/live-users"
+          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+        >
+          Live users online →
+        </Link>
+        <Link
+          to="/admin/fx"
+          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+        >
+          Currency converter dashboard →
+        </Link>
+      </div>
       <div className="mb-6 grid gap-6 xl:grid-cols-2">
         <RealtimeNotifications />
         <OnlineUsersWidget />
@@ -79,6 +93,7 @@ function AdminDashboard() {
         <FxConverterWidget />
         <PurgeControlsWidget />
       </div>
+
       <Suspense fallback={<DashboardFallback />}>
         <DashboardBody />
       </Suspense>
