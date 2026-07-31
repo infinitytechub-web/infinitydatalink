@@ -90,6 +90,7 @@ type AuthState = {
 const AuthCtx = createContext<AuthState | null>(null);
 
 async function loadRoles(userId: string): Promise<AppRole[]> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error || !data) {
     if (import.meta.env.DEV && error) {
@@ -99,10 +100,11 @@ async function loadRoles(userId: string): Promise<AppRole[]> {
     }
     return [];
   }
-  return data.map((r) => r.role as AppRole);
+  return data.map((r: { role: string }) => r.role as AppRole);
 }
 
 async function loadStatus(userId: string): Promise<{ status: AccountStatus; rejectionReason: string | null }> {
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("profiles")
     .select("status, rejection_reason")
