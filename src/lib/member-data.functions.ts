@@ -162,6 +162,7 @@ export const getMySummary = createServerFn({ method: "GET" })
 
 const LoanApplicationSchema = z.object({
   product: z.string().min(2).max(80),
+  product_id: z.string().uuid().optional().nullable(),
   amount: z.number().positive().max(10_000_000),
   term_months: z.number().int().min(1).max(360),
   purpose: z.string().max(1000).optional().nullable(),
@@ -175,12 +176,34 @@ export const applyForLoan = createServerFn({ method: "POST" })
     const suffix = Math.floor(1000 + Math.random() * 9000);
     const ref = `LN-${year}-${suffix}`;
 
+    // Product-based applications are re-checked server-side; the client preview
+    // is advisory only and must never be the gate.
+    let rate: number | null = null;
+    if (data.product_id) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: verdict, error: eligErr } = await (supabaseAdmin as any).rpc("check_loan_eligibility", {
+        _user_id: context.userId,
+        _product_id: data.product_id,
+        _amount: data.amount,
+        _term_months: data.term_months,
+      });
+      if (eligErr) throw new Error(eligErr.message);
+      const v = (verdict ?? {}) as any;
+      if (!v.eligible) {
+        const reasons = ((v.reasons ?? []) as string[]).join("; ");
+        throw new Error(reasons || "You are not currently eligible for this product.");
+      }
+      rate = v.interest_rate == null ? null : Number(v.interest_rate);
+    }
+
     const { data: inserted, error } = await context.supabase
       .from("loans")
       .insert({
         user_id: context.userId,
         ref,
         product: data.product,
+        ...(data.product_id ? { product_id: data.product_id } : {}),
+        ...(rate != null ? { interest_rate: rate } : {}),
         amount: data.amount,
         term_months: data.term_months,
         purpose: data.purpose ?? null,
@@ -189,6 +212,7 @@ export const applyForLoan = createServerFn({ method: "POST" })
       .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at")
       .single();
     if (error) throw new Error(error.message);
+
 
     await writeAudit({
       actor_id: context.userId,
