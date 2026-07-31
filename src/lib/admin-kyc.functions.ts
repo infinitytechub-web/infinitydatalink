@@ -258,7 +258,11 @@ export const getMemberKyc = createServerFn({ method: "GET" })
 
     return {
       profile: profile as any,
-      next_of_kin: (nok ?? []) as NextOfKin[],
+      next_of_kin: ((nok ?? []) as NextOfKin[]).map(({ national_id, ...rest }) => ({
+        ...rest,
+        national_id_masked: maskNationalId(national_id),
+      })),
+
       documents: signedDocs,
     };
   });
