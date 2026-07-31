@@ -117,3 +117,62 @@ export const getGoalProgress = createServerFn({ method: "GET" })
       on_track,
     };
   });
+
+export type GoalRow = {
+  account_id: string;
+  label: string;
+  balance: number;
+  goal_amount: number;
+  goal_target_date: string | null;
+  goal_started_at: string | null;
+  goal_completed_at: string | null;
+  progress_pct: number;
+  remaining: number;
+  days_left: number | null;
+  required_monthly: number | null;
+};
+
+export const listMyGoals = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ rows: GoalRow[]; total_saved: number; total_target: number }> => {
+    const { data, error } = await context.supabase
+      .from("savings_accounts")
+      .select(
+        "id, balance, nickname, goal_amount, goal_target_date, goal_started_at, goal_completed_at, savings_plans(name)",
+      )
+      .eq("user_id", context.userId)
+      .not("goal_amount", "is", null);
+    if (error) throw new Error(error.message);
+
+    const rows: GoalRow[] = (data ?? []).map((a: any) => {
+      const balance = Number(a.balance ?? 0);
+      const goal = Number(a.goal_amount ?? 0);
+      const remaining = Math.max(0, goal - balance);
+      let days_left: number | null = null;
+      let required_monthly: number | null = null;
+      if (a.goal_target_date) {
+        days_left = Math.ceil((new Date(a.goal_target_date).getTime() - Date.now()) / 86400_000);
+        const months = Math.max(1, days_left / 30);
+        required_monthly = remaining > 0 ? Math.round((remaining / months) * 100) / 100 : 0;
+      }
+      return {
+        account_id: a.id,
+        label: a.nickname || a.savings_plans?.name || "Savings account",
+        balance,
+        goal_amount: goal,
+        goal_target_date: a.goal_target_date,
+        goal_started_at: a.goal_started_at,
+        goal_completed_at: a.goal_completed_at,
+        progress_pct: goal > 0 ? Math.min(100, Math.round((balance / goal) * 100)) : 0,
+        remaining,
+        days_left,
+        required_monthly,
+      };
+    });
+    rows.sort((x, y) => y.progress_pct - x.progress_pct);
+    return {
+      rows,
+      total_saved: rows.reduce((s, r) => s + Math.min(r.balance, r.goal_amount), 0),
+      total_target: rows.reduce((s, r) => s + r.goal_amount, 0),
+    };
+  });
