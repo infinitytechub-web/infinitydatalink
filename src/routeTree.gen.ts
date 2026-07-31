@@ -9,116 +9,104 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/_admin'
-import { Route as MemberRouteImport } from './routes/_member'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
-import { Route as AdminAdminRouteImport } from './routes/_admin.admin'
-import { Route as MemberAppRouteImport } from './routes/_member.app'
-import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
-import { Route as AuthResetRouteImport } from './routes/auth.reset'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as MemberRouteImport } from './routes/_member'
+import { Route as AdminRouteImport } from './routes/_admin'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as AdminAdminIndexRouteImport } from './routes/_admin.admin.index'
-import { Route as AdminAdminActivityRouteImport } from './routes/_admin.admin.activity'
-import { Route as AdminAdminAnalyticsRouteImport } from './routes/_admin.admin.analytics'
-import { Route as AdminAdminApprovalsRouteImport } from './routes/_admin.admin.approvals'
-import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
-import { Route as AdminAdminBrandingRouteImport } from './routes/_admin.admin.branding'
-import { Route as AdminAdminConsoleRouteImport } from './routes/_admin.admin.console'
-import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.entities'
-import { Route as AdminAdminFinanceRouteImport } from './routes/_admin.admin.finance'
-import { Route as AdminAdminHealthRouteImport } from './routes/_admin.admin.health'
-import { Route as AdminAdminInvestmentsRouteImport } from './routes/_admin.admin.investments'
-import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
-import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
-import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
-import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.admin.notifications'
-import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
-import { Route as AdminAdminRecurringRouteImport } from './routes/_admin.admin.recurring'
-import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.reports'
-import { Route as AdminAdminRolesRouteImport } from './routes/_admin.admin.roles'
-import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
-import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
-import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
-import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
+import { Route as AuthResetRouteImport } from './routes/auth.reset'
+import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
+import { Route as MemberAppRouteImport } from './routes/_member.app'
+import { Route as AdminAdminRouteImport } from './routes/_admin.admin'
 import { Route as MemberAppIndexRouteImport } from './routes/_member.app.index'
-import { Route as MemberAppInvestmentsRouteImport } from './routes/_member.app.investments'
-import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
-import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
-import { Route as MemberAppNotificationsRouteImport } from './routes/_member.app.notifications'
-import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
-import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
-import { Route as MemberAppRepaymentsRouteImport } from './routes/_member.app.repayments'
-import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
-import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
-import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
-import { Route as MemberAppTransfersRouteImport } from './routes/_member.app.transfers'
+import { Route as AdminAdminIndexRouteImport } from './routes/_admin.admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
-import { Route as AdminAdminComplianceApprovalsRouteImport } from './routes/_admin.admin.compliance.approvals'
-import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
-import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.admin.console.snapshots'
-import { Route as AdminAdminEntitiesIndexRouteImport } from './routes/_admin.admin.entities.index'
-import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
-import { Route as AdminAdminEntitiesRegisterRouteImport } from './routes/_admin.admin.entities.register'
-import { Route as AdminAdminFinanceIndexRouteImport } from './routes/_admin.admin.finance.index'
-import { Route as AdminAdminFinanceAdjustmentsRouteImport } from './routes/_admin.admin.finance.adjustments'
-import { Route as AdminAdminFinanceBreakdownRouteImport } from './routes/_admin.admin.finance.breakdown'
-import { Route as AdminAdminFinanceContributionsRouteImport } from './routes/_admin.admin.finance.contributions'
-import { Route as AdminAdminFinanceExpensesRouteImport } from './routes/_admin.admin.finance.expenses'
-import { Route as AdminAdminFinanceIncomeRouteImport } from './routes/_admin.admin.finance.income'
-import { Route as AdminAdminFinanceSummaryRouteImport } from './routes/_admin.admin.finance.summary'
-import { Route as AdminAdminFinanceTransfersRouteImport } from './routes/_admin.admin.finance.transfers'
-import { Route as AdminAdminInvestmentsAuditRouteImport } from './routes/_admin.admin.investments.audit'
-import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
-import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
-import { Route as AdminAdminSavingsFixedRouteImport } from './routes/_admin.admin.savings.fixed'
-import { Route as AdminAdminSavingsHoldsRouteImport } from './routes/_admin.admin.savings.holds'
-import { Route as AdminAdminSavingsInterestRouteImport } from './routes/_admin.admin.savings.interest'
-import { Route as AdminAdminSavingsPlansRouteImport } from './routes/_admin.admin.savings.plans'
-import { Route as AdminAdminSavingsPotsRouteImport } from './routes/_admin.admin.savings.pots'
-import { Route as AdminAdminSavingsReconciliationRouteImport } from './routes/_admin.admin.savings.reconciliation'
-import { Route as AdminAdminSavingsWithdrawalsRouteImport } from './routes/_admin.admin.savings.withdrawals'
-import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
-import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.app.entities.register'
-import { Route as MemberAppLoansLoanIdRouteImport } from './routes/_member.app.loans.$loanId'
+import { Route as MemberAppTransfersRouteImport } from './routes/_member.app.transfers'
+import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
+import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
+import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
+import { Route as MemberAppRepaymentsRouteImport } from './routes/_member.app.repayments'
+import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
+import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
+import { Route as MemberAppNotificationsRouteImport } from './routes/_member.app.notifications'
+import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
+import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
+import { Route as MemberAppInvestmentsRouteImport } from './routes/_member.app.investments'
+import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
+import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
+import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
+import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
+import { Route as AdminAdminRolesRouteImport } from './routes/_admin.admin.roles'
+import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.reports'
+import { Route as AdminAdminRecurringRouteImport } from './routes/_admin.admin.recurring'
+import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
+import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.admin.notifications'
+import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
+import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
+import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
+import { Route as AdminAdminInvestmentsRouteImport } from './routes/_admin.admin.investments'
+import { Route as AdminAdminHealthRouteImport } from './routes/_admin.admin.health'
+import { Route as AdminAdminFinanceRouteImport } from './routes/_admin.admin.finance'
+import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.entities'
+import { Route as AdminAdminConsoleRouteImport } from './routes/_admin.admin.console'
+import { Route as AdminAdminBrandingRouteImport } from './routes/_admin.admin.branding'
+import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
+import { Route as AdminAdminApprovalsRouteImport } from './routes/_admin.admin.approvals'
+import { Route as AdminAdminAnalyticsRouteImport } from './routes/_admin.admin.analytics'
+import { Route as AdminAdminActivityRouteImport } from './routes/_admin.admin.activity'
 import { Route as MemberAppSavingsIndexRouteImport } from './routes/_member.app.savings.index'
-import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
-import { Route as MemberAppSavingsDepositRouteImport } from './routes/_member.app.savings.deposit'
-import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
-import { Route as MemberAppSavingsFixedRouteImport } from './routes/_member.app.savings.fixed'
-import { Route as MemberAppSavingsInsightsRouteImport } from './routes/_member.app.savings.insights'
-import { Route as MemberAppSavingsLedgerRouteImport } from './routes/_member.app.savings.ledger'
-import { Route as MemberAppSavingsPotsRouteImport } from './routes/_member.app.savings.pots'
-import { Route as MemberAppSavingsStatementsRouteImport } from './routes/_member.app.savings.statements'
-import { Route as ApiPublicHooksLoanRemindersRouteImport } from './routes/api/public/hooks/loan-reminders'
-import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/public/hooks/monthly-interest'
-import { Route as ApiPublicHooksNotificationDispatchRouteImport } from './routes/api/public/hooks/notification-dispatch'
-import { Route as ApiPublicHooksSavingsSweepsRouteImport } from './routes/api/public/hooks/savings-sweeps'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as AdminAdminFinanceIndexRouteImport } from './routes/_admin.admin.finance.index'
+import { Route as AdminAdminEntitiesIndexRouteImport } from './routes/_admin.admin.entities.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicHooksSavingsSweepsRouteImport } from './routes/api/public/hooks/savings-sweeps'
+import { Route as ApiPublicHooksNotificationDispatchRouteImport } from './routes/api/public/hooks/notification-dispatch'
+import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/public/hooks/monthly-interest'
+import { Route as ApiPublicHooksLoanRemindersRouteImport } from './routes/api/public/hooks/loan-reminders'
+import { Route as MemberAppSavingsStatementsRouteImport } from './routes/_member.app.savings.statements'
+import { Route as MemberAppSavingsPotsRouteImport } from './routes/_member.app.savings.pots'
+import { Route as MemberAppSavingsLedgerRouteImport } from './routes/_member.app.savings.ledger'
+import { Route as MemberAppSavingsInsightsRouteImport } from './routes/_member.app.savings.insights'
+import { Route as MemberAppSavingsGoalsRouteImport } from './routes/_member.app.savings.goals'
+import { Route as MemberAppSavingsFixedRouteImport } from './routes/_member.app.savings.fixed'
+import { Route as MemberAppSavingsEnrollRouteImport } from './routes/_member.app.savings.enroll'
+import { Route as MemberAppSavingsDepositRouteImport } from './routes/_member.app.savings.deposit'
+import { Route as MemberAppSavingsAccountIdRouteImport } from './routes/_member.app.savings.$accountId'
+import { Route as MemberAppLoansLoanIdRouteImport } from './routes/_member.app.loans.$loanId'
+import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.app.entities.register'
+import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
+import { Route as AdminAdminSavingsWithdrawalsRouteImport } from './routes/_admin.admin.savings.withdrawals'
+import { Route as AdminAdminSavingsReconciliationRouteImport } from './routes/_admin.admin.savings.reconciliation'
+import { Route as AdminAdminSavingsPotsRouteImport } from './routes/_admin.admin.savings.pots'
+import { Route as AdminAdminSavingsPlansRouteImport } from './routes/_admin.admin.savings.plans'
+import { Route as AdminAdminSavingsInterestRouteImport } from './routes/_admin.admin.savings.interest'
+import { Route as AdminAdminSavingsHoldsRouteImport } from './routes/_admin.admin.savings.holds'
+import { Route as AdminAdminSavingsFixedRouteImport } from './routes/_admin.admin.savings.fixed'
+import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
+import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
+import { Route as AdminAdminInvestmentsAuditRouteImport } from './routes/_admin.admin.investments.audit'
+import { Route as AdminAdminFinanceTransfersRouteImport } from './routes/_admin.admin.finance.transfers'
+import { Route as AdminAdminFinanceSummaryRouteImport } from './routes/_admin.admin.finance.summary'
+import { Route as AdminAdminFinanceIncomeRouteImport } from './routes/_admin.admin.finance.income'
+import { Route as AdminAdminFinanceExpensesRouteImport } from './routes/_admin.admin.finance.expenses'
+import { Route as AdminAdminFinanceContributionsRouteImport } from './routes/_admin.admin.finance.contributions'
+import { Route as AdminAdminFinanceBreakdownRouteImport } from './routes/_admin.admin.finance.breakdown'
+import { Route as AdminAdminFinanceAdjustmentsRouteImport } from './routes/_admin.admin.finance.adjustments'
+import { Route as AdminAdminEntitiesRegisterRouteImport } from './routes/_admin.admin.entities.register'
+import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.admin.entities.$entityId'
+import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.admin.console.snapshots'
+import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
+import { Route as AdminAdminComplianceApprovalsRouteImport } from './routes/_admin.admin.compliance.approvals'
+import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/_admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MemberRoute = MemberRouteImport.update({
-  id: '/_member',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -126,199 +114,67 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: '/unsubscribe',
-  path: '/unsubscribe',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAdminRoute = AdminAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AdminRoute,
+const MemberRoute = MemberRouteImport.update({
+  id: '/_member',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const MemberAppRoute = MemberAppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => MemberRoute,
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthForgotRoute = AuthForgotRouteImport.update({
-  id: '/forgot',
-  path: '/forgot',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthResetRoute = AuthResetRouteImport.update({
-  id: '/reset',
-  path: '/reset',
-  getParentRoute: () => AuthRoute,
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminAdminRoute,
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/reset',
+  path: '/reset',
+  getParentRoute: () => AuthRoute,
 } as any)
-const AdminAdminActivityRoute = AdminAdminActivityRouteImport.update({
-  id: '/activity',
-  path: '/activity',
-  getParentRoute: () => AdminAdminRoute,
+const AuthForgotRoute = AuthForgotRouteImport.update({
+  id: '/forgot',
+  path: '/forgot',
+  getParentRoute: () => AuthRoute,
 } as any)
-const AdminAdminAnalyticsRoute = AdminAdminAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AdminAdminRoute,
+const MemberAppRoute = MemberAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => MemberRoute,
 } as any)
-const AdminAdminApprovalsRoute = AdminAdminApprovalsRouteImport.update({
-  id: '/approvals',
-  path: '/approvals',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminBrandingRoute = AdminAdminBrandingRouteImport.update({
-  id: '/branding',
-  path: '/branding',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminConsoleRoute = AdminAdminConsoleRouteImport.update({
-  id: '/console',
-  path: '/console',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminEntitiesRoute = AdminAdminEntitiesRouteImport.update({
-  id: '/entities',
-  path: '/entities',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminFinanceRoute = AdminAdminFinanceRouteImport.update({
-  id: '/finance',
-  path: '/finance',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminHealthRoute = AdminAdminHealthRouteImport.update({
-  id: '/health',
-  path: '/health',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminInvestmentsRoute = AdminAdminInvestmentsRouteImport.update({
-  id: '/investments',
-  path: '/investments',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminLoansRoute = AdminAdminLoansRouteImport.update({
-  id: '/loans',
-  path: '/loans',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminLogsRoute = AdminAdminLogsRouteImport.update({
-  id: '/logs',
-  path: '/logs',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminMembersRoute = AdminAdminMembersRouteImport.update({
-  id: '/members',
-  path: '/members',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminNotificationsRoute = AdminAdminNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
-  id: '/payments',
-  path: '/payments',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminRecurringRoute = AdminAdminRecurringRouteImport.update({
-  id: '/recurring',
-  path: '/recurring',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminReportsRoute = AdminAdminReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminRolesRoute = AdminAdminRolesRouteImport.update({
-  id: '/roles',
-  path: '/roles',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminSavingsRoute = AdminAdminSavingsRouteImport.update({
-  id: '/savings',
-  path: '/savings',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminSecurityRoute = AdminAdminSecurityRouteImport.update({
-  id: '/security',
-  path: '/security',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminSettingsRoute = AdminAdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminAdminRoute,
-} as any)
-const AdminAdminSuperAdminsRoute = AdminAdminSuperAdminsRouteImport.update({
-  id: '/super-admins',
-  path: '/super-admins',
-  getParentRoute: () => AdminAdminRoute,
+const AdminAdminRoute = AdminAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AdminRoute,
 } as any)
 const MemberAppIndexRoute = MemberAppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MemberAppRoute,
 } as any)
-const MemberAppInvestmentsRoute = MemberAppInvestmentsRouteImport.update({
-  id: '/investments',
-  path: '/investments',
-  getParentRoute: () => MemberAppRoute,
+const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
-const MemberAppKycRoute = MemberAppKycRouteImport.update({
-  id: '/kyc',
-  path: '/kyc',
-  getParentRoute: () => MemberAppRoute,
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const MemberAppLoansRoute = MemberAppLoansRouteImport.update({
-  id: '/loans',
-  path: '/loans',
-  getParentRoute: () => MemberAppRoute,
-} as any)
-const MemberAppNotificationsRoute = MemberAppNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => MemberAppRoute,
-} as any)
-const MemberAppPaymentsRoute = MemberAppPaymentsRouteImport.update({
-  id: '/payments',
-  path: '/payments',
-  getParentRoute: () => MemberAppRoute,
-} as any)
-const MemberAppProfileRoute = MemberAppProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => MemberAppRoute,
-} as any)
-const MemberAppRepaymentsRoute = MemberAppRepaymentsRouteImport.update({
-  id: '/repayments',
-  path: '/repayments',
-  getParentRoute: () => MemberAppRoute,
-} as any)
-const MemberAppSavingsRoute = MemberAppSavingsRouteImport.update({
-  id: '/savings',
-  path: '/savings',
-  getParentRoute: () => MemberAppRoute,
-} as any)
-const MemberAppSupportRoute = MemberAppSupportRouteImport.update({
-  id: '/support',
-  path: '/support',
+const MemberAppTransfersRoute = MemberAppTransfersRouteImport.update({
+  id: '/transfers',
+  path: '/transfers',
   getParentRoute: () => MemberAppRoute,
 } as any)
 const MemberAppTransactionsRoute = MemberAppTransactionsRouteImport.update({
@@ -326,260 +182,180 @@ const MemberAppTransactionsRoute = MemberAppTransactionsRouteImport.update({
   path: '/transactions',
   getParentRoute: () => MemberAppRoute,
 } as any)
-const MemberAppTransfersRoute = MemberAppTransfersRouteImport.update({
-  id: '/transfers',
-  path: '/transfers',
+const MemberAppSupportRoute = MemberAppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => MemberAppRoute,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
-  getParentRoute: () => rootRouteImport,
+const MemberAppSavingsRoute = MemberAppSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminAuditTransfersRoute =
-  AdminAdminAuditTransfersRouteImport.update({
-    id: '/transfers',
-    path: '/transfers',
-    getParentRoute: () => AdminAdminAuditRoute,
-  } as any)
-const AdminAdminComplianceApprovalsRoute =
-  AdminAdminComplianceApprovalsRouteImport.update({
-    id: '/compliance/approvals',
-    path: '/compliance/approvals',
-    getParentRoute: () => AdminAdminRoute,
-  } as any)
-const AdminAdminConsoleApprovalsRoute =
-  AdminAdminConsoleApprovalsRouteImport.update({
-    id: '/approvals',
-    path: '/approvals',
-    getParentRoute: () => AdminAdminConsoleRoute,
-  } as any)
-const AdminAdminConsoleSnapshotsRoute =
-  AdminAdminConsoleSnapshotsRouteImport.update({
-    id: '/snapshots',
-    path: '/snapshots',
-    getParentRoute: () => AdminAdminConsoleRoute,
-  } as any)
-const AdminAdminEntitiesIndexRoute = AdminAdminEntitiesIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminAdminEntitiesRoute,
+const MemberAppRepaymentsRoute = MemberAppRepaymentsRouteImport.update({
+  id: '/repayments',
+  path: '/repayments',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminEntitiesEntityIdRoute =
-  AdminAdminEntitiesEntityIdRouteImport.update({
-    id: '/$entityId',
-    path: '/$entityId',
-    getParentRoute: () => AdminAdminEntitiesRoute,
-  } as any)
-const AdminAdminEntitiesRegisterRoute =
-  AdminAdminEntitiesRegisterRouteImport.update({
-    id: '/register',
-    path: '/register',
-    getParentRoute: () => AdminAdminEntitiesRoute,
-  } as any)
-const AdminAdminFinanceIndexRoute = AdminAdminFinanceIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminAdminFinanceRoute,
+const MemberAppProfileRoute = MemberAppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminFinanceAdjustmentsRoute =
-  AdminAdminFinanceAdjustmentsRouteImport.update({
-    id: '/adjustments',
-    path: '/adjustments',
-    getParentRoute: () => AdminAdminFinanceRoute,
-  } as any)
-const AdminAdminFinanceBreakdownRoute =
-  AdminAdminFinanceBreakdownRouteImport.update({
-    id: '/breakdown',
-    path: '/breakdown',
-    getParentRoute: () => AdminAdminFinanceRoute,
-  } as any)
-const AdminAdminFinanceContributionsRoute =
-  AdminAdminFinanceContributionsRouteImport.update({
-    id: '/contributions',
-    path: '/contributions',
-    getParentRoute: () => AdminAdminFinanceRoute,
-  } as any)
-const AdminAdminFinanceExpensesRoute =
-  AdminAdminFinanceExpensesRouteImport.update({
-    id: '/expenses',
-    path: '/expenses',
-    getParentRoute: () => AdminAdminFinanceRoute,
-  } as any)
-const AdminAdminFinanceIncomeRoute = AdminAdminFinanceIncomeRouteImport.update({
-  id: '/income',
-  path: '/income',
-  getParentRoute: () => AdminAdminFinanceRoute,
+const MemberAppPaymentsRoute = MemberAppPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminFinanceSummaryRoute =
-  AdminAdminFinanceSummaryRouteImport.update({
-    id: '/summary',
-    path: '/summary',
-    getParentRoute: () => AdminAdminFinanceRoute,
-  } as any)
-const AdminAdminFinanceTransfersRoute =
-  AdminAdminFinanceTransfersRouteImport.update({
-    id: '/transfers',
-    path: '/transfers',
-    getParentRoute: () => AdminAdminFinanceRoute,
-  } as any)
-const AdminAdminInvestmentsAuditRoute =
-  AdminAdminInvestmentsAuditRouteImport.update({
-    id: '/audit',
-    path: '/audit',
-    getParentRoute: () => AdminAdminInvestmentsRoute,
-  } as any)
-const AdminAdminLoansLoanIdRoute = AdminAdminLoansLoanIdRouteImport.update({
-  id: '/$loanId',
-  path: '/$loanId',
-  getParentRoute: () => AdminAdminLoansRoute,
+const MemberAppNotificationsRoute = MemberAppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AdminAdminMembersRoute,
+const MemberAppLoansRoute = MemberAppLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminSavingsFixedRoute = AdminAdminSavingsFixedRouteImport.update({
-  id: '/fixed',
-  path: '/fixed',
-  getParentRoute: () => AdminAdminSavingsRoute,
+const MemberAppKycRoute = MemberAppKycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminSavingsHoldsRoute = AdminAdminSavingsHoldsRouteImport.update({
-  id: '/holds',
-  path: '/holds',
-  getParentRoute: () => AdminAdminSavingsRoute,
+const MemberAppInvestmentsRoute = MemberAppInvestmentsRouteImport.update({
+  id: '/investments',
+  path: '/investments',
+  getParentRoute: () => MemberAppRoute,
 } as any)
-const AdminAdminSavingsInterestRoute =
-  AdminAdminSavingsInterestRouteImport.update({
-    id: '/interest',
-    path: '/interest',
-    getParentRoute: () => AdminAdminSavingsRoute,
-  } as any)
-const AdminAdminSavingsPlansRoute = AdminAdminSavingsPlansRouteImport.update({
-  id: '/plans',
-  path: '/plans',
-  getParentRoute: () => AdminAdminSavingsRoute,
+const AdminAdminSuperAdminsRoute = AdminAdminSuperAdminsRouteImport.update({
+  id: '/super-admins',
+  path: '/super-admins',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
-const AdminAdminSavingsPotsRoute = AdminAdminSavingsPotsRouteImport.update({
-  id: '/pots',
-  path: '/pots',
-  getParentRoute: () => AdminAdminSavingsRoute,
+const AdminAdminSettingsRoute = AdminAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
-const AdminAdminSavingsReconciliationRoute =
-  AdminAdminSavingsReconciliationRouteImport.update({
-    id: '/reconciliation',
-    path: '/reconciliation',
-    getParentRoute: () => AdminAdminSavingsRoute,
-  } as any)
-const AdminAdminSavingsWithdrawalsRoute =
-  AdminAdminSavingsWithdrawalsRouteImport.update({
-    id: '/withdrawals',
-    path: '/withdrawals',
-    getParentRoute: () => AdminAdminSavingsRoute,
-  } as any)
-const AdminAdminSuperAdminsHistoryRoute =
-  AdminAdminSuperAdminsHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
-    getParentRoute: () => AdminAdminSuperAdminsRoute,
-  } as any)
-const MemberAppEntitiesRegisterRoute =
-  MemberAppEntitiesRegisterRouteImport.update({
-    id: '/entities/register',
-    path: '/entities/register',
-    getParentRoute: () => MemberAppRoute,
-  } as any)
-const MemberAppLoansLoanIdRoute = MemberAppLoansLoanIdRouteImport.update({
-  id: '/$loanId',
-  path: '/$loanId',
-  getParentRoute: () => MemberAppLoansRoute,
+const AdminAdminSecurityRoute = AdminAdminSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSavingsRoute = AdminAdminSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminRolesRoute = AdminAdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminReportsRoute = AdminAdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminRecurringRoute = AdminAdminRecurringRouteImport.update({
+  id: '/recurring',
+  path: '/recurring',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminNotificationsRoute = AdminAdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminMembersRoute = AdminAdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminLogsRoute = AdminAdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminLoansRoute = AdminAdminLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminInvestmentsRoute = AdminAdminInvestmentsRouteImport.update({
+  id: '/investments',
+  path: '/investments',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminHealthRoute = AdminAdminHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminFinanceRoute = AdminAdminFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminEntitiesRoute = AdminAdminEntitiesRouteImport.update({
+  id: '/entities',
+  path: '/entities',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminConsoleRoute = AdminAdminConsoleRouteImport.update({
+  id: '/console',
+  path: '/console',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminBrandingRoute = AdminAdminBrandingRouteImport.update({
+  id: '/branding',
+  path: '/branding',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminApprovalsRoute = AdminAdminApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminAnalyticsRoute = AdminAdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminActivityRoute = AdminAdminActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
 const MemberAppSavingsIndexRoute = MemberAppSavingsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MemberAppSavingsRoute,
 } as any)
-const MemberAppSavingsAccountIdRoute =
-  MemberAppSavingsAccountIdRouteImport.update({
-    id: '/$accountId',
-    path: '/$accountId',
-    getParentRoute: () => MemberAppSavingsRoute,
-  } as any)
-const MemberAppSavingsDepositRoute = MemberAppSavingsDepositRouteImport.update({
-  id: '/deposit',
-  path: '/deposit',
-  getParentRoute: () => MemberAppSavingsRoute,
+const AdminAdminFinanceIndexRoute = AdminAdminFinanceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminFinanceRoute,
 } as any)
-const MemberAppSavingsEnrollRoute = MemberAppSavingsEnrollRouteImport.update({
-  id: '/enroll',
-  path: '/enroll',
-  getParentRoute: () => MemberAppSavingsRoute,
+const AdminAdminEntitiesIndexRoute = AdminAdminEntitiesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminEntitiesRoute,
 } as any)
-const MemberAppSavingsFixedRoute = MemberAppSavingsFixedRouteImport.update({
-  id: '/fixed',
-  path: '/fixed',
-  getParentRoute: () => MemberAppSavingsRoute,
-} as any)
-const MemberAppSavingsInsightsRoute =
-  MemberAppSavingsInsightsRouteImport.update({
-    id: '/insights',
-    path: '/insights',
-    getParentRoute: () => MemberAppSavingsRoute,
-  } as any)
-const MemberAppSavingsLedgerRoute = MemberAppSavingsLedgerRouteImport.update({
-  id: '/ledger',
-  path: '/ledger',
-  getParentRoute: () => MemberAppSavingsRoute,
-} as any)
-const MemberAppSavingsPotsRoute = MemberAppSavingsPotsRouteImport.update({
-  id: '/pots',
-  path: '/pots',
-  getParentRoute: () => MemberAppSavingsRoute,
-} as any)
-const MemberAppSavingsStatementsRoute =
-  MemberAppSavingsStatementsRouteImport.update({
-    id: '/statements',
-    path: '/statements',
-    getParentRoute: () => MemberAppSavingsRoute,
-  } as any)
-const ApiPublicHooksLoanRemindersRoute =
-  ApiPublicHooksLoanRemindersRouteImport.update({
-    id: '/api/public/hooks/loan-reminders',
-    path: '/api/public/hooks/loan-reminders',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksMonthlyInterestRoute =
-  ApiPublicHooksMonthlyInterestRouteImport.update({
-    id: '/api/public/hooks/monthly-interest',
-    path: '/api/public/hooks/monthly-interest',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksNotificationDispatchRoute =
-  ApiPublicHooksNotificationDispatchRouteImport.update({
-    id: '/api/public/hooks/notification-dispatch',
-    path: '/api/public/hooks/notification-dispatch',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksSavingsSweepsRoute =
-  ApiPublicHooksSavingsSweepsRouteImport.update({
-    id: '/api/public/hooks/savings-sweeps',
-    path: '/api/public/hooks/savings-sweeps',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 const LovableEmailTransactionalPreviewRoute =
@@ -588,11 +364,241 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksSavingsSweepsRoute =
+  ApiPublicHooksSavingsSweepsRouteImport.update({
+    id: '/api/public/hooks/savings-sweeps',
+    path: '/api/public/hooks/savings-sweeps',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksNotificationDispatchRoute =
+  ApiPublicHooksNotificationDispatchRouteImport.update({
+    id: '/api/public/hooks/notification-dispatch',
+    path: '/api/public/hooks/notification-dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksMonthlyInterestRoute =
+  ApiPublicHooksMonthlyInterestRouteImport.update({
+    id: '/api/public/hooks/monthly-interest',
+    path: '/api/public/hooks/monthly-interest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksLoanRemindersRoute =
+  ApiPublicHooksLoanRemindersRouteImport.update({
+    id: '/api/public/hooks/loan-reminders',
+    path: '/api/public/hooks/loan-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const MemberAppSavingsStatementsRoute =
+  MemberAppSavingsStatementsRouteImport.update({
+    id: '/statements',
+    path: '/statements',
+    getParentRoute: () => MemberAppSavingsRoute,
+  } as any)
+const MemberAppSavingsPotsRoute = MemberAppSavingsPotsRouteImport.update({
+  id: '/pots',
+  path: '/pots',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsLedgerRoute = MemberAppSavingsLedgerRouteImport.update({
+  id: '/ledger',
+  path: '/ledger',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsInsightsRoute =
+  MemberAppSavingsInsightsRouteImport.update({
+    id: '/insights',
+    path: '/insights',
+    getParentRoute: () => MemberAppSavingsRoute,
+  } as any)
+const MemberAppSavingsGoalsRoute = MemberAppSavingsGoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsFixedRoute = MemberAppSavingsFixedRouteImport.update({
+  id: '/fixed',
+  path: '/fixed',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsEnrollRoute = MemberAppSavingsEnrollRouteImport.update({
+  id: '/enroll',
+  path: '/enroll',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsDepositRoute = MemberAppSavingsDepositRouteImport.update({
+  id: '/deposit',
+  path: '/deposit',
+  getParentRoute: () => MemberAppSavingsRoute,
+} as any)
+const MemberAppSavingsAccountIdRoute =
+  MemberAppSavingsAccountIdRouteImport.update({
+    id: '/$accountId',
+    path: '/$accountId',
+    getParentRoute: () => MemberAppSavingsRoute,
+  } as any)
+const MemberAppLoansLoanIdRoute = MemberAppLoansLoanIdRouteImport.update({
+  id: '/$loanId',
+  path: '/$loanId',
+  getParentRoute: () => MemberAppLoansRoute,
+} as any)
+const MemberAppEntitiesRegisterRoute =
+  MemberAppEntitiesRegisterRouteImport.update({
+    id: '/entities/register',
+    path: '/entities/register',
+    getParentRoute: () => MemberAppRoute,
+  } as any)
+const AdminAdminSuperAdminsHistoryRoute =
+  AdminAdminSuperAdminsHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AdminAdminSuperAdminsRoute,
+  } as any)
+const AdminAdminSavingsWithdrawalsRoute =
+  AdminAdminSavingsWithdrawalsRouteImport.update({
+    id: '/withdrawals',
+    path: '/withdrawals',
+    getParentRoute: () => AdminAdminSavingsRoute,
+  } as any)
+const AdminAdminSavingsReconciliationRoute =
+  AdminAdminSavingsReconciliationRouteImport.update({
+    id: '/reconciliation',
+    path: '/reconciliation',
+    getParentRoute: () => AdminAdminSavingsRoute,
+  } as any)
+const AdminAdminSavingsPotsRoute = AdminAdminSavingsPotsRouteImport.update({
+  id: '/pots',
+  path: '/pots',
+  getParentRoute: () => AdminAdminSavingsRoute,
+} as any)
+const AdminAdminSavingsPlansRoute = AdminAdminSavingsPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => AdminAdminSavingsRoute,
+} as any)
+const AdminAdminSavingsInterestRoute =
+  AdminAdminSavingsInterestRouteImport.update({
+    id: '/interest',
+    path: '/interest',
+    getParentRoute: () => AdminAdminSavingsRoute,
+  } as any)
+const AdminAdminSavingsHoldsRoute = AdminAdminSavingsHoldsRouteImport.update({
+  id: '/holds',
+  path: '/holds',
+  getParentRoute: () => AdminAdminSavingsRoute,
+} as any)
+const AdminAdminSavingsFixedRoute = AdminAdminSavingsFixedRouteImport.update({
+  id: '/fixed',
+  path: '/fixed',
+  getParentRoute: () => AdminAdminSavingsRoute,
+} as any)
+const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminAdminMembersRoute,
+} as any)
+const AdminAdminLoansLoanIdRoute = AdminAdminLoansLoanIdRouteImport.update({
+  id: '/$loanId',
+  path: '/$loanId',
+  getParentRoute: () => AdminAdminLoansRoute,
+} as any)
+const AdminAdminInvestmentsAuditRoute =
+  AdminAdminInvestmentsAuditRouteImport.update({
+    id: '/audit',
+    path: '/audit',
+    getParentRoute: () => AdminAdminInvestmentsRoute,
+  } as any)
+const AdminAdminFinanceTransfersRoute =
+  AdminAdminFinanceTransfersRouteImport.update({
+    id: '/transfers',
+    path: '/transfers',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminFinanceSummaryRoute =
+  AdminAdminFinanceSummaryRouteImport.update({
+    id: '/summary',
+    path: '/summary',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminFinanceIncomeRoute = AdminAdminFinanceIncomeRouteImport.update({
+  id: '/income',
+  path: '/income',
+  getParentRoute: () => AdminAdminFinanceRoute,
+} as any)
+const AdminAdminFinanceExpensesRoute =
+  AdminAdminFinanceExpensesRouteImport.update({
+    id: '/expenses',
+    path: '/expenses',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminFinanceContributionsRoute =
+  AdminAdminFinanceContributionsRouteImport.update({
+    id: '/contributions',
+    path: '/contributions',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminFinanceBreakdownRoute =
+  AdminAdminFinanceBreakdownRouteImport.update({
+    id: '/breakdown',
+    path: '/breakdown',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminFinanceAdjustmentsRoute =
+  AdminAdminFinanceAdjustmentsRouteImport.update({
+    id: '/adjustments',
+    path: '/adjustments',
+    getParentRoute: () => AdminAdminFinanceRoute,
+  } as any)
+const AdminAdminEntitiesRegisterRoute =
+  AdminAdminEntitiesRegisterRouteImport.update({
+    id: '/register',
+    path: '/register',
+    getParentRoute: () => AdminAdminEntitiesRoute,
+  } as any)
+const AdminAdminEntitiesEntityIdRoute =
+  AdminAdminEntitiesEntityIdRouteImport.update({
+    id: '/$entityId',
+    path: '/$entityId',
+    getParentRoute: () => AdminAdminEntitiesRoute,
+  } as any)
+const AdminAdminConsoleSnapshotsRoute =
+  AdminAdminConsoleSnapshotsRouteImport.update({
+    id: '/snapshots',
+    path: '/snapshots',
+    getParentRoute: () => AdminAdminConsoleRoute,
+  } as any)
+const AdminAdminConsoleApprovalsRoute =
+  AdminAdminConsoleApprovalsRouteImport.update({
+    id: '/approvals',
+    path: '/approvals',
+    getParentRoute: () => AdminAdminConsoleRoute,
+  } as any)
+const AdminAdminComplianceApprovalsRoute =
+  AdminAdminComplianceApprovalsRouteImport.update({
+    id: '/compliance/approvals',
+    path: '/compliance/approvals',
+    getParentRoute: () => AdminAdminRoute,
+  } as any)
+const AdminAdminAuditTransfersRoute =
+  AdminAdminAuditTransfersRouteImport.update({
+    id: '/transfers',
+    path: '/transfers',
+    getParentRoute: () => AdminAdminAuditRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -671,6 +677,7 @@ export interface FileRoutesByFullPath {
   '/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/app/savings/fixed': typeof MemberAppSavingsFixedRoute
+  '/app/savings/goals': typeof MemberAppSavingsGoalsRoute
   '/app/savings/insights': typeof MemberAppSavingsInsightsRoute
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
@@ -759,6 +766,7 @@ export interface FileRoutesByTo {
   '/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/app/savings/fixed': typeof MemberAppSavingsFixedRoute
+  '/app/savings/goals': typeof MemberAppSavingsGoalsRoute
   '/app/savings/insights': typeof MemberAppSavingsInsightsRoute
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
@@ -855,6 +863,7 @@ export interface FileRoutesById {
   '/_member/app/savings/deposit': typeof MemberAppSavingsDepositRoute
   '/_member/app/savings/enroll': typeof MemberAppSavingsEnrollRoute
   '/_member/app/savings/fixed': typeof MemberAppSavingsFixedRoute
+  '/_member/app/savings/goals': typeof MemberAppSavingsGoalsRoute
   '/_member/app/savings/insights': typeof MemberAppSavingsInsightsRoute
   '/_member/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/_member/app/savings/pots': typeof MemberAppSavingsPotsRoute
@@ -950,6 +959,7 @@ export interface FileRouteTypes {
     | '/app/savings/deposit'
     | '/app/savings/enroll'
     | '/app/savings/fixed'
+    | '/app/savings/goals'
     | '/app/savings/insights'
     | '/app/savings/ledger'
     | '/app/savings/pots'
@@ -1038,6 +1048,7 @@ export interface FileRouteTypes {
     | '/app/savings/deposit'
     | '/app/savings/enroll'
     | '/app/savings/fixed'
+    | '/app/savings/goals'
     | '/app/savings/insights'
     | '/app/savings/ledger'
     | '/app/savings/pots'
@@ -1133,6 +1144,7 @@ export interface FileRouteTypes {
     | '/_member/app/savings/deposit'
     | '/_member/app/savings/enroll'
     | '/_member/app/savings/fixed'
+    | '/_member/app/savings/goals'
     | '/_member/app/savings/insights'
     | '/_member/app/savings/ledger'
     | '/_member/app/savings/pots'
@@ -1173,32 +1185,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_admin': {
-      id: '/_admin'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_member': {
-      id: '/_member'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof MemberRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1208,40 +1199,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/unsubscribe': {
-      id: '/unsubscribe'
-      path: '/unsubscribe'
-      fullPath: '/unsubscribe'
-      preLoaderRoute: typeof UnsubscribeRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin/admin': {
-      id: '/_admin/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminAdminRouteImport
-      parentRoute: typeof AdminRoute
+    '/_member': {
+      id: '/_member'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MemberRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_member/app': {
-      id: '/_member/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof MemberAppRouteImport
-      parentRoute: typeof MemberRoute
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/auth/forgot': {
-      id: '/auth/forgot'
-      path: '/forgot'
-      fullPath: '/auth/forgot'
-      preLoaderRoute: typeof AuthForgotRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/reset': {
-      id: '/auth/reset'
-      path: '/reset'
-      fullPath: '/auth/reset'
-      preLoaderRoute: typeof AuthResetRouteImport
-      parentRoute: typeof AuthRoute
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -1250,166 +1234,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin/admin/': {
-      id: '/_admin/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminAdminIndexRouteImport
-      parentRoute: typeof AdminAdminRoute
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/_admin/admin/activity': {
-      id: '/_admin/admin/activity'
-      path: '/activity'
-      fullPath: '/admin/activity'
-      preLoaderRoute: typeof AdminAdminActivityRouteImport
-      parentRoute: typeof AdminAdminRoute
+    '/auth/forgot': {
+      id: '/auth/forgot'
+      path: '/forgot'
+      fullPath: '/auth/forgot'
+      preLoaderRoute: typeof AuthForgotRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/_admin/admin/analytics': {
-      id: '/_admin/admin/analytics'
-      path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAdminAnalyticsRouteImport
-      parentRoute: typeof AdminAdminRoute
+    '/_member/app': {
+      id: '/_member/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof MemberAppRouteImport
+      parentRoute: typeof MemberRoute
     }
-    '/_admin/admin/approvals': {
-      id: '/_admin/admin/approvals'
-      path: '/approvals'
-      fullPath: '/admin/approvals'
-      preLoaderRoute: typeof AdminAdminApprovalsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/audit': {
-      id: '/_admin/admin/audit'
-      path: '/audit'
-      fullPath: '/admin/audit'
-      preLoaderRoute: typeof AdminAdminAuditRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/branding': {
-      id: '/_admin/admin/branding'
-      path: '/branding'
-      fullPath: '/admin/branding'
-      preLoaderRoute: typeof AdminAdminBrandingRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/console': {
-      id: '/_admin/admin/console'
-      path: '/console'
-      fullPath: '/admin/console'
-      preLoaderRoute: typeof AdminAdminConsoleRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/entities': {
-      id: '/_admin/admin/entities'
-      path: '/entities'
-      fullPath: '/admin/entities'
-      preLoaderRoute: typeof AdminAdminEntitiesRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/finance': {
-      id: '/_admin/admin/finance'
-      path: '/finance'
-      fullPath: '/admin/finance'
-      preLoaderRoute: typeof AdminAdminFinanceRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/health': {
-      id: '/_admin/admin/health'
-      path: '/health'
-      fullPath: '/admin/health'
-      preLoaderRoute: typeof AdminAdminHealthRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/investments': {
-      id: '/_admin/admin/investments'
-      path: '/investments'
-      fullPath: '/admin/investments'
-      preLoaderRoute: typeof AdminAdminInvestmentsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/loans': {
-      id: '/_admin/admin/loans'
-      path: '/loans'
-      fullPath: '/admin/loans'
-      preLoaderRoute: typeof AdminAdminLoansRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/logs': {
-      id: '/_admin/admin/logs'
-      path: '/logs'
-      fullPath: '/admin/logs'
-      preLoaderRoute: typeof AdminAdminLogsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/members': {
-      id: '/_admin/admin/members'
-      path: '/members'
-      fullPath: '/admin/members'
-      preLoaderRoute: typeof AdminAdminMembersRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/notifications': {
-      id: '/_admin/admin/notifications'
-      path: '/notifications'
-      fullPath: '/admin/notifications'
-      preLoaderRoute: typeof AdminAdminNotificationsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/payments': {
-      id: '/_admin/admin/payments'
-      path: '/payments'
-      fullPath: '/admin/payments'
-      preLoaderRoute: typeof AdminAdminPaymentsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/recurring': {
-      id: '/_admin/admin/recurring'
-      path: '/recurring'
-      fullPath: '/admin/recurring'
-      preLoaderRoute: typeof AdminAdminRecurringRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/reports': {
-      id: '/_admin/admin/reports'
-      path: '/reports'
-      fullPath: '/admin/reports'
-      preLoaderRoute: typeof AdminAdminReportsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/roles': {
-      id: '/_admin/admin/roles'
-      path: '/roles'
-      fullPath: '/admin/roles'
-      preLoaderRoute: typeof AdminAdminRolesRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/savings': {
-      id: '/_admin/admin/savings'
-      path: '/savings'
-      fullPath: '/admin/savings'
-      preLoaderRoute: typeof AdminAdminSavingsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/security': {
-      id: '/_admin/admin/security'
-      path: '/security'
-      fullPath: '/admin/security'
-      preLoaderRoute: typeof AdminAdminSecurityRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/settings': {
-      id: '/_admin/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminAdminSettingsRouteImport
-      parentRoute: typeof AdminAdminRoute
-    }
-    '/_admin/admin/super-admins': {
-      id: '/_admin/admin/super-admins'
-      path: '/super-admins'
-      fullPath: '/admin/super-admins'
-      preLoaderRoute: typeof AdminAdminSuperAdminsRouteImport
-      parentRoute: typeof AdminAdminRoute
+    '/_admin/admin': {
+      id: '/_admin/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_member/app/': {
       id: '/_member/app/'
@@ -1418,67 +1269,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppIndexRouteImport
       parentRoute: typeof MemberAppRoute
     }
-    '/_member/app/investments': {
-      id: '/_member/app/investments'
-      path: '/investments'
-      fullPath: '/app/investments'
-      preLoaderRoute: typeof MemberAppInvestmentsRouteImport
-      parentRoute: typeof MemberAppRoute
+    '/_admin/admin/': {
+      id: '/_admin/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAdminIndexRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_member/app/kyc': {
-      id: '/_member/app/kyc'
-      path: '/kyc'
-      fullPath: '/app/kyc'
-      preLoaderRoute: typeof MemberAppKycRouteImport
-      parentRoute: typeof MemberAppRoute
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_member/app/loans': {
-      id: '/_member/app/loans'
-      path: '/loans'
-      fullPath: '/app/loans'
-      preLoaderRoute: typeof MemberAppLoansRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
-    '/_member/app/notifications': {
-      id: '/_member/app/notifications'
-      path: '/notifications'
-      fullPath: '/app/notifications'
-      preLoaderRoute: typeof MemberAppNotificationsRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
-    '/_member/app/payments': {
-      id: '/_member/app/payments'
-      path: '/payments'
-      fullPath: '/app/payments'
-      preLoaderRoute: typeof MemberAppPaymentsRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
-    '/_member/app/profile': {
-      id: '/_member/app/profile'
-      path: '/profile'
-      fullPath: '/app/profile'
-      preLoaderRoute: typeof MemberAppProfileRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
-    '/_member/app/repayments': {
-      id: '/_member/app/repayments'
-      path: '/repayments'
-      fullPath: '/app/repayments'
-      preLoaderRoute: typeof MemberAppRepaymentsRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
-    '/_member/app/savings': {
-      id: '/_member/app/savings'
-      path: '/savings'
-      fullPath: '/app/savings'
-      preLoaderRoute: typeof MemberAppSavingsRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
-    '/_member/app/support': {
-      id: '/_member/app/support'
-      path: '/support'
-      fullPath: '/app/support'
-      preLoaderRoute: typeof MemberAppSupportRouteImport
+    '/_member/app/transfers': {
+      id: '/_member/app/transfers'
+      path: '/transfers'
+      fullPath: '/app/transfers'
+      preLoaderRoute: typeof MemberAppTransfersRouteImport
       parentRoute: typeof MemberAppRoute
     }
     '/_member/app/transactions': {
@@ -1488,215 +1297,222 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppTransactionsRouteImport
       parentRoute: typeof MemberAppRoute
     }
-    '/_member/app/transfers': {
-      id: '/_member/app/transfers'
-      path: '/transfers'
-      fullPath: '/app/transfers'
-      preLoaderRoute: typeof MemberAppTransfersRouteImport
+    '/_member/app/support': {
+      id: '/_member/app/support'
+      path: '/support'
+      fullPath: '/app/support'
+      preLoaderRoute: typeof MemberAppSupportRouteImport
       parentRoute: typeof MemberAppRoute
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_member/app/savings': {
+      id: '/_member/app/savings'
+      path: '/savings'
+      fullPath: '/app/savings'
+      preLoaderRoute: typeof MemberAppSavingsRouteImport
+      parentRoute: typeof MemberAppRoute
     }
-    '/_admin/admin/audit/transfers': {
-      id: '/_admin/admin/audit/transfers'
-      path: '/transfers'
-      fullPath: '/admin/audit/transfers'
-      preLoaderRoute: typeof AdminAdminAuditTransfersRouteImport
-      parentRoute: typeof AdminAdminAuditRoute
+    '/_member/app/repayments': {
+      id: '/_member/app/repayments'
+      path: '/repayments'
+      fullPath: '/app/repayments'
+      preLoaderRoute: typeof MemberAppRepaymentsRouteImport
+      parentRoute: typeof MemberAppRoute
     }
-    '/_admin/admin/compliance/approvals': {
-      id: '/_admin/admin/compliance/approvals'
-      path: '/compliance/approvals'
-      fullPath: '/admin/compliance/approvals'
-      preLoaderRoute: typeof AdminAdminComplianceApprovalsRouteImport
+    '/_member/app/profile': {
+      id: '/_member/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof MemberAppProfileRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/payments': {
+      id: '/_member/app/payments'
+      path: '/payments'
+      fullPath: '/app/payments'
+      preLoaderRoute: typeof MemberAppPaymentsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/notifications': {
+      id: '/_member/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof MemberAppNotificationsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/loans': {
+      id: '/_member/app/loans'
+      path: '/loans'
+      fullPath: '/app/loans'
+      preLoaderRoute: typeof MemberAppLoansRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/kyc': {
+      id: '/_member/app/kyc'
+      path: '/kyc'
+      fullPath: '/app/kyc'
+      preLoaderRoute: typeof MemberAppKycRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/investments': {
+      id: '/_member/app/investments'
+      path: '/investments'
+      fullPath: '/app/investments'
+      preLoaderRoute: typeof MemberAppInvestmentsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_admin/admin/super-admins': {
+      id: '/_admin/admin/super-admins'
+      path: '/super-admins'
+      fullPath: '/admin/super-admins'
+      preLoaderRoute: typeof AdminAdminSuperAdminsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/console/approvals': {
-      id: '/_admin/admin/console/approvals'
-      path: '/approvals'
-      fullPath: '/admin/console/approvals'
-      preLoaderRoute: typeof AdminAdminConsoleApprovalsRouteImport
-      parentRoute: typeof AdminAdminConsoleRoute
+    '/_admin/admin/settings': {
+      id: '/_admin/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminAdminSettingsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/console/snapshots': {
-      id: '/_admin/admin/console/snapshots'
-      path: '/snapshots'
-      fullPath: '/admin/console/snapshots'
-      preLoaderRoute: typeof AdminAdminConsoleSnapshotsRouteImport
-      parentRoute: typeof AdminAdminConsoleRoute
+    '/_admin/admin/security': {
+      id: '/_admin/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminAdminSecurityRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/entities/': {
-      id: '/_admin/admin/entities/'
-      path: '/'
-      fullPath: '/admin/entities/'
-      preLoaderRoute: typeof AdminAdminEntitiesIndexRouteImport
-      parentRoute: typeof AdminAdminEntitiesRoute
+    '/_admin/admin/savings': {
+      id: '/_admin/admin/savings'
+      path: '/savings'
+      fullPath: '/admin/savings'
+      preLoaderRoute: typeof AdminAdminSavingsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/entities/$entityId': {
-      id: '/_admin/admin/entities/$entityId'
-      path: '/$entityId'
-      fullPath: '/admin/entities/$entityId'
-      preLoaderRoute: typeof AdminAdminEntitiesEntityIdRouteImport
-      parentRoute: typeof AdminAdminEntitiesRoute
+    '/_admin/admin/roles': {
+      id: '/_admin/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminAdminRolesRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/entities/register': {
-      id: '/_admin/admin/entities/register'
-      path: '/register'
-      fullPath: '/admin/entities/register'
-      preLoaderRoute: typeof AdminAdminEntitiesRegisterRouteImport
-      parentRoute: typeof AdminAdminEntitiesRoute
+    '/_admin/admin/reports': {
+      id: '/_admin/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminAdminReportsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/': {
-      id: '/_admin/admin/finance/'
-      path: '/'
-      fullPath: '/admin/finance/'
-      preLoaderRoute: typeof AdminAdminFinanceIndexRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/recurring': {
+      id: '/_admin/admin/recurring'
+      path: '/recurring'
+      fullPath: '/admin/recurring'
+      preLoaderRoute: typeof AdminAdminRecurringRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/adjustments': {
-      id: '/_admin/admin/finance/adjustments'
-      path: '/adjustments'
-      fullPath: '/admin/finance/adjustments'
-      preLoaderRoute: typeof AdminAdminFinanceAdjustmentsRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/payments': {
+      id: '/_admin/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminAdminPaymentsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/breakdown': {
-      id: '/_admin/admin/finance/breakdown'
-      path: '/breakdown'
-      fullPath: '/admin/finance/breakdown'
-      preLoaderRoute: typeof AdminAdminFinanceBreakdownRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/notifications': {
+      id: '/_admin/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminAdminNotificationsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/contributions': {
-      id: '/_admin/admin/finance/contributions'
-      path: '/contributions'
-      fullPath: '/admin/finance/contributions'
-      preLoaderRoute: typeof AdminAdminFinanceContributionsRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/members': {
+      id: '/_admin/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminAdminMembersRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/expenses': {
-      id: '/_admin/admin/finance/expenses'
-      path: '/expenses'
-      fullPath: '/admin/finance/expenses'
-      preLoaderRoute: typeof AdminAdminFinanceExpensesRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/logs': {
+      id: '/_admin/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminAdminLogsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/income': {
-      id: '/_admin/admin/finance/income'
-      path: '/income'
-      fullPath: '/admin/finance/income'
-      preLoaderRoute: typeof AdminAdminFinanceIncomeRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/loans': {
+      id: '/_admin/admin/loans'
+      path: '/loans'
+      fullPath: '/admin/loans'
+      preLoaderRoute: typeof AdminAdminLoansRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/summary': {
-      id: '/_admin/admin/finance/summary'
-      path: '/summary'
-      fullPath: '/admin/finance/summary'
-      preLoaderRoute: typeof AdminAdminFinanceSummaryRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/investments': {
+      id: '/_admin/admin/investments'
+      path: '/investments'
+      fullPath: '/admin/investments'
+      preLoaderRoute: typeof AdminAdminInvestmentsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/finance/transfers': {
-      id: '/_admin/admin/finance/transfers'
-      path: '/transfers'
-      fullPath: '/admin/finance/transfers'
-      preLoaderRoute: typeof AdminAdminFinanceTransfersRouteImport
-      parentRoute: typeof AdminAdminFinanceRoute
+    '/_admin/admin/health': {
+      id: '/_admin/admin/health'
+      path: '/health'
+      fullPath: '/admin/health'
+      preLoaderRoute: typeof AdminAdminHealthRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/investments/audit': {
-      id: '/_admin/admin/investments/audit'
+    '/_admin/admin/finance': {
+      id: '/_admin/admin/finance'
+      path: '/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminAdminFinanceRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/entities': {
+      id: '/_admin/admin/entities'
+      path: '/entities'
+      fullPath: '/admin/entities'
+      preLoaderRoute: typeof AdminAdminEntitiesRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/console': {
+      id: '/_admin/admin/console'
+      path: '/console'
+      fullPath: '/admin/console'
+      preLoaderRoute: typeof AdminAdminConsoleRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/branding': {
+      id: '/_admin/admin/branding'
+      path: '/branding'
+      fullPath: '/admin/branding'
+      preLoaderRoute: typeof AdminAdminBrandingRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/audit': {
+      id: '/_admin/admin/audit'
       path: '/audit'
-      fullPath: '/admin/investments/audit'
-      preLoaderRoute: typeof AdminAdminInvestmentsAuditRouteImport
-      parentRoute: typeof AdminAdminInvestmentsRoute
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAdminAuditRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/loans/$loanId': {
-      id: '/_admin/admin/loans/$loanId'
-      path: '/$loanId'
-      fullPath: '/admin/loans/$loanId'
-      preLoaderRoute: typeof AdminAdminLoansLoanIdRouteImport
-      parentRoute: typeof AdminAdminLoansRoute
+    '/_admin/admin/approvals': {
+      id: '/_admin/admin/approvals'
+      path: '/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminAdminApprovalsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/members/$id': {
-      id: '/_admin/admin/members/$id'
-      path: '/$id'
-      fullPath: '/admin/members/$id'
-      preLoaderRoute: typeof AdminAdminMembersIdRouteImport
-      parentRoute: typeof AdminAdminMembersRoute
+    '/_admin/admin/analytics': {
+      id: '/_admin/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAdminAnalyticsRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
-    '/_admin/admin/savings/fixed': {
-      id: '/_admin/admin/savings/fixed'
-      path: '/fixed'
-      fullPath: '/admin/savings/fixed'
-      preLoaderRoute: typeof AdminAdminSavingsFixedRouteImport
-      parentRoute: typeof AdminAdminSavingsRoute
-    }
-    '/_admin/admin/savings/holds': {
-      id: '/_admin/admin/savings/holds'
-      path: '/holds'
-      fullPath: '/admin/savings/holds'
-      preLoaderRoute: typeof AdminAdminSavingsHoldsRouteImport
-      parentRoute: typeof AdminAdminSavingsRoute
-    }
-    '/_admin/admin/savings/interest': {
-      id: '/_admin/admin/savings/interest'
-      path: '/interest'
-      fullPath: '/admin/savings/interest'
-      preLoaderRoute: typeof AdminAdminSavingsInterestRouteImport
-      parentRoute: typeof AdminAdminSavingsRoute
-    }
-    '/_admin/admin/savings/plans': {
-      id: '/_admin/admin/savings/plans'
-      path: '/plans'
-      fullPath: '/admin/savings/plans'
-      preLoaderRoute: typeof AdminAdminSavingsPlansRouteImport
-      parentRoute: typeof AdminAdminSavingsRoute
-    }
-    '/_admin/admin/savings/pots': {
-      id: '/_admin/admin/savings/pots'
-      path: '/pots'
-      fullPath: '/admin/savings/pots'
-      preLoaderRoute: typeof AdminAdminSavingsPotsRouteImport
-      parentRoute: typeof AdminAdminSavingsRoute
-    }
-    '/_admin/admin/savings/reconciliation': {
-      id: '/_admin/admin/savings/reconciliation'
-      path: '/reconciliation'
-      fullPath: '/admin/savings/reconciliation'
-      preLoaderRoute: typeof AdminAdminSavingsReconciliationRouteImport
-      parentRoute: typeof AdminAdminSavingsRoute
-    }
-    '/_admin/admin/savings/withdrawals': {
-      id: '/_admin/admin/savings/withdrawals'
-      path: '/withdrawals'
-      fullPath: '/admin/savings/withdrawals'
-      preLoaderRoute: typeof AdminAdminSavingsWithdrawalsRouteImport
-      parentRoute: typeof AdminAdminSavingsRoute
-    }
-    '/_admin/admin/super-admins/history': {
-      id: '/_admin/admin/super-admins/history'
-      path: '/history'
-      fullPath: '/admin/super-admins/history'
-      preLoaderRoute: typeof AdminAdminSuperAdminsHistoryRouteImport
-      parentRoute: typeof AdminAdminSuperAdminsRoute
-    }
-    '/_member/app/entities/register': {
-      id: '/_member/app/entities/register'
-      path: '/entities/register'
-      fullPath: '/app/entities/register'
-      preLoaderRoute: typeof MemberAppEntitiesRegisterRouteImport
-      parentRoute: typeof MemberAppRoute
-    }
-    '/_member/app/loans/$loanId': {
-      id: '/_member/app/loans/$loanId'
-      path: '/$loanId'
-      fullPath: '/app/loans/$loanId'
-      preLoaderRoute: typeof MemberAppLoansLoanIdRouteImport
-      parentRoute: typeof MemberAppLoansRoute
+    '/_admin/admin/activity': {
+      id: '/_admin/admin/activity'
+      path: '/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminAdminActivityRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
     '/_member/app/savings/': {
       id: '/_member/app/savings/'
@@ -1705,109 +1521,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppSavingsIndexRouteImport
       parentRoute: typeof MemberAppSavingsRoute
     }
-    '/_member/app/savings/$accountId': {
-      id: '/_member/app/savings/$accountId'
-      path: '/$accountId'
-      fullPath: '/app/savings/$accountId'
-      preLoaderRoute: typeof MemberAppSavingsAccountIdRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
+    '/_admin/admin/finance/': {
+      id: '/_admin/admin/finance/'
+      path: '/'
+      fullPath: '/admin/finance/'
+      preLoaderRoute: typeof AdminAdminFinanceIndexRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
     }
-    '/_member/app/savings/deposit': {
-      id: '/_member/app/savings/deposit'
-      path: '/deposit'
-      fullPath: '/app/savings/deposit'
-      preLoaderRoute: typeof MemberAppSavingsDepositRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
+    '/_admin/admin/entities/': {
+      id: '/_admin/admin/entities/'
+      path: '/'
+      fullPath: '/admin/entities/'
+      preLoaderRoute: typeof AdminAdminEntitiesIndexRouteImport
+      parentRoute: typeof AdminAdminEntitiesRoute
     }
-    '/_member/app/savings/enroll': {
-      id: '/_member/app/savings/enroll'
-      path: '/enroll'
-      fullPath: '/app/savings/enroll'
-      preLoaderRoute: typeof MemberAppSavingsEnrollRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
-    }
-    '/_member/app/savings/fixed': {
-      id: '/_member/app/savings/fixed'
-      path: '/fixed'
-      fullPath: '/app/savings/fixed'
-      preLoaderRoute: typeof MemberAppSavingsFixedRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
-    }
-    '/_member/app/savings/insights': {
-      id: '/_member/app/savings/insights'
-      path: '/insights'
-      fullPath: '/app/savings/insights'
-      preLoaderRoute: typeof MemberAppSavingsInsightsRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
-    }
-    '/_member/app/savings/ledger': {
-      id: '/_member/app/savings/ledger'
-      path: '/ledger'
-      fullPath: '/app/savings/ledger'
-      preLoaderRoute: typeof MemberAppSavingsLedgerRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
-    }
-    '/_member/app/savings/pots': {
-      id: '/_member/app/savings/pots'
-      path: '/pots'
-      fullPath: '/app/savings/pots'
-      preLoaderRoute: typeof MemberAppSavingsPotsRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
-    }
-    '/_member/app/savings/statements': {
-      id: '/_member/app/savings/statements'
-      path: '/statements'
-      fullPath: '/app/savings/statements'
-      preLoaderRoute: typeof MemberAppSavingsStatementsRouteImport
-      parentRoute: typeof MemberAppSavingsRoute
-    }
-    '/api/public/hooks/loan-reminders': {
-      id: '/api/public/hooks/loan-reminders'
-      path: '/api/public/hooks/loan-reminders'
-      fullPath: '/api/public/hooks/loan-reminders'
-      preLoaderRoute: typeof ApiPublicHooksLoanRemindersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/monthly-interest': {
-      id: '/api/public/hooks/monthly-interest'
-      path: '/api/public/hooks/monthly-interest'
-      fullPath: '/api/public/hooks/monthly-interest'
-      preLoaderRoute: typeof ApiPublicHooksMonthlyInterestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/notification-dispatch': {
-      id: '/api/public/hooks/notification-dispatch'
-      path: '/api/public/hooks/notification-dispatch'
-      fullPath: '/api/public/hooks/notification-dispatch'
-      preLoaderRoute: typeof ApiPublicHooksNotificationDispatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/savings-sweeps': {
-      id: '/api/public/hooks/savings-sweeps'
-      path: '/api/public/hooks/savings-sweeps'
-      fullPath: '/api/public/hooks/savings-sweeps'
-      preLoaderRoute: typeof ApiPublicHooksSavingsSweepsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/transactional/preview': {
@@ -1817,12 +1549,299 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/savings-sweeps': {
+      id: '/api/public/hooks/savings-sweeps'
+      path: '/api/public/hooks/savings-sweeps'
+      fullPath: '/api/public/hooks/savings-sweeps'
+      preLoaderRoute: typeof ApiPublicHooksSavingsSweepsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/notification-dispatch': {
+      id: '/api/public/hooks/notification-dispatch'
+      path: '/api/public/hooks/notification-dispatch'
+      fullPath: '/api/public/hooks/notification-dispatch'
+      preLoaderRoute: typeof ApiPublicHooksNotificationDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/monthly-interest': {
+      id: '/api/public/hooks/monthly-interest'
+      path: '/api/public/hooks/monthly-interest'
+      fullPath: '/api/public/hooks/monthly-interest'
+      preLoaderRoute: typeof ApiPublicHooksMonthlyInterestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/loan-reminders': {
+      id: '/api/public/hooks/loan-reminders'
+      path: '/api/public/hooks/loan-reminders'
+      fullPath: '/api/public/hooks/loan-reminders'
+      preLoaderRoute: typeof ApiPublicHooksLoanRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_member/app/savings/statements': {
+      id: '/_member/app/savings/statements'
+      path: '/statements'
+      fullPath: '/app/savings/statements'
+      preLoaderRoute: typeof MemberAppSavingsStatementsRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/pots': {
+      id: '/_member/app/savings/pots'
+      path: '/pots'
+      fullPath: '/app/savings/pots'
+      preLoaderRoute: typeof MemberAppSavingsPotsRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/ledger': {
+      id: '/_member/app/savings/ledger'
+      path: '/ledger'
+      fullPath: '/app/savings/ledger'
+      preLoaderRoute: typeof MemberAppSavingsLedgerRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/insights': {
+      id: '/_member/app/savings/insights'
+      path: '/insights'
+      fullPath: '/app/savings/insights'
+      preLoaderRoute: typeof MemberAppSavingsInsightsRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/goals': {
+      id: '/_member/app/savings/goals'
+      path: '/goals'
+      fullPath: '/app/savings/goals'
+      preLoaderRoute: typeof MemberAppSavingsGoalsRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/fixed': {
+      id: '/_member/app/savings/fixed'
+      path: '/fixed'
+      fullPath: '/app/savings/fixed'
+      preLoaderRoute: typeof MemberAppSavingsFixedRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/enroll': {
+      id: '/_member/app/savings/enroll'
+      path: '/enroll'
+      fullPath: '/app/savings/enroll'
+      preLoaderRoute: typeof MemberAppSavingsEnrollRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/deposit': {
+      id: '/_member/app/savings/deposit'
+      path: '/deposit'
+      fullPath: '/app/savings/deposit'
+      preLoaderRoute: typeof MemberAppSavingsDepositRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/savings/$accountId': {
+      id: '/_member/app/savings/$accountId'
+      path: '/$accountId'
+      fullPath: '/app/savings/$accountId'
+      preLoaderRoute: typeof MemberAppSavingsAccountIdRouteImport
+      parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_member/app/loans/$loanId': {
+      id: '/_member/app/loans/$loanId'
+      path: '/$loanId'
+      fullPath: '/app/loans/$loanId'
+      preLoaderRoute: typeof MemberAppLoansLoanIdRouteImport
+      parentRoute: typeof MemberAppLoansRoute
+    }
+    '/_member/app/entities/register': {
+      id: '/_member/app/entities/register'
+      path: '/entities/register'
+      fullPath: '/app/entities/register'
+      preLoaderRoute: typeof MemberAppEntitiesRegisterRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_admin/admin/super-admins/history': {
+      id: '/_admin/admin/super-admins/history'
+      path: '/history'
+      fullPath: '/admin/super-admins/history'
+      preLoaderRoute: typeof AdminAdminSuperAdminsHistoryRouteImport
+      parentRoute: typeof AdminAdminSuperAdminsRoute
+    }
+    '/_admin/admin/savings/withdrawals': {
+      id: '/_admin/admin/savings/withdrawals'
+      path: '/withdrawals'
+      fullPath: '/admin/savings/withdrawals'
+      preLoaderRoute: typeof AdminAdminSavingsWithdrawalsRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/reconciliation': {
+      id: '/_admin/admin/savings/reconciliation'
+      path: '/reconciliation'
+      fullPath: '/admin/savings/reconciliation'
+      preLoaderRoute: typeof AdminAdminSavingsReconciliationRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/pots': {
+      id: '/_admin/admin/savings/pots'
+      path: '/pots'
+      fullPath: '/admin/savings/pots'
+      preLoaderRoute: typeof AdminAdminSavingsPotsRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/plans': {
+      id: '/_admin/admin/savings/plans'
+      path: '/plans'
+      fullPath: '/admin/savings/plans'
+      preLoaderRoute: typeof AdminAdminSavingsPlansRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/interest': {
+      id: '/_admin/admin/savings/interest'
+      path: '/interest'
+      fullPath: '/admin/savings/interest'
+      preLoaderRoute: typeof AdminAdminSavingsInterestRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/holds': {
+      id: '/_admin/admin/savings/holds'
+      path: '/holds'
+      fullPath: '/admin/savings/holds'
+      preLoaderRoute: typeof AdminAdminSavingsHoldsRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/savings/fixed': {
+      id: '/_admin/admin/savings/fixed'
+      path: '/fixed'
+      fullPath: '/admin/savings/fixed'
+      preLoaderRoute: typeof AdminAdminSavingsFixedRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
+    }
+    '/_admin/admin/members/$id': {
+      id: '/_admin/admin/members/$id'
+      path: '/$id'
+      fullPath: '/admin/members/$id'
+      preLoaderRoute: typeof AdminAdminMembersIdRouteImport
+      parentRoute: typeof AdminAdminMembersRoute
+    }
+    '/_admin/admin/loans/$loanId': {
+      id: '/_admin/admin/loans/$loanId'
+      path: '/$loanId'
+      fullPath: '/admin/loans/$loanId'
+      preLoaderRoute: typeof AdminAdminLoansLoanIdRouteImport
+      parentRoute: typeof AdminAdminLoansRoute
+    }
+    '/_admin/admin/investments/audit': {
+      id: '/_admin/admin/investments/audit'
+      path: '/audit'
+      fullPath: '/admin/investments/audit'
+      preLoaderRoute: typeof AdminAdminInvestmentsAuditRouteImport
+      parentRoute: typeof AdminAdminInvestmentsRoute
+    }
+    '/_admin/admin/finance/transfers': {
+      id: '/_admin/admin/finance/transfers'
+      path: '/transfers'
+      fullPath: '/admin/finance/transfers'
+      preLoaderRoute: typeof AdminAdminFinanceTransfersRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/summary': {
+      id: '/_admin/admin/finance/summary'
+      path: '/summary'
+      fullPath: '/admin/finance/summary'
+      preLoaderRoute: typeof AdminAdminFinanceSummaryRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/income': {
+      id: '/_admin/admin/finance/income'
+      path: '/income'
+      fullPath: '/admin/finance/income'
+      preLoaderRoute: typeof AdminAdminFinanceIncomeRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/expenses': {
+      id: '/_admin/admin/finance/expenses'
+      path: '/expenses'
+      fullPath: '/admin/finance/expenses'
+      preLoaderRoute: typeof AdminAdminFinanceExpensesRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/contributions': {
+      id: '/_admin/admin/finance/contributions'
+      path: '/contributions'
+      fullPath: '/admin/finance/contributions'
+      preLoaderRoute: typeof AdminAdminFinanceContributionsRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/breakdown': {
+      id: '/_admin/admin/finance/breakdown'
+      path: '/breakdown'
+      fullPath: '/admin/finance/breakdown'
+      preLoaderRoute: typeof AdminAdminFinanceBreakdownRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/finance/adjustments': {
+      id: '/_admin/admin/finance/adjustments'
+      path: '/adjustments'
+      fullPath: '/admin/finance/adjustments'
+      preLoaderRoute: typeof AdminAdminFinanceAdjustmentsRouteImport
+      parentRoute: typeof AdminAdminFinanceRoute
+    }
+    '/_admin/admin/entities/register': {
+      id: '/_admin/admin/entities/register'
+      path: '/register'
+      fullPath: '/admin/entities/register'
+      preLoaderRoute: typeof AdminAdminEntitiesRegisterRouteImport
+      parentRoute: typeof AdminAdminEntitiesRoute
+    }
+    '/_admin/admin/entities/$entityId': {
+      id: '/_admin/admin/entities/$entityId'
+      path: '/$entityId'
+      fullPath: '/admin/entities/$entityId'
+      preLoaderRoute: typeof AdminAdminEntitiesEntityIdRouteImport
+      parentRoute: typeof AdminAdminEntitiesRoute
+    }
+    '/_admin/admin/console/snapshots': {
+      id: '/_admin/admin/console/snapshots'
+      path: '/snapshots'
+      fullPath: '/admin/console/snapshots'
+      preLoaderRoute: typeof AdminAdminConsoleSnapshotsRouteImport
+      parentRoute: typeof AdminAdminConsoleRoute
+    }
+    '/_admin/admin/console/approvals': {
+      id: '/_admin/admin/console/approvals'
+      path: '/approvals'
+      fullPath: '/admin/console/approvals'
+      preLoaderRoute: typeof AdminAdminConsoleApprovalsRouteImport
+      parentRoute: typeof AdminAdminConsoleRoute
+    }
+    '/_admin/admin/compliance/approvals': {
+      id: '/_admin/admin/compliance/approvals'
+      path: '/compliance/approvals'
+      fullPath: '/admin/compliance/approvals'
+      preLoaderRoute: typeof AdminAdminComplianceApprovalsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/audit/transfers': {
+      id: '/_admin/admin/audit/transfers'
+      path: '/transfers'
+      fullPath: '/admin/audit/transfers'
+      preLoaderRoute: typeof AdminAdminAuditTransfersRouteImport
+      parentRoute: typeof AdminAdminAuditRoute
     }
   }
 }
@@ -2049,6 +2068,7 @@ interface MemberAppSavingsRouteChildren {
   MemberAppSavingsDepositRoute: typeof MemberAppSavingsDepositRoute
   MemberAppSavingsEnrollRoute: typeof MemberAppSavingsEnrollRoute
   MemberAppSavingsFixedRoute: typeof MemberAppSavingsFixedRoute
+  MemberAppSavingsGoalsRoute: typeof MemberAppSavingsGoalsRoute
   MemberAppSavingsInsightsRoute: typeof MemberAppSavingsInsightsRoute
   MemberAppSavingsLedgerRoute: typeof MemberAppSavingsLedgerRoute
   MemberAppSavingsPotsRoute: typeof MemberAppSavingsPotsRoute
@@ -2061,6 +2081,7 @@ const MemberAppSavingsRouteChildren: MemberAppSavingsRouteChildren = {
   MemberAppSavingsDepositRoute: MemberAppSavingsDepositRoute,
   MemberAppSavingsEnrollRoute: MemberAppSavingsEnrollRoute,
   MemberAppSavingsFixedRoute: MemberAppSavingsFixedRoute,
+  MemberAppSavingsGoalsRoute: MemberAppSavingsGoalsRoute,
   MemberAppSavingsInsightsRoute: MemberAppSavingsInsightsRoute,
   MemberAppSavingsLedgerRoute: MemberAppSavingsLedgerRoute,
   MemberAppSavingsPotsRoute: MemberAppSavingsPotsRoute,
@@ -2153,13 +2174,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

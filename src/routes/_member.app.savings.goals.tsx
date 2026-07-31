@@ -80,10 +80,12 @@ function Body() {
     return (
       <SectionCard title="Goals">
         <div className="p-6">
-          <EmptyState
-            title="No savings goals yet"
-            description="Set a goal on any savings account and it will show up here with progress tracking."
-          />
+          <EmptyState title="No savings goals yet" />
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Set a goal on any savings account and it will show up here with progress tracking.
+          </p>
+        </div>
+
         </div>
       </SectionCard>
     );
