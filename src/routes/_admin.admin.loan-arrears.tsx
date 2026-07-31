@@ -120,10 +120,10 @@ function ArrearsContent() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KPIStat label="Total arrears" value={formatMoney(summary.total_arrears)} accent="rose" />
-        <KPIStat label="Loans in arrears" value={String(summary.loans_in_arrears)} accent="amber" />
-        <KPIStat label="Portfolio at risk" value={`${summary.portfolio_at_risk_pct}%`} accent="teal" />
-        <KPIStat label="Late fees outstanding" value={formatMoney(summary.penalties_outstanding)} accent="violet" />
+        <KPIStat label="Total arrears" value={formatMoney(summary.total_arrears)} />
+        <KPIStat label="Loans in arrears" value={String(summary.loans_in_arrears)} />
+        <KPIStat label="Portfolio at risk" value={`${summary.portfolio_at_risk_pct}%`} />
+        <KPIStat label="Late fees outstanding" value={formatMoney(summary.penalties_outstanding)} />
       </div>
 
       <SectionCard
