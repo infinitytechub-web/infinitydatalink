@@ -132,9 +132,9 @@ function ProductsContent() {
         <Button onClick={() => setCreating(true)}>New product</Button>
       </div>
 
-      <SectionCard title="Product catalogue" description={`${products.length} products configured`}>
+      <SectionCard title={`Product catalogue (${products.length})`}>
         {products.length === 0 ? (
-          <EmptyState title="No loan products" message="Create your first product to enable applications." />
+          <EmptyState title="No loan products" hint="Create your first product to enable applications." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -177,7 +177,7 @@ function ProductsContent() {
                       </div>
                     </td>
                     <td className="py-3 pr-4">
-                      <StatusPill status={p.active ? "active" : "retired"} />
+                      <StatusPill status={p.active ? "active" : "closed"} />
                     </td>
                     <td className="py-3">
                       <div className="flex gap-2">
