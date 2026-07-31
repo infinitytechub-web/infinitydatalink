@@ -12,6 +12,18 @@ const realtimeSsrStub = fileURLToPath(
   new URL("./src/integrations/supabase/realtime-ssr-stub.ts", import.meta.url),
 );
 
+// tslib ships a UMD CommonJS entry (`tslib.js`) that the Worker bundler cannot
+// interop correctly: `tslib/modules/index.js` does `import tslib from
+// '../tslib.js'` and destructures it, which evaluates to `undefined` in the
+// bundled output and throws
+// `Cannot destructure property '__extends' of '__toESM(...).default'`
+// at module-init time. Because that chunk also carries shared runtime
+// polyfills, the throw took down SSR for EVERY route (production returned the
+// 500 error page). Pointing tslib at its real ESM build removes the CJS
+// interop entirely.
+const tslibEsm = fileURLToPath(new URL("./node_modules/tslib/tslib.es6.mjs", import.meta.url));
+
+
 // Opt-in bundle analyzer: run `BUNDLE_ANALYZE=1 bun run build` to emit
 // dist/stats.html with an interactive treemap of the client bundle.
 const analyze = process.env.BUNDLE_ANALYZE === "1";
