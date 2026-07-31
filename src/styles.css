@@ -4,8 +4,8 @@
 /* Variable faces ship a single stylesheet whose @font-face rules are split by
    unicode-range, so non-latin subsets are never downloaded. The static mono
    face is pinned to its latin subset to keep the blocking CSS small. */
-@import "@fontsource-variable/inter/wght.css";
-@import "@fontsource-variable/plus-jakarta-sans/wght.css";
+@import "@fontsource-variable/manrope/wght.css";
+@import "@fontsource-variable/sora/wght.css";
 @import "@fontsource/ibm-plex-mono/latin-400.css";
 @import "@fontsource/ibm-plex-mono/latin-500.css";
 
@@ -17,18 +17,17 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Primary = Inter (body, tables, forms, nav). "serif" alias is remapped to
-     Plus Jakarta Sans so existing `font-serif` usage across the app now
-     renders as the premium display face without touching every consumer. */
+  /* Body/UI = Manrope, display/headings = Sora. The "serif" alias is remapped
+     to Sora so existing `font-serif` usage renders as the display face. */
   --font-sans:
-    "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Manrope Variable", "Manrope", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif:
-    "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Inter Variable",
-    ui-sans-serif, system-ui, sans-serif;
+    "Sora Variable", "Sora", "Manrope Variable", ui-sans-serif, system-ui,
+    sans-serif;
   --font-display:
-    "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Inter Variable",
-    ui-sans-serif, system-ui, sans-serif;
+    "Sora Variable", "Sora", "Manrope Variable", ui-sans-serif, system-ui,
+    sans-serif;
   --font-mono:
     "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     monospace;
@@ -76,111 +75,111 @@
 
   /* Enterprise elevation — primary-tinted so cards feel connected to the
      brand instead of using flat neutral drop-shadows. */
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-xs: 0 1px 2px rgba(10, 26, 51, 0.04);
   --shadow-sm:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 1px 3px rgba(30, 58, 138, 0.06);
+    0 1px 2px rgba(10, 26, 51, 0.04),
+    0 1px 3px rgba(18, 58, 107, 0.06);
   --shadow-md:
-    0 4px 6px -1px rgba(15, 23, 42, 0.05),
-    0 8px 16px -6px rgba(30, 58, 138, 0.10);
+    0 4px 6px -1px rgba(10, 26, 51, 0.05),
+    0 8px 16px -6px rgba(18, 58, 107, 0.10);
   --shadow-lg:
-    0 10px 24px -8px rgba(15, 23, 42, 0.10),
-    0 20px 40px -18px rgba(30, 58, 138, 0.20);
+    0 10px 24px -8px rgba(10, 26, 51, 0.10),
+    0 20px 40px -18px rgba(18, 58, 107, 0.20);
   --shadow-elevated:
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 12px 32px -14px rgba(30, 58, 138, 0.28);
+    0 1px 2px rgba(10, 26, 51, 0.05),
+    0 12px 32px -14px rgba(18, 58, 107, 0.28);
   --shadow-nav:
-    0 20px 50px -30px rgba(15, 23, 42, 0.55);
+    0 20px 50px -30px rgba(10, 26, 51, 0.55);
 }
 
 :root {
-  --radius: 0.75rem; /* 12px — cards */
+  --radius: 0.625rem; /* 10px — compact banking console cards */
 
   /* Enterprise palette: Royal Blue primary, Emerald secondary, Gold accent. */
-  --emerald-deep: #0f172a;      /* charcoal ink (text) */
-  --emerald-mid: #1e3a8a;       /* royal blue accent */
-  --gold: #d4af37;              /* premium gold accent */
-  --cream: #f8fafc;             /* off-white background */
+  --emerald-deep: #0a1a33;      /* institutional navy ink (text) */
+  --emerald-mid: #0d9488;       /* teal accent */
+  --gold: #c9a227;              /* reserved highlight gold */
+  --cream: #f6f8fb;             /* off-white background */
   --success: #059669;
   --warning: #d97706;
   --info: #0284c7;
 
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f6f8fb;
+  --foreground: #0a1a33;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #0a1a33;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #1e3a8a;           /* Deep Royal Blue */
+  --popover-foreground: #0a1a33;
+  --primary: #123a6b;           /* Institutional navy */
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
-  --accent: #d4af37;            /* Gold */
-  --accent-foreground: #0f172a;
-  --destructive: #dc2626;
+  --secondary: #eef2f7;
+  --secondary-foreground: #0a1a33;
+  --muted: #eef2f7;
+  --muted-foreground: #4a5b73;
+  --accent: #0d9488;            /* Teal */
+  --accent-foreground: #ffffff;
+  --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #cbd5e1;
-  --ring: rgba(30, 58, 138, 0.45);
+  --border: #dde4ee;
+  --input: #c3cedd;
+  --ring: rgba(13, 148, 136, 0.45);
 
   /* Chart series — dark-mode-safe palette lives in `.dark` below. */
-  --chart-1: #1e3a8a;   /* royal */
-  --chart-2: #059669;   /* emerald */
-  --chart-3: #d4af37;   /* gold */
+  --chart-1: #123a6b;   /* navy */
+  --chart-2: #0d9488;   /* teal */
+  --chart-3: #c9a227;   /* gold */
   --chart-4: #0284c7;   /* sky */
   --chart-5: #7c3aed;   /* violet */
   --chart-6: #dc2626;   /* crimson */
   --chart-7: #475569;   /* slate */
-  --chart-grid: rgba(15, 23, 42, 0.08);
+  --chart-grid: rgba(10, 26, 51, 0.08);
   --chart-axis: #64748b;
 
   /* Sidebar: deep navy premium rail with subtle gradient (applied in shell). */
-  --sidebar: #0f1e4d;
-  --sidebar-foreground: #e2e8f0;
-  --sidebar-primary: #d4af37;
-  --sidebar-primary-foreground: #0f172a;
+  --sidebar: #0a1a33;
+  --sidebar-foreground: #dce5f0;
+  --sidebar-primary: #c9a227;
+  --sidebar-primary-foreground: #0a1a33;
   --sidebar-accent: rgba(255, 255, 255, 0.08);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.10);
-  --sidebar-ring: #d4af37;
+  --sidebar-ring: #0d9488;
 }
 
 .dark {
-  --emerald-deep: #e2e8f0;      /* invert: bright body text */
-  --emerald-mid: #60a5fa;
-  --gold: #eab308;
-  --cream: #0b1220;
+  --emerald-deep: #e4ecf6;      /* invert: bright body text */
+  --emerald-mid: #2dd4bf;
+  --gold: #e0be4e;
+  --cream: #071120;
   --success: #10b981;
   --warning: #f59e0b;
   --info: #38bdf8;
 
-  --background: #0b1220;
-  --foreground: #e2e8f0;
-  --card: #111a2e;
-  --card-foreground: #e2e8f0;
-  --popover: #111a2e;
-  --popover-foreground: #e2e8f0;
-  --primary: #3b5bdb;
+  --background: #071120;
+  --foreground: #e4ecf6;
+  --card: #0d1c31;
+  --card-foreground: #e4ecf6;
+  --popover: #0d1c31;
+  --popover-foreground: #e4ecf6;
+  --primary: #2f6ba8;
   --primary-foreground: #ffffff;
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #e2e8f0;
   --muted: rgba(255, 255, 255, 0.05);
   --muted-foreground: rgba(226, 232, 240, 0.78);
-  --accent: #eab308;
-  --accent-foreground: #0b1220;
+  --accent: #2dd4bf;
+  --accent-foreground: #071120;
   --destructive: #f87171;
   --destructive-foreground: #0b1220;
   --border: rgba(148, 163, 184, 0.16);
   --input: rgba(148, 163, 184, 0.22);
-  --ring: rgba(96, 165, 250, 0.55);
+  --ring: rgba(45, 212, 191, 0.55);
 
   /* Dark-mode chart palette — brighter, higher-chroma variants that clear
      WCAG contrast on the dark card surface. */
-  --chart-1: #7aa2ff;   /* royal → soft indigo */
-  --chart-2: #34d399;   /* emerald */
-  --chart-3: #fbbf24;   /* gold */
+  --chart-1: #7fb2e8;   /* navy → soft blue */
+  --chart-2: #2dd4bf;   /* teal */
+  --chart-3: #e0be4e;   /* gold */
   --chart-4: #38bdf8;   /* sky */
   --chart-5: #c084fc;   /* violet */
   --chart-6: #fb7185;   /* rose */
@@ -188,14 +187,14 @@
   --chart-grid: rgba(226, 232, 240, 0.12);
   --chart-axis: rgba(226, 232, 240, 0.7);
 
-  --sidebar: #060c1f;
-  --sidebar-foreground: #e2e8f0;
-  --sidebar-primary: #eab308;
-  --sidebar-primary-foreground: #060c1f;
+  --sidebar: #050d1a;
+  --sidebar-foreground: #e4ecf6;
+  --sidebar-primary: #e0be4e;
+  --sidebar-primary-foreground: #050d1a;
   --sidebar-accent: rgba(255, 255, 255, 0.06);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #eab308;
+  --sidebar-ring: #2dd4bf;
 }
 
 @layer base {
@@ -211,17 +210,29 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    line-height: 1.55;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
-    line-height: 1.2;
+    letter-spacing: -0.02em;
+    line-height: 1.18;
+    font-weight: 650;
     color: var(--color-foreground);
   }
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
+  }
+  /* Compact banking-console density: tighter table rhythm across every data
+     screen without touching each route. */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+  table th,
+  table td {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
   }
   .font-mono,
   .tabular {
