@@ -79,30 +79,53 @@ function GoalsPage() {
 }
 
 function Body() {
-  const { data } = useSuspenseQuery(goalsQuery);
+  const { data: result } = useSuspenseQuery(goalsQuery);
+  const online = useOnlineStatus();
+  const data = result.data;
   const overall =
     data.total_target > 0 ? Math.min(100, Math.round((data.total_saved / data.total_target) * 100)) : 0;
 
+  const banner =
+    !online || result.stale ? (
+      <div
+        role="status"
+        className="flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-foreground"
+      >
+        {online ? <CloudOff className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+        <span>
+          {online ? "Live sync unavailable." : "You're offline."} Showing your last synced goal progress
+          {result.saved_at ? ` from ${new Date(result.saved_at).toLocaleString()}` : ""}. New contributions will
+          appear once you reconnect.
+        </span>
+      </div>
+    ) : null;
+
   if (data.rows.length === 0) {
     return (
-      <SectionCard title="Goals">
-        <div className="p-6">
-          <EmptyState title="No savings goals yet" />
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            Set a goal on any savings account and it will show up here with progress tracking.
-          </p>
-        </div>
-      </SectionCard>
+      <div className="space-y-4">
+        {banner}
+        <SectionCard title="Goals">
+          <div className="p-6">
+            <EmptyState title="No savings goals yet" />
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Set a goal on any savings account and it will show up here with progress tracking.
+            </p>
+          </div>
+        </SectionCard>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-6 md:grid-cols-3">
+      {banner}
+      <section className="grid gap-6 md:grid-cols-4">
         <KPIStat label="Saved toward goals" value={<Money amount={data.total_saved} />} accent />
         <KPIStat label="Total target" value={<Money amount={data.total_target} />} />
+        <KPIStat label="Contributed since start" value={<Money amount={data.total_contributed} />} />
         <KPIStat label="Overall progress" value={<span className="tabular">{overall}%</span>} />
       </section>
+
 
       <div className="grid gap-4 md:grid-cols-2">
         {data.rows.map((g) => (
