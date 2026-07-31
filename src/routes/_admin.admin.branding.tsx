@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { PageHeader, SectionCard } from "@/components/primitives";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth";
 import { useBranding, BRANDING_QUERY_KEY } from "@/components/branding-provider";
 import {
+  getBrandingFull,
   updateBranding,
   uploadBrandingAsset,
   clearBrandingAsset,
@@ -55,7 +56,9 @@ type Form = {
   email_footer_html: string;
 };
 
-function toForm(b: ReturnType<typeof useBranding>["branding"]): Form {
+type BrandingLike = ReturnType<typeof useBranding>["branding"];
+
+function toForm(b: BrandingLike): Form {
   return {
     app_name: b.app_name,
     tagline: b.tagline ?? "",
@@ -80,12 +83,21 @@ function toForm(b: ReturnType<typeof useBranding>["branding"]): Form {
 function BrandingEditor() {
   const { branding, refresh } = useBranding();
   const qc = useQueryClient();
-  const [form, setForm] = useState<Form>(() => toForm(branding));
+  // The public branding read omits staff-only org/email fields, so the editor
+  // loads the full row through an authenticated super-admin-only server fn.
+  const fetchFull = useServerFn(getBrandingFull);
+  const fullQuery = useQuery({
+    queryKey: [...BRANDING_QUERY_KEY, "full"],
+    queryFn: () => fetchFull(),
+    staleTime: 30_000,
+  });
+  const source: BrandingLike = (fullQuery.data as BrandingLike | undefined) ?? branding;
+  const [form, setForm] = useState<Form>(() => toForm(source));
 
   useEffect(() => {
-    setForm(toForm(branding));
+    setForm(toForm(source));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [branding.updated_at]);
+  }, [source.updated_at, fullQuery.data]);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -94,7 +106,10 @@ function BrandingEditor() {
   const uploadFn = useServerFn(uploadBrandingAsset);
   const clearFn = useServerFn(clearBrandingAsset);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY });
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY });
+    fullQuery.refetch();
+  };
 
   const saveMut = useMutation({
     mutationFn: () => {
@@ -277,7 +292,7 @@ function BrandingEditor() {
       </SectionCard>
 
       <div className="sticky bottom-4 z-10 flex justify-end gap-2 rounded-lg border border-border bg-background/95 p-3 shadow-lg backdrop-blur">
-        <Button variant="outline" onClick={() => setForm(toForm(branding))} disabled={saveMut.isPending}>
+        <Button variant="outline" onClick={() => setForm(toForm(source))} disabled={saveMut.isPending}>
           Reset
         </Button>
         <Button onClick={() => saveMut.mutate()} disabled={!canSave}>

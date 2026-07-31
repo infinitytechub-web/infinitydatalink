@@ -1,7 +1,6 @@
 // Universal FX converter — GHS default base. Rates fetched from exchangerate.host
 // and cached server-side (in-memory + fx_rates DB). Falls back to last-known DB row.
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 export const DEFAULT_BASE = "GHS";
@@ -14,12 +13,6 @@ export type FxRate = { base: string; quote: string; rate: number; fetched_at: st
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 min
 type CacheEntry = { rows: FxRate[]; ts: number };
 const memoryCache = new Map<string, CacheEntry>();
-
-function serverClient() {
-  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
 
 async function readDbRates(base: string): Promise<FxRate[]> {
   // fx_rates is signed-in-only; use the trusted server client for this read.
