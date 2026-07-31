@@ -70,10 +70,10 @@ function FxDashboard() {
     : DEFAULT_BASE;
   const range = (Object.keys(FX_RANGES).includes(search.range) ? search.range : "30D") as FxRangeKey;
   const chartQuotes = useMemo(() => {
-    const list = search.quotes
+    const list = String(search.quotes)
       .split(",")
-      .map((c) => c.trim().toUpperCase())
-      .filter((c) => (SUPPORTED_QUOTES as readonly string[]).includes(c) && c !== base);
+      .map((c: string) => c.trim().toUpperCase())
+      .filter((c: string) => (SUPPORTED_QUOTES as readonly string[]).includes(c) && c !== base);
     return (list.length ? list : ["USD", "EUR", "GBP"].filter((c) => c !== base)).slice(0, 5);
   }, [search.quotes, base]);
 
