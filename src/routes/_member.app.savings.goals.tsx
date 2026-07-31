@@ -156,11 +156,17 @@ function Body() {
                   style={{ width: `${g.progress_pct}%` }}
                 />
               </div>
-              <dl className="grid grid-cols-3 gap-2 text-xs">
+              <dl className="grid grid-cols-4 gap-2 text-xs">
                 <div>
                   <dt className="text-muted-foreground">Remaining</dt>
                   <dd className="tabular font-medium">
                     <Money amount={g.remaining} />
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Contributed</dt>
+                  <dd className="tabular font-medium">
+                    <Money amount={g.contributed_since_start} />
                   </dd>
                 </div>
                 <div>
@@ -176,6 +182,38 @@ function Body() {
                   </dd>
                 </div>
               </dl>
+              <div className="rounded-md border border-border/60 bg-muted/30 p-3">
+                <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
+                  <span>Contributions toward this goal ({g.contributions_count})</span>
+                  <Link
+                    to="/app/savings/ledger"
+                    className="font-medium normal-case tracking-normal text-primary hover:underline"
+                  >
+                    Ledger
+                  </Link>
+                </div>
+                {g.recent_contributions.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    No cleared deposits or transfers since this goal started.
+                  </p>
+                ) : (
+                  <ul className="space-y-1">
+                    {g.recent_contributions.map((c) => (
+                      <li key={c.id} className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          {new Date(c.created_at).toLocaleDateString()} ·{" "}
+                          <span className="capitalize">{c.kind.replace("_", " ")}</span>
+                          {c.ref ? <span className="font-mono"> {c.ref}</span> : null}
+                        </span>
+                        <span className="tabular font-medium">
+                          <Money amount={c.amount} />
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
               <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                 <span>
                   {g.goal_completed_at
