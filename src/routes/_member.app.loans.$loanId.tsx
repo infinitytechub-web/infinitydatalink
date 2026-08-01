@@ -7,6 +7,11 @@ import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from 
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMyLoanDetail, submitLoanRepayment } from "@/lib/member-data.functions";
 import { getLoanPayoffQuote } from "@/lib/loan-payoff.functions";
+import {
+  cancelSettlementRequest,
+  listMySettlementRequests,
+  requestLoanSettlement,
+} from "@/lib/loan-settlements.functions";
 
 export const Route = createFileRoute("/_member/app/loans/$loanId")({
   component: MemberLoanDetail,
