@@ -100,6 +100,7 @@ const groups: NavGroup[] = [
       { to: "/admin/security", label: "Security Centre", icon: <ShieldAlert /> },
       { to: "/admin/logs", label: "Runtime Logs", icon: <Bug /> },
       { to: "/admin/health", label: "Integration Health", icon: <Activity /> },
+      { to: "/admin/cron-runs", label: "Scheduled job runs", icon: <History /> },
       { to: "/admin/super-admins", label: "Super Admins", icon: <Crown /> },
       { to: "/admin/super-admins/history", label: "Grant history", icon: <ClipboardCheck /> },
       { to: "/admin/roles", label: "Roles & Permissions", icon: <KeyRound /> },
