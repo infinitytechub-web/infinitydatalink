@@ -144,6 +144,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/security": "Security Centre",
   "/admin/logs": "Runtime Logs",
   "/admin/health": "Integration Health",
+  "/admin/cron-runs": "Scheduled Job Runs",
 
   "/admin/super-admins": "Super Admins",
   "/admin/super-admins/history": "Grant history",
