@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
-import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMyLoanDetail, submitLoanRepayment } from "@/lib/member-data.functions";
+import { getLoanPayoffQuote } from "@/lib/loan-payoff.functions";
 
 export const Route = createFileRoute("/_member/app/loans/$loanId")({
   component: MemberLoanDetail,
@@ -90,6 +91,7 @@ function Body({ loanId }: { loanId: string }) {
           suggested={loan.monthly_payment ?? 0}
         />
       )}
+      {loan.status === "active" && <PayoffCard loanId={loan.id} />}
       {loan.status === "approved" && (
         <SectionCard title="Awaiting disbursement">
           <div className="p-6 text-sm text-emerald-deep/70">
@@ -152,6 +154,86 @@ function Body({ loanId }: { loanId: string }) {
         )}
       </SectionCard>
     </>
+  );
+}
+
+function PayoffCard({ loanId }: { loanId: string }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const [settleOn, setSettleOn] = useState(today);
+  const quote = useQuery({
+    queryKey: ["member", "loans", "payoff", loanId, settleOn],
+    queryFn: () => getLoanPayoffQuote({ data: { loan_id: loanId, settle_on: settleOn } }),
+  });
+
+  return (
+    <SectionCard
+      title="Early settlement quote"
+      action={
+        <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          Settle on
+          <input
+            type="date"
+            value={settleOn}
+            min={today}
+            onChange={(e) => setSettleOn(e.target.value || today)}
+            className="rounded border border-emerald-deep/15 bg-card px-2 py-1 text-xs font-normal normal-case tracking-normal outline-none focus:border-emerald-mid"
+          />
+        </label>
+      }
+    >
+      {quote.isPending ? (
+        <div className="p-6"><Skeleton className="h-32 w-full" /></div>
+      ) : quote.isError ? (
+        <div className="p-6 text-sm text-emerald-deep/70">
+          Settlement quote unavailable: {(quote.error as Error).message}
+        </div>
+      ) : quote.data ? (
+        <div className="grid gap-6 p-6 md:grid-cols-2">
+          <div className="space-y-2 text-sm">
+            {quote.data.lines.map((line) => (
+              <div key={line.label} className="flex items-start justify-between gap-4 border-b border-emerald-deep/5 pb-2">
+                <div>
+                  <div className="text-emerald-deep/80">{line.label}</div>
+                  {line.note && <div className="text-[11px] text-emerald-deep/45">{line.note}</div>}
+                </div>
+                <Money amount={line.amount} signed={line.amount < 0} />
+              </div>
+            ))}
+            <div className="flex items-center justify-between pt-1 text-base font-bold">
+              <span>Total payoff</span>
+              <Money amount={quote.data.total_payoff} />
+            </div>
+          </div>
+          <div className="space-y-3 rounded-lg bg-cream/60 p-4 text-sm">
+            <div className="flex justify-between">
+              <span className="text-emerald-deep/60">Savings balance</span>
+              <Money amount={quote.data.savings_balance} />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-emerald-deep/60">
+                {quote.data.savings_covers_payoff ? "Surplus after settlement" : "Shortfall to fund"}
+              </span>
+              <Money
+                amount={
+                  quote.data.savings_covers_payoff
+                    ? quote.data.savings_balance - quote.data.total_payoff
+                    : quote.data.shortfall
+                }
+              />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-emerald-deep/60">Installments remaining</span>
+              <span>{quote.data.installments_remaining}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-emerald-deep/60">Interest saved by settling</span>
+              <Money amount={quote.data.interest_rebate} />
+            </div>
+            <p className="text-[11px] leading-relaxed text-emerald-deep/50">{quote.data.disclaimer}</p>
+          </div>
+        </div>
+      ) : null}
+    </SectionCard>
   );
 }
 
