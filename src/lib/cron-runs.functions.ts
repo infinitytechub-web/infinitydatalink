@@ -31,7 +31,8 @@ export type CronRunRow = {
   duration_ms: number | null;
   caller: string | null;
   error: string | null;
-  metrics: Record<string, unknown>;
+  // Metrics are flat scalar counters written by the job routines.
+  metrics: Record<string, string | number | boolean | null>;
 };
 
 export type CronRunPage = {
