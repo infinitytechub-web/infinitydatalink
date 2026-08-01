@@ -138,7 +138,7 @@ function Body({ rates }: { rates: Rates }) {
             title="Loan loss provisioning by bucket"
             subtitle={`As of ${new Date(data.as_of).toLocaleString()}`}
             filename="loan-provisions-buckets"
-            permission="export:reports"
+            permission="export:loans"
             rows={data.buckets}
             columns={bucketColumns}
           />
@@ -190,7 +190,7 @@ function Body({ rates }: { rates: Rates }) {
 
       <SectionCard title="Provision by product">
         {data.products.length === 0 ? (
-          <EmptyState title="No active loans" message="Provisioning appears once loans are disbursed." />
+          <EmptyState title="No active loans" hint="Provisioning appears once loans are disbursed." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -226,14 +226,14 @@ function Body({ rates }: { rates: Rates }) {
             title="Largest provisioned loan exposures"
             subtitle={`As of ${new Date(data.as_of).toLocaleString()}`}
             filename="loan-provisions-exposures"
-            permission="export:reports"
+            permission="export:loans"
             rows={data.exposures}
             columns={exposureColumns}
           />
         }
       >
         {data.exposures.length === 0 ? (
-          <EmptyState title="Nothing to provision" message="No active loans carry provisionable exposure." />
+          <EmptyState title="Nothing to provision" hint="No active loans carry provisionable exposure." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -276,24 +276,24 @@ function Body({ rates }: { rates: Rates }) {
 }
 
 const bucketColumns = [
-  { header: "Bucket", value: (r: ProvisionBucketRow) => r.bucket },
-  { header: "Loans", value: (r: ProvisionBucketRow) => r.loans },
-  { header: "Outstanding", value: (r: ProvisionBucketRow) => r.outstanding },
-  { header: "Share %", value: (r: ProvisionBucketRow) => r.share_pct },
-  { header: "Arrears", value: (r: ProvisionBucketRow) => r.arrears },
-  { header: "Rate %", value: (r: ProvisionBucketRow) => r.rate_pct },
-  { header: "Provision", value: (r: ProvisionBucketRow) => r.provision },
-  { header: "Net exposure", value: (r: ProvisionBucketRow) => r.net_exposure },
+  { header: "Bucket", accessor: (r: ProvisionBucketRow) => r.bucket },
+  { header: "Loans", accessor: (r: ProvisionBucketRow) => r.loans },
+  { header: "Outstanding", accessor: (r: ProvisionBucketRow) => r.outstanding },
+  { header: "Share %", accessor: (r: ProvisionBucketRow) => r.share_pct },
+  { header: "Arrears", accessor: (r: ProvisionBucketRow) => r.arrears },
+  { header: "Rate %", accessor: (r: ProvisionBucketRow) => r.rate_pct },
+  { header: "Provision", accessor: (r: ProvisionBucketRow) => r.provision },
+  { header: "Net exposure", accessor: (r: ProvisionBucketRow) => r.net_exposure },
 ];
 
 const exposureColumns = [
-  { header: "Loan ref", value: (r: ProvisionExposureRow) => r.ref },
-  { header: "Product", value: (r: ProvisionExposureRow) => r.product },
-  { header: "Member", value: (r: ProvisionExposureRow) => r.member_name ?? "" },
-  { header: "Member no", value: (r: ProvisionExposureRow) => r.member_no ?? "" },
-  { header: "Bucket", value: (r: ProvisionExposureRow) => r.bucket },
-  { header: "Days past due", value: (r: ProvisionExposureRow) => r.days_past_due },
-  { header: "Outstanding", value: (r: ProvisionExposureRow) => r.outstanding },
-  { header: "Arrears", value: (r: ProvisionExposureRow) => r.arrears },
-  { header: "Provision", value: (r: ProvisionExposureRow) => r.provision },
+  { header: "Loan ref", accessor: (r: ProvisionExposureRow) => r.ref },
+  { header: "Product", accessor: (r: ProvisionExposureRow) => r.product },
+  { header: "Member", accessor: (r: ProvisionExposureRow) => r.member_name ?? "" },
+  { header: "Member no", accessor: (r: ProvisionExposureRow) => r.member_no ?? "" },
+  { header: "Bucket", accessor: (r: ProvisionExposureRow) => r.bucket },
+  { header: "Days past due", accessor: (r: ProvisionExposureRow) => r.days_past_due },
+  { header: "Outstanding", accessor: (r: ProvisionExposureRow) => r.outstanding },
+  { header: "Arrears", accessor: (r: ProvisionExposureRow) => r.arrears },
+  { header: "Provision", accessor: (r: ProvisionExposureRow) => r.provision },
 ];
