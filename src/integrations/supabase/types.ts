@@ -4814,6 +4814,10 @@ export type Database = {
             Args: { _actor_id?: string; _reason?: string; _user_id: string }
             Returns: undefined
           }
+      run_loan_arrears_job: {
+        Args: { _caller?: string; _run_key?: string }
+        Returns: Json
+      }
       run_loan_repayment_reminders: {
         Args: { _days_ahead?: number }
         Returns: {
