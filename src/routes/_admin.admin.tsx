@@ -141,6 +141,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/loan-products": "Loan products & eligibility",
   "/admin/loan-arrears": "Arrears & delinquency",
   "/admin/loan-workouts": "Workouts & write-offs",
+  "/admin/loan-settlements": "Early settlement approvals",
   "/admin/loan-provisions": "Loan loss provisioning",
   "/admin/payments": "Payments",
   "/admin/investments": "Investments & Shares",
