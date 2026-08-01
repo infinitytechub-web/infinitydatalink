@@ -86,6 +86,7 @@ const groups: NavGroup[] = [
       { to: "/admin/loan-products", label: "Loan products", icon: <ClipboardList /> },
       { to: "/admin/loan-arrears", label: "Arrears & collections", icon: <TrendingDown /> },
       { to: "/admin/loan-workouts", label: "Workout approvals", icon: <Scale /> },
+      { to: "/admin/loan-settlements", label: "Settlement approvals", icon: <ClipboardCheck /> },
       { to: "/admin/loan-provisions", label: "Loan provisioning", icon: <ShieldAlert /> },
       { to: "/admin/payments", label: "Payments", icon: <CreditCard /> },
       { to: "/admin/investments", label: "Investments & Shares", icon: <TrendingUp /> },
