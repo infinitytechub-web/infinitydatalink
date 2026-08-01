@@ -1649,6 +1649,68 @@ export type Database = {
           },
         ]
       }
+      loan_settlement_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          id: string
+          loan_id: string
+          member_note: string | null
+          quote: Json
+          quoted_total: number
+          requested_at: string
+          settle_on: string
+          status: Database["public"]["Enums"]["settlement_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          id?: string
+          loan_id: string
+          member_note?: string | null
+          quote?: Json
+          quoted_total: number
+          requested_at?: string
+          settle_on: string
+          status?: Database["public"]["Enums"]["settlement_request_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decided_by_email?: string | null
+          decision_note?: string | null
+          id?: string
+          loan_id?: string
+          member_note?: string | null
+          quote?: Json
+          quoted_total?: number
+          requested_at?: string
+          settle_on?: string
+          status?: Database["public"]["Enums"]["settlement_request_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_settlement_requests_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loans: {
         Row: {
           amount: number
@@ -3638,6 +3700,32 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancel_loan_settlement: {
+        Args: { _actor_id?: string; _note?: string; _request_id: string }
+        Returns: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          id: string
+          loan_id: string
+          member_note: string | null
+          quote: Json
+          quoted_total: number
+          requested_at: string
+          settle_on: string
+          status: Database["public"]["Enums"]["settlement_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_settlement_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancel_savings_withdrawal: {
         Args: { _id: string; _reason?: string }
         Returns: {
@@ -3810,6 +3898,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "loan_restructures"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      decide_loan_settlement: {
+        Args: {
+          _actor_id?: string
+          _approve: boolean
+          _note: string
+          _request_id: string
+        }
+        Returns: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          id: string
+          loan_id: string
+          member_note: string | null
+          quote: Json
+          quoted_total: number
+          requested_at: string
+          settle_on: string
+          status: Database["public"]["Enums"]["settlement_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_settlement_requests"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -4727,6 +4846,39 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      request_loan_settlement: {
+        Args: {
+          _actor_id?: string
+          _loan_id: string
+          _note: string
+          _quote: Json
+          _quoted_total: number
+          _settle_on: string
+        }
+        Returns: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decided_by_email: string | null
+          decision_note: string | null
+          id: string
+          loan_id: string
+          member_note: string | null
+          quote: Json
+          quoted_total: number
+          requested_at: string
+          settle_on: string
+          status: Database["public"]["Enums"]["settlement_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loan_settlement_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       request_savings_withdrawal: {
         Args: {
           _account_id: string
@@ -5089,6 +5241,11 @@ export type Database = {
         | "rejected"
         | "applied"
         | "failed"
+      settlement_request_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "cancelled"
       share_txn_kind: "purchase" | "sale" | "dividend"
       transfer_status: "pending" | "cleared" | "failed" | "reversed"
       txn_kind:
@@ -5282,6 +5439,12 @@ export const Constants = {
         "rejected",
         "applied",
         "failed",
+      ],
+      settlement_request_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled",
       ],
       share_txn_kind: ["purchase", "sale", "dividend"],
       transfer_status: ["pending", "cleared", "failed", "reversed"],
