@@ -160,10 +160,48 @@ function Body({ loanId }: { loanId: string }) {
 function PayoffCard({ loanId }: { loanId: string }) {
   const today = new Date().toISOString().slice(0, 10);
   const [settleOn, setSettleOn] = useState(today);
+  const [memberNote, setMemberNote] = useState("");
+  const qc = useQueryClient();
   const quote = useQuery({
     queryKey: ["member", "loans", "payoff", loanId, settleOn],
     queryFn: () => getLoanPayoffQuote({ data: { loan_id: loanId, settle_on: settleOn } }),
   });
+  const requests = useQuery({
+    queryKey: ["member", "loans", "settlement-requests", loanId],
+    queryFn: () => listMySettlementRequests({ data: { loan_id: loanId } }),
+  });
+  const submitRequest = useServerFn(requestLoanSettlement);
+  const cancelRequest = useServerFn(cancelSettlementRequest);
+  const pendingRequest = (requests.data ?? []).find((r) => r.status === "pending");
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["member", "loans", "settlement-requests", loanId] });
+  };
+
+  const request = useMutation({
+    mutationFn: () =>
+      submitRequest({
+        data: { loan_id: loanId, settle_on: settleOn, note: memberNote.trim() || undefined },
+      }),
+    onSuccess: () => {
+      toast.success("Settlement request submitted", {
+        description: "A finance officer will review it and you will be notified of the decision.",
+      });
+      setMemberNote("");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error("Could not submit request", { description: e.message }),
+  });
+
+  const cancel = useMutation({
+    mutationFn: (id: string) => cancelRequest({ data: { request_id: id } }),
+    onSuccess: () => {
+      toast.success("Settlement request withdrawn");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error("Could not withdraw request", { description: e.message }),
+  });
+
 
   return (
     <SectionCard
