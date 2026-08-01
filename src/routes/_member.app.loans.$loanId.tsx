@@ -7,6 +7,11 @@ import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from 
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMyLoanDetail, submitLoanRepayment } from "@/lib/member-data.functions";
 import { getLoanPayoffQuote } from "@/lib/loan-payoff.functions";
+import {
+  cancelSettlementRequest,
+  listMySettlementRequests,
+  requestLoanSettlement,
+} from "@/lib/loan-settlements.functions";
 
 export const Route = createFileRoute("/_member/app/loans/$loanId")({
   component: MemberLoanDetail,
@@ -160,10 +165,48 @@ function Body({ loanId }: { loanId: string }) {
 function PayoffCard({ loanId }: { loanId: string }) {
   const today = new Date().toISOString().slice(0, 10);
   const [settleOn, setSettleOn] = useState(today);
+  const [memberNote, setMemberNote] = useState("");
+  const qc = useQueryClient();
   const quote = useQuery({
     queryKey: ["member", "loans", "payoff", loanId, settleOn],
     queryFn: () => getLoanPayoffQuote({ data: { loan_id: loanId, settle_on: settleOn } }),
   });
+  const requests = useQuery({
+    queryKey: ["member", "loans", "settlement-requests", loanId],
+    queryFn: () => listMySettlementRequests({ data: { loan_id: loanId } }),
+  });
+  const submitRequest = useServerFn(requestLoanSettlement);
+  const cancelRequest = useServerFn(cancelSettlementRequest);
+  const pendingRequest = (requests.data ?? []).find((r) => r.status === "pending");
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["member", "loans", "settlement-requests", loanId] });
+  };
+
+  const request = useMutation({
+    mutationFn: () =>
+      submitRequest({
+        data: { loan_id: loanId, settle_on: settleOn, note: memberNote.trim() || undefined },
+      }),
+    onSuccess: () => {
+      toast.success("Settlement request submitted", {
+        description: "A finance officer will review it and you will be notified of the decision.",
+      });
+      setMemberNote("");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error("Could not submit request", { description: e.message }),
+  });
+
+  const cancel = useMutation({
+    mutationFn: (id: string) => cancelRequest({ data: { request_id: id } }),
+    onSuccess: () => {
+      toast.success("Settlement request withdrawn");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error("Could not withdraw request", { description: e.message }),
+  });
+
 
   return (
     <SectionCard
@@ -233,7 +276,77 @@ function PayoffCard({ loanId }: { loanId: string }) {
           </div>
         </div>
       ) : null}
+
+      {quote.data && (
+        <div className="border-t border-emerald-deep/10 p-6">
+          {pendingRequest ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-cream/60 p-4 text-sm">
+              <div>
+                <div className="font-semibold text-emerald-deep">Settlement request awaiting approval</div>
+                <div className="text-[11px] text-emerald-deep/60">
+                  <Money amount={pendingRequest.quoted_total} /> to settle on {pendingRequest.settle_on} · submitted{" "}
+                  {new Date(pendingRequest.requested_at).toLocaleDateString()}
+                </div>
+              </div>
+              <button
+                onClick={() => cancel.mutate(pendingRequest.id)}
+                disabled={cancel.isPending}
+                className="h-9 rounded border border-emerald-deep/20 px-4 text-[11px] font-bold uppercase tracking-widest text-emerald-deep hover:bg-emerald-deep/5 disabled:opacity-50"
+              >
+                {cancel.isPending ? "Withdrawing…" : "Withdraw request"}
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+                  Request early settlement — note to finance (optional)
+                </span>
+                <input
+                  value={memberNote}
+                  onChange={(e) => setMemberNote(e.target.value)}
+                  placeholder="e.g. settling from my savings on payday"
+                  className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+                />
+              </label>
+              <button
+                onClick={() => request.mutate()}
+                disabled={request.isPending}
+                className="h-10 rounded bg-emerald-deep px-4 text-xs font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
+              >
+                {request.isPending ? "Submitting…" : "Request settlement"}
+              </button>
+              <p className="text-[11px] text-emerald-deep/50 md:col-span-2">
+                Submitting sends the quoted figure for {settleOn} to the finance office for approval. You will be
+                notified once it is approved or declined.
+              </p>
+            </div>
+          )}
+
+          {(requests.data ?? []).filter((r) => r.status !== "pending").length > 0 && (
+            <div className="mt-5 space-y-2">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                Previous settlement requests
+              </div>
+              {(requests.data ?? [])
+                .filter((r) => r.status !== "pending")
+                .map((r) => (
+                  <div key={r.id} className="flex flex-wrap items-center gap-3 text-xs text-emerald-deep/70">
+                    <StatusPill status={r.status === "approved" ? "approved" : "rejected"} />
+                    <span>{r.status}</span>
+                    <span>·</span>
+                    <span>
+                      <Money amount={r.quoted_total} /> for {r.settle_on}
+                    </span>
+                    {r.decision_note && <span className="text-emerald-deep/50">“{r.decision_note}”</span>}
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
     </SectionCard>
+
   );
 }
 
