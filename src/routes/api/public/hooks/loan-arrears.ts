@@ -47,83 +47,37 @@ export const Route = createFileRoute("/api/public/hooks/loan-arrears")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const admin = supabaseAdmin as any;
 
-        // 1. Claim the run slot (idempotency gate).
-        const { data: claimed, error: claimError } = await admin.rpc("claim_cron_run", {
-          _job: JOB,
-          _run_key: runKey,
-          _caller: request.headers.get("user-agent")?.slice(0, 200) ?? null,
-        });
-        if (claimError) {
-          console.error(`[cron:${JOB}] could not claim run ${runKey}:`, claimError.message);
-          return json({ success: false, error: claimError.message }, 500);
-        }
-        const run: any = Array.isArray(claimed) ? claimed[0] : claimed;
-
-        if (run?.status === "succeeded") {
-          console.log(`[cron:${JOB}] run ${runKey} already succeeded — replaying metrics (no re-post).`);
-          return json({
-            success: true,
-            skipped: true,
-            reason: "already_completed",
-            run_key: runKey,
-            attempt: run.attempt,
-            metrics: run.metrics ?? {},
-          });
-        }
+        // Single implementation lives in the DB routine `run_loan_arrears_job`,
+        // which owns the run-ledger claim, the arrears refresh, penalty accrual
+        // and the finish/metrics write in one transaction-scoped unit. pg_cron
+        // calls the same routine nightly; this endpoint is the manual re-run.
         const startedAt = Date.now();
-        console.log(`[cron:${JOB}] starting run ${runKey} (attempt ${run?.attempt ?? 1})`);
+        console.log(`[cron:${JOB}] invoking run_loan_arrears_job run_key=${runKey}`);
 
-        try {
-          // 2. Refresh arrears/DPD buckets, then accrue penalties.
-          const { data: arrears, error: arrearsError } = await admin.rpc("refresh_loan_arrears");
-          if (arrearsError) throw new Error(`refresh_loan_arrears: ${arrearsError.message}`);
+        const { data, error } = await admin.rpc("run_loan_arrears_job", {
+          _run_key: runKey,
+          _caller: (request.headers.get("user-agent") ?? "http").slice(0, 200),
+        });
 
-          const { data: penalties, error: penaltyError } = await admin.rpc("assess_loan_penalties");
-          if (penaltyError) throw new Error(`assess_loan_penalties: ${penaltyError.message}`);
-
-          const a: any = Array.isArray(arrears) ? arrears[0] : arrears;
-          const p: any = Array.isArray(penalties) ? penalties[0] : penalties;
-
-          const metrics = {
-            loans_updated: Number(a?.loans_updated ?? 0),
-            as_of: a?.as_of ?? null,
-            penalties_created: Number(p?.penalties_created ?? 0),
-            penalty_total: Number(p?.total_amount ?? 0),
-            period: p?.period ?? null,
-            duration_ms: Date.now() - startedAt,
-            attempt: Number(run?.attempt ?? 1),
-          };
-
-          const { error: finishError } = await admin.rpc("finish_cron_run", {
-            _run_id: run.id,
-            _status: "succeeded",
-            _metrics: metrics,
-            _error: null,
-          });
-          if (finishError) {
-            console.error(`[cron:${JOB}] run ${runKey} finished but ledger update failed:`, finishError.message);
-          }
-
-          console.log(
-            `[cron:${JOB}] run ${runKey} succeeded in ${metrics.duration_ms}ms — ` +
-              `${metrics.loans_updated} loans updated, ${metrics.penalties_created} penalties (${metrics.penalty_total}).`,
-          );
-          return json({ success: true, run_key: runKey, ...metrics });
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error(`[cron:${JOB}] run ${runKey} FAILED after ${Date.now() - startedAt}ms:`, message);
-          await admin
-            .rpc("finish_cron_run", {
-              _run_id: run.id,
-              _status: "failed",
-              _metrics: { duration_ms: Date.now() - startedAt, attempt: Number(run?.attempt ?? 1) },
-              _error: message.slice(0, 1000),
-            })
-            .catch(() => undefined);
-          // 500 lets the scheduler (or an operator) retry with the same run_key;
-          // the ledger + unique penalty constraint make that safe.
-          return json({ success: false, run_key: runKey, error: message }, 500);
+        const elapsed = Date.now() - startedAt;
+        if (error) {
+          // The routine records the failure in cron_job_runs before re-raising,
+          // so the ledger stays accurate and the same run_key can be retried.
+          console.error(`[cron:${JOB}] run ${runKey} FAILED after ${elapsed}ms:`, error.message);
+          return json({ success: false, run_key: runKey, duration_ms: elapsed, error: error.message }, 500);
         }
+
+        const result: any = data ?? {};
+        if (result.skipped) {
+          console.log(`[cron:${JOB}] run ${runKey} already succeeded — replaying metrics, no fees re-posted.`);
+        } else {
+          const m = result.metrics ?? {};
+          console.log(
+            `[cron:${JOB}] run ${runKey} succeeded in ${elapsed}ms (attempt ${result.attempt}) — ` +
+              `${m.loans_updated ?? 0} loans updated, ${m.penalties_created ?? 0} penalties totalling ${m.penalty_total ?? 0}.`,
+          );
+        }
+        return json({ ...result, duration_ms: result.duration_ms ?? elapsed });
       },
     },
   },
