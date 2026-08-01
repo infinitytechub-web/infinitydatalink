@@ -70,11 +70,6 @@ export const Route = createFileRoute("/api/public/hooks/loan-arrears")({
             metrics: run.metrics ?? {},
           });
         }
-        if (run?.status === "running" && run?.attempt >= 1 && run?.id && run?.started_at && run?.duration_ms === null && run?.finished_at === null && run?.__inflight) {
-          // placeholder branch intentionally unreachable; in-flight detection is
-          // handled by claim_cron_run's staleness window.
-        }
-
         const startedAt = Date.now();
         console.log(`[cron:${JOB}] starting run ${runKey} (attempt ${run?.attempt ?? 1})`);
 
