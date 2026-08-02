@@ -1,12 +1,16 @@
 /**
  * Shared registration biodata helpers (client-safe).
  *
- * Ghana Card is stored canonically as `GHA-XXXXXXXXXX` (10 digits). Forms
- * capture only the digits; the `GHA-` prefix is fixed in the UI.
+ * Ghana Card is stored canonically as `GHA-XXXXXXXXX-X`. Forms
+ * capture only the digits; the `GHA-` prefix is fixed in the UI. The canonical
+ * storage form is `GHA-XXXXXXXXX-X`, matching the printed card and the shared
+ * national-ID validator, so registration and KYC compare identically.
  */
 export const GHANA_CARD_DIGITS = 10;
 export const GHANA_CARD_PREFIX = "GHA-";
-export const GHANA_CARD_REGEX = /^GHA-\d{10}$/;
+/** Canonical form; the legacy undashed form is still accepted on input. */
+export const GHANA_CARD_REGEX = /^GHA-\d{9}-\d$/;
+export const GHANA_CARD_INPUT_REGEX = /^GHA-(\d{10}|\d{9}-\d)$/;
 
 export const MEMBERSHIP_TYPES = [
   "individual",
@@ -36,11 +40,11 @@ export function ghanaCardDigits(input: string): string {
 export function toCanonicalGhanaCard(input: string): string | null {
   const digits = ghanaCardDigits(input);
   if (digits.length !== GHANA_CARD_DIGITS) return null;
-  return `${GHANA_CARD_PREFIX}${digits}`;
+  return `${GHANA_CARD_PREFIX}${digits.slice(0, 9)}-${digits.slice(9)}`;
 }
 
 export function isValidGhanaCard(value: string): boolean {
-  return GHANA_CARD_REGEX.test(value.trim());
+  return GHANA_CARD_INPUT_REGEX.test(value.trim().toUpperCase());
 }
 
 /**

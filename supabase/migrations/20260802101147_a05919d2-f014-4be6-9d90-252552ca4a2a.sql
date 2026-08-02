@@ -1,0 +1,14 @@
+ALTER FUNCTION public.profiles_guard_privileged_columns() SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.profiles_guard_sensitive_columns() SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.guard_profile_kyc_self_update() SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.approve_dividend_run(uuid, uuid, text) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.reject_dividend_run(uuid, uuid, text) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.execute_dividend_run(uuid, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.submit_dividend_run_for_approval(uuid, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.reject_savings_withdrawal(uuid, text, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.approve_savings_withdrawal(uuid, text, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.pay_savings_withdrawal(uuid, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.set_user_active(uuid, boolean, text, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.reject_user(uuid, text, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.approve_user(uuid, text, uuid) SET search_path = public, private, pg_temp;
+ALTER FUNCTION public.profiles_guard_national_id_dup() SET search_path = public, private, pg_temp;
