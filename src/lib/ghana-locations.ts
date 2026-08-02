@@ -97,8 +97,8 @@ export const GHANA_REGIONS: GhanaRegion[] = [
       "Sekyere East",
       "Sekyere Kumawu",
       "Sekyere South",
-											    "Suame Municipal",
-      "Tano Fiapre (Bantama Municipal)",
+      "Suame Municipal",
+      "Bantama Municipal",
     ],
   },
   {
