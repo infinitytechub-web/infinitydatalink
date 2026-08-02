@@ -302,6 +302,10 @@ const decideInput = z
       .max(20)
       .optional()
       .default([]),
+    /** Extra guardian checklist — mandatory when the member is a minor. */
+    minor_review: minorReviewSchema.optional(),
+    /** Fresh re-authentication proof — mandatory when the member is a minor. */
+    step_up_token: z.string().min(16).max(200).optional(),
   })
   .superRefine((v, ctx) => {
     if (v.decision === "rejected" && v.notes.trim().length < 5) {
@@ -319,6 +323,52 @@ const decideInput = z
       });
     }
   });
+
+/**
+ * Enforces the minor-specific review steps. Returns audit-ready metadata when
+ * the member is a minor, or null for ordinary adult reviews.
+ */
+async function enforceMinorReview(
+  sb: { from: (t: string) => any },
+  opts: {
+    memberId: string;
+    decision: "approved" | "rejected";
+    notes: string;
+    minorReview?: MinorReview;
+    stepUpToken?: string;
+    officerId: string;
+  },
+): Promise<{ guardian: GuardianCandidate; review: MinorReview; step_up_id: string } | null> {
+  const [{ data: prof }, { data: nok }] = await Promise.all([
+    sb.from("profiles").select("id, is_minor, date_of_birth").eq("id", opts.memberId).maybeSingle(),
+    sb.from("next_of_kin").select("id, full_name, relationship, phone").eq("member_id", opts.memberId),
+  ]);
+  if (!prof) throw new Error("Member not found");
+  if (!(prof as any).is_minor) return null;
+
+  const nextOfKin = ((nok ?? []) as GuardianCandidate[]) ?? [];
+  const { blockers } = evaluateMinorGuardrails({
+    isMinor: true,
+    decision: opts.decision,
+    notes: opts.notes,
+    minorReview: opts.minorReview ?? null,
+    nextOfKin,
+  });
+  if (blockers.length > 0) {
+    throw new Error(`Minor account review incomplete — ${blockers.join(" ")}`);
+  }
+
+  const { assertStepUp } = await import("@/lib/step-up.server");
+  const proof = await assertStepUp(
+    opts.officerId,
+    opts.stepUpToken,
+    `${opts.decision === "approved" ? "approve" : "reject"} KYC for a minor account`,
+  );
+
+  const guardian = nextOfKin.find((g) => g.id === opts.minorReview!.guardian_nok_id)!;
+  return { guardian, review: opts.minorReview!, step_up_id: proof.id };
+}
+
 
 /**
  * Resubmission window + attempt allowance applied when a KYC review is rejected.
