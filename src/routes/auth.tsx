@@ -536,6 +536,8 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
       </Field>
 
       {err ? <p className="text-xs font-medium text-destructive">{err}</p> : null}
+      {notice ? <p className="text-xs font-medium text-teal-700">{notice}</p> : null}
+
 
       <button
         type="submit"
