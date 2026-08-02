@@ -143,3 +143,32 @@ export function validateNationalId(
   }
   return null;
 }
+
+/**
+ * Canonical comparison key for duplicate detection. Mirrors the database
+ * function `public.national_id_key(text, text)` exactly: Ghana Card compares on
+ * digits only; every other type compares on uppercase alphanumerics, so
+ * spacing, dashes and case can never hide a duplicate.
+ */
+export function nationalIdKey(
+  code: string | null | undefined,
+  value: string | null | undefined,
+): string | null {
+  if (!value || !value.trim()) return null;
+  const type = code || DEFAULT_NATIONAL_ID_TYPE;
+  const upperValue = value.toUpperCase();
+  if (type === "ghana_card") return `ghana_card:${upperValue.replace(/[^0-9]/g, "")}`;
+  return `${type}:${upperValue.replace(/[^0-9A-Z]/g, "")}`;
+}
+
+/** True when two ID numbers refer to the same document after normalization. */
+export function isSameNationalId(
+  aType: string | null | undefined,
+  aValue: string | null | undefined,
+  bType: string | null | undefined,
+  bValue: string | null | undefined,
+): boolean {
+  const a = nationalIdKey(aType, aValue);
+  const b = nationalIdKey(bType, bValue);
+  return a !== null && a === b;
+}
