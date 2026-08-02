@@ -14,7 +14,16 @@ export type NationalIdType = {
   hint: string;
 };
 
-const upper = (raw: string) => raw.trim().toUpperCase().replace(/\s+/g, "");
+/** Trim, drop all whitespace (incl. non-breaking) and uppercase. */
+const upper = (raw: string) => raw.trim().replace(/[\s\u00a0]+/g, "").toUpperCase();
+
+/**
+ * Strict compaction for ID types whose printed form never contains separators
+ * (passport, SSNIT, TIN): trim, remove spaces, dashes, dots, slashes and
+ * underscores, then uppercase. Guarantees "g-123 456 7" === "G1234567".
+ */
+const compact = (raw: string) => upper(raw).replace(/[-–—_./\\]+/g, "");
+
 
 export const NATIONAL_ID_TYPES: NationalIdType[] = [
   {
