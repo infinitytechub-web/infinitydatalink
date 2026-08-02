@@ -1316,3 +1316,36 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
     };
   });
 
+
+export type MinorStatusChange = {
+  id: string;
+  member_id: string;
+  was_minor: boolean | null;
+  is_minor: boolean;
+  previous_date_of_birth: string | null;
+  source_date_of_birth: string | null;
+  change_kind: string;
+  changed_by: string | null;
+  changed_at: string;
+};
+
+/**
+ * Automatic under-18 flag history for one member, newest first. Written by the
+ * `profiles_set_minor_flag` trigger, so it covers every write path (member
+ * edits, KYC remediation, staff tools and direct database changes).
+ */
+export const listMinorStatusChanges = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ member_id: z.string().uuid(), limit: z.number().int().min(1).max(100).default(20) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("minor_status_changes")
+      .select("id, member_id, was_minor, is_minor, previous_date_of_birth, source_date_of_birth, change_kind, changed_by, changed_at")
+      .eq("member_id", data.member_id)
+      .order("changed_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return { changes: (rows ?? []) as MinorStatusChange[] };
+  });
