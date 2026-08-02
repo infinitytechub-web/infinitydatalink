@@ -5,6 +5,8 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
+import { formatAge } from "@/lib/age";
+
 import {
   ErrorState,
   KPIGridSkeleton,
@@ -377,11 +379,20 @@ function QueueBody() {
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <Link to="/admin/members/$id" params={{ id: m.member_id }} className="block">
-                      <div className="font-semibold">{m.full_name ?? "—"}</div>
+                      <div className="flex items-center gap-2 font-semibold">
+                        {m.full_name ?? "—"}
+                        {m.is_minor ? (
+                          <span className="rounded bg-gold/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-gold">
+                            Under 18
+                          </span>
+                        ) : null}
+                      </div>
                       <div className="tabular text-[11px] text-emerald-deep/50">
                         {m.member_no ?? ""} · {m.region ?? "—"}
+                        {m.date_of_birth ? ` · ${formatAge(m.date_of_birth)}` : ""}
                       </div>
                     </Link>
+
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <Popover
