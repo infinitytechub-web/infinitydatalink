@@ -4,6 +4,7 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery }
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
+import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 import {
   ErrorState,
   KPIGridSkeleton,
@@ -202,6 +203,7 @@ function QueueBody() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDialog, setBulkDialog] = useState<null | "approved" | "rejected">(null);
   const [bulkNotes, setBulkNotes] = useState("");
+  const [bulkItems, setBulkItems] = useState<string[]>([]);
   const [assignOpenFor, setAssignOpenFor] = useState<string | null>(null);
 
   const setSearch = (patch: Partial<SearchInput>) => {
@@ -229,8 +231,12 @@ function QueueBody() {
   });
 
   const bulkMutation = useMutation({
-    mutationFn: (args: { member_ids: string[]; decision: "approved" | "rejected"; notes: string }) =>
-      bulkDecideKyc({ data: args }),
+    mutationFn: (args: {
+      member_ids: string[];
+      decision: "approved" | "rejected";
+      notes: string;
+      remediation_items: string[];
+    }) => bulkDecideKyc({ data: args }),
     onSuccess: (res) => {
       const failed = res.failed.length;
       if (failed === 0) toast.success(`${res.succeeded} member${res.succeeded === 1 ? "" : "s"} ${bulkDialog}`);
@@ -238,6 +244,7 @@ function QueueBody() {
       setSelected(new Set());
       setBulkDialog(null);
       setBulkNotes("");
+      setBulkItems([]);
       invalidate();
     },
     onError: (e: any) => toast.error(e?.message ?? "Bulk decision failed"),
@@ -485,6 +492,35 @@ function QueueBody() {
               rows={4}
               className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
             />
+            {bulkDialog === "rejected" ? (
+              <fieldset className="rounded border border-emerald-deep/15 p-3">
+                <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+                  Items every selected member must revise
+                </legend>
+                <div className="grid gap-1.5 sm:grid-cols-2">
+                  {ALL_REMEDIATION_ITEMS.map((item) => (
+                    <label key={item.key} className="flex items-center gap-2 text-xs text-emerald-deep/80">
+                      <input
+                        type="checkbox"
+                        checked={bulkItems.includes(item.key)}
+                        onChange={() =>
+                          setBulkItems((prev) =>
+                            prev.includes(item.key)
+                              ? prev.filter((k) => k !== item.key)
+                              : [...prev, item.key],
+                          )
+                        }
+                        className="h-3.5 w-3.5 accent-emerald-deep"
+                      />
+                      {item.label}
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] text-emerald-deep/50">
+                  Leave empty to ask for all documents to be re-uploaded.
+                </p>
+              </fieldset>
+            ) : null}
           </div>
           <DialogFooter>
             <button
@@ -492,6 +528,7 @@ function QueueBody() {
               onClick={() => {
                 setBulkDialog(null);
                 setBulkNotes("");
+                setBulkItems([]);
               }}
             >
               Cancel
@@ -507,6 +544,7 @@ function QueueBody() {
                   member_ids: selectedList,
                   decision: bulkDialog,
                   notes: bulkNotes,
+                  remediation_items: bulkDialog === "rejected" ? bulkItems : [],
                 })
               }
               className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${

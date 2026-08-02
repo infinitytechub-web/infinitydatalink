@@ -348,7 +348,7 @@ export const decideKyc = createServerFn({ method: "POST" })
     });
 
     // In-app + email/SMS fan-out per the member's notification preferences.
-    await notifyUser({
+    const fanOut = await notifyUser({
       userId: data.member_id,
       category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
       title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
@@ -357,9 +357,29 @@ export const decideKyc = createServerFn({ method: "POST" })
           ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
           : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
       link: "/app/kyc",
+      // The branded decision email is sent below via the transactional template,
+      // so the generic outbox only handles in-app + SMS.
+      channels: ["in_app", "sms"],
       meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
       dedupeKey: `kyc.${data.decision}:${data.member_id}:${now}`,
     });
+
+    // Mirror the queued SMS into the member-visible notification timeline.
+    if (fanOut.delivered.includes("sms")) {
+      const { data: contact } = await sb
+        .from("profiles")
+        .select("phone")
+        .eq("id", data.member_id)
+        .maybeSingle();
+      await sb.from("kyc_notifications").insert({
+        member_id: data.member_id,
+        channel: "sms",
+        decision: data.decision,
+        recipient: contact?.phone ?? "unknown",
+        subject: null,
+        status: "pending",
+      });
+    }
 
     // Fire-and-log notification email (never fails the decision)
     try {
@@ -657,21 +677,38 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           actor_role: role,
           action: `kyc.bulk_${data.decision}`,
           target: memberId,
-          meta: { notes: data.notes || null, member_id: memberId },
+          meta: { notes: data.notes || null, member_id: memberId, remediation_items: remediation },
         });
 
-        await notifyUser({
+        const fanOut = await notifyUser({
           userId: memberId,
           category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
           title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
           body:
             data.decision === "approved"
               ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
-              : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Please update your documents and resubmit.`,
+              : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
           link: "/app/kyc",
-          meta: { notes: data.notes || null, decision: data.decision },
+          channels: ["in_app", "sms"],
+          meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
           dedupeKey: `kyc.${data.decision}:${memberId}:${now}`,
         });
+
+        if (fanOut.delivered.includes("sms")) {
+          const { data: contact } = await sb
+            .from("profiles")
+            .select("phone")
+            .eq("id", memberId)
+            .maybeSingle();
+          await sb.from("kyc_notifications").insert({
+            member_id: memberId,
+            channel: "sms",
+            decision: data.decision,
+            recipient: contact?.phone ?? "unknown",
+            subject: null,
+            status: "pending",
+          });
+        }
 
         // Enqueue notification
         try {
