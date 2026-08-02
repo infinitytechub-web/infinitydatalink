@@ -275,7 +275,11 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const [fullName, setFullName] = useState("");
   const [cardDigits, setCardDigits] = useState("");
   const [phone, setPhone] = useState("");
+  const [dob, setDob] = useState("");
+  const [region, setRegion] = useState("");
+  const [district, setDistrict] = useState("");
   const [membershipType, setMembershipType] = useState<MembershipType>("individual");
+
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
