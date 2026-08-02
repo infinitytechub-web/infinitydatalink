@@ -149,13 +149,14 @@ const profileUpdateSchema = z
       }
     }
     if (val.date_of_birth) {
-      const dob = validateDateOfBirth(val.date_of_birth);
-      if (!dob.ok) ctx.addIssue({ code: "custom", path: ["date_of_birth"], message: dob.message });
+      const dobError = validateDateOfBirth(val.date_of_birth);
+      if (dobError) ctx.addIssue({ code: "custom", path: ["date_of_birth"], message: dobError });
     }
     if (val.national_id) {
-      const res = validateNationalId(val.national_id_type ?? null, val.national_id);
-      if (!res.ok) ctx.addIssue({ code: "custom", path: ["national_id"], message: res.message });
+      const idError = validateNationalId(val.national_id_type ?? null, val.national_id);
+      if (idError) ctx.addIssue({ code: "custom", path: ["national_id"], message: idError });
     }
+
     if (val.national_id_type && !val.national_id) {
       ctx.addIssue({ code: "custom", path: ["national_id"], message: "Enter the ID number for the selected ID type" });
     }
