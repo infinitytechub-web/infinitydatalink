@@ -2,13 +2,14 @@ import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { FileText, Upload } from "lucide-react";
+import { BellRing, FileText, Upload } from "lucide-react";
 import { SectionCard } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   MINOR_ATTESTATION_MAX_BYTES,
   MINOR_ATTESTATION_TYPES,
   listMinorAttestations,
+  sendGuardianConsentReminders,
   uploadMinorAttestation,
   type MinorAttestation,
   type MinorAttestationType,
@@ -40,6 +41,7 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
   const qc = useQueryClient();
   const list = useServerFn(listMinorAttestations);
   const upload = useServerFn(uploadMinorAttestation);
+  const remind = useServerFn(sendGuardianConsentReminders);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [docType, setDocType] = useState<MinorAttestationType>("guardian_consent");
@@ -74,6 +76,15 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
       if (fileInput.current) fileInput.current.value = "";
       void qc.invalidateQueries({ queryKey: ["minor-attestations", memberId] });
     },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reminders = useMutation({
+    mutationFn: () => remind({ data: {} }),
+    onSuccess: (r: { incomplete: number; staff_notified: number; guardians_notified: number }) =>
+      toast.success(
+        `Reminders sent — ${r.incomplete} incomplete minor account(s), ${r.staff_notified} officer alert(s), ${r.guardians_notified} guardian alert(s).`,
+      ),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -126,6 +137,7 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
           />
         </label>
 
+        <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={!canSubmit}
@@ -135,6 +147,21 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
           <Upload className="h-3.5 w-3.5" />
           {mutation.isPending ? "Uploading…" : "Attach attestation"}
         </button>
+        <button
+          type="button"
+          disabled={reminders.isPending}
+          onClick={() => reminders.mutate()}
+          className="inline-flex items-center gap-2 rounded border border-emerald-deep/20 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-deep/70 hover:border-emerald-mid disabled:opacity-40"
+        >
+          <BellRing className="h-3.5 w-3.5" />
+          {reminders.isPending ? "Sending…" : "Send consent reminders"}
+        </button>
+        </div>
+        <p className="text-[11px] text-emerald-deep/50">
+          Reminders also run automatically each night: officers get an in-app + email alert deep-linked to
+          the member review screen, and the guardian gets in-app, email and SMS notices until the consent
+          and safeguarding files are on file.
+        </p>
 
         <div className="space-y-2">
           <h3 className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
