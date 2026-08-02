@@ -122,26 +122,26 @@ describe("under-18 boundary — resolver alignment with the stored flag", () => 
     freeze("2026-08-02T09:00:00Z");
     const status = resolveMinorStatus("2008-08-02", true);
     expect(status.effective).toBe(false);
-    expect(status.stale).toBe(true);
+    expect(status.mismatch).toBe(true);
   });
 
   it("agrees with the stored flag on the day before the birthday", () => {
     freeze("2026-08-01T09:00:00Z");
     const status = resolveMinorStatus("2008-08-02", true);
     expect(status.effective).toBe(true);
-    expect(status.stale).toBe(false);
+    expect(status.mismatch).toBe(false);
   });
 
   it("agrees with the stored flag for a 29 February birth on 1 March", () => {
     freeze("2026-03-01T00:00:01Z");
     const status = resolveMinorStatus("2008-02-29", false);
     expect(status.effective).toBe(false);
-    expect(status.stale).toBe(false);
+    expect(status.mismatch).toBe(false);
   });
 
   it("falls back to the stored flag when the date of birth is missing", () => {
     const status = resolveMinorStatus(null, true);
     expect(status.effective).toBe(true);
-    expect(status.stale).toBe(false);
+    expect(status.mismatch).toBe(false);
   });
 });
