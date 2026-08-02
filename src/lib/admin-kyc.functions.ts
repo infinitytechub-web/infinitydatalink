@@ -854,6 +854,12 @@ export type KycResubmissionSettings = {
   auto_flag_enabled: boolean;
   /** Lowest risk level that triggers an automatic flag. */
   auto_flag_min_severity: RiskSeverity;
+  /** Send automated deadline / low-attempt reminders to members. */
+  reminder_enabled: boolean;
+  /** Days before the deadline the first reminder goes out. */
+  reminder_lead_days: number;
+  /** Warn the member once remaining attempts drop to this many or fewer. */
+  low_attempts_threshold: number;
   updated_at: string | null;
 };
 
@@ -864,7 +870,7 @@ export const getKycResubmissionSettings = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("kyc_resubmission_settings")
       .select(
-        "deadline_days, max_attempts, enforce_deadline, auto_flag_enabled, auto_flag_min_severity, updated_at",
+        "deadline_days, max_attempts, enforce_deadline, auto_flag_enabled, auto_flag_min_severity, reminder_enabled, reminder_lead_days, low_attempts_threshold, updated_at",
       )
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -874,6 +880,9 @@ export const getKycResubmissionSettings = createServerFn({ method: "GET" })
       enforce_deadline: (data?.enforce_deadline ?? true) as boolean,
       auto_flag_enabled: ((data as any)?.auto_flag_enabled ?? true) as boolean,
       auto_flag_min_severity: (((data as any)?.auto_flag_min_severity ?? "medium") as RiskSeverity),
+      reminder_enabled: ((data as any)?.reminder_enabled ?? true) as boolean,
+      reminder_lead_days: Number((data as any)?.reminder_lead_days ?? 3),
+      low_attempts_threshold: Number((data as any)?.low_attempts_threshold ?? 1),
       updated_at: (data?.updated_at as string | null) ?? null,
     };
   });
@@ -888,6 +897,9 @@ export const updateKycResubmissionSettings = createServerFn({ method: "POST" })
         enforce_deadline: z.boolean(),
         auto_flag_enabled: z.boolean().default(true),
         auto_flag_min_severity: z.enum(["low", "medium", "high"]).default("medium"),
+        reminder_enabled: z.boolean().default(true),
+        reminder_lead_days: z.number().int().min(0).max(60).default(3),
+        low_attempts_threshold: z.number().int().min(0).max(20).default(1),
       })
       .parse(d),
   )
@@ -901,10 +913,14 @@ export const updateKycResubmissionSettings = createServerFn({ method: "POST" })
         enforce_deadline: data.enforce_deadline,
         auto_flag_enabled: data.auto_flag_enabled,
         auto_flag_min_severity: data.auto_flag_min_severity,
+        reminder_enabled: data.reminder_enabled,
+        reminder_lead_days: data.reminder_lead_days,
+        low_attempts_threshold: data.low_attempts_threshold,
         updated_by: context.userId,
       } as any)
       .eq("id", true);
     if (error) throw new Error(error.message);
+
 
 
     await writeAudit({
