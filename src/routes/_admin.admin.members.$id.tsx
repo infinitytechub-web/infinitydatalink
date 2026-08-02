@@ -299,16 +299,83 @@ function DecisionPanel({
           Approving marks the member as verified and clears all pending documents. Rejecting requires a note explaining
           the reason so the member can resubmit.
         </p>
+        {isMinor ? (
+          <div className="rounded border border-gold/40 bg-gold/10 p-3 text-[11px] text-emerald-deep/80">
+            <strong className="uppercase tracking-widest">Minor account</strong> — this member is under
+            18. Every decision needs a verified guardian, a consent reference, a note of at least{" "}
+            {MINOR_DECISION_NOTE_MIN} characters, and fresh re-authentication. Minors are excluded from
+            bulk decisions, and each decision is broadcast to compliance leadership for secondary review.
+          </div>
+        ) : null}
         <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
           Notes
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            placeholder="Optional for approval, required for rejection."
+            placeholder={
+              isMinor
+                ? `Required for minors — at least ${MINOR_DECISION_NOTE_MIN} characters.`
+                : "Optional for approval, required for rejection."
+            }
             className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal text-emerald-deep outline-none focus:border-emerald-mid"
           />
         </label>
+        {isMinor ? (
+          <fieldset className="space-y-3 rounded border border-gold/40 p-3">
+            <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              Guardian verification (minor)
+            </legend>
+            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              Verified guardian
+              <select
+                value={guardianId}
+                onChange={(e) => setGuardianId(e.target.value)}
+                className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal outline-none focus:border-emerald-mid"
+              >
+                <option value="">Select guardian…</option>
+                {guardians.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.full_name ?? "Unnamed"} · {g.relationship} · {g.phone}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {guardians.length === 0 ? (
+              <p className="text-[11px] text-destructive">
+                No eligible guardian on file. Add a next-of-kin with a parent/guardian relationship and a
+                phone number before deciding.
+              </p>
+            ) : null}
+            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              Guardian consent reference
+              <input
+                value={consentRef}
+                onChange={(e) => setConsentRef(e.target.value)}
+                placeholder="e.g. CONSENT-2026-014"
+                className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal outline-none focus:border-emerald-mid"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-xs text-emerald-deep/80">
+              <input
+                type="checkbox"
+                checked={guardianIdVerified}
+                onChange={(e) => setGuardianIdVerified(e.target.checked)}
+                className="h-3.5 w-3.5 accent-emerald-deep"
+              />
+              Guardian identity document sighted and matches the consent
+            </label>
+            <label className="flex items-center gap-2 text-xs text-emerald-deep/80">
+              <input
+                type="checkbox"
+                checked={safeguardingAck}
+                onChange={(e) => setSafeguardingAck(e.target.checked)}
+                className="h-3.5 w-3.5 accent-emerald-deep"
+              />
+              Minor safeguarding checklist completed
+            </label>
+          </fieldset>
+        ) : null}
         <fieldset className="rounded border border-emerald-deep/15 p-3">
           <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
             Items the member must revise (rejection only)
@@ -330,23 +397,37 @@ function DecisionPanel({
             Only these items will be editable for the member when they resubmit.
           </p>
         </fieldset>
+        {isMinor && approveBlockers.length > 0 ? (
+          <ul className="list-disc space-y-1 pl-5 text-[11px] text-destructive">
+            {approveBlockers.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
+        ) : null}
         <div className="flex gap-2">
           <button
-            disabled={mutation.isPending || !canDecide}
+            disabled={mutation.isPending || !canDecide || approveBlockers.length > 0}
             onClick={() => mutation.mutate({ decision: "approved" })}
+            title={approveBlockers[0] ?? ""}
             className="inline-flex flex-1 items-center justify-center gap-1 rounded bg-emerald-deep px-3 py-2 text-xs font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
           >
             <Check className="h-3 w-3" /> Approve
           </button>
           <button
-            disabled={mutation.isPending || !canDecide || notes.trim().length < 5 || items.length === 0}
+            disabled={
+              mutation.isPending ||
+              !canDecide ||
+              notes.trim().length < 5 ||
+              items.length === 0 ||
+              rejectBlockers.length > 0
+            }
             onClick={() => mutation.mutate({ decision: "rejected" })}
             title={
               notes.trim().length < 5
                 ? "Add at least 5 characters to reject"
                 : items.length === 0
                   ? "Select at least one item to revise"
-                  : ""
+                  : (rejectBlockers[0] ?? "")
             }
             className="inline-flex flex-1 items-center justify-center gap-1 rounded border border-destructive/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10 disabled:opacity-50"
           >
@@ -359,8 +440,10 @@ function DecisionPanel({
           </p>
         ) : null}
       </div>
+      {dialog}
     </SectionCard>
   );
+
 }
 
 function Field({ label, value, className }: { label: string; value: string | null | undefined; className?: string }) {
