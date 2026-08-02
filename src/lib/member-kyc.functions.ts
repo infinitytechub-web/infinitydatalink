@@ -364,7 +364,7 @@ export const resubmitMyKyc = createServerFn({ method: "POST" })
       sb
         .from("profiles")
         .select(
-          "kyc, kyc_reviewed_at, kyc_remediation_items, full_name, phone, date_of_birth, gender, region, address_line, digital_address, occupation, employer, national_id",
+          "kyc, kyc_reviewed_at, kyc_remediation_items, full_name, phone, date_of_birth, gender, region, district, address_line, digital_address, occupation, employer, national_id",
         )
         .eq("id", context.userId)
         .maybeSingle(),
