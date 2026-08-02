@@ -124,6 +124,10 @@ function MemberDetailBody() {
             </dl>
           </SectionCard>
 
+          <MinorHistoryCard memberId={profile.id} />
+
+
+
           <SectionCard title="Documents">
             {documents.length === 0 ? (
               <div className="p-6 text-sm text-emerald-deep/60">No documents uploaded.</div>
