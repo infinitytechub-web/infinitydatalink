@@ -298,6 +298,33 @@ const decideInput = z
     }
   });
 
+/**
+ * Resubmission window + attempt allowance applied when a KYC review is rejected.
+ * Reads the shared settings row so compliance can retune it without a deploy.
+ * Approvals clear the window and reset the counter.
+ */
+async function resubmissionStamp(
+  sb: { from: (t: string) => any },
+  decision: "approved" | "rejected",
+) {
+  if (decision === "approved") {
+    return {
+      kyc_resubmission_deadline: null,
+      kyc_max_attempts: null,
+      kyc_attempts: 0,
+    };
+  }
+  const { data: settings } = await sb
+    .from("kyc_resubmission_settings")
+    .select("deadline_days, max_attempts")
+    .maybeSingle();
+  const days = Number(settings?.deadline_days ?? 14);
+  return {
+    kyc_resubmission_deadline: new Date(Date.now() + days * 86400_000).toISOString(),
+    kyc_max_attempts: Number(settings?.max_attempts ?? 3),
+  };
+}
+
 export const decideKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => decideInput.parse(data))
@@ -309,6 +336,7 @@ export const decideKyc = createServerFn({ method: "POST" })
     const now = new Date().toISOString();
 
     const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
+    const window = await resubmissionStamp(sb, data.decision);
 
     const { data: profile, error: pErr } = await sb
       .from("profiles")
@@ -318,6 +346,7 @@ export const decideKyc = createServerFn({ method: "POST" })
         kyc_reviewed_by: context.userId,
         kyc_reviewed_at: now,
         kyc_remediation_items: remediation,
+        ...window,
       })
       .eq("id", data.member_id)
       .select("id, kyc")
@@ -641,6 +670,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
 
     const succeeded: string[] = [];
     const failed: { id: string; error: string }[] = [];
+    const window = await resubmissionStamp(sb, data.decision);
 
     const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
 
@@ -654,6 +684,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
             kyc_reviewed_by: context.userId,
             kyc_reviewed_at: now,
             kyc_remediation_items: remediation,
+            ...window,
           })
           .eq("id", memberId)
           .select("id")
