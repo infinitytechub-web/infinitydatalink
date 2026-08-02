@@ -343,7 +343,6 @@ export const saveKycRemediationFields = createServerFn({ method: "POST" })
       patch[key] = value;
     }
 
-    }
     if (Object.keys(patch).length === 0) return { updated: false as const };
 
     const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
