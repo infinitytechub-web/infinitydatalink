@@ -136,7 +136,9 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
     full_name: profile.full_name ?? "",
     phone: profile.phone ?? "",
     national_id: profile.national_id ?? "",
+    national_id_type: profile.national_id_type ?? DEFAULT_NATIONAL_ID_TYPE,
     region: profile.region ?? "",
+    district: profile.district ?? "",
     date_of_birth: profile.date_of_birth ?? "",
     gender: profile.gender ?? "",
     digital_address: profile.digital_address ?? "",
@@ -144,6 +146,7 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
     occupation: profile.occupation ?? "",
     employer: profile.employer ?? "",
   });
+
   const identityLocked = profile.kyc === "active";
   const mutation = useMutation({
     mutationFn: () => update({ data: form }),
