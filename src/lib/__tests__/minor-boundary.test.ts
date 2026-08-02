@@ -98,11 +98,13 @@ describe("under-18 boundary — leap years", () => {
   });
 
   it("turns 18 on 29 February when the birthday year is itself a leap year", () => {
-    // Born 2012-02-29; 2030 is not a leap year, 2032 is.
-    expect(isMinor("2014-02-29", new Date("2032-02-29T00:00:00Z"))).toBe(true); // invalid date → guarded below
-    expect(isMinor("2012-02-29", new Date("2030-02-28T00:00:00Z"))).toBe(false);
+    // Born 2012-02-29 (leap). 2030-02-28 is the day before the 18th birthday
+    // in a non-leap year, so the member is already 18 on 2030-03-01.
+    expect(isMinor("2012-02-29", new Date("2030-02-28T00:00:00Z"))).toBe(true);
+    expect(isMinor("2012-02-29", new Date("2030-03-01T00:00:00Z"))).toBe(false);
     expect(calculateAge("2012-02-29", new Date("2032-02-29T00:00:00Z"))).toBe(20);
   });
+
 
   it("handles a 29 February evaluation date for a non-leap birth date", () => {
     expect(calculateAge("2006-03-01", new Date("2024-02-29T00:00:00Z"))).toBe(17);
