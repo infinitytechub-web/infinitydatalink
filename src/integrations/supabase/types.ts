@@ -4342,6 +4342,10 @@ export type Database = {
         Args: { _type: string; _value: string }
         Returns: string
       }
+      normalize_national_id: {
+        Args: { _type: string; _value: string }
+        Returns: string
+      }
       notify_user: {
         Args: {
           _body?: string

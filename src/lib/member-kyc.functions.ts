@@ -7,6 +7,7 @@ import {
   parseRemediationItems,
   type RemediationProfileField,
 } from "@/lib/kyc-remediation";
+import { normalizeNationalId, validateNationalId } from "@/lib/ghana-id-types";
 import { normalizePhone } from "@/lib/member-registration";
 import type { ProfileKycStatus } from "./member-profile.functions";
 
@@ -294,7 +295,7 @@ export const saveKycRemediationFields = createServerFn({ method: "POST" })
 
     const { data: profile, error: pErr } = await sb
       .from("profiles")
-      .select("kyc, kyc_remediation_items, is_minor, date_of_birth")
+      .select("kyc, kyc_remediation_items, is_minor, date_of_birth, national_id_type")
       .eq("id", context.userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
@@ -310,6 +311,11 @@ export const saveKycRemediationFields = createServerFn({ method: "POST" })
     );
 
     const patch: Record<string, string> = {};
+    // The ID type submitted alongside the number, else the one already on file.
+    const idType =
+      (data.values as Record<string, string>)["national_id_type"] ||
+      ((profile as any).national_id_type as string | null) ||
+      null;
     for (const [key, value] of Object.entries(data.values)) {
       if (!requested.has(key)) {
         throw new Error(`"${key}" was not requested by the reviewer.`);
@@ -323,11 +329,21 @@ export const saveKycRemediationFields = createServerFn({ method: "POST" })
         patch[key] = normalized;
         continue;
       }
+      if (key === "national_id") {
+        // Same normalization as registration and the profile editor, so a
+        // resubmitted ID can never bypass duplicate detection on spacing/case.
+        const normalized = normalizeNationalId(idType, value);
+        const idError = validateNationalId(idType, normalized);
+        if (idError) throw new Error(idError);
+        patch[key] = normalized;
+        continue;
+      }
       if (key === "date_of_birth" && Number.isNaN(Date.parse(value))) {
         throw new Error("Enter a valid date of birth.");
       }
       patch[key] = value;
     }
+
     if (Object.keys(patch).length === 0) return { updated: false as const };
 
     const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
