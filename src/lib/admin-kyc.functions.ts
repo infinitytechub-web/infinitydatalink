@@ -583,6 +583,11 @@ const bulkDecideInput = z
     member_ids: z.array(z.string().uuid()).min(1).max(50),
     decision: z.enum(["approved", "rejected"]),
     notes: z.string().trim().max(1000).optional().default(""),
+    remediation_items: z
+      .array(z.enum(REMEDIATION_KEYS as [string, ...string[]]))
+      .max(20)
+      .optional()
+      .default([]),
   })
   .superRefine((v, ctx) => {
     if (v.decision === "rejected" && v.notes.trim().length < 5) {
@@ -603,6 +608,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const docStatus: "approved" | "rejected" = data.decision === "approved" ? "approved" : "rejected";
     const now = new Date().toISOString();
+    const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
 
     const succeeded: string[] = [];
     const failed: { id: string; error: string }[] = [];
@@ -618,6 +624,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
             kyc_notes: data.notes || null,
             kyc_reviewed_by: context.userId,
             kyc_reviewed_at: now,
+            kyc_remediation_items: remediation,
           })
           .eq("id", memberId)
           .select("id")
