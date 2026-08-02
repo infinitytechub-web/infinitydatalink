@@ -47,6 +47,7 @@ function ApprovalsPage() {
 function ApprovalsInner() {
   const qc = useQueryClient();
   const [status, setStatus] = useState<Status>("pending");
+  const [membershipType, setMembershipType] = useState<MembershipFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 25;
@@ -57,9 +58,11 @@ function ApprovalsInner() {
   const activeFn = useServerFn(setUserActive);
 
   const query = useQuery({
-    queryKey: ["admin-approvals", status, search, page],
-    queryFn: () => listFn({ data: { status, search, page, pageSize } }),
+    queryKey: ["admin-approvals", status, membershipType, search, page],
+    queryFn: () =>
+      listFn({ data: { status, membership_type: membershipType, search, page, pageSize } }),
   });
+
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-approvals"] });
 
