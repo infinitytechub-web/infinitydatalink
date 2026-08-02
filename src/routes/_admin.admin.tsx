@@ -34,6 +34,8 @@ import {
   BellRing,
   Radio,
   Coins,
+  FileText,
+
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 
