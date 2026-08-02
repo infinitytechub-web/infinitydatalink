@@ -30,11 +30,41 @@ const transactions = [
   { icon: "M", label: "MTN Mobile Money Deposit", ref: "MOMO-77812", date: "Sep 05, 2025", amount: 500, kind: "Wallet", status: "pending" as const },
 ];
 
+function BiodataStrip() {
+  const load = useServerFn(getMyProfile);
+  const { data } = useQuery({
+    queryKey: ["member", "profile"],
+    queryFn: () => load(),
+    staleTime: 60_000,
+  });
+  const p = data?.profile;
+  if (!p) return null;
+  return (
+    <section className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-emerald-deep/10 bg-card px-4 py-3 sm:flex sm:justify-between">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold">{p.full_name ?? "Member"}</p>
+        <p className="truncate text-xs text-emerald-deep/60">
+          {p.member_no ? `Member no. ${p.member_no}` : "Membership pending"}
+          {p.region ? ` · ${p.district ? `${p.district}, ` : ""}${p.region}` : ""}
+        </p>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">Your age</p>
+        <div className="text-sm font-semibold">
+          <AgeBadge dateOfBirth={p.date_of_birth} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Dashboard() {
   return (
     <>
+      <BiodataStrip />
       {/* KPI row */}
       <section className="grid gap-6 md:grid-cols-3">
+
         <KPIStat
           label="Total Net Worth"
           value={
