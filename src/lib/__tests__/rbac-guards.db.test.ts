@@ -211,17 +211,21 @@ d("audit_log spoof guard (INSERT WITH CHECK)", () => {
     expect(memberId).toMatch(/[0-9a-f-]{36}/);
   });
 
-  it("policy has expected WITH CHECK expression", () => {
-    const expr = q(`
-      SELECT with_check FROM pg_policies
-       WHERE schemaname='public' AND tablename='audit_log'
-         AND policyname='authenticated can append audit'
+  it("clients cannot INSERT audit rows directly (definer-only writes)", () => {
+    const insertPolicies = q(`
+      SELECT count(*) FROM pg_policies
+       WHERE schemaname='public' AND tablename='audit_log' AND cmd='INSERT'
     `);
-    expect(expr).toMatch(/actor_id = auth\.uid\(\)/);
-    expect(expr).toMatch(/actor_email/);
-    expect(expr).toMatch(/actor_role/);
-    expect(expr).toMatch(/user_roles/);
+    expect(insertPolicies).toBe("0");
+
+    for (const role of ["authenticated", "anon"]) {
+      const priv = q(
+        `SELECT has_table_privilege('${role}','public.audit_log','INSERT')`,
+      );
+      expect(priv, `${role} must NOT INSERT audit_log`).toBe("f");
+    }
   });
+
 
   it("rejects when actor_id != auth.uid()", () => {
     const allowed = evalAuditPolicy({
