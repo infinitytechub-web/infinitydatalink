@@ -516,10 +516,51 @@ export const decideKyc = createServerFn({ method: "POST" })
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: role,
-      action: data.decision === "approved" ? "kyc.approved" : "kyc.rejected",
+      action:
+        minor
+          ? data.decision === "approved"
+            ? "kyc.minor_approved"
+            : "kyc.minor_rejected"
+          : data.decision === "approved"
+            ? "kyc.approved"
+            : "kyc.rejected",
       target: data.member_id,
-      meta: { notes: data.notes || null, member_id: data.member_id, remediation_items: remediation },
+      meta: {
+        notes: data.notes || null,
+        member_id: data.member_id,
+        remediation_items: remediation,
+        is_minor: !!minor,
+        ...(minor
+          ? {
+              minor_review: {
+                guardian_nok_id: minor.review.guardian_nok_id,
+                guardian_name: minor.guardian.full_name,
+                guardian_relationship: minor.guardian.relationship,
+                guardian_consent_ref: minor.review.guardian_consent_ref,
+                guardian_id_verified: minor.review.guardian_id_verified,
+                safeguarding_ack: minor.review.safeguarding_ack,
+              },
+              step_up_id: minor.step_up_id,
+            }
+          : {}),
+      },
     });
+
+    // Second-line visibility: every minor decision is broadcast to compliance
+    // leadership so it can be re-reviewed after the fact.
+    if (minor) {
+      await notifyStaff({
+        roles: ["super_admin", "compliance_officer"],
+        category: "kyc.minor.decision",
+        title: `Minor KYC ${data.decision} — secondary review required`,
+        body: `A minor account was ${data.decision} by ${role}. Guardian: ${minor.guardian.full_name ?? "unknown"} (${minor.guardian.relationship ?? "n/a"}), consent ref ${minor.review.guardian_consent_ref}.`,
+        link: `/admin/members/${data.member_id}`,
+        meta: { member_id: data.member_id, decision: data.decision, guardian_nok_id: minor.review.guardian_nok_id },
+        dedupeKey: `kyc.minor.${data.decision}:${data.member_id}:${now}`,
+        excludeUserId: context.userId,
+      });
+    }
+
 
     // In-app + email/SMS fan-out per the member's notification preferences.
     const fanOut = await notifyUser({
