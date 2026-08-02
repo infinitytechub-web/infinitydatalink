@@ -341,7 +341,9 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
                       phone: r.phone ?? "",
                       email: r.email ?? "",
                       national_id: r.national_id ?? "",
+                      national_id_type: r.national_id_type ?? DEFAULT_NATIONAL_ID_TYPE,
                       address: r.address ?? "",
+
                     })
                   }
                   className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream"
