@@ -23,9 +23,15 @@ export const NATIONAL_ID_TYPES: NationalIdType[] = [
     example: "GHA-123456789-0",
     pattern: /^GHA-\d{9}-\d$/,
     normalize: (raw) => {
-      const digits = upper(raw).replace(/[^0-9]/g, "");
-      if (digits.length === 10) return `GHA-${digits.slice(0, 9)}-${digits.slice(9)}`;
-      return upper(raw);
+      const value = upper(raw);
+      // Only reformat digit-only input, or input already prefixed with GHA.
+      // Any other letters (e.g. "ABC-123456789-0") must stay untouched so
+      // validation rejects them instead of silently rewriting the prefix.
+      if (/^(GHA)?[0-9-]+$/.test(value)) {
+        const digits = value.replace(/[^0-9]/g, "");
+        if (digits.length === 10) return `GHA-${digits.slice(0, 9)}-${digits.slice(9)}`;
+      }
+      return value;
     },
     hint: "Format: GHA-XXXXXXXXX-X",
   },
