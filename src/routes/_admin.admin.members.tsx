@@ -508,6 +508,11 @@ function QueueBody() {
               rows={4}
               className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
             />
+            <p className="rounded border border-gold/40 bg-gold/10 px-3 py-2 text-[11px] text-emerald-deep/80">
+              Minor (under 18) accounts are skipped in bulk decisions — open each one to complete
+              guardian verification and re-authentication.
+            </p>
+
             {bulkDialog === "rejected" ? (
               <fieldset className="rounded border border-emerald-deep/15 p-3">
                 <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
