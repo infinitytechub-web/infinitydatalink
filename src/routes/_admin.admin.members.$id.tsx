@@ -695,11 +695,17 @@ function MinorHistoryCard({ memberId }: { memberId: string }) {
         <ul className="divide-y divide-emerald-deep/5">
           {changes.map((c) => (
             <li key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-6 py-3 text-sm">
-              <StatusPill status={c.is_minor ? "pending" : "active"}>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-widest ${
+                  c.is_minor
+                    ? "bg-amber-500/15 text-amber-700"
+                    : "bg-emerald-deep/10 text-emerald-deep/80"
+                }`}
+              >
                 {c.was_minor === null
                   ? c.is_minor ? "Set to under 18" : "Set to adult"
                   : c.is_minor ? "Adult → under 18" : "Under 18 → adult"}
-              </StatusPill>
+              </span>
               <span className="text-emerald-deep/70">
                 Source date of birth: <strong>{c.source_date_of_birth ?? "not set"}</strong>
                 {c.previous_date_of_birth && c.previous_date_of_birth !== c.source_date_of_birth
