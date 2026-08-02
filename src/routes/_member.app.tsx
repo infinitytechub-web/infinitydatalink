@@ -76,14 +76,33 @@ export const Route = createFileRoute("/_member/app")({
   component: MemberLayout,
 });
 
+// Pages a member may always reach while KYC is incomplete.
+const KYC_ALLOWED_PATHS = ["/app/kyc", "/app/profile", "/app/notifications", "/app/support"];
+
 function MemberLayout() {
   const { user, loading, isAdmin } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const kycFn = useServerFn(getMyKycStatus);
+  const kycQuery = useQuery({
+    queryKey: ["my-kyc-gate", user?.id],
+    queryFn: () => kycFn(),
+    enabled: !!user && user.status === "approved" && !isAdmin,
+    staleTime: 60_000,
+  });
+
   if (loading) return null;
   if (!user) return <Navigate to="/auth" />;
   // Staff land on the admin dashboard; the member shell is for members only.
   if (isAdmin) return <Navigate to="/admin" replace />;
   if (user.status !== "approved") return <PendingApprovalGate />;
+
+  const kyc = kycQuery.data;
+  const kycComplete = !!kyc && kyc.steps.profile === "done" && kyc.steps.documents === "done";
+  const allowed = KYC_ALLOWED_PATHS.some((p) => pathname.startsWith(p));
+  if (kyc && !kycComplete && !allowed) {
+    return <Navigate to="/app/kyc" replace />;
+  }
+
   const breadcrumb = CRUMBS[pathname] ?? "Overview";
   return (
     <PortalShell
@@ -96,10 +115,29 @@ function MemberLayout() {
         </button>
       }
     >
+      {kyc && !kycComplete ? <KycBanner nextLabel={kyc.next_action?.label ?? null} /> : null}
       <Outlet />
     </PortalShell>
   );
 }
+
+function KycBanner({ nextLabel }: { nextLabel: string | null }) {
+  return (
+    <div className="mb-4 rounded-xl border border-gold/40 bg-gold/10 p-4">
+      <p className="text-sm font-semibold text-foreground">Verification required</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {nextLabel ?? "Complete your KYC details and documents to unlock the full dashboard."}
+      </p>
+      <Link
+        to="/app/kyc"
+        className="mt-3 inline-block rounded-md bg-emerald-deep px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
+      >
+        Continue verification
+      </Link>
+    </div>
+  );
+}
+
 
 function PendingApprovalGate() {
   const { user, signOut } = useAuth();
