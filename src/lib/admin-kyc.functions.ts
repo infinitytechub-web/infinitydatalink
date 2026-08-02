@@ -4,7 +4,14 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
 import { notifyUser } from "@/lib/notify.server";
-import { REMEDIATION_DOC_TYPES, REMEDIATION_KEYS, remediationLabel } from "@/lib/kyc-remediation";
+import {
+  ALL_REMEDIATION_ITEMS,
+  REMEDIATION_DOC_TYPES,
+  REMEDIATION_KEYS,
+  REMEDIATION_PROFILE_FIELDS,
+  parseRemediationItems,
+  remediationLabel,
+} from "@/lib/kyc-remediation";
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -325,6 +332,55 @@ async function resubmissionStamp(
   };
 }
 
+/**
+ * Captures the state a reviewer actually saw when rejecting, so a later
+ * resubmission can be diffed field-by-field and file-by-file. Stored on the
+ * profile row because it is decision evidence, not member-editable data.
+ */
+async function captureRejectionSnapshot(
+  sb: { from: (t: string) => any },
+  memberId: string,
+): Promise<Record<string, unknown> | null> {
+  const [{ data: prof }, { data: docs }] = await Promise.all([
+    sb
+      .from("profiles")
+      .select(REMEDIATION_PROFILE_FIELDS.join(", "))
+      .eq("id", memberId)
+      .maybeSingle(),
+    sb
+      .from("kyc_documents")
+      .select("id, doc_type, storage_path, size_bytes, mime_type, created_at")
+      .eq("member_id", memberId),
+  ]);
+  if (!prof) return null;
+
+  // Keep only the newest upload per doc type — that is the one under review.
+  const latest = new Map<string, any>();
+  for (const d of (docs ?? []) as any[]) {
+    const cur = latest.get(d.doc_type);
+    if (!cur || String(d.created_at) > String(cur.created_at)) latest.set(d.doc_type, d);
+  }
+
+  return {
+    captured_at: new Date().toISOString(),
+    fields: Object.fromEntries(
+      REMEDIATION_PROFILE_FIELDS.map((f) => [f, ((prof as any)[f] ?? null) as string | null]),
+    ),
+    documents: Object.fromEntries(
+      Array.from(latest.entries()).map(([type, d]) => [
+        type,
+        {
+          id: d.id as string,
+          storage_path: d.storage_path as string,
+          size_bytes: d.size_bytes as number | null,
+          mime_type: d.mime_type as string | null,
+          created_at: d.created_at as string,
+        },
+      ]),
+    ),
+  };
+}
+
 export const decideKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => decideInput.parse(data))
@@ -337,6 +393,8 @@ export const decideKyc = createServerFn({ method: "POST" })
 
     const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
     const window = await resubmissionStamp(sb, data.decision);
+    const snapshot =
+      data.decision === "rejected" ? await captureRejectionSnapshot(sb, data.member_id) : null;
 
     const { data: profile, error: pErr } = await sb
       .from("profiles")
@@ -346,6 +404,7 @@ export const decideKyc = createServerFn({ method: "POST" })
         kyc_reviewed_by: context.userId,
         kyc_reviewed_at: now,
         kyc_remediation_items: remediation,
+        kyc_rejection_snapshot: snapshot,
         ...window,
       })
       .eq("id", data.member_id)
@@ -676,6 +735,8 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
 
     for (const memberId of data.member_ids) {
       try {
+        const snapshot =
+          data.decision === "rejected" ? await captureRejectionSnapshot(sb, memberId) : null;
         const { data: prof, error: pErr } = await sb
           .from("profiles")
           .update({
@@ -684,6 +745,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
             kyc_reviewed_by: context.userId,
             kyc_reviewed_at: now,
             kyc_remediation_items: remediation,
+            kyc_rejection_snapshot: snapshot,
             ...window,
           })
           .eq("id", memberId)
