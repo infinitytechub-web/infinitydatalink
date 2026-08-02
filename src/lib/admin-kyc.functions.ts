@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
 import { notifyUser } from "@/lib/notify.server";
+import { REMEDIATION_KEYS, remediationLabel } from "@/lib/kyc-remediation";
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -273,6 +274,12 @@ const decideInput = z
     member_id: z.string().uuid(),
     decision: z.enum(["approved", "rejected"]),
     notes: z.string().trim().max(1000).optional().default(""),
+    // Which specific items the member must revise before resubmitting.
+    remediation_items: z
+      .array(z.enum(REMEDIATION_KEYS as [string, ...string[]]))
+      .max(20)
+      .optional()
+      .default([]),
   })
   .superRefine((v, ctx) => {
     if (v.decision === "rejected" && v.notes.trim().length < 5) {
@@ -280,6 +287,13 @@ const decideInput = z
         code: z.ZodIssueCode.custom,
         path: ["notes"],
         message: "Rejection notes must be at least 5 characters.",
+      });
+    }
+    if (v.decision === "rejected" && v.remediation_items.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["remediation_items"],
+        message: "Select at least one item the member must revise.",
       });
     }
   });
@@ -294,6 +308,8 @@ export const decideKyc = createServerFn({ method: "POST" })
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const now = new Date().toISOString();
 
+    const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
+
     const { data: profile, error: pErr } = await sb
       .from("profiles")
       .update({
@@ -301,6 +317,7 @@ export const decideKyc = createServerFn({ method: "POST" })
         kyc_notes: data.notes || null,
         kyc_reviewed_by: context.userId,
         kyc_reviewed_at: now,
+        kyc_remediation_items: remediation,
       })
       .eq("id", data.member_id)
       .select("id, kyc")
@@ -327,7 +344,7 @@ export const decideKyc = createServerFn({ method: "POST" })
       actor_role: role,
       action: data.decision === "approved" ? "kyc.approved" : "kyc.rejected",
       target: data.member_id,
-      meta: { notes: data.notes || null, member_id: data.member_id },
+      meta: { notes: data.notes || null, member_id: data.member_id, remediation_items: remediation },
     });
 
     // In-app + email/SMS fan-out per the member's notification preferences.
@@ -338,9 +355,9 @@ export const decideKyc = createServerFn({ method: "POST" })
       body:
         data.decision === "approved"
           ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
-          : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Please update your documents and resubmit.`,
+          : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
       link: "/app/kyc",
-      meta: { notes: data.notes || null, decision: data.decision },
+      meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
       dedupeKey: `kyc.${data.decision}:${data.member_id}:${now}`,
     });
 
