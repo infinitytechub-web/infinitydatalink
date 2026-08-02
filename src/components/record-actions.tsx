@@ -47,11 +47,14 @@ export type RecordActionsProps = {
   onReject?: Handler;
   /** Actions to render as disabled (e.g. already-approved records). */
   disabled?: Partial<Record<RecordActionKey, boolean>>;
+  /** Actions that should skip the built-in confirm prompt (caller shows its own dialog). */
+  noConfirm?: RecordActionKey[];
   /** Extra buttons rendered after the standard set. */
   extra?: ReactNode;
   size?: "sm" | "md";
   className?: string;
 };
+
 
 const ACTION_META: Record<
   RecordActionKey,
