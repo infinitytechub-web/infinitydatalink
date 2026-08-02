@@ -23,6 +23,12 @@ import {
   setUserActive,
   type PendingUserRow,
 } from "@/lib/admin-approvals.functions";
+import {
+  MEMBERSHIP_TYPES,
+  MEMBERSHIP_TYPE_LABEL,
+  type MembershipType,
+} from "@/lib/member-registration";
+
 
 export const Route = createFileRoute("/_admin/admin/approvals")({
   head: () => ({
@@ -35,6 +41,8 @@ export const Route = createFileRoute("/_admin/admin/approvals")({
 });
 
 type Status = "pending" | "approved" | "rejected" | "deactivated" | "all";
+type MembershipFilter = MembershipType | "all";
+
 
 function ApprovalsPage() {
   const { hasRole, hasAnyPermission, loading } = useAuth();
