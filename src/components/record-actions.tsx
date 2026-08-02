@@ -47,11 +47,14 @@ export type RecordActionsProps = {
   onReject?: Handler;
   /** Actions to render as disabled (e.g. already-approved records). */
   disabled?: Partial<Record<RecordActionKey, boolean>>;
+  /** Actions that should skip the built-in confirm prompt (caller shows its own dialog). */
+  noConfirm?: RecordActionKey[];
   /** Extra buttons rendered after the standard set. */
   extra?: ReactNode;
   size?: "sm" | "md";
   className?: string;
 };
+
 
 const ACTION_META: Record<
   RecordActionKey,
@@ -125,6 +128,7 @@ export function RecordActions({
   onApprove,
   onReject,
   disabled,
+  noConfirm,
   extra,
   size = "sm",
   className,
@@ -144,10 +148,11 @@ export function RecordActions({
 
   const run = async (key: RecordActionKey, handler: Handler) => {
     const meta = ACTION_META[key];
-    if (meta.confirm && typeof window !== "undefined") {
+    if (meta.confirm && !noConfirm?.includes(key) && typeof window !== "undefined") {
       const ok = window.confirm(`${meta.label} this ${label}? This action is audit-logged.`);
       if (!ok) return;
     }
+
     setBusy(key);
     try {
       await handler();

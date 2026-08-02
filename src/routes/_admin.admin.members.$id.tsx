@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AgeBadge } from "@/components/biodata-fields";
 import { idTypeLabel } from "@/lib/ghana-id-types";
 import { MinorAttestationUploads } from "@/components/minor-attestation-uploads";
+import { KycRecordActions } from "@/components/kyc-record-actions";
+import { IfCan } from "@/components/record-actions";
 
 
 import {
@@ -77,7 +79,50 @@ function MemberDetailBody() {
         eyebrow="Member review"
         title={profile.full_name ?? "Unnamed member"}
         description={`Member no. ${profile.member_no ?? "—"} · Joined ${new Date(profile.created_at).toLocaleDateString()}`}
-        action={<StatusPill status={profile.kyc as any} />}
+        action={
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusPill status={profile.kyc as any} />
+            <KycRecordActions
+              label="individual KYC record"
+              title={`Individual KYC — ${profile.full_name ?? profile.member_no ?? profile.id}`}
+              subtitle={`Status ${profile.kyc}`}
+              filename={`kyc_${profile.member_no ?? profile.id}`}
+              fields={[
+                { label: "Member", value: profile.full_name ?? "—" },
+                { label: "Member no.", value: profile.member_no ?? "—" },
+                { label: "Phone", value: profile.phone ?? "—" },
+                { label: "National ID type", value: idTypeLabel(profile.national_id_type) ?? "—" },
+                { label: "National ID", value: profile.national_id ?? "—" },
+                { label: "Date of birth", value: profile.date_of_birth ?? "—" },
+                {
+                  label: "Under 18",
+                  value: resolveMinorStatus(profile.date_of_birth, profile.is_minor).effective ? "Yes" : "No",
+                },
+                { label: "Gender", value: profile.gender ?? "—" },
+                { label: "Region", value: profile.region ?? "—" },
+                { label: "District", value: profile.district ?? "—" },
+                { label: "Digital address", value: profile.digital_address ?? "—" },
+                { label: "Residential address", value: profile.address_line ?? "—" },
+                { label: "Occupation", value: profile.occupation ?? "—" },
+                { label: "Employer", value: profile.employer ?? "—" },
+                { label: "Membership tier", value: profile.tier ?? "—" },
+                { label: "KYC status", value: profile.kyc },
+                { label: "Documents on file", value: String(documents.length) },
+                { label: "Reviewer notes", value: profile.kyc_notes ?? "—" },
+              ]}
+              onView={() => {
+                document
+                  .getElementById("kyc-documents")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              onEdit={() => {
+                document
+                  .getElementById("kyc-decision")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            />
+          </div>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -132,6 +177,7 @@ function MemberDetailBody() {
 
 
 
+          <div id="kyc-documents" />
           <SectionCard title="Documents">
             {documents.length === 0 ? (
               <div className="p-6 text-sm text-emerald-deep/60">No documents uploaded.</div>
@@ -185,12 +231,16 @@ function MemberDetailBody() {
           </Suspense>
         </div>
 
-        <DecisionPanel
-          memberId={profile.id}
-          kyc={profile.kyc}
-          isMinor={!!profile.is_minor}
-          nextOfKin={next_of_kin}
-        />
+        <div id="kyc-decision" className="contents">
+          <IfCan module="kyc" action="approve">
+            <DecisionPanel
+              memberId={profile.id}
+              kyc={profile.kyc}
+              isMinor={!!profile.is_minor}
+              nextOfKin={next_of_kin}
+            />
+          </IfCan>
+        </div>
 
         {profile.is_minor ? <MinorAttestationUploads memberId={profile.id} /> : null}
 

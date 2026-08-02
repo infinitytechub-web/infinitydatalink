@@ -12,7 +12,11 @@ import {
   SectionCardSkeleton,
   StatusPill,
 } from "@/components/primitives";
-import { listEntities, type EntityRow } from "@/lib/admin-entities.functions";
+import { listEntities, decideEntity, type EntityRow } from "@/lib/admin-entities.functions";
+import { KycRecordActions } from "@/components/kyc-record-actions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const TYPE_LABEL: Record<string, string> = {
   all: "All entities",
@@ -163,6 +167,9 @@ function FilterBar({
 
 function EntitiesBody({ search: s }: { search: SearchInput }) {
   const { data } = useSuspenseQuery(entitiesQuery(s));
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const decideFn = useServerFn(decideEntity);
   const rows = data.rows;
   const total = data.total;
   const pending = rows.filter((r) => r.status === "pending").length;
@@ -201,14 +208,36 @@ function EntitiesBody({ search: s }: { search: SearchInput }) {
                     <td className="px-6 py-3 text-muted-foreground">{e.region ?? "—"}</td>
                     <td className="px-6 py-3 text-right tabular">{e.member_count ?? 0}</td>
                     <td className="px-6 py-3"><StatusPill status={e.status as any} /></td>
-                    <td className="px-6 py-3 text-right">
-                      <Link
-                        to="/admin/entities/$entityId"
-                        params={{ entityId: e.id }}
-                        className="rounded-md border border-border bg-background px-2 py-1 text-[11px] hover:bg-muted"
-                      >
-                        Review
-                      </Link>
+                    <td className="px-6 py-3">
+                      <KycRecordActions
+                        label={`${e.type} KYC record`}
+                        title={`${e.type.toUpperCase()} KYC — ${e.name}`}
+                        subtitle={`Status ${e.status}`}
+                        filename={`entity_kyc_${e.name}`}
+                        fields={[
+                          { label: "Name", value: e.name },
+                          { label: "Type", value: e.type },
+                          { label: "Status", value: e.status },
+                          { label: "Region", value: e.region ?? "—" },
+                          { label: "Members", value: String(e.member_count ?? 0) },
+                        ]}
+                        approveLabel="Approve"
+                        rejectLabel={e.status === "pending" ? "Reject" : "Suspend"}
+                        disabled={{
+                          approve: e.status !== "pending",
+                          reject: e.status !== "pending" && e.status !== "active",
+                        }}
+                        onView={() => navigate({ to: "/admin/entities/$entityId", params: { entityId: e.id } })}
+                        onEdit={() => navigate({ to: "/admin/entities/$entityId", params: { entityId: e.id } })}
+                        onDecide={async (decision, note) => {
+                          await decideFn({
+                            data: { id: e.id, action: decision === "approved" ? "approve" : "suspend", note },
+                          });
+                          toast.success(`${e.name} ${decision === "approved" ? "approved" : "updated"}`);
+                          qc.invalidateQueries({ queryKey: ["admin", "entities"] });
+                        }}
+                        className="justify-end"
+                      />
                     </td>
                   </tr>
                 ))}

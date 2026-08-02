@@ -13,6 +13,7 @@ import {
   StatusPill,
 } from "@/components/primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { KycRecordActions } from "@/components/kyc-record-actions";
 import {
   Dialog,
   DialogContent,
@@ -114,18 +115,42 @@ function EntityBody({ entityId }: { entityId: string }) {
         />
       </section>
 
-      {entity.status === "pending" || entity.status === "active" ? (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {entity.status === "pending" ? (
-            <Button size="sm" onClick={() => setDecideDialog("approve")}>
-              Approve
-            </Button>
-          ) : null}
-          <Button size="sm" variant="destructive" onClick={() => setDecideDialog("suspend")}>
-            {entity.status === "pending" ? "Reject" : "Suspend"}
-          </Button>
-        </div>
-      ) : null}
+      <div className="mb-4">
+        <KycRecordActions
+          size="md"
+          label={`${entity.type} KYC record`}
+          title={`${entity.type.toUpperCase()} KYC — ${entity.name}`}
+          subtitle={`Status ${entity.status}`}
+          filename={`entity_kyc_${entity.name}`}
+          fields={[
+            { label: "Name", value: entity.name },
+            { label: "Type", value: entity.type },
+            { label: "Status", value: entity.status },
+            { label: "Region", value: entity.region ?? "—" },
+            { label: "Registration no.", value: (entity as any).reg_no ?? "—" },
+            { label: "Members", value: String(members.length) },
+            { label: "Registered", value: new Date(entity.created_at).toLocaleString() },
+            {
+              label: "Reviewed",
+              value: entity.reviewed_at ? new Date(entity.reviewed_at).toLocaleString() : "Never",
+            },
+            { label: "Review notes", value: entity.kyc_notes ?? "—" },
+          ]}
+          approveLabel="Approve"
+          rejectLabel={entity.status === "pending" ? "Reject" : "Suspend"}
+          disabled={{
+            approve: entity.status !== "pending",
+            reject: entity.status !== "pending" && entity.status !== "active",
+          }}
+          onDecide={async (decision, note) => {
+            await decide.mutateAsync({
+              action: decision === "approved" ? "approve" : "suspend",
+              note,
+            });
+          }}
+        />
+      </div>
+
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>

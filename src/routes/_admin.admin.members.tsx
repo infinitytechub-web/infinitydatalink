@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 import { MinorTag } from "@/components/biodata-fields";
+import { KycRecordActions } from "@/components/kyc-record-actions";
 import { formatAge, resolveMinorStatus } from "@/lib/age";
+
 
 import {
   ErrorState,
@@ -27,10 +30,12 @@ import {
   listKycReviewers,
   assignKyc,
   bulkDecideKyc,
+  decideKyc,
   getKycResubmissionSettings,
   updateKycResubmissionSettings,
   type KycQueueRow,
 } from "@/lib/admin-kyc.functions";
+
 import {
   AGING_ORDER,
   BUCKET_META,
@@ -258,7 +263,23 @@ function QueueBody() {
     onError: (e: any) => toast.error(e?.message ?? "Bulk decision failed"),
   });
 
+  const decideOne = useServerFn(decideKyc);
+
+  const rowDecision = async (row: KycQueueRow, decision: "approved" | "rejected", note: string) => {
+    const minor = resolveMinorStatus(row.date_of_birth ?? null, row.is_minor ?? null).effective;
+    if (minor) {
+      toast.info("Minor accounts need the guardian checklist — opening the full review.");
+      void navigate({ to: "/admin/members/$id", params: { id: row.member_id } });
+      return;
+    }
+    await decideOne({ data: { member_id: row.member_id, decision, notes: note } });
+    toast.success(`${row.full_name ?? "Member"} ${decision}`);
+    invalidate();
+  };
+
+
   const selectedList = useMemo(() => Array.from(selected), [selected]);
+
 
   return (
     <>
@@ -352,12 +373,14 @@ function QueueBody() {
               <th className="px-4 py-3 text-right font-medium">SLA</th>
               <th className="px-4 py-3 text-right font-medium">Last activity</th>
               <th className="px-4 py-3 text-right font-medium">KYC</th>
+              <th className="px-4 py-3 text-right font-medium">Actions</th>
+
             </tr>
           </thead>
           <tbody className="divide-y divide-emerald-deep/5">
             {data.rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
+                <td colSpan={8} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
                   No members match these filters.
                 </td>
               </tr>
@@ -454,9 +477,35 @@ function QueueBody() {
                   <td className="px-4 py-3 text-right">
                     <StatusPill status={m.kyc as any} />
                   </td>
+                  <td className="px-4 py-3">
+                    <KycRecordActions
+                      label="individual KYC record"
+                      title={`Individual KYC — ${m.full_name ?? m.member_no ?? m.member_id}`}
+                      subtitle={`Status ${m.kyc}`}
+                      filename={`kyc_${m.member_no ?? m.member_id}`}
+                      fields={[
+                        { label: "Member", value: m.full_name ?? "—" },
+                        { label: "Member no.", value: m.member_no ?? "—" },
+                        { label: "Region", value: m.region ?? "—" },
+                        { label: "Phone", value: m.phone ?? "—" },
+                        { label: "National ID", value: m.national_id ?? "—" },
+                        { label: "Date of birth", value: m.date_of_birth ?? "—" },
+                        { label: "Under 18", value: m.is_minor ? "Yes" : "No" },
+                        { label: "KYC status", value: m.kyc },
+                        { label: "Pending documents", value: String(m.pending_docs) },
+                        { label: "Assignee", value: m.kyc_assigned_name ?? "Unassigned" },
+                      ]}
+                      onView={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
+                      onEdit={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
+                      onDecide={(decision, note) => rowDecision(m, decision, note)}
+                      disabled={{ approve: m.kyc === "active", reject: m.kyc === "rejected" }}
+                      className="justify-end"
+                    />
+                  </td>
                 </tr>
               ))
             )}
+
           </tbody>
         </table>
 
