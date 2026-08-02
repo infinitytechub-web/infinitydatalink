@@ -799,6 +799,39 @@ function ResubmissionRules() {
             <option value="high">High</option>
           </select>
         </label>
+        <label className="flex items-center gap-2 pb-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={remind}
+            onChange={(e) => setRemind(e.target.checked)}
+            className="h-3.5 w-3.5 accent-primary"
+          />
+          Send automated deadline &amp; attempt reminders
+        </label>
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Remind (days before deadline)
+          <input
+            type="number"
+            min={0}
+            max={60}
+            value={lead}
+            disabled={!remind}
+            onChange={(e) => setLead(e.target.value)}
+            className="w-28 rounded border border-border bg-card px-2 py-1.5 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary disabled:opacity-50"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Warn at attempts left
+          <input
+            type="number"
+            min={0}
+            max={20}
+            value={lowLeft}
+            disabled={!remind}
+            onChange={(e) => setLowLeft(e.target.value)}
+            className="w-28 rounded border border-border bg-card px-2 py-1.5 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary disabled:opacity-50"
+          />
+        </label>
 
         <button
           type="button"
@@ -811,9 +844,11 @@ function ResubmissionRules() {
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground">
         Applies to rejections taken from now on — members already rejected keep the deadline and
-        allowance recorded at the time of their decision.
+        allowance recorded at the time of their decision. Reminders run once a day and each member
+        receives a given notice only once.
         {data.updated_at ? ` Last changed ${new Date(data.updated_at).toLocaleString()}.` : ""}
       </p>
+
     </SectionCard>
   );
 }
