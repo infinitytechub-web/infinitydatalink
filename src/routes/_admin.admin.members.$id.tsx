@@ -190,6 +190,9 @@ function MemberDetailBody() {
           nextOfKin={next_of_kin}
         />
 
+        {profile.is_minor ? <MinorAttestationUploads memberId={profile.id} /> : null}
+
+
       </div>
     </>
   );
