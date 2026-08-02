@@ -734,9 +734,14 @@ function ResubmissionRules() {
 
   const dayNum = Number(days);
   const attemptNum = Number(attempts);
+  const leadNum = Number(lead);
+  const lowNum = Number(lowLeft);
   const valid =
     Number.isInteger(dayNum) && dayNum >= 1 && dayNum <= 365 &&
-    Number.isInteger(attemptNum) && attemptNum >= 1 && attemptNum <= 20;
+    Number.isInteger(attemptNum) && attemptNum >= 1 && attemptNum <= 20 &&
+    Number.isInteger(leadNum) && leadNum >= 0 && leadNum <= 60 &&
+    Number.isInteger(lowNum) && lowNum >= 0 && lowNum <= 20;
+
 
   return (
     <SectionCard title="Resubmission deadlines & attempt limits">
