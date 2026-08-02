@@ -244,7 +244,7 @@ export const getMemberKyc = createServerFn({ method: "GET" })
       sb
         .from("profiles")
         .select(
-          "id, full_name, member_no, phone, national_id, region, date_of_birth, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, tier, created_at",
+          "id, full_name, member_no, phone, national_id, national_id_type, region, district, date_of_birth, is_minor, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, tier, created_at",
         )
         .eq("id", data.member_id)
         .maybeSingle(),
