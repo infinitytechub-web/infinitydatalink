@@ -383,7 +383,21 @@ export const resubmitMyKyc = createServerFn({ method: "POST" })
     }
 
     const { error } = await sb.rpc("resubmit_own_kyc", { _note: data.note || null } as never);
-    if (error) throw new Error(error.message);
+    if (error) {
+      // The routine is the source of truth for the window and the allowance;
+      // translate its codes into member-readable copy.
+      if (error.message.includes("resubmission_window_closed")) {
+        throw new Error(
+          "Your resubmission deadline has passed. Contact support to reopen your verification.",
+        );
+      }
+      if (error.message.includes("resubmission_limit_reached")) {
+        throw new Error(
+          "You have used all of your resubmission attempts. Contact support for assistance.",
+        );
+      }
+      throw new Error(error.message);
+    }
 
     await writeAudit({
       actor_id: context.userId,
