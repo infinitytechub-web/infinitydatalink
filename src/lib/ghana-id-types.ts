@@ -32,7 +32,10 @@ export const NATIONAL_ID_TYPES: NationalIdType[] = [
     example: "GHA-123456789-0",
     pattern: /^GHA-\d{9}-\d$/,
     normalize: (raw) => {
-      const value = upper(raw);
+      // Trim, drop spaces AND dashes, uppercase, then rebuild the canonical
+      // dashed form so "gha 123456789 0" and "GHA1234567890" both land on
+      // "GHA-123456789-0".
+      const value = compact(raw);
       // Only reformat digit-only input, or input already prefixed with GHA.
       // Any other letters (e.g. "ABC-123456789-0") must stay untouched so
       // validation rejects them instead of silently rewriting the prefix.
@@ -57,7 +60,7 @@ export const NATIONAL_ID_TYPES: NationalIdType[] = [
     label: "Ghanaian Passport",
     example: "G1234567",
     pattern: /^[A-Z]\d{7,8}$/,
-    normalize: upper,
+    normalize: compact,
     hint: "One letter followed by 7-8 digits",
   },
   {
@@ -65,7 +68,7 @@ export const NATIONAL_ID_TYPES: NationalIdType[] = [
     label: "SSNIT Number",
     example: "C123456789012",
     pattern: /^[A-Z]\d{12}$/,
-    normalize: upper,
+    normalize: compact,
     hint: "One letter followed by 12 digits",
   },
   {
@@ -89,7 +92,7 @@ export const NATIONAL_ID_TYPES: NationalIdType[] = [
     label: "Tax Identification Number (TIN)",
     example: "P0012345678",
     pattern: /^[A-Z]\d{10}$/,
-    normalize: upper,
+    normalize: compact,
     hint: "One letter followed by 10 digits",
   },
   {
