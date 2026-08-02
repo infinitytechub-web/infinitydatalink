@@ -321,6 +321,16 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
           setErr("Enter a valid Ghana telephone number, e.g. 024 123 4567");
           return;
         }
+        const dobError = validateDateOfBirth(dob);
+        if (dobError) {
+          setErr(dobError);
+          return;
+        }
+        if (!region || !district) {
+          setErr("Select your region and district.");
+          return;
+        }
+
         const parsed = signUpSchema.safeParse({
           email,
           password,
