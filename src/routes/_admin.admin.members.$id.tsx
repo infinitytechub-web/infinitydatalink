@@ -7,6 +7,7 @@ import { ArrowLeft, Check, ExternalLink, FileText, X } from "lucide-react";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { decideKyc, getMemberKyc, type KycDocumentWithUrl } from "@/lib/admin-kyc.functions";
+import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 
 export const Route = createFileRoute("/_admin/admin/members/$id")({
   head: () => ({ meta: [{ title: "Member review — KYC" }, { name: "robots", content: "noindex" }] }),
@@ -189,9 +190,19 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
   const navigate = useNavigate();
   const decide = useServerFn(decideKyc);
   const [notes, setNotes] = useState("");
+  const [items, setItems] = useState<string[]>([]);
+  const toggleItem = (key: string) =>
+    setItems((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   const mutation = useMutation({
     mutationFn: (input: { decision: "approved" | "rejected" }) =>
-      decide({ data: { member_id: memberId, decision: input.decision, notes } }),
+      decide({
+        data: {
+          member_id: memberId,
+          decision: input.decision,
+          notes,
+          remediation_items: input.decision === "rejected" ? items : [],
+        },
+      }),
     onSuccess: (_d, vars) => {
       toast.success(`Member ${vars.decision === "approved" ? "approved" : "rejected"}`);
       qc.invalidateQueries({ queryKey: ["admin", "kyc"] });
@@ -220,6 +231,27 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
             className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal text-emerald-deep outline-none focus:border-emerald-mid"
           />
         </label>
+        <fieldset className="rounded border border-emerald-deep/15 p-3">
+          <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+            Items the member must revise (rejection only)
+          </legend>
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {ALL_REMEDIATION_ITEMS.map((item) => (
+              <label key={item.key} className="flex items-center gap-2 text-xs text-emerald-deep/80">
+                <input
+                  type="checkbox"
+                  checked={items.includes(item.key)}
+                  onChange={() => toggleItem(item.key)}
+                  className="h-3.5 w-3.5 accent-emerald-deep"
+                />
+                {item.label}
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-emerald-deep/50">
+            Only these items will be editable for the member when they resubmit.
+          </p>
+        </fieldset>
         <div className="flex gap-2">
           <button
             disabled={mutation.isPending || !canDecide}
@@ -229,9 +261,15 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
             <Check className="h-3 w-3" /> Approve
           </button>
           <button
-            disabled={mutation.isPending || !canDecide || notes.trim().length < 5}
+            disabled={mutation.isPending || !canDecide || notes.trim().length < 5 || items.length === 0}
             onClick={() => mutation.mutate({ decision: "rejected" })}
-            title={notes.trim().length < 5 ? "Add at least 5 characters to reject" : ""}
+            title={
+              notes.trim().length < 5
+                ? "Add at least 5 characters to reject"
+                : items.length === 0
+                  ? "Select at least one item to revise"
+                  : ""
+            }
             className="inline-flex flex-1 items-center justify-center gap-1 rounded border border-destructive/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10 disabled:opacity-50"
           >
             <X className="h-3 w-3" /> Reject

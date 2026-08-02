@@ -2036,6 +2036,8 @@ export type Database = {
           kyc_assigned_at: string | null
           kyc_assigned_to: string | null
           kyc_notes: string | null
+          kyc_remediation_items: Json
+          kyc_resubmitted_at: string | null
           kyc_reviewed_at: string | null
           kyc_reviewed_by: string | null
           kyc_submitted_at: string | null
@@ -2066,6 +2068,8 @@ export type Database = {
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
           kyc_notes?: string | null
+          kyc_remediation_items?: Json
+          kyc_resubmitted_at?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
           kyc_submitted_at?: string | null
@@ -2096,6 +2100,8 @@ export type Database = {
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
           kyc_notes?: string | null
+          kyc_remediation_items?: Json
+          kyc_resubmitted_at?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
           kyc_submitted_at?: string | null
@@ -4977,6 +4983,7 @@ export type Database = {
       }
       reset_own_kyc_pending: { Args: never; Returns: undefined }
       restore_settings_snapshot: { Args: { _id: string }; Returns: undefined }
+      resubmit_own_kyc: { Args: { _note?: string }; Returns: string }
       revoke_super_admin:
         | { Args: { _reason?: string; _user_id: string }; Returns: undefined }
         | {

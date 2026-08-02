@@ -268,7 +268,18 @@ export const registerKycDocument = createServerFn({ method: "POST" })
     // Reset the caller's KYC review status via a SECURITY DEFINER helper.
     // Direct updates to kyc* columns are blocked by the profiles trigger for
     // non-staff callers.
-    await sb.rpc("reset_own_kyc_pending");
+    //
+    // Exception: a *rejected* profile stays rejected until the member explicitly
+    // resubmits from the KYC page, so reviewers only see the case again once all
+    // requested revisions are in.
+    const { data: currentKyc } = await sb
+      .from("profiles")
+      .select("kyc")
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (currentKyc?.kyc !== "rejected") {
+      await sb.rpc("reset_own_kyc_pending");
+    }
 
     await writeAudit({
       actor_id: context.userId,
