@@ -18,6 +18,14 @@ import {
   type RiskAssessment,
   type RiskSeverity,
 } from "@/lib/kyc-risk-rules";
+import {
+  MINOR_BULK_BLOCKED_REASON,
+  evaluateMinorGuardrails,
+  minorReviewSchema,
+  type GuardianCandidate,
+  type MinorReview,
+} from "@/lib/kyc-minor-rules";
+
 
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
@@ -302,6 +310,10 @@ const decideInput = z
       .max(20)
       .optional()
       .default([]),
+    /** Extra guardian checklist — mandatory when the member is a minor. */
+    minor_review: minorReviewSchema.optional(),
+    /** Fresh re-authentication proof — mandatory when the member is a minor. */
+    step_up_token: z.string().min(16).max(200).optional(),
   })
   .superRefine((v, ctx) => {
     if (v.decision === "rejected" && v.notes.trim().length < 5) {
@@ -319,6 +331,52 @@ const decideInput = z
       });
     }
   });
+
+/**
+ * Enforces the minor-specific review steps. Returns audit-ready metadata when
+ * the member is a minor, or null for ordinary adult reviews.
+ */
+async function enforceMinorReview(
+  sb: { from: (t: string) => any },
+  opts: {
+    memberId: string;
+    decision: "approved" | "rejected";
+    notes: string;
+    minorReview?: MinorReview;
+    stepUpToken?: string;
+    officerId: string;
+  },
+): Promise<{ guardian: GuardianCandidate; review: MinorReview; step_up_id: string } | null> {
+  const [{ data: prof }, { data: nok }] = await Promise.all([
+    sb.from("profiles").select("id, is_minor, date_of_birth").eq("id", opts.memberId).maybeSingle(),
+    sb.from("next_of_kin").select("id, full_name, relationship, phone").eq("member_id", opts.memberId),
+  ]);
+  if (!prof) throw new Error("Member not found");
+  if (!(prof as any).is_minor) return null;
+
+  const nextOfKin = (nok ?? []) as GuardianCandidate[];
+  const { blockers } = evaluateMinorGuardrails({
+    isMinor: true,
+    decision: opts.decision,
+    notes: opts.notes,
+    minorReview: opts.minorReview ?? null,
+    nextOfKin,
+  });
+  if (blockers.length > 0) {
+    throw new Error(`Minor account review incomplete — ${blockers.join(" ")}`);
+  }
+
+  const { assertStepUp } = await import("@/lib/step-up.server");
+  const proof = await assertStepUp(
+    opts.officerId,
+    opts.stepUpToken,
+    `${opts.decision === "approved" ? "approve" : "reject"} KYC for a minor account`,
+  );
+
+  const guardian = nextOfKin.find((g) => g.id === opts.minorReview!.guardian_nok_id)!;
+  return { guardian, review: opts.minorReview!, step_up_id: proof.id };
+}
+
 
 /**
  * Resubmission window + attempt allowance applied when a KYC review is rejected.
@@ -406,6 +464,19 @@ export const decideKyc = createServerFn({ method: "POST" })
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const now = new Date().toISOString();
 
+    // Minor accounts: guardian checklist + longer note + fresh re-authentication
+    // are enforced before anything is written.
+    const minor = await enforceMinorReview(sb, {
+      memberId: data.member_id,
+      decision: data.decision,
+      notes: data.notes,
+      minorReview: data.minor_review,
+      stepUpToken: data.step_up_token,
+      officerId: context.userId,
+    });
+
+
+
     const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
     const window = await resubmissionStamp(sb, data.decision);
     const snapshot =
@@ -445,10 +516,51 @@ export const decideKyc = createServerFn({ method: "POST" })
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: role,
-      action: data.decision === "approved" ? "kyc.approved" : "kyc.rejected",
+      action:
+        minor
+          ? data.decision === "approved"
+            ? "kyc.minor_approved"
+            : "kyc.minor_rejected"
+          : data.decision === "approved"
+            ? "kyc.approved"
+            : "kyc.rejected",
       target: data.member_id,
-      meta: { notes: data.notes || null, member_id: data.member_id, remediation_items: remediation },
+      meta: {
+        notes: data.notes || null,
+        member_id: data.member_id,
+        remediation_items: remediation,
+        is_minor: !!minor,
+        ...(minor
+          ? {
+              minor_review: {
+                guardian_nok_id: minor.review.guardian_nok_id,
+                guardian_name: minor.guardian.full_name,
+                guardian_relationship: minor.guardian.relationship,
+                guardian_consent_ref: minor.review.guardian_consent_ref,
+                guardian_id_verified: minor.review.guardian_id_verified,
+                safeguarding_ack: minor.review.safeguarding_ack,
+              },
+              step_up_id: minor.step_up_id,
+            }
+          : {}),
+      },
     });
+
+    // Second-line visibility: every minor decision is broadcast to compliance
+    // leadership so it can be re-reviewed after the fact.
+    if (minor) {
+      await notifyStaff({
+        roles: ["super_admin", "compliance_officer"],
+        category: "kyc.minor.decision",
+        title: `Minor KYC ${data.decision} — secondary review required`,
+        body: `A minor account was ${data.decision} by ${role}. Guardian: ${minor.guardian.full_name ?? "unknown"} (${minor.guardian.relationship ?? "n/a"}), consent ref ${minor.review.guardian_consent_ref}.`,
+        link: `/admin/members/${data.member_id}`,
+        meta: { member_id: data.member_id, decision: data.decision, guardian_nok_id: minor.review.guardian_nok_id },
+        dedupeKey: `kyc.minor.${data.decision}:${data.member_id}:${now}`,
+        excludeUserId: context.userId,
+      });
+    }
+
 
     // In-app + email/SMS fan-out per the member's notification preferences.
     const fanOut = await notifyUser({
@@ -746,11 +858,23 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
     const failed: { id: string; error: string }[] = [];
     const window = await resubmissionStamp(sb, data.decision);
 
+    // Minors are never decided in bulk — each needs guardian verification and a
+    // re-authenticated, individually audited decision.
+    const { data: minorRows } = await sb
+      .from("profiles")
+      .select("id")
+      .in("id", data.member_ids as never)
+      .eq("is_minor", true);
+    const minorIds = new Set(((minorRows ?? []) as any[]).map((r) => r.id as string));
+    for (const id of minorIds) failed.push({ id, error: MINOR_BULK_BLOCKED_REASON });
+
     const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
 
     for (const memberId of data.member_ids) {
+      if (minorIds.has(memberId)) continue;
       try {
         const snapshot =
+
           data.decision === "rejected" ? await captureRejectionSnapshot(sb, memberId) : null;
         const { data: prof, error: pErr } = await sb
           .from("profiles")

@@ -18,6 +18,14 @@ import {
 } from "@/lib/admin-kyc.functions";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 import { RISK_SEVERITY_LABEL } from "@/lib/kyc-risk-rules";
+import { useStepUp } from "@/components/step-up-dialog";
+import {
+  MINOR_DECISION_NOTE_MIN,
+  eligibleGuardians,
+  evaluateMinorGuardrails,
+  type GuardianCandidate,
+} from "@/lib/kyc-minor-rules";
+
 
 export const Route = createFileRoute("/_admin/admin/members/$id")({
   head: () => ({ meta: [{ title: "Member review — KYC" }, { name: "robots", content: "noindex" }] }),
@@ -162,7 +170,13 @@ function MemberDetailBody() {
           </Suspense>
         </div>
 
-        <DecisionPanel memberId={profile.id} kyc={profile.kyc} />
+        <DecisionPanel
+          memberId={profile.id}
+          kyc={profile.kyc}
+          isMinor={!!profile.is_minor}
+          nextOfKin={next_of_kin}
+        />
+
       </div>
     </>
   );
@@ -211,24 +225,57 @@ function DocumentRow({ doc }: { doc: KycDocumentWithUrl }) {
   );
 }
 
-function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
+function DecisionPanel({
+  memberId,
+  kyc,
+  isMinor,
+  nextOfKin,
+}: {
+  memberId: string;
+  kyc: string;
+  isMinor: boolean;
+  nextOfKin: readonly GuardianCandidate[];
+}) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const decide = useServerFn(decideKyc);
+  const { ensure, dialog } = useStepUp();
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<string[]>([]);
   const toggleItem = (key: string) =>
     setItems((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
+  // Minor-specific review state
+  const guardians = eligibleGuardians(nextOfKin);
+  const [guardianId, setGuardianId] = useState("");
+  const [consentRef, setConsentRef] = useState("");
+  const [guardianIdVerified, setGuardianIdVerified] = useState(false);
+  const [safeguardingAck, setSafeguardingAck] = useState(false);
+
+  const minorReview = {
+    guardian_nok_id: guardianId,
+    guardian_consent_ref: consentRef.trim(),
+    guardian_id_verified: guardianIdVerified,
+    safeguarding_ack: safeguardingAck,
+  };
+
   const mutation = useMutation({
-    mutationFn: (input: { decision: "approved" | "rejected" }) =>
-      decide({
+    mutationFn: async (input: { decision: "approved" | "rejected" }) => {
+      const stepUpToken = isMinor
+        ? await ensure(
+            `${input.decision === "approved" ? "approve" : "reject"} KYC for a minor account`,
+          )
+        : undefined;
+      return decide({
         data: {
           member_id: memberId,
           decision: input.decision,
           notes,
           remediation_items: input.decision === "rejected" ? items : [],
+          ...(isMinor ? { minor_review: minorReview, step_up_token: stepUpToken } : {}),
         },
-      }),
+      });
+    },
     onSuccess: (_d, vars) => {
       toast.success(`Member ${vars.decision === "approved" ? "approved" : "rejected"}`);
       qc.invalidateQueries({ queryKey: ["admin", "kyc"] });
@@ -239,6 +286,11 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
   });
 
   const canDecide = kyc !== "active";
+  const minorBlockers = (decision: "approved" | "rejected") =>
+    evaluateMinorGuardrails({ isMinor, decision, notes, minorReview, nextOfKin }).blockers;
+  const approveBlockers = minorBlockers("approved");
+  const rejectBlockers = minorBlockers("rejected");
+
 
   return (
     <SectionCard title="Compliance decision">
@@ -247,16 +299,83 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
           Approving marks the member as verified and clears all pending documents. Rejecting requires a note explaining
           the reason so the member can resubmit.
         </p>
+        {isMinor ? (
+          <div className="rounded border border-gold/40 bg-gold/10 p-3 text-[11px] text-emerald-deep/80">
+            <strong className="uppercase tracking-widest">Minor account</strong> — this member is under
+            18. Every decision needs a verified guardian, a consent reference, a note of at least{" "}
+            {MINOR_DECISION_NOTE_MIN} characters, and fresh re-authentication. Minors are excluded from
+            bulk decisions, and each decision is broadcast to compliance leadership for secondary review.
+          </div>
+        ) : null}
         <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
           Notes
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            placeholder="Optional for approval, required for rejection."
+            placeholder={
+              isMinor
+                ? `Required for minors — at least ${MINOR_DECISION_NOTE_MIN} characters.`
+                : "Optional for approval, required for rejection."
+            }
             className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal text-emerald-deep outline-none focus:border-emerald-mid"
           />
         </label>
+        {isMinor ? (
+          <fieldset className="space-y-3 rounded border border-gold/40 p-3">
+            <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              Guardian verification (minor)
+            </legend>
+            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              Verified guardian
+              <select
+                value={guardianId}
+                onChange={(e) => setGuardianId(e.target.value)}
+                className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal outline-none focus:border-emerald-mid"
+              >
+                <option value="">Select guardian…</option>
+                {guardians.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.full_name ?? "Unnamed"} · {g.relationship} · {g.phone}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {guardians.length === 0 ? (
+              <p className="text-[11px] text-destructive">
+                No eligible guardian on file. Add a next-of-kin with a parent/guardian relationship and a
+                phone number before deciding.
+              </p>
+            ) : null}
+            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              Guardian consent reference
+              <input
+                value={consentRef}
+                onChange={(e) => setConsentRef(e.target.value)}
+                placeholder="e.g. CONSENT-2026-014"
+                className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal outline-none focus:border-emerald-mid"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-xs text-emerald-deep/80">
+              <input
+                type="checkbox"
+                checked={guardianIdVerified}
+                onChange={(e) => setGuardianIdVerified(e.target.checked)}
+                className="h-3.5 w-3.5 accent-emerald-deep"
+              />
+              Guardian identity document sighted and matches the consent
+            </label>
+            <label className="flex items-center gap-2 text-xs text-emerald-deep/80">
+              <input
+                type="checkbox"
+                checked={safeguardingAck}
+                onChange={(e) => setSafeguardingAck(e.target.checked)}
+                className="h-3.5 w-3.5 accent-emerald-deep"
+              />
+              Minor safeguarding checklist completed
+            </label>
+          </fieldset>
+        ) : null}
         <fieldset className="rounded border border-emerald-deep/15 p-3">
           <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
             Items the member must revise (rejection only)
@@ -278,23 +397,37 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
             Only these items will be editable for the member when they resubmit.
           </p>
         </fieldset>
+        {isMinor && approveBlockers.length > 0 ? (
+          <ul className="list-disc space-y-1 pl-5 text-[11px] text-destructive">
+            {approveBlockers.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
+        ) : null}
         <div className="flex gap-2">
           <button
-            disabled={mutation.isPending || !canDecide}
+            disabled={mutation.isPending || !canDecide || approveBlockers.length > 0}
             onClick={() => mutation.mutate({ decision: "approved" })}
+            title={approveBlockers[0] ?? ""}
             className="inline-flex flex-1 items-center justify-center gap-1 rounded bg-emerald-deep px-3 py-2 text-xs font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
           >
             <Check className="h-3 w-3" /> Approve
           </button>
           <button
-            disabled={mutation.isPending || !canDecide || notes.trim().length < 5 || items.length === 0}
+            disabled={
+              mutation.isPending ||
+              !canDecide ||
+              notes.trim().length < 5 ||
+              items.length === 0 ||
+              rejectBlockers.length > 0
+            }
             onClick={() => mutation.mutate({ decision: "rejected" })}
             title={
               notes.trim().length < 5
                 ? "Add at least 5 characters to reject"
                 : items.length === 0
                   ? "Select at least one item to revise"
-                  : ""
+                  : (rejectBlockers[0] ?? "")
             }
             className="inline-flex flex-1 items-center justify-center gap-1 rounded border border-destructive/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10 disabled:opacity-50"
           >
@@ -307,8 +440,10 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
           </p>
         ) : null}
       </div>
+      {dialog}
     </SectionCard>
   );
+
 }
 
 function Field({ label, value, className }: { label: string; value: string | null | undefined; className?: string }) {
