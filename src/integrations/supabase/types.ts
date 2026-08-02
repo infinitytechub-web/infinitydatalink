@@ -3912,6 +3912,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      canonical_ghana_card: { Args: { _value: string }; Returns: string }
       check_loan_eligibility: {
         Args: {
           _amount: number
@@ -4289,6 +4290,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      national_id_key: {
+        Args: { _type: string; _value: string }
+        Returns: string
       }
       notify_user: {
         Args: {
