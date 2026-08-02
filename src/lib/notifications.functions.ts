@@ -237,3 +237,45 @@ export const markNotificationUnread = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+/**
+ * Super-admin clean-up that moves notifications into the recycle bin instead of
+ * deleting them outright, so a mistaken purge stays recoverable for a window.
+ * Scope "system" targets system-audited/internal alerts (system.*, audit.*,
+ * internal.*, auto-flag signals).
+ */
+export const recycleNotifications = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        scope: z.enum(["read", "unread", "all", "system"]).default("read"),
+        older_than_days: z.number().int().min(0).max(3650).optional(),
+        retention_days: z.number().int().min(1).max(365).optional().default(30),
+        confirm: z.literal("PURGE"),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const before = data.older_than_days
+      ? new Date(Date.now() - data.older_than_days * 86400_000).toISOString()
+      : undefined;
+    const { data: n, error } = await context.supabase.rpc("recycle_notifications", {
+      _scope: data.scope,
+      _before: before,
+      _retention_days: data.retention_days,
+    } as never);
+    if (error) throw new Error(error.message);
+    return { deleted: Number(n ?? 0) };
+  });
+
+export const restoreRecycledNotification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: ok, error } = await context.supabase.rpc("restore_recycled_notification", {
+      _id: data.id,
+    } as never);
+    if (error) throw new Error(error.message);
+    return { restored: Boolean(ok) };
+  });

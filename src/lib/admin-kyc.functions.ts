@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
-import { notifyUser } from "@/lib/notify.server";
+import { notifyStaff, notifyUser } from "@/lib/notify.server";
 import {
   ALL_REMEDIATION_ITEMS,
   REMEDIATION_DOC_TYPES,
@@ -1136,6 +1136,33 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
             attempts_used: attemptsUsed,
             resubmitted_at: resubmittedAt,
           },
+        });
+
+        // Internal signal to compliance staff — matched patterns + severity inline
+        // so the alert is actionable straight from the notifications centre.
+        const memberLabel =
+          ((profile as any).full_name as string | null) ??
+          ((profile as any).email as string | null) ??
+          data.member_id;
+        await notifyStaff({
+          roles: ["super_admin", "compliance_officer"],
+          category: "kyc.resubmission.auto_flagged",
+          title: `KYC resubmission flagged for re-review — ${memberLabel}`,
+          body: `Severity: ${risk.level.toUpperCase()}. ${risk.summary}${
+            risk.flags.length ? ` (${risk.flags.map((f) => f.code).join(", ")})` : ""
+          }`,
+          link: `/admin/members/${data.member_id}`,
+          meta: {
+            member_id: data.member_id,
+            risk_level: risk.level,
+            min_severity: autoFlag.min_severity,
+            codes: risk.flags.map((f) => f.code),
+            flags: risk.flags,
+            resubmitted_at: resubmittedAt,
+            attempts_used: attemptsUsed,
+          },
+          dedupeKey: `kyc-autoflag:${data.member_id}:${resubmittedAt ?? now}`,
+          excludeUserId: context.userId,
         });
       }
     } else if (!shouldFlag && risk.level === "none" && flaggedAt && resubmittedAt && flaggedAt >= resubmittedAt) {
