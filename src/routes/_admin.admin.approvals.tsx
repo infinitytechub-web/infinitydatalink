@@ -184,6 +184,10 @@ function ApprovalsInner() {
                   <th className="py-2 pr-3">Member</th>
                   <th className="py-2 pr-3">Email</th>
                   <th className="py-2 pr-3">Member No.</th>
+                  <th className="py-2 pr-3">Ghana Card</th>
+                  <th className="py-2 pr-3">Phone</th>
+                  <th className="py-2 pr-3">Category</th>
+
                   <th className="py-2 pr-3">Status</th>
                   <th className="py-2 pr-3">Registered</th>
                   <th className="py-2 pr-3 text-right">Actions</th>
