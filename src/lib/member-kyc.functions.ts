@@ -42,7 +42,19 @@ export type MyKycStatus = {
     current_value: string | null;
   }>;
   can_resubmit: boolean;
+  /** Resubmission window and attempt allowance, enforced by resubmit_own_kyc. */
+  resubmission: {
+    deadline: string | null;
+    deadline_passed: boolean;
+    enforce_deadline: boolean;
+    attempts_used: number;
+    attempt_limit: number;
+    attempts_left: number;
+    window_days: number;
+    blocked_reason: "deadline" | "attempts" | null;
+  };
   resubmitted_at: string | null;
+
   notifications: Array<{
     id: string;
     channel: "email" | "sms";
