@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
-import { notifyUser } from "@/lib/notify.server";
+import { notifyStaff, notifyUser } from "@/lib/notify.server";
 import {
   ALL_REMEDIATION_ITEMS,
   REMEDIATION_DOC_TYPES,
