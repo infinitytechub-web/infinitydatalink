@@ -180,13 +180,11 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
         <TextField label="Full name" value={form.full_name} onChange={setField("full_name")} required />
         <TextField label="Email" value={profile.email ?? ""} onChange={() => {}} disabled />
         <TextField label="Phone" value={form.phone} onChange={setField("phone")} placeholder="+233 …" />
-        <TextField
-          label="Date of birth"
+        <DateOfBirthField
           value={form.date_of_birth}
-          onChange={setField("date_of_birth")}
-          type="date"
+          onChange={(v) => setForm((f) => ({ ...f, date_of_birth: v }))}
           disabled={identityLocked}
-          hint={identityLocked ? "Locked after verification" : undefined}
+          lockedHint={identityLocked ? "Locked after verification" : undefined}
         />
         <SelectField
           label="Gender"
@@ -194,18 +192,25 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
           onChange={setField("gender")}
           options={["", "female", "male", "non-binary", "prefer_not_to_say"]}
         />
-        <TextField label="Region" value={form.region} onChange={setField("region")} />
+        <RegionDistrictFields
+          region={form.region}
+          district={form.district}
+          onRegionChange={(v) => setForm((f) => ({ ...f, region: v }))}
+          onDistrictChange={(v) => setForm((f) => ({ ...f, district: v }))}
+        />
         <TextField label="Digital address" value={form.digital_address} onChange={setField("digital_address")} placeholder="GA-123-4567" />
         <TextField label="Residential address" value={form.address_line} onChange={setField("address_line")} className="sm:col-span-2" />
-        <TextField
-          label="National ID"
-          value={form.national_id}
-          onChange={setField("national_id")}
+        <NationalIdFields
+          idType={form.national_id_type}
+          idNumber={form.national_id}
+          onTypeChange={(v) => setForm((f) => ({ ...f, national_id_type: v }))}
+          onNumberChange={(v) => setForm((f) => ({ ...f, national_id: v }))}
           disabled={identityLocked}
-          hint={identityLocked ? "Locked after verification" : undefined}
+          lockedHint={identityLocked ? "Locked after verification" : undefined}
         />
         <TextField label="Occupation" value={form.occupation} onChange={setField("occupation")} />
         <TextField label="Employer" value={form.employer} onChange={setField("employer")} className="sm:col-span-2" />
+
 
         <div className="flex items-center justify-end gap-2 sm:col-span-2">
           {identityLocked ? (
