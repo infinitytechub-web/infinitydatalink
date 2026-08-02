@@ -357,6 +357,9 @@ export const decideKyc = createServerFn({ method: "POST" })
           ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
           : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
       link: "/app/kyc",
+      // The branded decision email is sent below via the transactional template,
+      // so the generic outbox only handles in-app + SMS.
+      channels: ["in_app", "sms"],
       meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
       dedupeKey: `kyc.${data.decision}:${data.member_id}:${now}`,
     });
@@ -657,7 +660,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           actor_role: role,
           action: `kyc.bulk_${data.decision}`,
           target: memberId,
-          meta: { notes: data.notes || null, member_id: memberId },
+          meta: { notes: data.notes || null, member_id: memberId, remediation_items: remediation },
         });
 
         await notifyUser({
@@ -667,9 +670,10 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           body:
             data.decision === "approved"
               ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
-              : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Please update your documents and resubmit.`,
+              : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
           link: "/app/kyc",
-          meta: { notes: data.notes || null, decision: data.decision },
+          channels: ["in_app", "sms"],
+          meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
           dedupeKey: `kyc.${data.decision}:${memberId}:${now}`,
         });
 
