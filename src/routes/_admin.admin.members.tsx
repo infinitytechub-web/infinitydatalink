@@ -5,7 +5,8 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
-import { formatAge } from "@/lib/age";
+import { MinorTag } from "@/components/biodata-fields";
+import { formatAge, resolveMinorStatus } from "@/lib/age";
 
 import {
   ErrorState,
@@ -381,11 +382,12 @@ function QueueBody() {
                     <Link to="/admin/members/$id" params={{ id: m.member_id }} className="block">
                       <div className="flex items-center gap-2 font-semibold">
                         {m.full_name ?? "—"}
-                        {m.is_minor ? (
-                          <span className="rounded bg-gold/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-gold">
-                            Under 18
-                          </span>
-                        ) : null}
+                        {(() => {
+                          const minor = resolveMinorStatus(m.date_of_birth, m.is_minor);
+                          return minor.effective || minor.mismatch ? (
+                            <MinorTag mismatch={minor.mismatch} label={minor.effective ? "Under 18" : "18+"} />
+                          ) : null;
+                        })()}
                       </div>
                       <div className="tabular text-[11px] text-emerald-deep/50">
                         {m.member_no ?? ""} · {m.region ?? "—"}

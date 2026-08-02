@@ -11,7 +11,13 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, MapPin, ShieldCheck } from "lucide-react";
 import { GHANA_REGIONS, districtsForRegion } from "@/lib/ghana-locations";
 import { NATIONAL_ID_TYPES, findIdType, validateNationalId } from "@/lib/ghana-id-types";
-import { calculateAge, MINOR_AGE_THRESHOLD, validateDateOfBirth } from "@/lib/age";
+import {
+  calculateAge,
+  MINOR_AGE_THRESHOLD,
+  MINOR_MISMATCH_HINT,
+  resolveMinorStatus,
+  validateDateOfBirth,
+} from "@/lib/age";
 import {
   DEFAULT_RELATIONSHIPS,
   listRelationshipTypes,
@@ -196,11 +202,7 @@ export function DateOfBirthField({
       ) : age !== null ? (
         <span className="inline-flex flex-wrap items-center gap-2 normal-case tracking-normal">
           <Hint>Age: {age} years</Hint>
-          {minor ? (
-            <span className="rounded bg-gold/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-gold">
-              Under 18 · minor saver
-            </span>
-          ) : null}
+          {minor ? <MinorTag label="Under 18 · minor saver" /> : null}
         </span>
       ) : lockedHint ? (
         <Hint>{lockedHint}</Hint>
@@ -265,17 +267,46 @@ export function RelationshipSelect({
 }
 
 /* ---------------- Read-only display helpers ---------------- */
-export function AgeBadge({ dateOfBirth }: { dateOfBirth: string | null }) {
-  const age = calculateAge(dateOfBirth);
-  if (age === null) return <span className="text-emerald-deep/40">—</span>;
+/**
+ * The one "Under 18" tag used across member and admin screens. Pass the stored
+ * `profiles.is_minor` flag whenever it is available so the badge can flag drift
+ * between the database and the date-of-birth calculation.
+ */
+export function AgeBadge({
+  dateOfBirth,
+  storedIsMinor,
+}: {
+  dateOfBirth: string | null;
+  storedIsMinor?: boolean | null;
+}) {
+  const { age, effective, mismatch } = resolveMinorStatus(dateOfBirth, storedIsMinor);
+  if (age === null) {
+    return effective ? <MinorTag mismatch={false} /> : <span className="text-emerald-deep/40">—</span>;
+  }
   return (
     <span className="inline-flex items-center gap-1.5">
       <span className="tabular">{age} yrs</span>
-      {age < MINOR_AGE_THRESHOLD ? (
-        <span className="rounded bg-gold/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-gold">
-          Under 18
+      {effective ? <MinorTag mismatch={mismatch} /> : null}
+      {mismatch && !effective ? (
+        <span title={MINOR_MISMATCH_HINT} className="text-[9px] font-bold uppercase tracking-widest text-destructive">
+          flag stale
         </span>
       ) : null}
+    </span>
+  );
+}
+
+/** Shared visual for the under-18 chip so every surface matches. */
+export function MinorTag({ mismatch = false, label = "Under 18" }: { mismatch?: boolean; label?: string }) {
+  return (
+    <span
+      title={mismatch ? MINOR_MISMATCH_HINT : undefined}
+      className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${
+        mismatch ? "bg-destructive/15 text-destructive" : "bg-gold/15 text-gold"
+      }`}
+    >
+      {label}
+      {mismatch ? " · stale flag" : ""}
     </span>
   );
 }
