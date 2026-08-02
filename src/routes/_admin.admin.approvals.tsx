@@ -135,8 +135,26 @@ function ApprovalsInner() {
               <option value="all">All</option>
             </select>
           </div>
+          <div className="w-56">
+            <Label className="text-xs">Membership type</Label>
+            <select
+              value={membershipType}
+              onChange={(e) => {
+                setMembershipType(e.target.value as MembershipFilter);
+                setPage(1);
+              }}
+              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="all">All categories</option>
+              {MEMBERSHIP_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {MEMBERSHIP_TYPE_LABEL[t]}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="min-w-[240px] flex-1">
-            <Label className="text-xs">Search (name or member no.)</Label>
+            <Label className="text-xs">Search (name, member no., Ghana Card or phone)</Label>
             <Input
               value={search}
               onChange={(e) => {
@@ -146,6 +164,7 @@ function ApprovalsInner() {
               placeholder="Search…"
             />
           </div>
+
           <div className="text-xs text-muted-foreground">
             {total} result{total === 1 ? "" : "s"}
           </div>
