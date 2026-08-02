@@ -122,18 +122,45 @@ export const getMyProfile = createServerFn({ method: "GET" })
     };
   });
 
-const profileUpdateSchema = z.object({
-  full_name: z.string().trim().min(2).max(120).nullable().optional(),
-  phone: z.string().trim().max(40).nullable().optional(),
-  national_id: z.string().trim().max(80).nullable().optional(),
-  region: z.string().trim().max(80).nullable().optional(),
-  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD").nullable().optional(),
-  gender: z.string().trim().max(40).nullable().optional(),
-  digital_address: z.string().trim().max(80).nullable().optional(),
-  address_line: z.string().trim().max(240).nullable().optional(),
-  occupation: z.string().trim().max(120).nullable().optional(),
-  employer: z.string().trim().max(160).nullable().optional(),
-});
+const profileUpdateSchema = z
+  .object({
+    full_name: z.string().trim().min(2).max(120).nullable().optional(),
+    phone: z.string().trim().max(40).nullable().optional(),
+    national_id: z.string().trim().max(80).nullable().optional(),
+    national_id_type: z.string().trim().max(40).nullable().optional(),
+    region: z.string().trim().max(80).nullable().optional(),
+    district: z.string().trim().max(120).nullable().optional(),
+    date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD").nullable().optional(),
+    gender: z.string().trim().max(40).nullable().optional(),
+    digital_address: z.string().trim().max(80).nullable().optional(),
+    address_line: z.string().trim().max(240).nullable().optional(),
+    occupation: z.string().trim().max(120).nullable().optional(),
+    employer: z.string().trim().max(160).nullable().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.region && !isValidRegion(val.region)) {
+      ctx.addIssue({ code: "custom", path: ["region"], message: "Select one of Ghana's 16 regions" });
+    }
+    if (val.district) {
+      if (!val.region) {
+        ctx.addIssue({ code: "custom", path: ["district"], message: "Select a region first" });
+      } else if (!isValidDistrict(val.region, val.district)) {
+        ctx.addIssue({ code: "custom", path: ["district"], message: "District does not belong to the selected region" });
+      }
+    }
+    if (val.date_of_birth) {
+      const dob = validateDateOfBirth(val.date_of_birth);
+      if (!dob.ok) ctx.addIssue({ code: "custom", path: ["date_of_birth"], message: dob.message });
+    }
+    if (val.national_id) {
+      const res = validateNationalId(val.national_id_type ?? null, val.national_id);
+      if (!res.ok) ctx.addIssue({ code: "custom", path: ["national_id"], message: res.message });
+    }
+    if (val.national_id_type && !val.national_id) {
+      ctx.addIssue({ code: "custom", path: ["national_id"], message: "Enter the ID number for the selected ID type" });
+    }
+  });
+
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
