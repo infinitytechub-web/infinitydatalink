@@ -772,3 +772,63 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
     return { succeeded: succeeded.length, failed };
   });
 
+
+export type KycResubmissionSettings = {
+  deadline_days: number;
+  max_attempts: number;
+  enforce_deadline: boolean;
+  updated_at: string | null;
+};
+
+export const getKycResubmissionSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<KycResubmissionSettings> => {
+    await assertKycAdmin(context.supabase, context.userId);
+    const { data, error } = await context.supabase
+      .from("kyc_resubmission_settings")
+      .select("deadline_days, max_attempts, enforce_deadline, updated_at")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return {
+      deadline_days: Number(data?.deadline_days ?? 14),
+      max_attempts: Number(data?.max_attempts ?? 3),
+      enforce_deadline: (data?.enforce_deadline ?? true) as boolean,
+      updated_at: (data?.updated_at as string | null) ?? null,
+    };
+  });
+
+export const updateKycResubmissionSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        deadline_days: z.number().int().min(1).max(365),
+        max_attempts: z.number().int().min(1).max(20),
+        enforce_deadline: z.boolean(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const role = await assertKycAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase
+      .from("kyc_resubmission_settings")
+      .update({
+        deadline_days: data.deadline_days,
+        max_attempts: data.max_attempts,
+        enforce_deadline: data.enforce_deadline,
+        updated_by: context.userId,
+      })
+      .eq("id", true);
+    if (error) throw new Error(error.message);
+
+    await writeAudit({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: role,
+      action: "kyc.resubmission_settings.updated",
+      target: "kyc_resubmission_settings",
+      meta: { ...data },
+    });
+
+    return { ok: true as const };
+  });
