@@ -365,6 +365,11 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               ghana_card: canonicalCard,
               phone: canonicalPhone,
               membership_type: membershipType,
+              date_of_birth: dob || null,
+              region: region || null,
+              district: district || null,
+              is_minor: dob ? isMinor(dob) : null,
+
             },
           },
         });
