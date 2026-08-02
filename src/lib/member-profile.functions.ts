@@ -90,13 +90,16 @@ export const getMyProfile = createServerFn({ method: "GET" })
       sb
         .from("profiles")
         .select(
-          "id, full_name, member_no, phone, national_id, region, date_of_birth, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, tier",
+          "id, full_name, member_no, phone, national_id, national_id_type, region, district, date_of_birth, is_minor, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, tier",
         )
         .eq("id", uid)
         .maybeSingle(),
       sb
         .from("next_of_kin")
-        .select("id, full_name, relationship, phone, email, national_id, address, created_at, updated_at")
+        .select(
+          "id, full_name, relationship, relationship_code, phone, email, national_id, national_id_type, address, created_at, updated_at",
+        )
+
         .eq("member_id", uid)
         .order("created_at", { ascending: true }),
       sb
