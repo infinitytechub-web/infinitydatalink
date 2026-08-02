@@ -10,6 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { getOrgConfig, ORG_PRESETS, setOrgConfig } from "@/lib/org-config";
 import {
+  DateOfBirthField,
+  NationalIdFields,
+  RegionDistrictFields,
+  RelationshipSelect,
+} from "@/components/biodata-fields";
+import { DEFAULT_NATIONAL_ID_TYPE } from "@/lib/ghana-id-types";
+
+import {
   createKycUploadUrl,
   deleteMyPendingKycDocument,
   deleteNextOfKin,
