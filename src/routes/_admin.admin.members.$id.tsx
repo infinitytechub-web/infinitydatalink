@@ -6,7 +6,13 @@ import { toast } from "sonner";
 import { ArrowLeft, Check, ExternalLink, FileText, X } from "lucide-react";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
-import { decideKyc, getMemberKyc, type KycDocumentWithUrl } from "@/lib/admin-kyc.functions";
+import {
+  decideKyc,
+  getKycResubmissionDiff,
+  getMemberKyc,
+  type KycDiffRow,
+  type KycDocumentWithUrl,
+} from "@/lib/admin-kyc.functions";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 
 export const Route = createFileRoute("/_admin/admin/members/$id")({
@@ -134,6 +140,9 @@ function MemberDetailBody() {
             )}
           </SectionCard>
 
+          <Suspense fallback={<Skeleton className="h-40 w-full" />}>
+            <ResubmissionDiff memberId={profile.id} />
+          </Suspense>
         </div>
 
         <DecisionPanel memberId={profile.id} kyc={profile.kyc} />
@@ -290,6 +299,165 @@ function Field({ label, value, className }: { label: string; value: string | nul
     <div className={className}>
       <dt className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">{label}</dt>
       <dd className="mt-1 text-sm">{value ?? "—"}</dd>
+    </div>
+  );
+}
+
+const diffQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["admin", "kyc", "member", id, "diff"],
+    queryFn: () => getKycResubmissionDiff({ data: { member_id: id } }),
+    staleTime: 15_000,
+  });
+
+/**
+ * Side-by-side comparison of the rejected submission and the resubmitted one.
+ * Reviewer-requested items are pinned to the top; anything the member changed
+ * without being asked is still surfaced so it cannot slip through unnoticed.
+ */
+function ResubmissionDiff({ memberId }: { memberId: string }) {
+  const { data } = useSuspenseQuery(diffQuery(memberId));
+  const [showAll, setShowAll] = useState(false);
+
+  if (!data.has_snapshot) {
+    return (
+      <SectionCard title="Resubmission changes">
+        <p className="px-6 py-4 text-sm text-emerald-deep/60">
+          No rejected baseline is on file for this member, so there is nothing to compare yet. A
+          baseline is captured automatically the next time a submission is declined.
+        </p>
+      </SectionCard>
+    );
+  }
+
+  const visible = showAll ? data.rows : data.rows.filter((r) => r.requested || r.changed);
+
+  return (
+    <SectionCard
+      title="Resubmission changes"
+      action={
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="text-[11px] font-bold uppercase tracking-widest text-emerald-deep/60 hover:text-emerald-deep"
+        >
+          {showAll ? "Show changes only" : "Show all fields"}
+        </button>
+      }
+    >
+      <div className="space-y-3 px-6 py-4">
+        <p className="text-xs text-emerald-deep/70">
+          Declined {data.reviewed_at ? new Date(data.reviewed_at).toLocaleString() : "—"} · Resubmitted{" "}
+          {data.resubmitted_at ? new Date(data.resubmitted_at).toLocaleString() : "not yet"} · Attempt{" "}
+          {data.attempts_used}
+        </p>
+        <div className="flex flex-wrap gap-2 text-[11px] font-bold uppercase tracking-widest">
+          <span className="rounded bg-success/10 px-2 py-1 text-success">
+            {data.changed_count} changed
+          </span>
+          <span
+            className={
+              "rounded px-2 py-1 " +
+              (data.unchanged_requested_count > 0
+                ? "bg-destructive/10 text-destructive"
+                : "bg-emerald-deep/5 text-emerald-deep/60")
+            }
+          >
+            {data.unchanged_requested_count} requested but unchanged
+          </span>
+        </div>
+
+        {visible.length === 0 ? (
+          <p className="text-sm text-emerald-deep/60">Nothing changed since the rejection.</p>
+        ) : (
+          <ul className="divide-y divide-emerald-deep/10">
+            {visible.map((row) => (
+              <DiffRow key={row.key} row={row} />
+            ))}
+          </ul>
+        )}
+      </div>
+    </SectionCard>
+  );
+}
+
+function DiffRow({ row }: { row: KycDiffRow }) {
+  return (
+    <li className="py-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold text-emerald-deep">{row.label}</span>
+        {row.requested ? (
+          <span className="rounded bg-emerald-deep/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70">
+            Requested
+          </span>
+        ) : null}
+        <span
+          className={
+            "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest " +
+            (row.changed ? "bg-success/10 text-success" : "bg-emerald-deep/5 text-emerald-deep/50")
+          }
+        >
+          {row.changed ? "Changed" : "Unchanged"}
+        </span>
+      </div>
+      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+        <DiffSide
+          heading="At rejection"
+          value={row.before}
+          url={row.before_url}
+          at={row.before_at}
+          tone={row.changed ? "old" : "flat"}
+        />
+        <DiffSide
+          heading="Now"
+          value={row.after}
+          url={row.after_url}
+          at={row.after_at}
+          tone={row.changed ? "new" : "flat"}
+        />
+      </div>
+    </li>
+  );
+}
+
+function DiffSide({
+  heading,
+  value,
+  url,
+  at,
+  tone,
+}: {
+  heading: string;
+  value: string | null;
+  url: string | null;
+  at: string | null;
+  tone: "old" | "new" | "flat";
+}) {
+  const toneClass =
+    tone === "old"
+      ? "border-destructive/25 bg-destructive/5"
+      : tone === "new"
+        ? "border-success/30 bg-success/5"
+        : "border-emerald-deep/10 bg-cream/30";
+  return (
+    <div className={`rounded border px-3 py-2 ${toneClass}`}>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">{heading}</p>
+      <p className={`mt-1 break-words text-sm ${tone === "old" ? "line-through opacity-70" : ""}`}>
+        {value ?? "—"}
+      </p>
+      {at ? (
+        <p className="mt-1 text-[10px] text-emerald-deep/50">{new Date(at).toLocaleString()}</p>
+      ) : null}
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-deep hover:underline"
+        >
+          Open file <ExternalLink className="h-3 w-3" />
+        </a>
+      ) : null}
     </div>
   );
 }
