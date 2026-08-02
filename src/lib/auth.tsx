@@ -39,30 +39,32 @@ export type Permission =
 
 export const ADMIN_ROLE_LABEL: Record<Exclude<AppRole, "member">, string> = {
   super_admin: "Super Admin",
+  admin: "Admin",
+  manager: "Manager",
   compliance_officer: "Compliance Officer",
   loan_officer: "Loan Officer",
   finance_officer: "Finance Officer",
   auditor: "Auditor",
 };
 
+const ALL_EXPORTS: Permission[] = [
+  "export:members", "export:loans", "export:savings", "export:payments",
+  "export:security", "export:audit", "export:approvals",
+];
+
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
-  super_admin: [
-    "export:members", "export:loans", "export:savings", "export:payments",
-    "export:security", "export:audit", "export:approvals",
-    "loans:decide", "members:manage",
-  ],
+  super_admin: [...ALL_EXPORTS, "loans:decide", "members:manage"],
+  admin: [...ALL_EXPORTS, "loans:decide", "members:manage"],
+  manager: [...ALL_EXPORTS, "loans:decide", "members:manage"],
   compliance_officer: ["export:members", "export:audit", "export:security", "members:manage"],
   loan_officer: ["export:loans", "export:members", "export:approvals", "loans:decide"],
   finance_officer: ["export:savings", "export:payments", "export:loans", "export:approvals"],
-  auditor: [
-    "export:members", "export:loans", "export:savings", "export:payments",
-    "export:security", "export:audit", "export:approvals",
-  ],
+  auditor: [...ALL_EXPORTS],
   member: ["export:own_transactions", "export:own_loans", "export:own_savings", "export:own_statement"],
 };
 
 const ADMIN_ROLES: AppRole[] = [
-  "super_admin", "compliance_officer", "loan_officer", "finance_officer", "auditor",
+  "super_admin", "admin", "manager", "compliance_officer", "loan_officer", "finance_officer", "auditor",
 ];
 
 export type AccountStatus = "pending" | "approved" | "rejected" | "deactivated";
