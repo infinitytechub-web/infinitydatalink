@@ -178,26 +178,47 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     const isVerified = current?.kyc === "active";
 
     const patch: Record<string, unknown> = { ...data };
+    if (typeof patch.national_id === "string" && patch.national_id.trim()) {
+      patch.national_id = normalizeNationalId(
+        (patch.national_id_type as string | null) ?? null,
+        patch.national_id as string,
+      );
+    }
     if (isVerified) {
       if ("national_id" in patch) delete patch.national_id;
+      if ("national_id_type" in patch) delete patch.national_id_type;
       if ("date_of_birth" in patch) delete patch.date_of_birth;
     }
     if (Object.keys(patch).length === 0) return { updated: false };
 
     const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (/duplicate key|unique/i.test(error.message)) {
+        throw new Error("That national ID is already registered to another member.");
+      }
+      throw new Error(error.message);
+    }
     return { updated: true, locked_identity: isVerified };
   });
 
-const nokSchema = z.object({
-  id: z.string().uuid().optional(),
-  full_name: z.string().trim().min(2).max(120),
-  relationship: z.string().trim().min(2).max(60),
-  phone: z.string().trim().max(40).nullable().optional(),
-  email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
-  national_id: z.string().trim().max(80).nullable().optional(),
-  address: z.string().trim().max(240).nullable().optional(),
-});
+const nokSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    full_name: z.string().trim().min(2).max(120),
+    relationship: z.string().trim().min(2).max(60),
+    relationship_code: z.string().trim().max(40).nullable().optional(),
+    phone: z.string().trim().max(40).nullable().optional(),
+    email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+    national_id: z.string().trim().max(80).nullable().optional(),
+    national_id_type: z.string().trim().max(40).nullable().optional(),
+    address: z.string().trim().max(240).nullable().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.national_id) {
+      const idError = validateNationalId(val.national_id_type ?? null, val.national_id);
+      if (idError) ctx.addIssue({ code: "custom", path: ["national_id"], message: idError });
+    }
+  });
 
 export const upsertNextOfKin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -208,11 +229,16 @@ export const upsertNextOfKin = createServerFn({ method: "POST" })
       member_id: context.userId,
       full_name: data.full_name,
       relationship: data.relationship,
+      relationship_code: data.relationship_code ?? null,
       phone: data.phone ?? null,
       email: data.email ?? null,
-      national_id: data.national_id ?? null,
+      national_id: data.national_id
+        ? normalizeNationalId(data.national_id_type ?? null, data.national_id)
+        : null,
+      national_id_type: data.national_id_type ?? null,
       address: data.address ?? null,
     };
+
     if (data.id) {
       const { data: row, error } = await sb
         .from("next_of_kin")
