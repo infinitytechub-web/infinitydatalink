@@ -66,3 +66,42 @@ export function validateDateOfBirth(value: string | null | undefined): string | 
   if (age > 120) return "Enter a valid date of birth.";
   return null;
 }
+
+export type MinorStatus = {
+  /** Age in whole years from date_of_birth, or null when unknown. */
+  age: number | null;
+  /** UI calculation from date_of_birth (`age.ts`). */
+  computed: boolean;
+  /** Authoritative DB flag (`profiles.is_minor`), when the caller has it. */
+  stored: boolean | null;
+  /** What every surface should show: DB flag wins, UI calc fills the gaps. */
+  effective: boolean;
+  /**
+   * True when the DB flag and the date-of-birth calculation disagree — e.g. a
+   * member turned 18 after the flag was last written. Surfaces a warning so the
+   * "Under 18" tag is never silently wrong.
+   */
+  mismatch: boolean;
+};
+
+/**
+ * Single source of truth for the "Under 18" tag. Every age/KYC surface must use
+ * this instead of reading `is_minor` or calling `isMinor()` on its own, so the
+ * DB flag and the UI calculation can never drift apart unnoticed.
+ */
+export function resolveMinorStatus(
+  dateOfBirth: string | Date | null | undefined,
+  storedIsMinor?: boolean | null,
+  on: Date = new Date(),
+): MinorStatus {
+  const age = calculateAge(dateOfBirth, on);
+  const computed = age !== null && age < MINOR_AGE_THRESHOLD;
+  const stored = storedIsMinor ?? null;
+  // Without a date of birth the DB flag is all we have; with one, they must agree.
+  const effective = age === null ? stored === true : computed;
+  const mismatch = age !== null && stored !== null && stored !== computed;
+  return { age, computed, stored, effective, mismatch };
+}
+
+export const MINOR_MISMATCH_HINT =
+  "Under-18 flag is out of date for this date of birth — it refreshes on the next profile save.";
