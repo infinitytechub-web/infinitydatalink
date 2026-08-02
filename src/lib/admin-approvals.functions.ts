@@ -149,11 +149,24 @@ export const rejectUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const actorRole = await assertReviewerRole(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("reject_user", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("reject_user", {
       _uid: data.user_id,
       _reason: data.reason,
-    });
+      _actor: context.userId,
+    } as never);
     if (error) throw new Error(error.message);
+    const { error: notifyErr } = await supabaseAdmin.rpc("notify_user", {
+      _user_id: data.user_id,
+      _category: "account",
+      _title: "Registration not approved",
+      _body: `Your registration could not be approved. Reason: ${data.reason}`,
+      _link: "/auth",
+      _meta: { reason: data.reason },
+      _dedupe_key: `user.rejected:${data.user_id}`,
+    } as never);
+    if (notifyErr) console.error("rejection notification failed", notifyErr.message);
+
     await recordDecision({
       actorId: context.userId,
       actorEmail: (context.claims as any)?.email ?? null,
