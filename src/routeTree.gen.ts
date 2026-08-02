@@ -82,6 +82,7 @@ import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/
 import { Route as ApiPublicHooksLoanRemindersRouteImport } from './routes/api/public/hooks/loan-reminders'
 import { Route as ApiPublicHooksLoanArrearsRouteImport } from './routes/api/public/hooks/loan-arrears'
 import { Route as ApiPublicHooksKycRemindersRouteImport } from './routes/api/public/hooks/kyc-reminders'
+import { Route as ApiPublicHooksGuardianConsentRemindersRouteImport } from './routes/api/public/hooks/guardian-consent-reminders'
 import { Route as MemberAppSavingsStatementsRouteImport } from './routes/_member.app.savings.statements'
 import { Route as MemberAppSavingsPotsRouteImport } from './routes/_member.app.savings.pots'
 import { Route as MemberAppSavingsLedgerRouteImport } from './routes/_member.app.savings.ledger'
@@ -492,6 +493,12 @@ const ApiPublicHooksKycRemindersRoute =
     path: '/api/public/hooks/kyc-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksGuardianConsentRemindersRoute =
+  ApiPublicHooksGuardianConsentRemindersRouteImport.update({
+    id: '/api/public/hooks/guardian-consent-reminders',
+    path: '/api/public/hooks/guardian-consent-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MemberAppSavingsStatementsRoute =
   MemberAppSavingsStatementsRouteImport.update({
     id: '/statements',
@@ -782,6 +789,7 @@ export interface FileRoutesByFullPath {
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/guardian-consent-reminders': typeof ApiPublicHooksGuardianConsentRemindersRoute
   '/api/public/hooks/kyc-reminders': typeof ApiPublicHooksKycRemindersRoute
   '/api/public/hooks/loan-arrears': typeof ApiPublicHooksLoanArrearsRoute
   '/api/public/hooks/loan-reminders': typeof ApiPublicHooksLoanRemindersRoute
@@ -885,6 +893,7 @@ export interface FileRoutesByTo {
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/guardian-consent-reminders': typeof ApiPublicHooksGuardianConsentRemindersRoute
   '/api/public/hooks/kyc-reminders': typeof ApiPublicHooksKycRemindersRoute
   '/api/public/hooks/loan-arrears': typeof ApiPublicHooksLoanArrearsRoute
   '/api/public/hooks/loan-reminders': typeof ApiPublicHooksLoanRemindersRoute
@@ -996,6 +1005,7 @@ export interface FileRoutesById {
   '/_member/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/_member/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/_member/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/guardian-consent-reminders': typeof ApiPublicHooksGuardianConsentRemindersRoute
   '/api/public/hooks/kyc-reminders': typeof ApiPublicHooksKycRemindersRoute
   '/api/public/hooks/loan-arrears': typeof ApiPublicHooksLoanArrearsRoute
   '/api/public/hooks/loan-reminders': typeof ApiPublicHooksLoanRemindersRoute
@@ -1106,6 +1116,7 @@ export interface FileRouteTypes {
     | '/app/savings/ledger'
     | '/app/savings/pots'
     | '/app/savings/statements'
+    | '/api/public/hooks/guardian-consent-reminders'
     | '/api/public/hooks/kyc-reminders'
     | '/api/public/hooks/loan-arrears'
     | '/api/public/hooks/loan-reminders'
@@ -1209,6 +1220,7 @@ export interface FileRouteTypes {
     | '/app/savings/ledger'
     | '/app/savings/pots'
     | '/app/savings/statements'
+    | '/api/public/hooks/guardian-consent-reminders'
     | '/api/public/hooks/kyc-reminders'
     | '/api/public/hooks/loan-arrears'
     | '/api/public/hooks/loan-reminders'
@@ -1319,6 +1331,7 @@ export interface FileRouteTypes {
     | '/_member/app/savings/ledger'
     | '/_member/app/savings/pots'
     | '/_member/app/savings/statements'
+    | '/api/public/hooks/guardian-consent-reminders'
     | '/api/public/hooks/kyc-reminders'
     | '/api/public/hooks/loan-arrears'
     | '/api/public/hooks/loan-reminders'
@@ -1344,6 +1357,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksGuardianConsentRemindersRoute: typeof ApiPublicHooksGuardianConsentRemindersRoute
   ApiPublicHooksKycRemindersRoute: typeof ApiPublicHooksKycRemindersRoute
   ApiPublicHooksLoanArrearsRoute: typeof ApiPublicHooksLoanArrearsRoute
   ApiPublicHooksLoanRemindersRoute: typeof ApiPublicHooksLoanRemindersRoute
@@ -1868,6 +1882,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/kyc-reminders'
       fullPath: '/api/public/hooks/kyc-reminders'
       preLoaderRoute: typeof ApiPublicHooksKycRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/guardian-consent-reminders': {
+      id: '/api/public/hooks/guardian-consent-reminders'
+      path: '/api/public/hooks/guardian-consent-reminders'
+      fullPath: '/api/public/hooks/guardian-consent-reminders'
+      preLoaderRoute: typeof ApiPublicHooksGuardianConsentRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_member/app/savings/statements': {
@@ -2456,6 +2477,8 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksGuardianConsentRemindersRoute:
+    ApiPublicHooksGuardianConsentRemindersRoute,
   ApiPublicHooksKycRemindersRoute: ApiPublicHooksKycRemindersRoute,
   ApiPublicHooksLoanArrearsRoute: ApiPublicHooksLoanArrearsRoute,
   ApiPublicHooksLoanRemindersRoute: ApiPublicHooksLoanRemindersRoute,
