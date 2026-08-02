@@ -239,9 +239,18 @@ type NokDraft = {
   phone: string;
   email: string;
   national_id: string;
+  national_id_type: string;
   address: string;
 };
-const EMPTY_NOK: NokDraft = { full_name: "", relationship: "", phone: "", email: "", national_id: "", address: "" };
+const EMPTY_NOK: NokDraft = {
+  full_name: "",
+  relationship: "",
+  phone: "",
+  email: "",
+  national_id: "",
+  national_id_type: DEFAULT_NATIONAL_ID_TYPE,
+  address: "",
+};
 
 function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
   const qc = useQueryClient();
@@ -259,9 +268,11 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
           phone: v.phone || null,
           email: v.email || null,
           national_id: v.national_id || null,
+          national_id_type: v.national_id ? v.national_id_type : null,
           address: v.address || null,
         },
       }),
+
     onSuccess: () => {
       toast.success("Next of kin saved");
       qc.invalidateQueries({ queryKey: ["member", "profile"] });
