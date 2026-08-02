@@ -193,3 +193,33 @@ export const uploadMinorAttestation = createServerFn({ method: "POST" })
 
     return { id: row?.id as string, storage_path: path };
   });
+
+/**
+ * Manual trigger for the guardian-consent reminder sweep. The same routine runs
+ * nightly on a schedule; compliance can also fire it on demand from the member
+ * review screen. Reminders stay idempotent per member per day.
+ */
+export const sendGuardianConsentReminders = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(() => ({}))
+  .handler(async ({ context }) => {
+    const role = await assertAttestationRole(context.supabase, context.userId);
+    const { runGuardianConsentReminders } = await import("@/lib/guardian-consent-reminders.server");
+    const result = await runGuardianConsentReminders();
+
+    await writeAudit({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: role,
+      action: "kyc.minor_consent_reminders_sent",
+      target: "guardian_consent_reminders",
+      meta: {
+        scanned: result.scanned,
+        incomplete: result.incomplete,
+        staff_notified: result.staff_notified,
+        guardians_notified: result.guardians_notified,
+      },
+    });
+
+    return result;
+  });
