@@ -199,6 +199,10 @@ function ApprovalsInner() {
                     <td className="py-2 pr-3 font-medium">{r.full_name ?? "—"}</td>
                     <td className="py-2 pr-3 text-muted-foreground">{r.email ?? "—"}</td>
                     <td className="py-2 pr-3">{r.member_no ?? "—"}</td>
+                    <td className="py-2 pr-3 font-mono text-xs">{r.ghana_card ?? "—"}</td>
+                    <td className="py-2 pr-3 text-xs">{r.phone ?? "—"}</td>
+                    <td className="py-2 pr-3 text-xs capitalize">{r.membership_type ?? "—"}</td>
+
                     <td className="py-2 pr-3">
                       <StatusPill status={r.status} />
                       {r.status === "rejected" && r.rejection_reason ? (
