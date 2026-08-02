@@ -1928,6 +1928,30 @@ export type Database = {
           },
         ]
       }
+      national_id_claims: {
+        Row: {
+          created_at: string
+          id_key: string
+          member_id: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id_key: string
+          member_id: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id_key?: string
+          member_id?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       next_of_kin: {
         Row: {
           address: string | null
