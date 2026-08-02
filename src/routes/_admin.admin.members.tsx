@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
+import { MinorTag } from "@/components/biodata-fields";
 import { formatAge, resolveMinorStatus } from "@/lib/age";
 
 import {
