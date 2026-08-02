@@ -13,6 +13,7 @@ import {
   decideKyc,
   getKycResubmissionDiff,
   getMemberKyc,
+  listMinorStatusChanges,
   type KycDiffRow,
   type KycDocumentWithUrl,
 } from "@/lib/admin-kyc.functions";
@@ -26,6 +27,7 @@ import {
   type GuardianCandidate,
 } from "@/lib/kyc-minor-rules";
 import { resolveMinorStatus } from "@/lib/age";
+import { useQuery } from "@tanstack/react-query";
 
 
 export const Route = createFileRoute("/_admin/admin/members/$id")({
@@ -664,5 +666,53 @@ function DiffSide({
         </a>
       ) : null}
     </div>
+  );
+}
+
+
+/**
+ * Trigger-written history of automatic under-18 flag changes for this member.
+ * Every entry shows the date of birth that produced the change and when it
+ * happened, including changes made outside the app.
+ */
+function MinorHistoryCard({ memberId }: { memberId: string }) {
+  const fetchChanges = useServerFn(listMinorStatusChanges);
+  const { data, isLoading } = useQuery({
+    queryKey: ["minor-status-changes", memberId],
+    queryFn: () => fetchChanges({ data: { member_id: memberId, limit: 20 } }),
+  });
+  const changes = data?.changes ?? [];
+
+  return (
+    <SectionCard title="Under-18 status history">
+      {isLoading ? (
+        <div className="p-6"><Skeleton className="h-16 w-full" /></div>
+      ) : changes.length === 0 ? (
+        <div className="p-6 text-sm text-emerald-deep/60">
+          No automatic under-18 status changes recorded for this member.
+        </div>
+      ) : (
+        <ul className="divide-y divide-emerald-deep/5">
+          {changes.map((c) => (
+            <li key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-6 py-3 text-sm">
+              <StatusPill status={c.is_minor ? "pending" : "active"}>
+                {c.was_minor === null
+                  ? c.is_minor ? "Set to under 18" : "Set to adult"
+                  : c.is_minor ? "Adult → under 18" : "Under 18 → adult"}
+              </StatusPill>
+              <span className="text-emerald-deep/70">
+                Source date of birth: <strong>{c.source_date_of_birth ?? "not set"}</strong>
+                {c.previous_date_of_birth && c.previous_date_of_birth !== c.source_date_of_birth
+                  ? ` (was ${c.previous_date_of_birth})`
+                  : ""}
+              </span>
+              <span className="ml-auto text-xs uppercase tracking-widest text-emerald-deep/50">
+                {new Date(c.changed_at).toLocaleString()} · {c.change_kind}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </SectionCard>
   );
 }
