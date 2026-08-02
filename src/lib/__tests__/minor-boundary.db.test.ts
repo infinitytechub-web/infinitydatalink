@@ -81,8 +81,9 @@ d("profiles_set_minor_flag trigger", () => {
     )
       .split("\n")
       .pop()!;
-    expect(cols).toContain("profile_id");
-    expect(cols).toContain("new_is_minor");
-    expect(cols).toContain("old_is_minor");
+    expect(cols).toContain("member_id");
+    expect(cols).toContain("is_minor");
+    expect(cols).toContain("was_minor");
+    expect(cols).toContain("source_date_of_birth");
   });
 });
