@@ -1248,6 +1248,8 @@ export type Database = {
       }
       kyc_resubmission_settings: {
         Row: {
+          auto_flag_enabled: boolean
+          auto_flag_min_severity: string
           created_at: string
           deadline_days: number
           enforce_deadline: boolean
@@ -1257,6 +1259,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          auto_flag_enabled?: boolean
+          auto_flag_min_severity?: string
           created_at?: string
           deadline_days?: number
           enforce_deadline?: boolean
@@ -1266,6 +1270,8 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          auto_flag_enabled?: boolean
+          auto_flag_min_severity?: string
           created_at?: string
           deadline_days?: number
           enforce_deadline?: boolean
@@ -2082,6 +2088,8 @@ export type Database = {
           kyc_assigned_at: string | null
           kyc_assigned_to: string | null
           kyc_attempts: number
+          kyc_flag_reason: string | null
+          kyc_flagged_at: string | null
           kyc_max_attempts: number | null
           kyc_notes: string | null
           kyc_rejection_snapshot: Json | null
@@ -2090,6 +2098,8 @@ export type Database = {
           kyc_resubmitted_at: string | null
           kyc_reviewed_at: string | null
           kyc_reviewed_by: string | null
+          kyc_risk_flags: Json | null
+          kyc_risk_level: string | null
           kyc_submitted_at: string | null
           member_no: string | null
           membership_type: string
@@ -2121,6 +2131,8 @@ export type Database = {
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
           kyc_attempts?: number
+          kyc_flag_reason?: string | null
+          kyc_flagged_at?: string | null
           kyc_max_attempts?: number | null
           kyc_notes?: string | null
           kyc_rejection_snapshot?: Json | null
@@ -2129,6 +2141,8 @@ export type Database = {
           kyc_resubmitted_at?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
+          kyc_risk_flags?: Json | null
+          kyc_risk_level?: string | null
           kyc_submitted_at?: string | null
           member_no?: string | null
           membership_type?: string
@@ -2160,6 +2174,8 @@ export type Database = {
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
           kyc_attempts?: number
+          kyc_flag_reason?: string | null
+          kyc_flagged_at?: string | null
           kyc_max_attempts?: number | null
           kyc_notes?: string | null
           kyc_rejection_snapshot?: Json | null
@@ -2168,6 +2184,8 @@ export type Database = {
           kyc_resubmitted_at?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
+          kyc_risk_flags?: Json | null
+          kyc_risk_level?: string | null
           kyc_submitted_at?: string | null
           member_no?: string | null
           membership_type?: string

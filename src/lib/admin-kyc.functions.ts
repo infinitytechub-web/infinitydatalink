@@ -12,6 +12,13 @@ import {
   parseRemediationItems,
   remediationLabel,
 } from "@/lib/kyc-remediation";
+import {
+  assessResubmissionRisk,
+  meetsFlagThreshold,
+  type RiskAssessment,
+  type RiskSeverity,
+} from "@/lib/kyc-risk-rules";
+
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -843,6 +850,10 @@ export type KycResubmissionSettings = {
   deadline_days: number;
   max_attempts: number;
   enforce_deadline: boolean;
+  /** Auto-flag resubmissions for re-review when risk patterns match. */
+  auto_flag_enabled: boolean;
+  /** Lowest risk level that triggers an automatic flag. */
+  auto_flag_min_severity: RiskSeverity;
   updated_at: string | null;
 };
 
@@ -852,13 +863,17 @@ export const getKycResubmissionSettings = createServerFn({ method: "GET" })
     await assertKycAdmin(context.supabase, context.userId);
     const { data, error } = await context.supabase
       .from("kyc_resubmission_settings")
-      .select("deadline_days, max_attempts, enforce_deadline, updated_at")
+      .select(
+        "deadline_days, max_attempts, enforce_deadline, auto_flag_enabled, auto_flag_min_severity, updated_at",
+      )
       .maybeSingle();
     if (error) throw new Error(error.message);
     return {
       deadline_days: Number(data?.deadline_days ?? 14),
       max_attempts: Number(data?.max_attempts ?? 3),
       enforce_deadline: (data?.enforce_deadline ?? true) as boolean,
+      auto_flag_enabled: ((data as any)?.auto_flag_enabled ?? true) as boolean,
+      auto_flag_min_severity: (((data as any)?.auto_flag_min_severity ?? "medium") as RiskSeverity),
       updated_at: (data?.updated_at as string | null) ?? null,
     };
   });
@@ -871,6 +886,8 @@ export const updateKycResubmissionSettings = createServerFn({ method: "POST" })
         deadline_days: z.number().int().min(1).max(365),
         max_attempts: z.number().int().min(1).max(20),
         enforce_deadline: z.boolean(),
+        auto_flag_enabled: z.boolean().default(true),
+        auto_flag_min_severity: z.enum(["low", "medium", "high"]).default("medium"),
       })
       .parse(d),
   )
@@ -882,10 +899,13 @@ export const updateKycResubmissionSettings = createServerFn({ method: "POST" })
         deadline_days: data.deadline_days,
         max_attempts: data.max_attempts,
         enforce_deadline: data.enforce_deadline,
+        auto_flag_enabled: data.auto_flag_enabled,
+        auto_flag_min_severity: data.auto_flag_min_severity,
         updated_by: context.userId,
-      })
+      } as any)
       .eq("id", true);
     if (error) throw new Error(error.message);
+
 
     await writeAudit({
       actor_id: context.userId,
@@ -925,7 +945,15 @@ export type KycResubmissionDiff = {
   rows: KycDiffRow[];
   changed_count: number;
   unchanged_requested_count: number;
+  /** Risk patterns detected on this resubmission. */
+  risk: RiskAssessment;
+  /** Auto-flag configuration in force when the diff was computed. */
+  auto_flag: { enabled: boolean; min_severity: RiskSeverity };
+  /** Set when this resubmission is currently flagged for re-review. */
+  flagged_at: string | null;
+  flag_reason: string | null;
 };
+
 
 /**
  * Field-by-field and file-by-file comparison between what a reviewer rejected
@@ -936,15 +964,16 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ member_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<KycResubmissionDiff> => {
-    await assertKycAdmin(context.supabase, context.userId);
+    const role = await assertKycAdmin(context.supabase, context.userId);
     const sb = context.supabase;
 
-    const [{ data: profile, error }, { data: docs }] = await Promise.all([
+    const [{ data: profile, error }, { data: docs }, { data: flagSettings }] = await Promise.all([
       sb
         .from("profiles")
         .select(
-          `${REMEDIATION_PROFILE_FIELDS.join(", ")}, kyc_remediation_items, kyc_rejection_snapshot, kyc_reviewed_at, kyc_resubmitted_at, kyc_attempts`,
+          `${REMEDIATION_PROFILE_FIELDS.join(", ")}, kyc_remediation_items, kyc_rejection_snapshot, kyc_reviewed_at, kyc_resubmitted_at, kyc_attempts, kyc_flagged_at, kyc_flag_reason, kyc_risk_level`,
         )
+
         .eq("id", data.member_id)
         .maybeSingle(),
       sb
@@ -952,7 +981,12 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
         .select("id, doc_type, storage_path, size_bytes, mime_type, created_at")
         .eq("member_id", data.member_id)
         .order("created_at", { ascending: false }),
+      sb
+        .from("kyc_resubmission_settings")
+        .select("auto_flag_enabled, auto_flag_min_severity")
+        .maybeSingle(),
     ]);
+
     if (error) throw new Error(error.message);
     if (!profile) throw new Error("Member not found");
 
@@ -1020,15 +1054,94 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
     // Requested items first, then anything else that moved.
     rows.sort((a, b) => Number(b.requested) - Number(a.requested) || Number(b.changed) - Number(a.changed));
 
+    const attemptsUsed = Number((profile as any).kyc_attempts ?? 0);
+    const resubmittedAt = ((profile as any).kyc_resubmitted_at as string | null) ?? null;
+
+    const risk = assessResubmissionRisk({
+      rows: rows.map((r) => ({
+        key: r.key,
+        kind: r.kind,
+        label: r.label,
+        requested: r.requested,
+        changed: r.changed,
+        before: r.before,
+        after: r.after,
+      })),
+      attempts_used: attemptsUsed,
+      has_snapshot: Boolean(snapshot),
+    });
+
+    const autoFlag = {
+      enabled: (flagSettings?.auto_flag_enabled ?? true) as boolean,
+      min_severity: ((flagSettings?.auto_flag_min_severity ?? "medium") as RiskSeverity),
+    };
+
+    let flaggedAt = ((profile as any).kyc_flagged_at as string | null) ?? null;
+    let flagReason = ((profile as any).kyc_flag_reason as string | null) ?? null;
+
+    // Auto-flag for re-review: only once the member has actually resubmitted,
+    // and only when the detected level reaches the configured threshold.
+    const shouldFlag =
+      autoFlag.enabled &&
+      Boolean(resubmittedAt) &&
+      meetsFlagThreshold(risk.level, autoFlag.min_severity);
+    const alreadyFlagged =
+      flaggedAt !== null && resubmittedAt !== null && flaggedAt >= resubmittedAt;
+
+    if (shouldFlag && !alreadyFlagged) {
+      const now = new Date().toISOString();
+      const { error: flagErr } = await sb
+        .from("profiles")
+        .update({
+          kyc_flagged_at: now,
+          kyc_flag_reason: risk.summary,
+          kyc_risk_level: risk.level,
+          kyc_risk_flags: risk.flags as any,
+        })
+        .eq("id", data.member_id);
+      if (!flagErr) {
+        flaggedAt = now;
+        flagReason = risk.summary;
+        await writeAudit({
+          actor_id: context.userId,
+          actor_email: (context.claims as any)?.email ?? null,
+          actor_role: role,
+          action: "kyc.resubmission.auto_flagged",
+          target: data.member_id,
+          meta: {
+            risk_level: risk.level,
+            min_severity: autoFlag.min_severity,
+            codes: risk.flags.map((f) => f.code),
+            flags: risk.flags,
+            attempts_used: attemptsUsed,
+            resubmitted_at: resubmittedAt,
+          },
+        });
+      }
+    } else if (!shouldFlag && risk.level === "none" && flaggedAt && resubmittedAt && flaggedAt >= resubmittedAt) {
+      // Patterns cleared on a newer diff — drop the stale flag.
+      await sb
+        .from("profiles")
+        .update({ kyc_flagged_at: null, kyc_flag_reason: null, kyc_risk_level: "none", kyc_risk_flags: [] as any })
+        .eq("id", data.member_id);
+      flaggedAt = null;
+      flagReason = null;
+    }
+
     return {
       member_id: data.member_id,
       has_snapshot: Boolean(snapshot),
       captured_at: (snapshot?.captured_at as string | null) ?? null,
       reviewed_at: ((profile as any).kyc_reviewed_at as string | null) ?? null,
-      resubmitted_at: ((profile as any).kyc_resubmitted_at as string | null) ?? null,
-      attempts_used: Number((profile as any).kyc_attempts ?? 0),
+      resubmitted_at: resubmittedAt,
+      attempts_used: attemptsUsed,
       rows,
       changed_count: rows.filter((r) => r.changed).length,
       unchanged_requested_count: rows.filter((r) => r.requested && !r.changed).length,
+      risk,
+      auto_flag: autoFlag,
+      flagged_at: flaggedAt,
+      flag_reason: flagReason,
     };
   });
+

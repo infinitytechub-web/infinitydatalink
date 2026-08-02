@@ -681,12 +681,24 @@ function ResubmissionRules() {
   const [days, setDays] = useState(String(data.deadline_days));
   const [attempts, setAttempts] = useState(String(data.max_attempts));
   const [enforce, setEnforce] = useState(data.enforce_deadline);
+  const [autoFlag, setAutoFlag] = useState(data.auto_flag_enabled);
+  const [minSeverity, setMinSeverity] = useState<"low" | "medium" | "high">(
+    data.auto_flag_min_severity,
+  );
 
   useEffect(() => {
     setDays(String(data.deadline_days));
     setAttempts(String(data.max_attempts));
     setEnforce(data.enforce_deadline);
-  }, [data.deadline_days, data.max_attempts, data.enforce_deadline]);
+    setAutoFlag(data.auto_flag_enabled);
+    setMinSeverity(data.auto_flag_min_severity);
+  }, [
+    data.deadline_days,
+    data.max_attempts,
+    data.enforce_deadline,
+    data.auto_flag_enabled,
+    data.auto_flag_min_severity,
+  ]);
 
   const save = useMutation({
     mutationFn: () =>
@@ -695,8 +707,11 @@ function ResubmissionRules() {
           deadline_days: Number(days),
           max_attempts: Number(attempts),
           enforce_deadline: enforce,
+          auto_flag_enabled: autoFlag,
+          auto_flag_min_severity: minSeverity,
         },
       }),
+
     onSuccess: () => {
       toast.success("Resubmission rules saved");
       qc.invalidateQueries({ queryKey: ["admin", "kyc-resubmission-settings"] });
@@ -744,6 +759,29 @@ function ResubmissionRules() {
           />
           Block resubmission once the deadline passes
         </label>
+        <label className="flex items-center gap-2 pb-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={autoFlag}
+            onChange={(e) => setAutoFlag(e.target.checked)}
+            className="h-3.5 w-3.5 accent-primary"
+          />
+          Auto-flag risky resubmissions for re-review
+        </label>
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Flag from severity
+          <select
+            value={minSeverity}
+            disabled={!autoFlag}
+            onChange={(e) => setMinSeverity(e.target.value as "low" | "medium" | "high")}
+            className="w-32 rounded border border-border bg-card px-2 py-1.5 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary disabled:opacity-50"
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+
         <button
           type="button"
           disabled={!valid || save.isPending}
