@@ -4,7 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
 import { notifyUser } from "@/lib/notify.server";
-import { REMEDIATION_KEYS, remediationLabel } from "@/lib/kyc-remediation";
+import { REMEDIATION_DOC_TYPES, REMEDIATION_KEYS, remediationLabel } from "@/lib/kyc-remediation";
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -608,7 +608,16 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const docStatus: "approved" | "rejected" = data.decision === "approved" ? "approved" : "rejected";
     const now = new Date().toISOString();
-    const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
+    const remediation =
+      data.decision === "rejected"
+        ? Array.from(
+            new Set(
+              data.remediation_items.length > 0
+                ? data.remediation_items
+                : REMEDIATION_DOC_TYPES.map((t) => `document:${t}`),
+            ),
+          )
+        : [];
 
     const succeeded: string[] = [];
     const failed: { id: string; error: string }[] = [];
