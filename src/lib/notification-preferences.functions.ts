@@ -3,6 +3,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const NOTIFICATION_CATEGORIES = [
+  { key: "account.registration.approved", label: "Registration approved" },
+  { key: "account.registration.rejected", label: "Registration declined" },
+  { key: "account.kyc.approved", label: "KYC verification approved" },
+  { key: "account.kyc.rejected", label: "KYC verification declined" },
   { key: "loan.approved", label: "Loan approved" },
   { key: "loan.rejected", label: "Loan declined" },
   { key: "loan.disbursed", label: "Loan disbursed" },

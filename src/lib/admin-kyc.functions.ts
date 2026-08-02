@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
+import { notifyUser } from "@/lib/notify.server";
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -329,6 +330,20 @@ export const decideKyc = createServerFn({ method: "POST" })
       meta: { notes: data.notes || null, member_id: data.member_id },
     });
 
+    // In-app + email/SMS fan-out per the member's notification preferences.
+    await notifyUser({
+      userId: data.member_id,
+      category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
+      title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
+      body:
+        data.decision === "approved"
+          ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
+          : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Please update your documents and resubmit.`,
+      link: "/app/kyc",
+      meta: { notes: data.notes || null, decision: data.decision },
+      dedupeKey: `kyc.${data.decision}:${data.member_id}:${now}`,
+    });
+
     // Fire-and-log notification email (never fails the decision)
     try {
       const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
@@ -610,6 +625,19 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           action: `kyc.bulk_${data.decision}`,
           target: memberId,
           meta: { notes: data.notes || null, member_id: memberId },
+        });
+
+        await notifyUser({
+          userId: memberId,
+          category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
+          title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
+          body:
+            data.decision === "approved"
+              ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
+              : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Please update your documents and resubmit.`,
+          link: "/app/kyc",
+          meta: { notes: data.notes || null, decision: data.decision },
+          dedupeKey: `kyc.${data.decision}:${memberId}:${now}`,
         });
 
         // Enqueue notification
