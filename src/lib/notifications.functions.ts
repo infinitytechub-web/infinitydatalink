@@ -151,3 +151,89 @@ export const listRecycleBin = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { rows: (rows ?? []) as RecycleRow[] };
   });
+
+/**
+ * Notifications centre feed: page/filter over the member's own in-app alerts.
+ * RLS scopes rows to the caller; the extra user_id filter keeps legacy
+ * broadcast rows (user_id null) out of a personal inbox.
+ */
+export const listMyNotifications = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        page: z.number().int().min(1).optional().default(1),
+        page_size: z.number().int().min(5).max(100).optional().default(25),
+        status: z.enum(["all", "unread", "read"]).optional().default("all"),
+        category: z.string().optional().default(""),
+        q: z.string().max(120).optional().default(""),
+      })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const from = (data.page - 1) * data.page_size;
+
+    let query = context.supabase
+      .from("notifications")
+      .select("id, user_id, category, title, body, link, read_at, created_at", { count: "exact" })
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .range(from, from + data.page_size - 1);
+
+    if (data.status === "unread") query = query.is("read_at", null);
+    if (data.status === "read") query = query.not("read_at", "is", null);
+    if (data.category) query = query.eq("category", data.category);
+    if (data.q) {
+      // Escape PostgREST reserved characters before interpolating the pattern.
+      const term = data.q.replace(/[%,()*\\]/g, " ").trim();
+      if (term) query = query.or(`title.ilike.%${term}%,body.ilike.%${term}%`);
+    }
+
+    const { data: rows, error, count } = await query;
+    if (error) throw new Error(error.message);
+
+    const { count: unread, error: unreadError } = await context.supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", context.userId)
+      .is("read_at", null);
+    if (unreadError) throw new Error(unreadError.message);
+
+    return {
+      rows: (rows ?? []) as NotificationRow[],
+      total: count ?? 0,
+      unread: unread ?? 0,
+    };
+  });
+
+/** Mark a specific set of the caller's notifications as read. */
+export const markNotificationsRead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ ids: z.array(z.string().uuid()).min(1).max(200) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const ids = Array.from(new Set(data.ids));
+    const { error } = await context.supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .in("id", ids)
+      .eq("user_id", context.userId)
+      .is("read_at", null);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, count: ids.length };
+  });
+
+/** Restore a notification to unread so members can revisit it later. */
+export const markNotificationUnread = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("notifications")
+      .update({ read_at: null })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
