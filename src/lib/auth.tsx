@@ -82,11 +82,15 @@ type AuthState = {
   user: SessionUser | null;
   loading: boolean;
   permissions: Permission[];
+  /** Granular module.action capabilities resolved from the database matrix. */
+  capabilities: CapabilitySet;
   isMember: boolean;
   isAdmin: boolean;
   hasRole: (r: AppRole) => boolean;
   hasPermission: (p: Permission) => boolean;
   hasAnyPermission: (ps: Permission[]) => boolean;
+  /** Granular permission check: `can("kyc", "approve")`. */
+  can: (module: PermModule, action: PermAction) => boolean;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
 };
