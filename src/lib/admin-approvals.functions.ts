@@ -42,6 +42,10 @@ export const listPendingUsers = createServerFn({ method: "GET" })
     z
       .object({
         status: z.enum(["pending", "rejected", "deactivated", "approved", "all"]).default("pending"),
+        membership_type: z
+          .enum(["individual", "group", "department", "institution", "all"])
+          .optional()
+          .default("all"),
         search: z.string().trim().max(200).optional().default(""),
         page: z.number().int().min(1).optional().default(1),
         pageSize: z.number().int().min(5).max(100).optional().default(25),
@@ -53,11 +57,15 @@ export const listPendingUsers = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = (supabaseAdmin as any)
       .from("profiles")
-      .select("id, full_name, member_no, status, rejection_reason, created_at", { count: "exact" });
+      .select(
+        "id, full_name, member_no, ghana_card, phone, membership_type, status, rejection_reason, created_at",
+        { count: "exact" },
+      );
     if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.membership_type !== "all") q = q.eq("membership_type", data.membership_type);
     if (data.search) {
       const s = `%${data.search.replace(/[%,()*]/g, "")}%`;
-      q = q.or(`full_name.ilike.${s},member_no.ilike.${s}`);
+      q = q.or(`full_name.ilike.${s},member_no.ilike.${s},ghana_card.ilike.${s},phone.ilike.${s}`);
     }
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
@@ -77,10 +85,14 @@ export const listPendingUsers = createServerFn({ method: "GET" })
       email: emailMap.get(p.id) ?? null,
       full_name: p.full_name,
       member_no: p.member_no,
+      ghana_card: p.ghana_card ?? null,
+      phone: p.phone ?? null,
+      membership_type: p.membership_type ?? null,
       status: p.status,
       rejection_reason: p.rejection_reason,
       created_at: p.created_at,
     }));
+
     return { rows, total: count ?? rows.length };
   });
 
