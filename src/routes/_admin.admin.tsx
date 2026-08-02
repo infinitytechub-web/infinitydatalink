@@ -34,6 +34,8 @@ import {
   BellRing,
   Radio,
   Coins,
+  FileText,
+
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 
@@ -103,7 +105,10 @@ const groups: NavGroup[] = [
       { to: "/admin/logs", label: "Runtime Logs", icon: <Bug /> },
       { to: "/admin/health", label: "Integration Health", icon: <Activity /> },
       { to: "/admin/cron-runs", label: "Scheduled job runs", icon: <History /> },
+      { to: "/admin/documents", label: "Document Management", icon: <FileText /> },
+      { to: "/admin/relationships", label: "Relationship types", icon: <Users /> },
       { to: "/admin/super-admins", label: "Super Admins", icon: <Crown /> },
+
       { to: "/admin/super-admins/history", label: "Grant history", icon: <ClipboardCheck /> },
       { to: "/admin/roles", label: "Roles & Permissions", icon: <KeyRound /> },
       { to: "/admin/branding", label: "Branding", icon: <Palette /> },
@@ -150,7 +155,10 @@ const CRUMBS: Record<string, string> = {
   "/admin/health": "Integration Health",
   "/admin/cron-runs": "Scheduled Job Runs",
 
+  "/admin/documents": "Document Management",
+  "/admin/relationships": "Relationship Types",
   "/admin/super-admins": "Super Admins",
+
   "/admin/super-admins/history": "Grant history",
   "/admin/roles": "Roles & Permissions",
   "/admin/branding": "Branding",

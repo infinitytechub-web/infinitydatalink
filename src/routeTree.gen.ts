@@ -42,6 +42,7 @@ import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.se
 import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
 import { Route as AdminAdminRolesRouteImport } from './routes/_admin.admin.roles'
 import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.reports'
+import { Route as AdminAdminRelationshipsRouteImport } from './routes/_admin.admin.relationships'
 import { Route as AdminAdminRecurringRouteImport } from './routes/_admin.admin.recurring'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
 import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.admin.notifications'
@@ -59,6 +60,7 @@ import { Route as AdminAdminHealthRouteImport } from './routes/_admin.admin.heal
 import { Route as AdminAdminFxRouteImport } from './routes/_admin.admin.fx'
 import { Route as AdminAdminFinanceRouteImport } from './routes/_admin.admin.finance'
 import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.entities'
+import { Route as AdminAdminDocumentsRouteImport } from './routes/_admin.admin.documents'
 import { Route as AdminAdminCronRunsRouteImport } from './routes/_admin.admin.cron-runs'
 import { Route as AdminAdminConsoleRouteImport } from './routes/_admin.admin.console'
 import { Route as AdminAdminBrandingRouteImport } from './routes/_admin.admin.branding'
@@ -278,6 +280,11 @@ const AdminAdminReportsRoute = AdminAdminReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminRelationshipsRoute = AdminAdminRelationshipsRouteImport.update({
+  id: '/relationships',
+  path: '/relationships',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AdminAdminRecurringRoute = AdminAdminRecurringRouteImport.update({
   id: '/recurring',
   path: '/recurring',
@@ -363,6 +370,11 @@ const AdminAdminFinanceRoute = AdminAdminFinanceRouteImport.update({
 const AdminAdminEntitiesRoute = AdminAdminEntitiesRouteImport.update({
   id: '/entities',
   path: '/entities',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminDocumentsRoute = AdminAdminDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminCronRunsRoute = AdminAdminCronRunsRouteImport.update({
@@ -687,6 +699,7 @@ export interface FileRoutesByFullPath {
   '/admin/branding': typeof AdminAdminBrandingRoute
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
+  '/admin/documents': typeof AdminAdminDocumentsRoute
   '/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/admin/fx': typeof AdminAdminFxRoute
@@ -704,6 +717,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AdminAdminNotificationsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
+  '/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
@@ -790,6 +804,7 @@ export interface FileRoutesByTo {
   '/admin/branding': typeof AdminAdminBrandingRoute
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
+  '/admin/documents': typeof AdminAdminDocumentsRoute
   '/admin/fx': typeof AdminAdminFxRoute
   '/admin/health': typeof AdminAdminHealthRoute
   '/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
@@ -805,6 +820,7 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AdminAdminNotificationsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
+  '/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
@@ -895,6 +911,7 @@ export interface FileRoutesById {
   '/_admin/admin/branding': typeof AdminAdminBrandingRoute
   '/_admin/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/_admin/admin/cron-runs': typeof AdminAdminCronRunsRoute
+  '/_admin/admin/documents': typeof AdminAdminDocumentsRoute
   '/_admin/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
   '/_admin/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/_admin/admin/fx': typeof AdminAdminFxRoute
@@ -912,6 +929,7 @@ export interface FileRoutesById {
   '/_admin/admin/notifications': typeof AdminAdminNotificationsRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/recurring': typeof AdminAdminRecurringRoute
+  '/_admin/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/_admin/admin/reports': typeof AdminAdminReportsRoute
   '/_admin/admin/roles': typeof AdminAdminRolesRoute
   '/_admin/admin/savings': typeof AdminAdminSavingsRouteWithChildren
@@ -1002,6 +1020,7 @@ export interface FileRouteTypes {
     | '/admin/branding'
     | '/admin/console'
     | '/admin/cron-runs'
+    | '/admin/documents'
     | '/admin/entities'
     | '/admin/finance'
     | '/admin/fx'
@@ -1019,6 +1038,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/payments'
     | '/admin/recurring'
+    | '/admin/relationships'
     | '/admin/reports'
     | '/admin/roles'
     | '/admin/savings'
@@ -1105,6 +1125,7 @@ export interface FileRouteTypes {
     | '/admin/branding'
     | '/admin/console'
     | '/admin/cron-runs'
+    | '/admin/documents'
     | '/admin/fx'
     | '/admin/health'
     | '/admin/investments'
@@ -1120,6 +1141,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/payments'
     | '/admin/recurring'
+    | '/admin/relationships'
     | '/admin/reports'
     | '/admin/roles'
     | '/admin/savings'
@@ -1209,6 +1231,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/branding'
     | '/_admin/admin/console'
     | '/_admin/admin/cron-runs'
+    | '/_admin/admin/documents'
     | '/_admin/admin/entities'
     | '/_admin/admin/finance'
     | '/_admin/admin/fx'
@@ -1226,6 +1249,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/notifications'
     | '/_admin/admin/payments'
     | '/_admin/admin/recurring'
+    | '/_admin/admin/relationships'
     | '/_admin/admin/reports'
     | '/_admin/admin/roles'
     | '/_admin/admin/savings'
@@ -1552,6 +1576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminReportsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/relationships': {
+      id: '/_admin/admin/relationships'
+      path: '/relationships'
+      fullPath: '/admin/relationships'
+      preLoaderRoute: typeof AdminAdminRelationshipsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/recurring': {
       id: '/_admin/admin/recurring'
       path: '/recurring'
@@ -1669,6 +1700,13 @@ declare module '@tanstack/react-router' {
       path: '/entities'
       fullPath: '/admin/entities'
       preLoaderRoute: typeof AdminAdminEntitiesRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/documents': {
+      id: '/_admin/admin/documents'
+      path: '/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AdminAdminDocumentsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/cron-runs': {
@@ -2204,6 +2242,7 @@ interface AdminAdminRouteChildren {
   AdminAdminBrandingRoute: typeof AdminAdminBrandingRoute
   AdminAdminConsoleRoute: typeof AdminAdminConsoleRouteWithChildren
   AdminAdminCronRunsRoute: typeof AdminAdminCronRunsRoute
+  AdminAdminDocumentsRoute: typeof AdminAdminDocumentsRoute
   AdminAdminEntitiesRoute: typeof AdminAdminEntitiesRouteWithChildren
   AdminAdminFinanceRoute: typeof AdminAdminFinanceRouteWithChildren
   AdminAdminFxRoute: typeof AdminAdminFxRoute
@@ -2221,6 +2260,7 @@ interface AdminAdminRouteChildren {
   AdminAdminNotificationsRoute: typeof AdminAdminNotificationsRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminRecurringRoute: typeof AdminAdminRecurringRoute
+  AdminAdminRelationshipsRoute: typeof AdminAdminRelationshipsRoute
   AdminAdminReportsRoute: typeof AdminAdminReportsRoute
   AdminAdminRolesRoute: typeof AdminAdminRolesRoute
   AdminAdminSavingsRoute: typeof AdminAdminSavingsRouteWithChildren
@@ -2239,6 +2279,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminBrandingRoute: AdminAdminBrandingRoute,
   AdminAdminConsoleRoute: AdminAdminConsoleRouteWithChildren,
   AdminAdminCronRunsRoute: AdminAdminCronRunsRoute,
+  AdminAdminDocumentsRoute: AdminAdminDocumentsRoute,
   AdminAdminEntitiesRoute: AdminAdminEntitiesRouteWithChildren,
   AdminAdminFinanceRoute: AdminAdminFinanceRouteWithChildren,
   AdminAdminFxRoute: AdminAdminFxRoute,
@@ -2256,6 +2297,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminNotificationsRoute: AdminAdminNotificationsRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminRecurringRoute: AdminAdminRecurringRoute,
+  AdminAdminRelationshipsRoute: AdminAdminRelationshipsRoute,
   AdminAdminReportsRoute: AdminAdminReportsRoute,
   AdminAdminRolesRoute: AdminAdminRolesRoute,
   AdminAdminSavingsRoute: AdminAdminSavingsRouteWithChildren,

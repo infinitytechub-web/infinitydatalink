@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { ArrowLeft, Check, ExternalLink, FileText, X } from "lucide-react";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AgeBadge } from "@/components/biodata-fields";
+import { idTypeLabel } from "@/lib/ghana-id-types";
+
 import {
   decideKyc,
   getKycResubmissionDiff,
@@ -68,11 +71,24 @@ function MemberDetailBody() {
           <SectionCard title="Identity">
             <dl className="grid gap-4 p-6 sm:grid-cols-2">
               <Field label="Phone" value={profile.phone} />
+              <Field label="National ID type" value={idTypeLabel(profile.national_id_type)} />
               <Field label="National ID" value={profile.national_id} />
               <Field label="Date of birth" value={profile.date_of_birth} />
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">Age</p>
+                <div className="mt-1 text-sm">
+                  <AgeBadge dateOfBirth={profile.date_of_birth} />
+                </div>
+              </div>
+              <Field
+                label="Minor saver (under 18)"
+                value={profile.date_of_birth ? (profile.is_minor ? "Yes" : "No") : null}
+              />
               <Field label="Gender" value={profile.gender} />
               <Field label="Region" value={profile.region} />
+              <Field label="District / Municipal" value={profile.district} />
               <Field label="Digital address" value={profile.digital_address} />
+
               <Field label="Residential address" value={profile.address_line} className="sm:col-span-2" />
               <Field label="Occupation" value={profile.occupation} />
               <Field label="Employer" value={profile.employer} />

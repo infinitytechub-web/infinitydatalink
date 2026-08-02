@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useBranding } from "@/components/branding-provider";
 import DOMPurify from "isomorphic-dompurify";
+import { calculateAge, isMinor, validateDateOfBirth } from "@/lib/age";
+import { GHANA_REGIONS, districtsForRegion } from "@/lib/ghana-locations";
+
 import {
   beginPasskeyAuthentication,
   finishPasskeyAuthentication,
@@ -275,7 +278,11 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const [fullName, setFullName] = useState("");
   const [cardDigits, setCardDigits] = useState("");
   const [phone, setPhone] = useState("");
+  const [dob, setDob] = useState("");
+  const [region, setRegion] = useState("");
+  const [district, setDistrict] = useState("");
   const [membershipType, setMembershipType] = useState<MembershipType>("individual");
+
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -314,6 +321,16 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
           setErr("Enter a valid Ghana telephone number, e.g. 024 123 4567");
           return;
         }
+        const dobError = validateDateOfBirth(dob);
+        if (dobError) {
+          setErr(dobError);
+          return;
+        }
+        if (!region || !district) {
+          setErr("Select your region and district.");
+          return;
+        }
+
         const parsed = signUpSchema.safeParse({
           email,
           password,
@@ -358,6 +375,11 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               ghana_card: canonicalCard,
               phone: canonicalPhone,
               membership_type: membershipType,
+              date_of_birth: dob || null,
+              region: region || null,
+              district: district || null,
+              is_minor: dob ? isMinor(dob) : null,
+
             },
           },
         });
@@ -440,6 +462,65 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               placeholder="024 123 4567"
             />
           </Field>
+          <Field
+            label="Date of birth"
+            hint={
+              dob ? (
+                <span className="text-[11px] text-emerald-deep/50">
+                  Age {calculateAge(dob) ?? "—"}
+                  {isMinor(dob) ? " · under 18 (minor saver)" : ""}
+                </span>
+              ) : null
+            }
+          >
+            <input
+              type="date"
+              required
+              max={new Date().toISOString().slice(0, 10)}
+              className={inputClass(focusRing)}
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+            />
+            {dob && validateDateOfBirth(dob) ? (
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-destructive">
+                {validateDateOfBirth(dob)}
+              </p>
+            ) : null}
+          </Field>
+          <Field label="Region">
+            <select
+              required
+              className={inputClass(focusRing)}
+              value={region}
+              onChange={(e) => {
+                setRegion(e.target.value);
+                setDistrict("");
+              }}
+            >
+              <option value="">Select region…</option>
+              {GHANA_REGIONS.map((r) => (
+                <option key={r.code} value={r.name}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="District / Municipal">
+            <select
+              required
+              disabled={!region}
+              className={inputClass(focusRing)}
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
+            >
+              <option value="">{region ? "Select district…" : "Select a region first"}</option>
+              {districtsForRegion(region).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field label="Membership type">
             <select
               className={inputClass(focusRing)}
@@ -453,6 +534,7 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               ))}
             </select>
           </Field>
+
         </>
       ) : null}
 

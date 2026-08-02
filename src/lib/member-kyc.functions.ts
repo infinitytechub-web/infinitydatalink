@@ -71,9 +71,12 @@ const REQUIRED_PROFILE_FIELDS = [
   "date_of_birth",
   "gender",
   "region",
+  "district",
   "address_line",
+  "national_id_type",
   "national_id",
 ] as const;
+
 
 const REQUIRED_DOC_TYPES = ["national_id_front", "national_id_back", "selfie"] as const;
 
@@ -87,7 +90,7 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
       sb
         .from("profiles")
         .select(
-          "id, full_name, phone, date_of_birth, gender, region, address_line, digital_address, occupation, employer, national_id, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, kyc_remediation_items, kyc_resubmitted_at, kyc_resubmission_deadline, kyc_attempts, kyc_max_attempts",
+          "id, full_name, phone, date_of_birth, is_minor, gender, region, district, address_line, digital_address, occupation, employer, national_id, national_id_type, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, kyc_remediation_items, kyc_resubmitted_at, kyc_resubmission_deadline, kyc_attempts, kyc_max_attempts",
         )
         .eq("id", uid)
         .maybeSingle(),

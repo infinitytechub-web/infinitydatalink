@@ -194,8 +194,12 @@ export type MemberKycDetail = {
     member_no: string | null;
     phone: string | null;
     national_id: string | null;
+    national_id_type: string | null;
     region: string | null;
+    district: string | null;
     date_of_birth: string | null;
+    is_minor: boolean;
+
     gender: string | null;
     digital_address: string | null;
     address_line: string | null;
@@ -240,7 +244,7 @@ export const getMemberKyc = createServerFn({ method: "GET" })
       sb
         .from("profiles")
         .select(
-          "id, full_name, member_no, phone, national_id, region, date_of_birth, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, tier, created_at",
+          "id, full_name, member_no, phone, national_id, national_id_type, region, district, date_of_birth, is_minor, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, tier, created_at",
         )
         .eq("id", data.member_id)
         .maybeSingle(),

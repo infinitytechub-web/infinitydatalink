@@ -10,6 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { getOrgConfig, ORG_PRESETS, setOrgConfig } from "@/lib/org-config";
 import {
+  DateOfBirthField,
+  NationalIdFields,
+  RegionDistrictFields,
+  RelationshipSelect,
+} from "@/components/biodata-fields";
+import { DEFAULT_NATIONAL_ID_TYPE } from "@/lib/ghana-id-types";
+
+import {
   createKycUploadUrl,
   deleteMyPendingKycDocument,
   deleteNextOfKin,
@@ -136,7 +144,9 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
     full_name: profile.full_name ?? "",
     phone: profile.phone ?? "",
     national_id: profile.national_id ?? "",
+    national_id_type: profile.national_id_type ?? DEFAULT_NATIONAL_ID_TYPE,
     region: profile.region ?? "",
+    district: profile.district ?? "",
     date_of_birth: profile.date_of_birth ?? "",
     gender: profile.gender ?? "",
     digital_address: profile.digital_address ?? "",
@@ -144,6 +154,7 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
     occupation: profile.occupation ?? "",
     employer: profile.employer ?? "",
   });
+
   const identityLocked = profile.kyc === "active";
   const mutation = useMutation({
     mutationFn: () => update({ data: form }),
@@ -169,13 +180,11 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
         <TextField label="Full name" value={form.full_name} onChange={setField("full_name")} required />
         <TextField label="Email" value={profile.email ?? ""} onChange={() => {}} disabled />
         <TextField label="Phone" value={form.phone} onChange={setField("phone")} placeholder="+233 …" />
-        <TextField
-          label="Date of birth"
+        <DateOfBirthField
           value={form.date_of_birth}
-          onChange={setField("date_of_birth")}
-          type="date"
+          onChange={(v) => setForm((f) => ({ ...f, date_of_birth: v }))}
           disabled={identityLocked}
-          hint={identityLocked ? "Locked after verification" : undefined}
+          lockedHint={identityLocked ? "Locked after verification" : undefined}
         />
         <SelectField
           label="Gender"
@@ -183,18 +192,25 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
           onChange={setField("gender")}
           options={["", "female", "male", "non-binary", "prefer_not_to_say"]}
         />
-        <TextField label="Region" value={form.region} onChange={setField("region")} />
+        <RegionDistrictFields
+          region={form.region}
+          district={form.district}
+          onRegionChange={(v) => setForm((f) => ({ ...f, region: v }))}
+          onDistrictChange={(v) => setForm((f) => ({ ...f, district: v }))}
+        />
         <TextField label="Digital address" value={form.digital_address} onChange={setField("digital_address")} placeholder="GA-123-4567" />
         <TextField label="Residential address" value={form.address_line} onChange={setField("address_line")} className="sm:col-span-2" />
-        <TextField
-          label="National ID"
-          value={form.national_id}
-          onChange={setField("national_id")}
+        <NationalIdFields
+          idType={form.national_id_type}
+          idNumber={form.national_id}
+          onTypeChange={(v) => setForm((f) => ({ ...f, national_id_type: v }))}
+          onNumberChange={(v) => setForm((f) => ({ ...f, national_id: v }))}
           disabled={identityLocked}
-          hint={identityLocked ? "Locked after verification" : undefined}
+          lockedHint={identityLocked ? "Locked after verification" : undefined}
         />
         <TextField label="Occupation" value={form.occupation} onChange={setField("occupation")} />
         <TextField label="Employer" value={form.employer} onChange={setField("employer")} className="sm:col-span-2" />
+
 
         <div className="flex items-center justify-end gap-2 sm:col-span-2">
           {identityLocked ? (
@@ -223,9 +239,18 @@ type NokDraft = {
   phone: string;
   email: string;
   national_id: string;
+  national_id_type: string;
   address: string;
 };
-const EMPTY_NOK: NokDraft = { full_name: "", relationship: "", phone: "", email: "", national_id: "", address: "" };
+const EMPTY_NOK: NokDraft = {
+  full_name: "",
+  relationship: "",
+  phone: "",
+  email: "",
+  national_id: "",
+  national_id_type: DEFAULT_NATIONAL_ID_TYPE,
+  address: "",
+};
 
 function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
   const qc = useQueryClient();
@@ -243,9 +268,11 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
           phone: v.phone || null,
           email: v.email || null,
           national_id: v.national_id || null,
+          national_id_type: v.national_id ? v.national_id_type : null,
           address: v.address || null,
         },
       }),
+
     onSuccess: () => {
       toast.success("Next of kin saved");
       qc.invalidateQueries({ queryKey: ["member", "profile"] });
@@ -314,7 +341,9 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
                       phone: r.phone ?? "",
                       email: r.email ?? "",
                       national_id: r.national_id ?? "",
+                      national_id_type: r.national_id_type ?? DEFAULT_NATIONAL_ID_TYPE,
                       address: r.address ?? "",
+
                     })
                   }
                   className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream"
@@ -383,10 +412,20 @@ function NokDialog({
           }}
         >
           <TextField label="Full name" value={value.full_name} onChange={set("full_name")} required />
-          <TextField label="Relationship" value={value.relationship} onChange={set("relationship")} required placeholder="e.g. Spouse" />
+          <RelationshipSelect
+            value={value.relationship}
+            onChange={(v) => onChange({ ...value, relationship: v })}
+            required
+          />
           <TextField label="Phone" value={value.phone} onChange={set("phone")} />
           <TextField label="Email" value={value.email} onChange={set("email")} type="email" />
-          <TextField label="National ID" value={value.national_id} onChange={set("national_id")} />
+          <NationalIdFields
+            idType={value.national_id_type}
+            idNumber={value.national_id}
+            onTypeChange={(v) => onChange({ ...value, national_id_type: v })}
+            onNumberChange={(v) => onChange({ ...value, national_id: v })}
+          />
+
           <TextField label="Address" value={value.address} onChange={set("address")} className="sm:col-span-2" />
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button

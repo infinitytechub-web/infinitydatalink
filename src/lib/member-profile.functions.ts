@@ -2,6 +2,10 @@ import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isValidDistrict, isValidRegion } from "@/lib/ghana-locations";
+import { normalizeNationalId, validateNationalId } from "@/lib/ghana-id-types";
+import { validateDateOfBirth } from "@/lib/age";
+
 
 export type KycDocType =
   | "national_id_front"
@@ -30,9 +34,11 @@ export type NextOfKin = {
   id: string;
   full_name: string;
   relationship: string;
+  relationship_code: string | null;
   phone: string | null;
   email: string | null;
   national_id: string | null;
+  national_id_type: string | null;
   address: string | null;
   created_at: string;
   updated_at: string;
@@ -46,8 +52,11 @@ export type MemberProfileFull = {
     email: string | null;
     phone: string | null;
     national_id: string | null;
+    national_id_type: string | null;
     region: string | null;
+    district: string | null;
     date_of_birth: string | null;
+    is_minor: boolean;
     gender: string | null;
     digital_address: string | null;
     address_line: string | null;
@@ -61,6 +70,7 @@ export type MemberProfileFull = {
   next_of_kin: NextOfKin[];
   documents: KycDocument[];
 };
+
 
 const BUCKET = "kyc-documents";
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
@@ -80,13 +90,16 @@ export const getMyProfile = createServerFn({ method: "GET" })
       sb
         .from("profiles")
         .select(
-          "id, full_name, member_no, phone, national_id, region, date_of_birth, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, tier",
+          "id, full_name, member_no, phone, national_id, national_id_type, region, district, date_of_birth, is_minor, gender, digital_address, address_line, occupation, employer, kyc, kyc_notes, kyc_reviewed_at, tier",
         )
         .eq("id", uid)
         .maybeSingle(),
       sb
         .from("next_of_kin")
-        .select("id, full_name, relationship, phone, email, national_id, address, created_at, updated_at")
+        .select(
+          "id, full_name, relationship, relationship_code, phone, email, national_id, national_id_type, address, created_at, updated_at",
+        )
+
         .eq("member_id", uid)
         .order("created_at", { ascending: true }),
       sb
@@ -109,18 +122,46 @@ export const getMyProfile = createServerFn({ method: "GET" })
     };
   });
 
-const profileUpdateSchema = z.object({
-  full_name: z.string().trim().min(2).max(120).nullable().optional(),
-  phone: z.string().trim().max(40).nullable().optional(),
-  national_id: z.string().trim().max(80).nullable().optional(),
-  region: z.string().trim().max(80).nullable().optional(),
-  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD").nullable().optional(),
-  gender: z.string().trim().max(40).nullable().optional(),
-  digital_address: z.string().trim().max(80).nullable().optional(),
-  address_line: z.string().trim().max(240).nullable().optional(),
-  occupation: z.string().trim().max(120).nullable().optional(),
-  employer: z.string().trim().max(160).nullable().optional(),
-});
+const profileUpdateSchema = z
+  .object({
+    full_name: z.string().trim().min(2).max(120).nullable().optional(),
+    phone: z.string().trim().max(40).nullable().optional(),
+    national_id: z.string().trim().max(80).nullable().optional(),
+    national_id_type: z.string().trim().max(40).nullable().optional(),
+    region: z.string().trim().max(80).nullable().optional(),
+    district: z.string().trim().max(120).nullable().optional(),
+    date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD").nullable().optional(),
+    gender: z.string().trim().max(40).nullable().optional(),
+    digital_address: z.string().trim().max(80).nullable().optional(),
+    address_line: z.string().trim().max(240).nullable().optional(),
+    occupation: z.string().trim().max(120).nullable().optional(),
+    employer: z.string().trim().max(160).nullable().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.region && !isValidRegion(val.region)) {
+      ctx.addIssue({ code: "custom", path: ["region"], message: "Select one of Ghana's 16 regions" });
+    }
+    if (val.district) {
+      if (!val.region) {
+        ctx.addIssue({ code: "custom", path: ["district"], message: "Select a region first" });
+      } else if (!isValidDistrict(val.region, val.district)) {
+        ctx.addIssue({ code: "custom", path: ["district"], message: "District does not belong to the selected region" });
+      }
+    }
+    if (val.date_of_birth) {
+      const dobError = validateDateOfBirth(val.date_of_birth);
+      if (dobError) ctx.addIssue({ code: "custom", path: ["date_of_birth"], message: dobError });
+    }
+    if (val.national_id) {
+      const idError = validateNationalId(val.national_id_type ?? null, val.national_id);
+      if (idError) ctx.addIssue({ code: "custom", path: ["national_id"], message: idError });
+    }
+
+    if (val.national_id_type && !val.national_id) {
+      ctx.addIssue({ code: "custom", path: ["national_id"], message: "Enter the ID number for the selected ID type" });
+    }
+  });
+
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -137,26 +178,47 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     const isVerified = current?.kyc === "active";
 
     const patch: Record<string, unknown> = { ...data };
+    if (typeof patch.national_id === "string" && patch.national_id.trim()) {
+      patch.national_id = normalizeNationalId(
+        (patch.national_id_type as string | null) ?? null,
+        patch.national_id as string,
+      );
+    }
     if (isVerified) {
       if ("national_id" in patch) delete patch.national_id;
+      if ("national_id_type" in patch) delete patch.national_id_type;
       if ("date_of_birth" in patch) delete patch.date_of_birth;
     }
     if (Object.keys(patch).length === 0) return { updated: false };
 
     const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (/duplicate key|unique/i.test(error.message)) {
+        throw new Error("That national ID is already registered to another member.");
+      }
+      throw new Error(error.message);
+    }
     return { updated: true, locked_identity: isVerified };
   });
 
-const nokSchema = z.object({
-  id: z.string().uuid().optional(),
-  full_name: z.string().trim().min(2).max(120),
-  relationship: z.string().trim().min(2).max(60),
-  phone: z.string().trim().max(40).nullable().optional(),
-  email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
-  national_id: z.string().trim().max(80).nullable().optional(),
-  address: z.string().trim().max(240).nullable().optional(),
-});
+const nokSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    full_name: z.string().trim().min(2).max(120),
+    relationship: z.string().trim().min(2).max(60),
+    relationship_code: z.string().trim().max(40).nullable().optional(),
+    phone: z.string().trim().max(40).nullable().optional(),
+    email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+    national_id: z.string().trim().max(80).nullable().optional(),
+    national_id_type: z.string().trim().max(40).nullable().optional(),
+    address: z.string().trim().max(240).nullable().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.national_id) {
+      const idError = validateNationalId(val.national_id_type ?? null, val.national_id);
+      if (idError) ctx.addIssue({ code: "custom", path: ["national_id"], message: idError });
+    }
+  });
 
 export const upsertNextOfKin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -167,11 +229,16 @@ export const upsertNextOfKin = createServerFn({ method: "POST" })
       member_id: context.userId,
       full_name: data.full_name,
       relationship: data.relationship,
+      relationship_code: data.relationship_code ?? null,
       phone: data.phone ?? null,
       email: data.email ?? null,
-      national_id: data.national_id ?? null,
+      national_id: data.national_id
+        ? normalizeNationalId(data.national_id_type ?? null, data.national_id)
+        : null,
+      national_id_type: data.national_id_type ?? null,
       address: data.address ?? null,
     };
+
     if (data.id) {
       const { data: row, error } = await sb
         .from("next_of_kin")
