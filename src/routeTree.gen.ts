@@ -34,6 +34,7 @@ import { Route as MemberAppNotificationsRouteImport } from './routes/_member.app
 import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
 import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
 import { Route as MemberAppInvestmentsRouteImport } from './routes/_member.app.investments'
+import { Route as MemberAppInboxRouteImport } from './routes/_member.app.inbox'
 import { Route as MemberAppGuaranteesRouteImport } from './routes/_member.app.guarantees'
 import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
@@ -235,6 +236,11 @@ const MemberAppKycRoute = MemberAppKycRouteImport.update({
 const MemberAppInvestmentsRoute = MemberAppInvestmentsRouteImport.update({
   id: '/investments',
   path: '/investments',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppInboxRoute = MemberAppInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => MemberAppRoute,
 } as any)
 const MemberAppGuaranteesRoute = MemberAppGuaranteesRouteImport.update({
@@ -705,6 +711,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/app/guarantees': typeof MemberAppGuaranteesRoute
+  '/app/inbox': typeof MemberAppInboxRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
@@ -805,6 +812,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/app/guarantees': typeof MemberAppGuaranteesRoute
+  '/app/inbox': typeof MemberAppInboxRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
@@ -911,6 +919,7 @@ export interface FileRoutesById {
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
   '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/_member/app/guarantees': typeof MemberAppGuaranteesRoute
+  '/_member/app/inbox': typeof MemberAppInboxRoute
   '/_member/app/investments': typeof MemberAppInvestmentsRoute
   '/_member/app/kyc': typeof MemberAppKycRoute
   '/_member/app/loans': typeof MemberAppLoansRouteWithChildren
@@ -1017,6 +1026,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/super-admins'
     | '/app/guarantees'
+    | '/app/inbox'
     | '/app/investments'
     | '/app/kyc'
     | '/app/loans'
@@ -1117,6 +1127,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/super-admins'
     | '/app/guarantees'
+    | '/app/inbox'
     | '/app/investments'
     | '/app/kyc'
     | '/app/loans'
@@ -1222,6 +1233,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/settings'
     | '/_admin/admin/super-admins'
     | '/_member/app/guarantees'
+    | '/_member/app/inbox'
     | '/_member/app/investments'
     | '/_member/app/kyc'
     | '/_member/app/loans'
@@ -1482,6 +1494,13 @@ declare module '@tanstack/react-router' {
       path: '/investments'
       fullPath: '/app/investments'
       preLoaderRoute: typeof MemberAppInvestmentsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/inbox': {
+      id: '/_member/app/inbox'
+      path: '/inbox'
+      fullPath: '/app/inbox'
+      preLoaderRoute: typeof MemberAppInboxRouteImport
       parentRoute: typeof MemberAppRoute
     }
     '/_member/app/guarantees': {
@@ -2304,6 +2323,7 @@ const MemberAppSavingsRouteWithChildren =
 
 interface MemberAppRouteChildren {
   MemberAppGuaranteesRoute: typeof MemberAppGuaranteesRoute
+  MemberAppInboxRoute: typeof MemberAppInboxRoute
   MemberAppInvestmentsRoute: typeof MemberAppInvestmentsRoute
   MemberAppKycRoute: typeof MemberAppKycRoute
   MemberAppLoansRoute: typeof MemberAppLoansRouteWithChildren
@@ -2321,6 +2341,7 @@ interface MemberAppRouteChildren {
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppGuaranteesRoute: MemberAppGuaranteesRoute,
+  MemberAppInboxRoute: MemberAppInboxRoute,
   MemberAppInvestmentsRoute: MemberAppInvestmentsRoute,
   MemberAppKycRoute: MemberAppKycRoute,
   MemberAppLoansRoute: MemberAppLoansRouteWithChildren,

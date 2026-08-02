@@ -43,7 +43,8 @@ const groups: NavGroup[] = [
   {
     label: "Support",
     items: [
-      { to: "/app/notifications", label: "Alerts & notifications", icon: <BellRing /> },
+      { to: "/app/inbox", label: "Notifications", icon: <BellRing /> },
+      { to: "/app/notifications", label: "Alert settings", icon: <BellRing /> },
       { to: "/app/support", label: "Help Centre", icon: <LifeBuoy /> },
     ],
   },
@@ -69,7 +70,8 @@ const CRUMBS: Record<string, string> = {
   "/app/profile": "Profile & KYC",
   "/app/kyc": "Verification status",
   "/app/entities/register": "Register organization",
-  "/app/notifications": "Alerts & notifications",
+  "/app/inbox": "Notifications centre",
+  "/app/notifications": "Alert settings",
   "/app/support": "Help Centre",
 };
 
@@ -81,7 +83,7 @@ export const Route = createFileRoute("/_member/app")({
 });
 
 // Pages a member may always reach while KYC is incomplete.
-const KYC_ALLOWED_PATHS = ["/app/kyc", "/app/profile", "/app/notifications", "/app/support"];
+const KYC_ALLOWED_PATHS = ["/app/kyc", "/app/profile", "/app/notifications", "/app/inbox", "/app/support"];
 
 function MemberLayout() {
   const { user, loading, isAdmin } = useAuth();
