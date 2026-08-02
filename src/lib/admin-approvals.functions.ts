@@ -127,7 +127,7 @@ export const approveUser = createServerFn({ method: "POST" })
     // verification. Never fail the approval on notification errors.
     const { error: notifyErr } = await supabaseAdmin.rpc("notify_user", {
       _user_id: data.user_id,
-      _category: "account",
+      _category: "account.registration.approved",
       _title: "Membership approved",
       _body: "Your registration has been approved. Sign in and complete your KYC verification to unlock your dashboard.",
       _link: "/app/kyc",
@@ -158,7 +158,7 @@ export const rejectUser = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const { error: notifyErr } = await supabaseAdmin.rpc("notify_user", {
       _user_id: data.user_id,
-      _category: "account",
+      _category: "account.registration.rejected",
       _title: "Registration not approved",
       _body: `Your registration could not be approved. Reason: ${data.reason}`,
       _link: "/auth",
