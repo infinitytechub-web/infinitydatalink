@@ -13,6 +13,17 @@ import {
   beginPasskeyAuthentication,
   finishPasskeyAuthentication,
 } from "@/lib/passkeys.functions";
+import {
+  GHANA_CARD_DIGITS,
+  GHANA_CARD_REGEX,
+  MEMBERSHIP_TYPES,
+  MEMBERSHIP_TYPE_LABEL,
+  ghanaCardDigits,
+  normalizePhone,
+  toCanonicalGhanaCard,
+  type MembershipType,
+} from "@/lib/member-registration";
+
 
 
 export const Route = createFileRoute("/auth")({
