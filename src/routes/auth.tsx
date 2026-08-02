@@ -249,7 +249,12 @@ const signInSchema = z.object({
 });
 
 const signUpSchema = signInSchema.extend({
-  fullName: z.string().min(2, "Enter your full name"),
+  fullName: z.string().trim().min(2, "Enter your full name"),
+  ghanaCard: z
+    .string()
+    .regex(GHANA_CARD_REGEX, "Ghana Card must be 10 digits after the GHA- prefix"),
+  phone: z.string().min(1, "Enter your telephone number"),
+  membershipType: z.enum(MEMBERSHIP_TYPES),
 });
 
 function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }) {
@@ -257,7 +262,11 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [cardDigits, setCardDigits] = useState("");
+  const [phone, setPhone] = useState("");
+  const [membershipType, setMembershipType] = useState<MembershipType>("individual");
   const [err, setErr] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [capsOn, setCapsOn] = useState(false);
@@ -284,26 +293,74 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
+    setNotice(null);
     setLoading(true);
     try {
       if (mode === "signup") {
-        const parsed = signUpSchema.safeParse({ email, password, fullName });
+        const canonicalCard = toCanonicalGhanaCard(cardDigits) ?? "";
+        const canonicalPhone = normalizePhone(phone);
+        if (!canonicalPhone) {
+          setErr("Enter a valid Ghana telephone number, e.g. 024 123 4567");
+          return;
+        }
+        const parsed = signUpSchema.safeParse({
+          email,
+          password,
+          fullName,
+          ghanaCard: canonicalCard,
+          phone: canonicalPhone,
+          membershipType,
+        });
         if (!parsed.success) {
           setErr(parsed.error.issues[0]?.message ?? "Invalid input");
           return;
         }
+
+        // Pre-flight duplicate check so users see a clear message instead of a
+        // raw unique-constraint error from the database.
+        const { data: availability, error: availErr } = await (supabase as any).rpc(
+          "check_registration_availability",
+          { _ghana_card: canonicalCard, _phone: canonicalPhone },
+        );
+        if (!availErr && availability) {
+          if (availability.ghana_card_valid === false) {
+            setErr("Ghana Card number format is invalid.");
+            return;
+          }
+          if (availability.ghana_card_taken) {
+            setErr("This Ghana Card number is already registered.");
+            return;
+          }
+          if (availability.phone_taken) {
+            setErr("This telephone number is already registered.");
+            return;
+          }
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/app`,
-            data: { full_name: fullName },
+            data: {
+              full_name: parsed.data.fullName,
+              ghana_card: canonicalCard,
+              phone: canonicalPhone,
+              membership_type: membershipType,
+            },
           },
         });
         if (error) {
-          setErr(error.message);
+          setErr(
+            /duplicate|already/i.test(error.message)
+              ? "An account with these details already exists."
+              : error.message,
+          );
           return;
         }
+        setNotice(
+          "Registration submitted. An administrator will review your request — you'll be notified once approved.",
+        );
         navigate({ to: "/app" });
       } else {
         const parsed = signInSchema.safeParse({ email, password });
@@ -327,18 +384,67 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {mode === "signup" ? (
-        <Field label="Full name">
-          <input
-            type="text"
-            required
-            autoComplete="name"
-            className={inputClass(focusRing)}
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Ada Lovelace"
-          />
-        </Field>
+        <>
+          <Field label="Full name">
+            <input
+              type="text"
+              required
+              autoComplete="name"
+              className={inputClass(focusRing)}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Ada Lovelace"
+            />
+          </Field>
+          <Field label="Ghana Card number" hint={<span className="text-[11px] text-emerald-deep/50">10 digits</span>}>
+            <div className="flex items-stretch gap-0">
+              <span className="flex items-center rounded-l-lg border border-r-0 border-emerald-deep/15 bg-emerald-deep/5 px-3 text-sm font-semibold text-emerald-deep/70">
+                GHA-
+              </span>
+              <input
+                type="text"
+                required
+                inputMode="numeric"
+                aria-label="Ghana Card digits"
+                className={cn(inputClass(focusRing), "rounded-l-none tracking-widest")}
+                value={cardDigits}
+                onChange={(e) => setCardDigits(ghanaCardDigits(e.target.value))}
+                placeholder="0123456789"
+              />
+            </div>
+            {cardDigits && cardDigits.length !== GHANA_CARD_DIGITS ? (
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-gold">
+                {GHANA_CARD_DIGITS - cardDigits.length} digit(s) remaining
+              </p>
+            ) : null}
+          </Field>
+          <Field label="Telephone number">
+            <input
+              type="tel"
+              required
+              autoComplete="tel"
+              className={inputClass(focusRing)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="024 123 4567"
+            />
+          </Field>
+          <Field label="Membership type">
+            <select
+              className={inputClass(focusRing)}
+              value={membershipType}
+              onChange={(e) => setMembershipType(e.target.value as MembershipType)}
+            >
+              {MEMBERSHIP_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {MEMBERSHIP_TYPE_LABEL[t]}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </>
       ) : null}
+
       <Field label="Email">
         <input
           type="email"
