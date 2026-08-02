@@ -193,12 +193,15 @@ export const setUserActive = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const actorRole = await assertReviewerRole(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("set_user_active", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("set_user_active", {
       _uid: data.user_id,
       _active: data.active,
-      _reason: data.reason ?? undefined,
-    });
+      _reason: data.reason ?? null,
+      _actor: context.userId,
+    } as never);
     if (error) throw new Error(error.message);
+
     await recordDecision({
       actorId: context.userId,
       actorEmail: (context.claims as any)?.email ?? null,
