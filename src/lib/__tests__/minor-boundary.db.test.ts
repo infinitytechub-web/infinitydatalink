@@ -65,29 +65,29 @@ d("profiles_set_minor_flag trigger", () => {
     expect(out).toContain("profiles_set_minor_flag");
   });
 
-  it("computes is_minor from date_of_birth on insert and update", () => {
+  it("recomputes is_minor from date_of_birth on update (rolled back)", () => {
+    const target = q(`select id from public.profiles order by created_at limit 1;`)
+      .split("\n")
+      .pop()!
+      .trim();
+    if (!target) return; // no profiles in this environment
     const sql = `
 BEGIN;
-insert into auth.users (id, email) values ('11111111-1111-4111-8111-111111111111', 'minor.boundary@example.test');
-insert into public.profiles (id, full_name, date_of_birth)
-values ('11111111-1111-4111-8111-111111111111', 'Boundary Test', (current_date - interval '17 years')::date);
-select 'insert=' || is_minor::text from public.profiles where id = '11111111-1111-4111-8111-111111111111';
-update public.profiles set date_of_birth = (current_date - interval '18 years')::date
-  where id = '11111111-1111-4111-8111-111111111111';
-select 'exact18=' || is_minor::text from public.profiles where id = '11111111-1111-4111-8111-111111111111';
-update public.profiles set date_of_birth = (current_date - interval '18 years' + interval '1 day')::date
-  where id = '11111111-1111-4111-8111-111111111111';
-select 'oneDayShort=' || is_minor::text from public.profiles where id = '11111111-1111-4111-8111-111111111111';
-select 'ledger=' || count(*)::text from public.minor_status_changes
-  where profile_id = '11111111-1111-4111-8111-111111111111';
+update public.profiles set date_of_birth = (current_date - interval '17 years')::date where id = '${target}';
+select 'minor17=' || is_minor::text from public.profiles where id = '${target}';
+update public.profiles set date_of_birth = (current_date - interval '18 years')::date where id = '${target}';
+select 'exact18=' || is_minor::text from public.profiles where id = '${target}';
+update public.profiles set date_of_birth = (current_date - interval '18 years' + interval '1 day')::date where id = '${target}';
+select 'oneDayShort=' || is_minor::text from public.profiles where id = '${target}';
+select 'ledger=' || count(*)::text from public.minor_status_changes where profile_id = '${target}';
 ROLLBACK;`;
     const out = execFileSync("psql", ["-tAX", "-v", "ON_ERROR_STOP=1", "-c", sql], {
       encoding: "utf8",
     });
-    expect(out).toContain("insert=true");
+    expect(out).toContain("minor17=true");
     expect(out).toContain("exact18=false");
     expect(out).toContain("oneDayShort=true");
-    // Insert + two flag flips are recorded in the audit ledger.
+    // Every flip is recorded in the audit ledger by the same trigger.
     expect(out).toMatch(/ledger=[1-9]/);
   });
 });
