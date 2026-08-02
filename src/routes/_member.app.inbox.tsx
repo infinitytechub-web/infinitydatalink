@@ -7,6 +7,7 @@ import { BellRing, CheckCheck, MailOpen, RotateCcw, Search, Settings2 } from "lu
 import { toast } from "sonner";
 import { PageHeader, SectionCard, SectionCardSkeleton, EmptyState, StatusPill } from "@/components/primitives";
 import { Pagination } from "@/components/table-controls";
+import { KycReminderLog } from "@/components/kyc-reminder-log";
 import { Button } from "@/components/ui/button";
 import { NOTIFICATION_CATEGORIES } from "@/lib/notification-preferences.functions";
 import {
@@ -70,6 +71,7 @@ function InboxPage() {
       <Suspense fallback={<SectionCardSkeleton rows={8} />}>
         <InboxContent />
       </Suspense>
+      <KycReminderLog />
     </div>
   );
 }

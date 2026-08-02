@@ -117,7 +117,7 @@ function LogBody() {
       {data.rows.length === 0 ? (
         <EmptyState
           title="No KYC reminders yet"
-          description="Deadline, final-notice and low-attempt reminders about your verification will appear here with their delivery status."
+          hint="Deadline, final-notice and low-attempt reminders about your verification will appear here with their delivery status."
         />
       ) : (
         <div className="overflow-x-auto">
