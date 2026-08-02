@@ -5,6 +5,8 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
+import { formatAge } from "@/lib/age";
+
 import {
   ErrorState,
   KPIGridSkeleton,
