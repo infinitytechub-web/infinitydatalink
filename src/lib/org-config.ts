@@ -15,9 +15,10 @@ export const ORG_PRESETS: Record<string, OrgConfig> = {
     currency: { code: "GHS", symbol: "GH₵", locale: "en-GH" },
     nationalId: {
       label: "Ghana Card Number",
-      placeholder: "GHA-XXXXXXXXX-X",
-      pattern: /^GHA-\d{9}-\d$/,
+      placeholder: "GHA-XXXXXXXXXX",
+      pattern: /^GHA-\d{10}$/,
     },
+
     regions: [
       "Ahafo", "Ashanti", "Bono", "Bono East", "Central", "Eastern", "Greater Accra",
       "North East", "Northern", "Oti", "Savannah", "Upper East", "Upper West",
