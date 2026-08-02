@@ -15,13 +15,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  purgeNotifications,
+  recycleNotifications,
   purgeAuditLog,
   purgeRecycleBin,
 } from "@/lib/notifications.functions";
 import { useAuth } from "@/lib/auth";
 
-type PurgeKind = "notifications-read" | "notifications-all" | "audit" | "recycle";
+type PurgeKind = "notifications" | "audit" | "recycle";
+type NoteScope = "read" | "unread" | "all" | "system";
+
+const NOTE_SCOPES: { value: NoteScope; label: string; hint: string }[] = [
+  { value: "read", label: "Read only", hint: "Alerts the recipient already opened" },
+  { value: "unread", label: "Unread only", hint: "Alerts never opened" },
+  { value: "all", label: "Everything", hint: "Every in-app notification" },
+  {
+    value: "system",
+    label: "System-audited",
+    hint: "Internal system/audit alerts, incl. KYC auto-flag signals",
+  },
+];
 
 export function PurgeControlsWidget() {
   const { hasRole } = useAuth();
@@ -30,16 +42,18 @@ export function PurgeControlsWidget() {
   const [confirm, setConfirm] = useState("");
   const [days, setDays] = useState(365);
 
-  const nFn = useServerFn(purgeNotifications);
+  const [noteScope, setNoteScope] = useState<NoteScope>("read");
+  const nFn = useServerFn(recycleNotifications);
   const aFn = useServerFn(purgeAuditLog);
   const rFn = useServerFn(purgeRecycleBin);
 
   const purgeMut = useMutation({
     mutationFn: async () => {
-      if (open === "notifications-read")
-        return { label: "notifications", n: (await nFn({ data: { scope: "read", confirm: "PURGE" } })).deleted };
-      if (open === "notifications-all")
-        return { label: "notifications", n: (await nFn({ data: { scope: "all", confirm: "PURGE" } })).deleted };
+      if (open === "notifications")
+        return {
+          label: "notifications moved to the recycle bin",
+          n: (await nFn({ data: { scope: noteScope, retention_days: 30, confirm: "PURGE" } })).deleted,
+        };
       if (open === "audit")
         return {
           label: "audit entries",
@@ -70,9 +84,9 @@ export function PurgeControlsWidget() {
       <div className="grid gap-3 md:grid-cols-3">
         <PurgeTile
           label="Notifications"
-          hint="Delete read notifications"
+          hint="Move alerts to the recycle bin (30-day restore)"
           onClick={() => {
-            setOpen("notifications-read");
+            setOpen("notifications");
             setConfirm("");
           }}
           danger
@@ -105,12 +119,15 @@ export function PurgeControlsWidget() {
                 ? "Purge audit log"
                 : open === "recycle"
                   ? "Empty recycle bin"
-                  : "Purge notifications"}
+                  : "Clear notifications"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              This is irreversible. An audit entry will be recorded for the purge action.
+              {open === "notifications"
+                ? "Selected notifications move to the recycle bin and can be restored for 30 days."
+                : "This is irreversible."}{" "}
+              An audit entry will be recorded for the action.
             </p>
             {open === "audit" ? (
               <div>
@@ -123,15 +140,27 @@ export function PurgeControlsWidget() {
                   onChange={(e) => setDays(Math.max(7, Number(e.target.value) || 365))}
                 />
               </div>
-            ) : open === "notifications-read" ? (
-              <p>
-                <button
-                  className="text-xs text-primary underline"
-                  onClick={() => setOpen("notifications-all")}
-                >
-                  Switch to purge ALL notifications (including unread)
-                </button>
-              </p>
+            ) : open === "notifications" ? (
+              <div className="space-y-2">
+                <Label className="text-xs">Which notifications?</Label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {NOTE_SCOPES.map((s) => (
+                    <button
+                      key={s.value}
+                      type="button"
+                      onClick={() => setNoteScope(s.value)}
+                      className={`rounded-lg border p-2 text-left text-xs transition ${
+                        noteScope === s.value
+                          ? "border-primary bg-primary/10"
+                          : "border-border hover:bg-muted/50"
+                      }`}
+                    >
+                      <span className="block font-semibold">{s.label}</span>
+                      <span className="block text-[11px] text-muted-foreground">{s.hint}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             ) : null}
             <div>
               <Label className="text-xs">
