@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { ArrowLeft, Check, ExternalLink, FileText, X } from "lucide-react";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AgeBadge } from "@/components/biodata-fields";
+import { idTypeLabel } from "@/lib/ghana-id-types";
+
 import {
   decideKyc,
   getKycResubmissionDiff,
