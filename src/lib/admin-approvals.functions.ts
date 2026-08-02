@@ -118,8 +118,21 @@ export const approveUser = createServerFn({ method: "POST" })
       subjectId: data.user_id,
       note: data.note ?? null,
     });
+    // In-app + email notification so the member knows they can now sign in
+    // and start verification. Never fail the approval on notification errors.
+    const { error: notifyErr } = await context.supabase.rpc("notify_user", {
+      _user_id: data.user_id,
+      _category: "account",
+      _title: "Membership approved",
+      _body: "Your registration has been approved. Sign in and complete your KYC verification to unlock your dashboard.",
+      _link: "/app/kyc",
+      _meta: { note: data.note ?? null },
+      _dedupe_key: `user.approved:${data.user_id}`,
+    } as never);
+    if (notifyErr) console.error("approval notification failed", notifyErr.message);
     return { ok: true as const };
   });
+
 
 export const rejectUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
