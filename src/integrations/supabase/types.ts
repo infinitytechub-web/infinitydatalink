@@ -2030,6 +2030,7 @@ export type Database = {
           employer: string | null
           full_name: string | null
           gender: string | null
+          ghana_card: string | null
           id: string
           kyc: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at: string | null
@@ -2037,7 +2038,9 @@ export type Database = {
           kyc_notes: string | null
           kyc_reviewed_at: string | null
           kyc_reviewed_by: string | null
+          kyc_submitted_at: string | null
           member_no: string | null
+          membership_type: string
           national_id: string | null
           occupation: string | null
           phone: string | null
@@ -2057,6 +2060,7 @@ export type Database = {
           employer?: string | null
           full_name?: string | null
           gender?: string | null
+          ghana_card?: string | null
           id: string
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
@@ -2064,7 +2068,9 @@ export type Database = {
           kyc_notes?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
+          kyc_submitted_at?: string | null
           member_no?: string | null
+          membership_type?: string
           national_id?: string | null
           occupation?: string | null
           phone?: string | null
@@ -2084,6 +2090,7 @@ export type Database = {
           employer?: string | null
           full_name?: string | null
           gender?: string | null
+          ghana_card?: string | null
           id?: string
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
@@ -2091,7 +2098,9 @@ export type Database = {
           kyc_notes?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
+          kyc_submitted_at?: string | null
           member_no?: string | null
+          membership_type?: string
           national_id?: string | null
           occupation?: string | null
           phone?: string | null
@@ -3768,6 +3777,10 @@ export type Database = {
           _term_months: number
           _user_id: string
         }
+        Returns: Json
+      }
+      check_registration_availability: {
+        Args: { _ghana_card: string; _phone: string }
         Returns: Json
       }
       claim_cron_run: {
