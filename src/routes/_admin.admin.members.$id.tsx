@@ -217,24 +217,57 @@ function DocumentRow({ doc }: { doc: KycDocumentWithUrl }) {
   );
 }
 
-function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
+function DecisionPanel({
+  memberId,
+  kyc,
+  isMinor,
+  nextOfKin,
+}: {
+  memberId: string;
+  kyc: string;
+  isMinor: boolean;
+  nextOfKin: readonly GuardianCandidate[];
+}) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const decide = useServerFn(decideKyc);
+  const { ensure, dialog } = useStepUp();
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<string[]>([]);
   const toggleItem = (key: string) =>
     setItems((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
+  // Minor-specific review state
+  const guardians = eligibleGuardians(nextOfKin);
+  const [guardianId, setGuardianId] = useState("");
+  const [consentRef, setConsentRef] = useState("");
+  const [guardianIdVerified, setGuardianIdVerified] = useState(false);
+  const [safeguardingAck, setSafeguardingAck] = useState(false);
+
+  const minorReview = {
+    guardian_nok_id: guardianId,
+    guardian_consent_ref: consentRef.trim(),
+    guardian_id_verified: guardianIdVerified,
+    safeguarding_ack: safeguardingAck,
+  };
+
   const mutation = useMutation({
-    mutationFn: (input: { decision: "approved" | "rejected" }) =>
-      decide({
+    mutationFn: async (input: { decision: "approved" | "rejected" }) => {
+      const stepUpToken = isMinor
+        ? await ensure(
+            `${input.decision === "approved" ? "approve" : "reject"} KYC for a minor account`,
+          )
+        : undefined;
+      return decide({
         data: {
           member_id: memberId,
           decision: input.decision,
           notes,
           remediation_items: input.decision === "rejected" ? items : [],
+          ...(isMinor ? { minor_review: minorReview, step_up_token: stepUpToken } : {}),
         },
-      }),
+      });
+    },
     onSuccess: (_d, vars) => {
       toast.success(`Member ${vars.decision === "approved" ? "approved" : "rejected"}`);
       qc.invalidateQueries({ queryKey: ["admin", "kyc"] });
@@ -245,6 +278,11 @@ function DecisionPanel({ memberId, kyc }: { memberId: string; kyc: string }) {
   });
 
   const canDecide = kyc !== "active";
+  const minorBlockers = (decision: "approved" | "rejected") =>
+    evaluateMinorGuardrails({ isMinor, decision, notes, minorReview, nextOfKin }).blockers;
+  const approveBlockers = minorBlockers("approved");
+  const rejectBlockers = minorBlockers("rejected");
+
 
   return (
     <SectionCard title="Compliance decision">
