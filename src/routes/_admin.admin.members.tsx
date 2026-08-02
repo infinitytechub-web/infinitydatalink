@@ -685,6 +685,9 @@ function ResubmissionRules() {
   const [minSeverity, setMinSeverity] = useState<"low" | "medium" | "high">(
     data.auto_flag_min_severity,
   );
+  const [remind, setRemind] = useState(data.reminder_enabled);
+  const [lead, setLead] = useState(String(data.reminder_lead_days));
+  const [lowLeft, setLowLeft] = useState(String(data.low_attempts_threshold));
 
   useEffect(() => {
     setDays(String(data.deadline_days));
@@ -692,12 +695,18 @@ function ResubmissionRules() {
     setEnforce(data.enforce_deadline);
     setAutoFlag(data.auto_flag_enabled);
     setMinSeverity(data.auto_flag_min_severity);
+    setRemind(data.reminder_enabled);
+    setLead(String(data.reminder_lead_days));
+    setLowLeft(String(data.low_attempts_threshold));
   }, [
     data.deadline_days,
     data.max_attempts,
     data.enforce_deadline,
     data.auto_flag_enabled,
     data.auto_flag_min_severity,
+    data.reminder_enabled,
+    data.reminder_lead_days,
+    data.low_attempts_threshold,
   ]);
 
   const save = useMutation({
@@ -709,8 +718,12 @@ function ResubmissionRules() {
           enforce_deadline: enforce,
           auto_flag_enabled: autoFlag,
           auto_flag_min_severity: minSeverity,
+          reminder_enabled: remind,
+          reminder_lead_days: Number(lead),
+          low_attempts_threshold: Number(lowLeft),
         },
       }),
+
 
     onSuccess: () => {
       toast.success("Resubmission rules saved");
