@@ -366,11 +366,16 @@ export const decideKyc = createServerFn({ method: "POST" })
 
     // Mirror the queued SMS into the member-visible notification timeline.
     if (fanOut.delivered.includes("sms")) {
+      const { data: contact } = await sb
+        .from("profiles")
+        .select("phone")
+        .eq("id", data.member_id)
+        .maybeSingle();
       await sb.from("kyc_notifications").insert({
         member_id: data.member_id,
         channel: "sms",
         decision: data.decision,
-        recipient: null,
+        recipient: contact?.phone ?? "unknown",
         subject: null,
         status: "pending",
       });
@@ -690,11 +695,16 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
         });
 
         if (fanOut.delivered.includes("sms")) {
+          const { data: contact } = await sb
+            .from("profiles")
+            .select("phone")
+            .eq("id", memberId)
+            .maybeSingle();
           await sb.from("kyc_notifications").insert({
             member_id: memberId,
             channel: "sms",
             decision: data.decision,
-            recipient: null,
+            recipient: contact?.phone ?? "unknown",
             subject: null,
             status: "pending",
           });
