@@ -69,6 +69,98 @@ const listSchema = z.object({
   dir: z.enum(["asc", "desc"]).default("desc"),
 });
 
+async function collectDocuments(
+  sb: any,
+  source: "all" | DocSource,
+): Promise<ManagedDocument[]> {
+  const collected: ManagedDocument[] = [];
+
+  if (source === "all" || source === "kyc") {
+    const { data: rows, error } = await sb
+      .from("kyc_documents")
+      .select(
+        "id, member_id, doc_type, storage_path, mime_type, size_bytes, status, review_notes, created_at, profiles:member_id(full_name, member_no)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    for (const r of rows ?? []) {
+      collected.push({
+        id: r.id,
+        source: "kyc",
+        bucket: KYC_BUCKET,
+        storage_path: r.storage_path,
+        filename: baseName(r.storage_path),
+        doc_type: r.doc_type,
+        mime_type: r.mime_type,
+        size_bytes: r.size_bytes ?? 0,
+        status: r.status ?? null,
+        review_notes: r.review_notes ?? null,
+        owner_id: r.member_id,
+        owner_label:
+          [r.profiles?.full_name, r.profiles?.member_no].filter(Boolean).join(" · ") || "Member",
+        created_at: r.created_at,
+      });
+    }
+  }
+
+  if (source === "all" || source === "entity") {
+    const { data: rows, error } = await sb
+      .from("entity_documents")
+      .select(
+        "id, entity_id, doc_type, storage_path, mime_type, size_bytes, created_at, entities:entity_id(name)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    for (const r of rows ?? []) {
+      collected.push({
+        id: r.id,
+        source: "entity",
+        bucket: ENTITY_BUCKET,
+        storage_path: r.storage_path,
+        filename: baseName(r.storage_path),
+        doc_type: r.doc_type ?? "other",
+        mime_type: r.mime_type ?? "application/octet-stream",
+        size_bytes: r.size_bytes ?? 0,
+        status: null,
+        review_notes: null,
+        owner_id: r.entity_id,
+        owner_label: r.entities?.name ?? "Entity",
+        created_at: r.created_at,
+      });
+    }
+  }
+
+  return collected;
+}
+
+function applyFilters(
+  rows: ManagedDocument[],
+  f: { search?: string | undefined; format?: string | undefined; sort: string; dir: "asc" | "desc" },
+) {
+  let filtered = rows;
+  if (f.search) {
+    const q = f.search.toLowerCase();
+    filtered = filtered.filter(
+      (r) =>
+        r.owner_label.toLowerCase().includes(q) ||
+        r.filename.toLowerCase().includes(q) ||
+        r.doc_type.toLowerCase().includes(q),
+    );
+  }
+  if (f.format) {
+    filtered = filtered.filter((r) => formatLabel(r.mime_type) === f.format);
+  }
+
+  const dir = f.dir === "asc" ? 1 : -1;
+  return [...filtered].sort((a, b) => {
+    if (f.sort === "size_bytes") return (a.size_bytes - b.size_bytes) * dir;
+    if (f.sort === "doc_type") return a.doc_type.localeCompare(b.doc_type) * dir;
+    return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
+  });
+}
+
 export const listManagedDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => listSchema.parse(d ?? {}))
@@ -77,90 +169,54 @@ export const listManagedDocuments = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const sb = supabaseAdmin as any;
 
-    const collected: ManagedDocument[] = [];
-
-    if (data.source === "all" || data.source === "kyc") {
-      const { data: rows, error } = await sb
-        .from("kyc_documents")
-        .select(
-          "id, member_id, doc_type, storage_path, mime_type, size_bytes, status, review_notes, created_at, profiles:member_id(full_name, member_no)",
-        )
-        .order("created_at", { ascending: false })
-        .limit(1000);
-      if (error) throw new Error(error.message);
-      for (const r of rows ?? []) {
-        collected.push({
-          id: r.id,
-          source: "kyc",
-          bucket: KYC_BUCKET,
-          storage_path: r.storage_path,
-          filename: baseName(r.storage_path),
-          doc_type: r.doc_type,
-          mime_type: r.mime_type,
-          size_bytes: r.size_bytes ?? 0,
-          status: r.status ?? null,
-          review_notes: r.review_notes ?? null,
-          owner_id: r.member_id,
-          owner_label:
-            [r.profiles?.full_name, r.profiles?.member_no].filter(Boolean).join(" · ") || "Member",
-          created_at: r.created_at,
-        });
-      }
-    }
-
-    if (data.source === "all" || data.source === "entity") {
-      const { data: rows, error } = await sb
-        .from("entity_documents")
-        .select(
-          "id, entity_id, doc_type, storage_path, mime_type, size_bytes, created_at, entities:entity_id(name)",
-        )
-        .order("created_at", { ascending: false })
-        .limit(1000);
-      if (error) throw new Error(error.message);
-      for (const r of rows ?? []) {
-        collected.push({
-          id: r.id,
-          source: "entity",
-          bucket: ENTITY_BUCKET,
-          storage_path: r.storage_path,
-          filename: baseName(r.storage_path),
-          doc_type: r.doc_type ?? "other",
-          mime_type: r.mime_type ?? "application/octet-stream",
-          size_bytes: r.size_bytes ?? 0,
-          status: null,
-          review_notes: null,
-          owner_id: r.entity_id,
-          owner_label: r.entities?.name ?? "Entity",
-          created_at: r.created_at,
-        });
-      }
-    }
-
-    let filtered = collected;
-    if (data.search) {
-      const q = data.search.toLowerCase();
-      filtered = filtered.filter(
-        (r) =>
-          r.owner_label.toLowerCase().includes(q) ||
-          r.filename.toLowerCase().includes(q) ||
-          r.doc_type.toLowerCase().includes(q),
-      );
-    }
-    if (data.format) {
-      filtered = filtered.filter((r) => formatLabel(r.mime_type) === data.format);
-    }
-
-    filtered.sort((a, b) => {
-      const dir = data.dir === "asc" ? 1 : -1;
-      if (data.sort === "size_bytes") return (a.size_bytes - b.size_bytes) * dir;
-      if (data.sort === "doc_type") return a.doc_type.localeCompare(b.doc_type) * dir;
-      return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
-    });
-
+    const filtered = applyFilters(await collectDocuments(sb, data.source), data);
     const total = filtered.length;
     const start = (data.page - 1) * data.page_size;
     return { rows: filtered.slice(start, start + data.page_size), total };
   });
+
+/**
+ * Full filtered register for an export/print run. Super Admin only, capped at
+ * 5,000 rows, and every run is written to the audit trail with the requested
+ * output format so exfiltration attempts are traceable.
+ */
+export const exportManagedDocuments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    listSchema
+      .omit({ page: true, page_size: true })
+      .extend({ output: z.enum(["pdf", "csv", "docx", "xlsx", "print"]) })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<{ rows: ManagedDocument[]; truncated: boolean }> => {
+    await assertSuperAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const sb = supabaseAdmin as any;
+
+    const filtered = applyFilters(await collectDocuments(sb, data.source), data);
+    const MAX = 5000;
+    const rows = filtered.slice(0, MAX);
+
+    await writeAudit({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: "super_admin",
+      action: `document.register_${data.output === "print" ? "print" : "export"}`,
+      target: "document_register",
+      meta: {
+        output: data.output,
+        source: data.source,
+        search: data.search ?? null,
+        format: data.format ?? null,
+        sort: `${data.sort}:${data.dir}`,
+        row_count: rows.length,
+        truncated: filtered.length > MAX,
+      },
+    });
+
+    return { rows, truncated: filtered.length > MAX };
+  });
+
 
 const refSchema = z.object({
   source: z.enum(["kyc", "entity"]),

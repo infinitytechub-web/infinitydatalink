@@ -331,3 +331,111 @@ export async function exportPrint<T>(opts: ExportOptions<T>) {
   </body></html>`);
   win.document.close();
 }
+
+// ----------------------- DOCX -----------------------
+export async function exportDocx<T>(opts: ExportOptions<T>) {
+  const {
+    Document,
+    Packer,
+    Paragraph,
+    TextRun,
+    Table,
+    TableRow,
+    TableCell,
+    WidthType,
+    ShadingType,
+    BorderStyle,
+    AlignmentType,
+  } = await import("docx");
+  const cfg = getOrgConfig();
+  const docId = opts.docId || generateDocId();
+
+  const CONTENT_WIDTH = 9360;
+  const colWidth = Math.floor(CONTENT_WIDTH / opts.columns.length);
+  const columnWidths = opts.columns.map((_, i) =>
+    i === opts.columns.length - 1 ? CONTENT_WIDTH - colWidth * (opts.columns.length - 1) : colWidth,
+  );
+  const border = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
+  const borders = { top: border, bottom: border, left: border, right: border };
+  const align = (a?: "left" | "right" | "center") =>
+    a === "right" ? AlignmentType.RIGHT : a === "center" ? AlignmentType.CENTER : AlignmentType.LEFT;
+
+  const cell = (text: string, i: number, header: boolean, a?: "left" | "right" | "center") =>
+    new TableCell({
+      borders,
+      width: { size: columnWidths[i]!, type: WidthType.DXA },
+      margins: { top: 80, bottom: 80, left: 120, right: 120 },
+      ...(header ? { shading: { fill: "064E3B", type: ShadingType.CLEAR, color: "auto" } } : {}),
+      children: [
+        new Paragraph({
+          alignment: align(a),
+          children: [new TextRun({ text, bold: header, size: header ? 18 : 18, color: header ? "F5F0E0" : "0B1F1A" })],
+        }),
+      ],
+    });
+
+  const table = new Table({
+    width: { size: CONTENT_WIDTH, type: WidthType.DXA },
+    columnWidths,
+    rows: [
+      new TableRow({
+        tableHeader: true,
+        children: opts.columns.map((c, i) => cell(c.header.toUpperCase(), i, true, c.align)),
+      }),
+      ...opts.rows.map(
+        (r) =>
+          new TableRow({
+            children: opts.columns.map((c, i) => cell(sanitizeCell(c.accessor(r)), i, false, c.align)),
+          }),
+      ),
+    ],
+  });
+
+  const meta = (text: string) =>
+    new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text, size: 18, color: "3F5B52" })] });
+
+  const wordDoc = new Document({
+    styles: { default: { document: { run: { font: "Arial", size: 20 } } } },
+    sections: [
+      {
+        properties: {
+          page: {
+            size: { width: 12240, height: 15840 },
+            margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+          },
+        },
+        children: [
+          new Paragraph({
+            spacing: { after: 60 },
+            children: [new TextRun({ text: BRAND.name, bold: true, size: 32, color: "064E3B" })],
+          }),
+          meta(BRAND.tagline),
+          new Paragraph({
+            spacing: { before: 160, after: 80 },
+            children: [new TextRun({ text: opts.title, bold: true, size: 26 })],
+          }),
+          ...(opts.subtitle ? [meta(opts.subtitle)] : []),
+          meta(`Region: ${cfg.name}   Currency: ${cfg.currency.code}`),
+          meta(`Doc ID: ${docId}`),
+          meta(`Generated: ${new Date().toLocaleString(cfg.currency.locale)}`),
+          new Paragraph({ spacing: { after: 120 }, children: [] }),
+          table,
+          new Paragraph({
+            spacing: { before: 200 },
+            children: [new TextRun({ text: BRAND.address, size: 16, color: "3F5B52" })],
+          }),
+        ],
+      },
+    ],
+  });
+
+  const blob = await Packer.toBlob(wordDoc);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${safeFilename(opts.filename || opts.title)}_${nowStamp()}.docx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}

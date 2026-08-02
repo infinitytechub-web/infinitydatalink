@@ -3,18 +3,21 @@ import { Suspense, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Download, Eye, Loader2, Pencil, Printer, Trash2 } from "lucide-react";
+import { Download, Eye, FileSpreadsheet, FileText, FileType2, Loader2, Pencil, Printer, ShieldAlert, Table2, Trash2 } from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
-import { exportCsv } from "@/lib/exports";
+import { useAuth } from "@/lib/auth";
+import { exportCsv, exportDocx, exportExcel, exportPdf, exportPrint, type ExportColumn } from "@/lib/exports";
 import {
   deleteManagedDocument,
+  exportManagedDocuments,
   formatLabel,
   getManagedDocumentUrl,
   listManagedDocuments,
   updateManagedDocument,
   type ManagedDocument,
 } from "@/lib/admin-documents.functions";
+
 
 export const Route = createFileRoute("/_admin/admin/documents")({
   head: () => ({
@@ -33,19 +36,72 @@ export const Route = createFileRoute("/_admin/admin/documents")({
 const FORMATS = ["", "PDF", "CSV", "DOCX", "DOC", "XLSX", "XLS", "JPEG", "PNG"];
 
 function DocumentsPage() {
+  const { user } = useAuth();
+  const isSuperAdmin = (user?.roles ?? []).includes("super_admin");
+
   return (
     <>
       <PageHeader
         eyebrow="Super Admin"
         title="Document Management"
-        description="View, edit, print, download and delete every stored document. Restricted to Super Admins; every action is written to the audit trail."
+        description="View, edit, print, download and delete every stored document, and export the register to PDF, CSV, DOCX or XLSX. Restricted to Super Admins; every action is written to the audit trail."
       />
-      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-        <DocumentsBody />
-      </Suspense>
+      {!isSuperAdmin ? (
+        <SectionCard title="Restricted area">
+          <div className="flex items-start gap-3 p-6 text-sm text-emerald-deep/70">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-destructive" aria-hidden />
+            <p>
+              Document download, print and export are limited to the <strong>Super Admin</strong> role.
+              Your account does not hold that role, so the register is not shown. Requests are also
+              rejected server-side and logged.
+            </p>
+          </div>
+        </SectionCard>
+      ) : (
+        <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+          <DocumentsBody />
+        </Suspense>
+      )}
     </>
   );
 }
+
+const REGISTER_COLUMNS: ExportColumn<ManagedDocument>[] = [
+  { header: "Owner", accessor: (r) => r.owner_label },
+  { header: "Source", accessor: (r) => r.source },
+  { header: "Type", accessor: (r) => r.doc_type.replace(/_/g, " ") },
+  { header: "Format", accessor: (r) => formatLabel(r.mime_type) },
+  { header: "Size (KB)", accessor: (r) => Math.max(1, Math.round(r.size_bytes / 1024)), align: "right" },
+  { header: "Status", accessor: (r) => r.status ?? "—" },
+  { header: "Filename", accessor: (r) => r.filename },
+  { header: "Uploaded", accessor: (r) => new Date(r.created_at).toISOString().slice(0, 19).replace("T", " ") },
+];
+
+function ExportButton({
+  icon,
+  label,
+  disabled,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label === "Print" ? "Print document register" : `Export document register as ${label}`}
+      className="inline-flex min-h-[40px] items-center gap-1.5 rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest hover:bg-cream disabled:opacity-50"
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
 
 function DocumentsBody() {
   const qc = useQueryClient();
@@ -61,6 +117,45 @@ function DocumentsBody() {
   const list = useServerFn(listManagedDocuments);
   const urlFn = useServerFn(getManagedDocumentUrl);
   const del = useServerFn(deleteManagedDocument);
+  const exportFn = useServerFn(exportManagedDocuments);
+
+  const exportRun = useMutation({
+    mutationFn: async (output: "pdf" | "csv" | "docx" | "xlsx" | "print") => {
+      const res = await exportFn({
+        data: {
+          source,
+          search: search || undefined,
+          format: format || undefined,
+          sort,
+          dir,
+          output,
+        },
+      });
+      return { ...res, output };
+    },
+    onSuccess: async ({ rows: all, truncated, output }) => {
+      if (all.length === 0) {
+        toast.error("No documents match these filters.");
+        return;
+      }
+      const opts = {
+        title: "Document register",
+        subtitle: `${source === "all" ? "All sources" : source === "kyc" ? "Member KYC uploads" : "Entity documents"}${format ? ` · ${format}` : ""}${search ? ` · “${search}”` : ""}`,
+        filename: "document-register",
+        columns: REGISTER_COLUMNS,
+        rows: all,
+      };
+      if (output === "pdf") await exportPdf(opts);
+      else if (output === "csv") exportCsv(opts);
+      else if (output === "docx") await exportDocx(opts);
+      else if (output === "xlsx") await exportExcel(opts);
+      else await exportPrint(opts);
+
+      if (truncated) toast.warning("Export capped at the first 5,000 documents.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const query = useQuery({
     queryKey: ["admin", "documents", { source, search, format, page, pageSize, sort, dir }],
@@ -169,29 +264,18 @@ function DocumentsBody() {
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-emerald-deep/10 px-4 py-3">
           <p className="text-[11px] uppercase tracking-widest text-emerald-deep/50">
             {total} document{total === 1 ? "" : "s"}
+            {exportRun.isPending ? " · preparing export…" : ""}
           </p>
-          <button
-            onClick={() =>
-              exportCsv({
-                title: "Document register",
-                filename: "document-register",
-                columns: [
-                  { header: "Owner", accessor: (r: ManagedDocument) => r.owner_label },
-                  { header: "Source", accessor: (r: ManagedDocument) => r.source },
-                  { header: "Type", accessor: (r: ManagedDocument) => r.doc_type },
-                  { header: "Format", accessor: (r: ManagedDocument) => formatLabel(r.mime_type) },
-                  { header: "Size (KB)", accessor: (r: ManagedDocument) => Math.round(r.size_bytes / 1024) },
-                  { header: "Status", accessor: (r: ManagedDocument) => r.status ?? "" },
-                  { header: "Uploaded", accessor: (r: ManagedDocument) => new Date(r.created_at).toISOString() },
-                ],
-                rows,
-              })
-            }
-            className="min-h-[40px] rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest hover:bg-cream"
-          >
-            Export register (CSV)
-          </button>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <ExportButton icon={<FileText className="h-3.5 w-3.5" />} label="PDF" disabled={exportRun.isPending} onClick={() => exportRun.mutate("pdf")} />
+            <ExportButton icon={<Table2 className="h-3.5 w-3.5" />} label="CSV" disabled={exportRun.isPending} onClick={() => exportRun.mutate("csv")} />
+            <ExportButton icon={<FileType2 className="h-3.5 w-3.5" />} label="DOCX" disabled={exportRun.isPending} onClick={() => exportRun.mutate("docx")} />
+            <ExportButton icon={<FileSpreadsheet className="h-3.5 w-3.5" />} label="XLSX" disabled={exportRun.isPending} onClick={() => exportRun.mutate("xlsx")} />
+            <ExportButton icon={<Printer className="h-3.5 w-3.5" />} label="Print" disabled={exportRun.isPending} onClick={() => exportRun.mutate("print")} />
+          </div>
         </div>
+
+
 
         {query.isLoading ? (
           <div className="p-6">
