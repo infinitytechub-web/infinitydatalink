@@ -373,6 +373,8 @@ function QueueBody() {
               <th className="px-4 py-3 text-right font-medium">SLA</th>
               <th className="px-4 py-3 text-right font-medium">Last activity</th>
               <th className="px-4 py-3 text-right font-medium">KYC</th>
+              <th className="px-4 py-3 text-right font-medium">Actions</th>
+
             </tr>
           </thead>
           <tbody className="divide-y divide-emerald-deep/5">
