@@ -354,7 +354,7 @@ async function enforceMinorReview(
   if (!prof) throw new Error("Member not found");
   if (!(prof as any).is_minor) return null;
 
-  const nextOfKin = ((nok ?? []) as GuardianCandidate[]) ?? [];
+  const nextOfKin = (nok ?? []) as GuardianCandidate[];
   const { blockers } = evaluateMinorGuardrails({
     isMinor: true,
     decision: opts.decision,
