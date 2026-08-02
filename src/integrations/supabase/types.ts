@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_sessions: {
+        Row: {
+          device: string | null
+          ended_at: string | null
+          id: string
+          ip_address: string | null
+          last_seen_at: string
+          started_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          device?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          started_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          device?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_step_up_sessions: {
         Row: {
           aal: string | null
@@ -2149,6 +2182,184 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_intents: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          failure_reason: string | null
+          id: string
+          member_id: string | null
+          metadata: Json
+          provider_code: string
+          provider_reference: string | null
+          purpose: string
+          reference: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          member_id?: string | null
+          metadata?: Json
+          provider_code: string
+          provider_reference?: string | null
+          purpose?: string
+          reference: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          member_id?: string | null
+          metadata?: Json
+          provider_code?: string
+          provider_reference?: string | null
+          purpose?: string
+          reference?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_intents_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_providers: {
+        Row: {
+          code: string
+          config: Json
+          created_at: string
+          enabled: boolean
+          id: string
+          label: string
+          mode: string
+          secret_ref: string | null
+          updated_at: string
+          webhook_path: string | null
+        }
+        Insert: {
+          code: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          label: string
+          mode?: string
+          secret_ref?: string | null
+          updated_at?: string
+          webhook_path?: string | null
+        }
+        Update: {
+          code?: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          label?: string
+          mode?: string
+          secret_ref?: string | null
+          updated_at?: string
+          webhook_path?: string | null
+        }
+        Relationships: []
+      }
+      payment_receipts: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          currency: string
+          id: string
+          intent_id: string
+          issued_at: string
+          issued_by: string | null
+          receipt_no: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          currency?: string
+          id?: string
+          intent_id: string
+          issued_at?: string
+          issued_by?: string | null
+          receipt_no: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          intent_id?: string
+          issued_at?: string
+          issued_by?: string | null
+          receipt_no?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_receipts_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_webhook_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_id: string | null
+          event_type: string | null
+          id: string
+          payload: Json
+          processed_at: string | null
+          provider_code: string
+          signature_verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider_code: string
+          signature_verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider_code?: string
+          signature_verified?: boolean
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line: string | null
@@ -3060,6 +3271,114 @@ export type Database = {
         }
         Relationships: []
       }
+      security_ip_rules: {
+        Row: {
+          cidr: string
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          mode: string
+          note: string | null
+          updated_at: string
+        }
+        Insert: {
+          cidr: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          mode?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cidr?: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          mode?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      security_rate_limits: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          max_requests: number
+          note: string | null
+          scope: string
+          updated_at: string
+          window_seconds: number
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          max_requests?: number
+          note?: string | null
+          scope: string
+          updated_at?: string
+          window_seconds?: number
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          max_requests?: number
+          note?: string | null
+          scope?: string
+          updated_at?: string
+          window_seconds?: number
+        }
+        Relationships: []
+      }
+      security_settings: {
+        Row: {
+          allowed_upload_mime: string[]
+          block_executables: boolean
+          created_at: string
+          firewall_enabled: boolean
+          id: boolean
+          ip_allowlist_only: boolean
+          max_upload_mb: number
+          rate_limiting_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+          upload_scanning_enabled: boolean
+        }
+        Insert: {
+          allowed_upload_mime?: string[]
+          block_executables?: boolean
+          created_at?: string
+          firewall_enabled?: boolean
+          id?: boolean
+          ip_allowlist_only?: boolean
+          max_upload_mb?: number
+          rate_limiting_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          upload_scanning_enabled?: boolean
+        }
+        Update: {
+          allowed_upload_mime?: string[]
+          block_executables?: boolean
+          created_at?: string
+          firewall_enabled?: boolean
+          id?: boolean
+          ip_allowlist_only?: boolean
+          max_upload_mb?: number
+          rate_limiting_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          upload_scanning_enabled?: boolean
+        }
+        Relationships: []
+      }
       settings_change_requests: {
         Row: {
           applied_at: string | null
@@ -3511,6 +3830,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      upload_scan_log: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          mime_type: string | null
+          reasons: string[]
+          size_bytes: number | null
+          user_id: string | null
+          verdict: string
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          mime_type?: string | null
+          reasons?: string[]
+          size_bytes?: number | null
+          user_id?: string | null
+          verdict?: string
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          reasons?: string[]
+          size_bytes?: number | null
+          user_id?: string | null
+          verdict?: string
+        }
+        Relationships: []
       }
       user_passkeys: {
         Row: {
@@ -4352,6 +4704,10 @@ export type Database = {
               user_id: string
             }[]
           }
+      has_permission_for: {
+        Args: { _action: string; _module: string }
+        Returns: boolean
+      }
       list_super_admins:
         | {
             Args: never
@@ -5535,6 +5891,8 @@ export type Database = {
         | "institution"
         | "role_grant"
         | "role_revoke"
+        | "permission_matrix"
+        | "payment_config"
       settings_change_status:
         | "pending"
         | "approved"
@@ -5736,6 +6094,8 @@ export const Constants = {
         "institution",
         "role_grant",
         "role_revoke",
+        "permission_matrix",
+        "payment_config",
       ],
       settings_change_status: [
         "pending",
