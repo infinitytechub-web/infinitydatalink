@@ -5482,6 +5482,8 @@ export type Database = {
         | "selfie"
         | "proof_of_address"
         | "other"
+        | "guardian_consent"
+        | "safeguarding_attestation"
       kyc_notification_channel: "email" | "sms"
       kyc_status: "pending" | "active" | "rejected"
       loan_restructure_kind: "reschedule" | "grace_period" | "write_off"
@@ -5678,6 +5680,8 @@ export const Constants = {
         "selfie",
         "proof_of_address",
         "other",
+        "guardian_consent",
+        "safeguarding_attestation",
       ],
       kyc_notification_channel: ["email", "sms"],
       kyc_status: ["pending", "active", "rejected"],

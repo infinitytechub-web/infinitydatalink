@@ -8,6 +8,8 @@ import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgeBadge } from "@/components/biodata-fields";
 import { idTypeLabel } from "@/lib/ghana-id-types";
+import { MinorAttestationUploads } from "@/components/minor-attestation-uploads";
+
 
 import {
   decideKyc,
@@ -189,6 +191,9 @@ function MemberDetailBody() {
           isMinor={!!profile.is_minor}
           nextOfKin={next_of_kin}
         />
+
+        {profile.is_minor ? <MinorAttestationUploads memberId={profile.id} /> : null}
+
 
       </div>
     </>
