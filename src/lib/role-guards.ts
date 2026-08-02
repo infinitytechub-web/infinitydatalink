@@ -2,6 +2,8 @@
 // independently of Supabase middleware.
 export const ALL_ROLES = [
   "super_admin",
+  "admin",
+  "manager",
   "compliance_officer",
   "loan_officer",
   "finance_officer",
@@ -12,6 +14,8 @@ export type Role = (typeof ALL_ROLES)[number];
 
 export const ADMIN_ROLES: readonly Role[] = [
   "super_admin",
+  "admin",
+  "manager",
   "compliance_officer",
   "loan_officer",
   "finance_officer",
