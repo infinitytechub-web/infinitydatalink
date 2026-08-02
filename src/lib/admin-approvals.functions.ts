@@ -8,10 +8,14 @@ export type PendingUserRow = {
   email: string | null;
   full_name: string | null;
   member_no: string | null;
+  ghana_card: string | null;
+  phone: string | null;
+  membership_type: string | null;
   status: string;
   rejection_reason: string | null;
   created_at: string;
 };
+
 
 async function assertReviewer(supabase: any, userId: string) {
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
