@@ -71,9 +71,12 @@ const REQUIRED_PROFILE_FIELDS = [
   "date_of_birth",
   "gender",
   "region",
+  "district",
   "address_line",
+  "national_id_type",
   "national_id",
 ] as const;
+
 
 const REQUIRED_DOC_TYPES = ["national_id_front", "national_id_back", "selfie"] as const;
 
