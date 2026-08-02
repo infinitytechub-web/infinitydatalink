@@ -18,6 +18,14 @@ import {
   type RiskAssessment,
   type RiskSeverity,
 } from "@/lib/kyc-risk-rules";
+import {
+  MINOR_BULK_BLOCKED_REASON,
+  evaluateMinorGuardrails,
+  minorReviewSchema,
+  type GuardianCandidate,
+  type MinorReview,
+} from "@/lib/kyc-minor-rules";
+
 
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
