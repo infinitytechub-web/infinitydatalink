@@ -14,6 +14,8 @@ function getSupabase() {
 
 export type AppRole =
   | "super_admin"
+  | "admin"
+  | "manager"
   | "compliance_officer"
   | "loan_officer"
   | "finance_officer"
