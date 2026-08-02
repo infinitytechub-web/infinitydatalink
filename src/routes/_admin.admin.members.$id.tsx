@@ -162,7 +162,13 @@ function MemberDetailBody() {
           </Suspense>
         </div>
 
-        <DecisionPanel memberId={profile.id} kyc={profile.kyc} />
+        <DecisionPanel
+          memberId={profile.id}
+          kyc={profile.kyc}
+          isMinor={!!profile.is_minor}
+          nextOfKin={next_of_kin}
+        />
+
       </div>
     </>
   );
