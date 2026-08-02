@@ -17,6 +17,7 @@ import {
   type KycDocumentWithUrl,
 } from "@/lib/admin-kyc.functions";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
+import { RISK_SEVERITY_LABEL } from "@/lib/kyc-risk-rules";
 
 export const Route = createFileRoute("/_admin/admin/members/$id")({
   head: () => ({ meta: [{ title: "Member review — KYC" }, { name: "robots", content: "noindex" }] }),
@@ -382,6 +383,48 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
             {data.unchanged_requested_count} requested but unchanged
           </span>
         </div>
+
+        {data.risk.flags.length > 0 ? (
+          <div
+            className={
+              "rounded-lg border p-3 " +
+              (data.risk.level === "high"
+                ? "border-destructive/30 bg-destructive/5"
+                : data.risk.level === "medium"
+                  ? "border-gold/40 bg-gold/5"
+                  : "border-emerald-deep/15 bg-emerald-deep/5")
+            }
+          >
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
+              <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-widest text-emerald-deep/70">
+                Risk patterns · {RISK_SEVERITY_LABEL[data.risk.level as "low" | "medium" | "high"]} risk
+              </p>
+              <span
+                className={
+                  "shrink-0 rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest " +
+                  (data.flagged_at
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-emerald-deep/10 text-emerald-deep/60")
+                }
+              >
+                {data.flagged_at
+                  ? `Flagged for re-review ${new Date(data.flagged_at).toLocaleDateString()}`
+                  : data.auto_flag.enabled
+                    ? `Below threshold (${data.auto_flag.min_severity})`
+                    : "Auto-flagging off"}
+              </span>
+            </div>
+            <ul className="mt-2 space-y-1 text-xs text-emerald-deep/80">
+              {data.risk.flags.map((f) => (
+                <li key={f.code} className="flex gap-2">
+                  <span className="mt-[3px] h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-50" />
+                  <span className="min-w-0">{f.message}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
 
         {visible.length === 0 ? (
           <p className="text-sm text-emerald-deep/60">Nothing changed since the rejection.</p>
