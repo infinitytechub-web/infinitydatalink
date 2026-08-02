@@ -38,6 +38,8 @@ export type KycQueueRow = {
   region: string | null;
   phone: string | null;
   national_id: string | null;
+  date_of_birth: string | null;
+  is_minor: boolean;
   kyc: ProfileKycStatus;
   kyc_reviewed_at: string | null;
   kyc_assigned_to: string | null;
@@ -81,7 +83,7 @@ export const listKycQueue = createServerFn({ method: "GET" })
     let q = sb
       .from("profiles")
       .select(
-        "id, full_name, member_no, region, phone, national_id, kyc, kyc_notes, kyc_reviewed_at, kyc_assigned_to, updated_at",
+        "id, full_name, member_no, region, phone, national_id, date_of_birth, is_minor, kyc, kyc_notes, kyc_reviewed_at, kyc_assigned_to, updated_at",
         { count: "exact" },
       );
     q = isPending
@@ -173,6 +175,8 @@ export const listKycQueue = createServerFn({ method: "GET" })
           member_id: r.id,
           full_name: r.full_name,
           member_no: r.member_no,
+          date_of_birth: (r.date_of_birth as string | null) ?? null,
+          is_minor: Boolean(r.is_minor),
           region: r.region,
           phone: r.phone,
           national_id: r.national_id,
