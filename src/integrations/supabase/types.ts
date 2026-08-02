@@ -2353,6 +2353,33 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          module: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          module: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          module?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       runtime_error_logs: {
         Row: {
           actor_role: string | null
@@ -4362,6 +4389,13 @@ export type Database = {
         }
         Returns: number
       }
+      my_permissions: {
+        Args: never
+        Returns: {
+          action: string
+          module: string
+        }[]
+      }
       national_id_key: {
         Args: { _type: string; _value: string }
         Returns: string
@@ -5468,6 +5502,8 @@ export type Database = {
         | "finance_officer"
         | "auditor"
         | "member"
+        | "admin"
+        | "manager"
       collateral_status: "pledged" | "released" | "seized"
       entity_role: "owner" | "admin" | "member"
       entity_status: "pending" | "active" | "suspended" | "closed"
@@ -5665,6 +5701,8 @@ export const Constants = {
         "finance_officer",
         "auditor",
         "member",
+        "admin",
+        "manager",
       ],
       collateral_status: ["pledged", "released", "seized"],
       entity_role: ["owner", "admin", "member"],
