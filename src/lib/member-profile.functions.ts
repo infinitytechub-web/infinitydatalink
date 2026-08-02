@@ -172,7 +172,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     // If the profile is already verified, block edits to identity-locked fields.
     const { data: current } = await sb
       .from("profiles")
-      .select("kyc")
+      .select("kyc, is_minor, date_of_birth")
       .eq("id", context.userId)
       .maybeSingle();
     const isVerified = current?.kyc === "active";
@@ -198,6 +198,22 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       }
       throw new Error(error.message);
     }
+
+    if ("date_of_birth" in patch) {
+      const { alertMinorFlipIfChanged } = await import("@/lib/minor-flip-alert.server");
+      await alertMinorFlipIfChanged({
+        memberId: context.userId,
+        before: {
+          is_minor: ((current as any)?.is_minor as boolean | null) ?? null,
+          date_of_birth: ((current as any)?.date_of_birth as string | null) ?? null,
+        },
+        actorId: context.userId,
+        actorEmail: (context.claims as any)?.email ?? null,
+        actorRole: "member",
+        source: "member.profile_update",
+      });
+    }
+
     return { updated: true, locked_identity: isVerified };
   });
 
