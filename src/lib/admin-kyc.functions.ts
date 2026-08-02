@@ -858,11 +858,23 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
     const failed: { id: string; error: string }[] = [];
     const window = await resubmissionStamp(sb, data.decision);
 
+    // Minors are never decided in bulk — each needs guardian verification and a
+    // re-authenticated, individually audited decision.
+    const { data: minorRows } = await sb
+      .from("profiles")
+      .select("id")
+      .in("id", data.member_ids as never)
+      .eq("is_minor", true);
+    const minorIds = new Set(((minorRows ?? []) as any[]).map((r) => r.id as string));
+    for (const id of minorIds) failed.push({ id, error: MINOR_BULK_BLOCKED_REASON });
+
     const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
 
     for (const memberId of data.member_ids) {
+      if (minorIds.has(memberId)) continue;
       try {
         const snapshot =
+
           data.decision === "rejected" ? await captureRejectionSnapshot(sb, memberId) : null;
         const { data: prof, error: pErr } = await sb
           .from("profiles")
