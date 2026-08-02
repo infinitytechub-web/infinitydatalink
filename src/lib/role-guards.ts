@@ -2,6 +2,8 @@
 // independently of Supabase middleware.
 export const ALL_ROLES = [
   "super_admin",
+  "admin",
+  "manager",
   "compliance_officer",
   "loan_officer",
   "finance_officer",
@@ -12,15 +14,17 @@ export type Role = (typeof ALL_ROLES)[number];
 
 export const ADMIN_ROLES: readonly Role[] = [
   "super_admin",
+  "admin",
+  "manager",
   "compliance_officer",
   "loan_officer",
   "finance_officer",
   "auditor",
 ];
 
-export const KYC_ADMIN_ROLES: readonly Role[] = ["super_admin", "compliance_officer"];
-export const FINANCE_ROLES: readonly Role[] = ["super_admin", "finance_officer"];
-export const LOAN_DECISION_ROLES: readonly Role[] = ["super_admin", "loan_officer"];
+export const KYC_ADMIN_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "compliance_officer"];
+export const FINANCE_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "finance_officer"];
+export const LOAN_DECISION_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "loan_officer"];
 export const SUPER_ADMIN_ONLY: readonly Role[] = ["super_admin"];
 
 export type RoleSet = ReadonlySet<Role>;
