@@ -34,9 +34,11 @@ export type NextOfKin = {
   id: string;
   full_name: string;
   relationship: string;
+  relationship_code: string | null;
   phone: string | null;
   email: string | null;
   national_id: string | null;
+  national_id_type: string | null;
   address: string | null;
   created_at: string;
   updated_at: string;
@@ -50,8 +52,11 @@ export type MemberProfileFull = {
     email: string | null;
     phone: string | null;
     national_id: string | null;
+    national_id_type: string | null;
     region: string | null;
+    district: string | null;
     date_of_birth: string | null;
+    is_minor: boolean;
     gender: string | null;
     digital_address: string | null;
     address_line: string | null;
@@ -65,6 +70,7 @@ export type MemberProfileFull = {
   next_of_kin: NextOfKin[];
   documents: KycDocument[];
 };
+
 
 const BUCKET = "kyc-documents";
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
