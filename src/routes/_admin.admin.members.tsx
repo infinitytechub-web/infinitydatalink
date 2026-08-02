@@ -477,9 +477,35 @@ function QueueBody() {
                   <td className="px-4 py-3 text-right">
                     <StatusPill status={m.kyc as any} />
                   </td>
+                  <td className="px-4 py-3">
+                    <KycRecordActions
+                      label="individual KYC record"
+                      title={`Individual KYC — ${m.full_name ?? m.member_no ?? m.member_id}`}
+                      subtitle={`Status ${m.kyc}`}
+                      filename={`kyc_${m.member_no ?? m.member_id}`}
+                      fields={[
+                        { label: "Member", value: m.full_name ?? "—" },
+                        { label: "Member no.", value: m.member_no ?? "—" },
+                        { label: "Region", value: m.region ?? "—" },
+                        { label: "Phone", value: m.phone ?? "—" },
+                        { label: "National ID", value: m.national_id ?? "—" },
+                        { label: "Date of birth", value: m.date_of_birth ?? "—" },
+                        { label: "Under 18", value: m.is_minor ? "Yes" : "No" },
+                        { label: "KYC status", value: m.kyc },
+                        { label: "Pending documents", value: String(m.pending_docs) },
+                        { label: "Assignee", value: m.kyc_assigned_name ?? "Unassigned" },
+                      ]}
+                      onView={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
+                      onEdit={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
+                      onDecide={(decision, note) => rowDecision(m, decision, note)}
+                      disabled={{ approve: m.kyc === "active", reject: m.kyc === "rejected" }}
+                      className="justify-end"
+                    />
+                  </td>
                 </tr>
               ))
             )}
+
           </tbody>
         </table>
 
