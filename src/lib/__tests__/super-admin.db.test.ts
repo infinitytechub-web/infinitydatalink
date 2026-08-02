@@ -47,18 +47,21 @@ d("Database: super_admin seed & role enforcement", () => {
     expect(rows).toContain("guard_super_admin_role_ins");
   });
 
-  it("grant/revoke/list RPCs are executable by authenticated role only", () => {
+  it("grant/revoke/list RPCs are executable by service_role only", () => {
     for (const fn of [
       "grant_super_admin_by_email(text,text)",
       "revoke_super_admin(uuid,text)",
       "list_super_admins()",
     ]) {
+      const svc = q(`SELECT has_function_privilege('service_role','public.${fn}','EXECUTE')`);
       const auth = q(`SELECT has_function_privilege('authenticated','public.${fn}','EXECUTE')`);
       const anon = q(`SELECT has_function_privilege('anon','public.${fn}','EXECUTE')`);
-      expect(auth, `authenticated should EXECUTE ${fn}`).toBe("t");
+      expect(svc, `service_role should EXECUTE ${fn}`).toBe("t");
+      expect(auth, `authenticated must NOT EXECUTE ${fn}`).toBe("f");
       expect(anon, `anon must NOT EXECUTE ${fn}`).toBe("f");
     }
   });
+
 
   it("user_roles has grant metadata columns", () => {
     const cols = q(
