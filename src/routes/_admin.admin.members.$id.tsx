@@ -18,6 +18,14 @@ import {
 } from "@/lib/admin-kyc.functions";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 import { RISK_SEVERITY_LABEL } from "@/lib/kyc-risk-rules";
+import { useStepUp } from "@/components/step-up-dialog";
+import {
+  MINOR_DECISION_NOTE_MIN,
+  eligibleGuardians,
+  evaluateMinorGuardrails,
+  type GuardianCandidate,
+} from "@/lib/kyc-minor-rules";
+
 
 export const Route = createFileRoute("/_admin/admin/members/$id")({
   head: () => ({ meta: [{ title: "Member review — KYC" }, { name: "robots", content: "noindex" }] }),
