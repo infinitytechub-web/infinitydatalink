@@ -7,6 +7,7 @@ import {
   parseRemediationItems,
   type RemediationProfileField,
 } from "@/lib/kyc-remediation";
+import { normalizeNationalId, validateNationalId } from "@/lib/ghana-id-types";
 import { normalizePhone } from "@/lib/member-registration";
 import type { ProfileKycStatus } from "./member-profile.functions";
 
