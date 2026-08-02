@@ -412,10 +412,20 @@ function NokDialog({
           }}
         >
           <TextField label="Full name" value={value.full_name} onChange={set("full_name")} required />
-          <TextField label="Relationship" value={value.relationship} onChange={set("relationship")} required placeholder="e.g. Spouse" />
+          <RelationshipSelect
+            value={value.relationship}
+            onChange={(v) => onChange({ ...value, relationship: v })}
+            required
+          />
           <TextField label="Phone" value={value.phone} onChange={set("phone")} />
           <TextField label="Email" value={value.email} onChange={set("email")} type="email" />
-          <TextField label="National ID" value={value.national_id} onChange={set("national_id")} />
+          <NationalIdFields
+            idType={value.national_id_type}
+            idNumber={value.national_id}
+            onTypeChange={(v) => onChange({ ...value, national_id_type: v })}
+            onNumberChange={(v) => onChange({ ...value, national_id: v })}
+          />
+
           <TextField label="Address" value={value.address} onChange={set("address")} className="sm:col-span-2" />
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button
