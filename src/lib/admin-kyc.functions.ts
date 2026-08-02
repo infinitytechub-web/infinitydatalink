@@ -340,7 +340,7 @@ async function resubmissionStamp(
 async function captureRejectionSnapshot(
   sb: { from: (t: string) => any },
   memberId: string,
-): Promise<Record<string, unknown> | null> {
+): Promise<any> {
   const [{ data: prof }, { data: docs }] = await Promise.all([
     sb
       .from("profiles")
