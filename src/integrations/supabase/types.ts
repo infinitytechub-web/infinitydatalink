@@ -1881,6 +1881,53 @@ export type Database = {
           },
         ]
       }
+      minor_status_changes: {
+        Row: {
+          change_kind: string
+          changed_at: string
+          changed_by: string | null
+          db_role: string | null
+          id: string
+          is_minor: boolean
+          member_id: string
+          previous_date_of_birth: string | null
+          source_date_of_birth: string | null
+          was_minor: boolean | null
+        }
+        Insert: {
+          change_kind: string
+          changed_at?: string
+          changed_by?: string | null
+          db_role?: string | null
+          id?: string
+          is_minor: boolean
+          member_id: string
+          previous_date_of_birth?: string | null
+          source_date_of_birth?: string | null
+          was_minor?: boolean | null
+        }
+        Update: {
+          change_kind?: string
+          changed_at?: string
+          changed_by?: string | null
+          db_role?: string | null
+          id?: string
+          is_minor?: boolean
+          member_id?: string
+          previous_date_of_birth?: string | null
+          source_date_of_birth?: string | null
+          was_minor?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "minor_status_changes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       next_of_kin: {
         Row: {
           address: string | null
