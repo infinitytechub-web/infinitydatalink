@@ -30,10 +30,12 @@ import {
   listKycReviewers,
   assignKyc,
   bulkDecideKyc,
+  decideKyc,
   getKycResubmissionSettings,
   updateKycResubmissionSettings,
   type KycQueueRow,
 } from "@/lib/admin-kyc.functions";
+
 import {
   AGING_ORDER,
   BUCKET_META,
