@@ -45,7 +45,11 @@ const STATUSES = [
   { key: "read", label: "Read" },
 ] as const;
 
-const CATEGORY_LABELS = new Map(NOTIFICATION_CATEGORIES.map((c) => [c.key, c.label] as const));
+type CategoryKey = (typeof NOTIFICATION_CATEGORIES)[number]["key"];
+
+const CATEGORY_LABELS = new Map<CategoryKey, string>(
+  NOTIFICATION_CATEGORIES.map((c) => [c.key, c.label] as const),
+);
 
 function InboxPage() {
   return (
@@ -54,7 +58,7 @@ function InboxPage() {
         eyebrow="Member portal"
         title="Notifications centre"
         description="Every in-app alert about your registration, verification, savings and loans — filter it, read it, clear it."
-        actions={
+        action={
           <Button asChild variant="outline" size="sm">
             <Link to="/app/notifications">
               <Settings2 className="mr-2 h-4 w-4" />
@@ -82,7 +86,7 @@ function InboxContent() {
     | "all"
     | "unread"
     | "read";
-  const category = CATEGORY_LABELS.has(search.category) ? search.category : "";
+  const category = CATEGORY_LABELS.has(search.category as CategoryKey) ? search.category : "";
   const q = search.q.slice(0, 120);
 
   const [term, setTerm] = useState(q);
@@ -97,7 +101,7 @@ function InboxContent() {
   const refresh = () => qc.invalidateQueries({ queryKey: ["member", "notifications-feed"] });
 
   const setSearch = (patch: Partial<typeof search>) =>
-    navigate({ search: (prev) => ({ ...prev, page: 1, ...patch }) });
+    navigate({ search: (prev: typeof search) => ({ ...prev, page: 1, ...patch }) });
 
   const readOne = useMutation({
     mutationFn: (id: string) => markNotificationsRead({ data: { ids: [id] } }),
@@ -215,13 +219,13 @@ function InboxContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Notifications" padded={false}>
+      <SectionCard title="Notifications">
         {data.rows.length === 0 ? (
           <div className="p-6">
             <EmptyState
               icon={<BellRing className="h-5 w-5" />}
               title="Nothing here"
-              description={
+              hint={
                 status === "unread"
                   ? "You have read every notification that matches these filters."
                   : "No notifications match these filters yet."
@@ -252,15 +256,13 @@ function InboxContent() {
                       <span className={"text-sm " + (unread ? "font-semibold" : "font-medium")}>
                         {n.title}
                       </span>
-                      <StatusPill status={unread ? "pending" : "cleared"}>
-                        {unread ? "Unread" : "Read"}
-                      </StatusPill>
+                      <StatusPill status={unread ? "pending" : "cleared"} />
                     </div>
                     {n.body ? (
                       <p className="text-xs leading-relaxed text-muted-foreground">{n.body}</p>
                     ) : null}
                     <p className="text-[11px] text-muted-foreground/80">
-                      {CATEGORY_LABELS.get(n.category) ?? n.category} ·{" "}
+                      {CATEGORY_LABELS.get(n.category as CategoryKey) ?? n.category} ·{" "}
                       {new Date(n.created_at).toLocaleString()}
                     </p>
                   </div>
@@ -301,7 +303,7 @@ function InboxContent() {
           page={page}
           pageSize={pageSize}
           total={data.total}
-          onPage={(n) => navigate({ search: (prev) => ({ ...prev, page: n }) })}
+          onPage={(n) => navigate({ search: (prev: typeof search) => ({ ...prev, page: n }) })}
           onPageSize={(n) => setSearch({ page_size: n })}
         />
       </SectionCard>
