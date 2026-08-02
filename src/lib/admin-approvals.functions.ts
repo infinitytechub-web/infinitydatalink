@@ -103,10 +103,15 @@ export const approveUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const actorRole = await assertReviewerRole(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("approve_user", {
+    // The decision routines are service_role-only (no client write path), so we
+    // pass the already-authenticated officer id explicitly; the routine re-checks
+    // the officer's role before writing.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("approve_user", {
       _uid: data.user_id,
-      _note: data.note ?? undefined,
-    });
+      _note: data.note ?? null,
+      _actor: context.userId,
+    } as never);
     if (error) throw new Error(error.message);
     await recordDecision({
       actorId: context.userId,
@@ -118,9 +123,9 @@ export const approveUser = createServerFn({ method: "POST" })
       subjectId: data.user_id,
       note: data.note ?? null,
     });
-    // In-app + email notification so the member knows they can now sign in
-    // and start verification. Never fail the approval on notification errors.
-    const { error: notifyErr } = await context.supabase.rpc("notify_user", {
+    // In-app notification so the member knows they can now sign in and start
+    // verification. Never fail the approval on notification errors.
+    const { error: notifyErr } = await supabaseAdmin.rpc("notify_user", {
       _user_id: data.user_id,
       _category: "account",
       _title: "Membership approved",
@@ -132,6 +137,7 @@ export const approveUser = createServerFn({ method: "POST" })
     if (notifyErr) console.error("approval notification failed", notifyErr.message);
     return { ok: true as const };
   });
+
 
 
 export const rejectUser = createServerFn({ method: "POST" })
