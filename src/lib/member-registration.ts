@@ -1,7 +1,7 @@
 /**
  * Shared registration biodata helpers (client-safe).
  *
- * Ghana Card is stored canonically as `GHA-XXXXXXXXXX` (10 digits). Forms
+ * Ghana Card is stored canonically as `GHA-XXXXXXXXX-X`. Forms
  * capture only the digits; the `GHA-` prefix is fixed in the UI. The canonical
  * storage form is `GHA-XXXXXXXXX-X`, matching the printed card and the shared
  * national-ID validator, so registration and KYC compare identically.
