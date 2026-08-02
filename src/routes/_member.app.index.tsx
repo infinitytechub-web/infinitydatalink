@@ -51,7 +51,7 @@ function BiodataStrip() {
       <div className="shrink-0 text-right">
         <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">Your age</p>
         <div className="text-sm font-semibold">
-          <AgeBadge dateOfBirth={p.date_of_birth} />
+          <AgeBadge dateOfBirth={p.date_of_birth} storedIsMinor={p.is_minor} />
         </div>
       </div>
     </section>

@@ -306,7 +306,7 @@ export function MinorTag({ mismatch = false, label = "Under 18" }: { mismatch?: 
       }`}
     >
       {label}
-      {mismatch ? " ·  stale flag" : ""}
+      {mismatch ? " · stale flag" : ""}
     </span>
   );
 }

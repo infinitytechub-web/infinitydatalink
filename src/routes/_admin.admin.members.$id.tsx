@@ -25,6 +25,7 @@ import {
   evaluateMinorGuardrails,
   type GuardianCandidate,
 } from "@/lib/kyc-minor-rules";
+import { resolveMinorStatus } from "@/lib/age";
 
 
 export const Route = createFileRoute("/_admin/admin/members/$id")({
@@ -86,12 +87,18 @@ function MemberDetailBody() {
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">Age</p>
                 <div className="mt-1 text-sm">
-                  <AgeBadge dateOfBirth={profile.date_of_birth} />
+                  <AgeBadge dateOfBirth={profile.date_of_birth} storedIsMinor={profile.is_minor} />
                 </div>
               </div>
               <Field
                 label="Minor saver (under 18)"
-                value={profile.date_of_birth ? (profile.is_minor ? "Yes" : "No") : null}
+                value={
+                  profile.date_of_birth || profile.is_minor
+                    ? resolveMinorStatus(profile.date_of_birth, profile.is_minor).effective
+                      ? "Yes"
+                      : "No"
+                    : null
+                }
               />
               <Field label="Gender" value={profile.gender} />
               <Field label="Region" value={profile.region} />
