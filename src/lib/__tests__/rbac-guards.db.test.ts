@@ -193,7 +193,7 @@ d("guard_super_admin_role trigger", () => {
   });
 });
 
-d("audit_log spoof guard (INSERT WITH CHECK)", () => {
+d("audit_log anti-spoof invariants (definer-only appends)", () => {
   let memberId = "";
   const memberEmail = "member.mock@example.test";
   const otherId = "00000000-0000-0000-0000-000000000042";
