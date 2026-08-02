@@ -106,6 +106,7 @@ function Body() {
           items={data.remediation}
           canResubmit={data.can_resubmit}
           reviewerNotes={data.latest_decision?.notes ?? null}
+          window={data.resubmission}
         />
       ) : null}
 

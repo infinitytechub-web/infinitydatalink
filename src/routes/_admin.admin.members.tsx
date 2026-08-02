@@ -24,6 +24,8 @@ import {
   listKycReviewers,
   assignKyc,
   bulkDecideKyc,
+  getKycResubmissionSettings,
+  updateKycResubmissionSettings,
   type KycQueueRow,
 } from "@/lib/admin-kyc.functions";
 import {
@@ -102,6 +104,9 @@ function MembersPage() {
         </Suspense>
         <Suspense fallback={<SectionCardSkeleton title="Queue" rows={8} cols={6} />}>
           <QueueBody />
+        </Suspense>
+        <Suspense fallback={<SectionCardSkeleton title="Resubmission rules" rows={3} />}>
+          <ResubmissionRules />
         </Suspense>
       </div>
     </>
@@ -660,3 +665,99 @@ function SlaCell({
   );
 }
 
+
+const resubmissionSettingsQuery = queryOptions({
+  queryKey: ["admin", "kyc-resubmission-settings"],
+  queryFn: () => getKycResubmissionSettings(),
+});
+
+/**
+ * Resubmission window + attempt allowance applied to every future rejection.
+ * Existing rejections keep the deadline and allowance stamped at decision time.
+ */
+function ResubmissionRules() {
+  const { data } = useSuspenseQuery(resubmissionSettingsQuery);
+  const qc = useQueryClient();
+  const [days, setDays] = useState(String(data.deadline_days));
+  const [attempts, setAttempts] = useState(String(data.max_attempts));
+  const [enforce, setEnforce] = useState(data.enforce_deadline);
+
+  useEffect(() => {
+    setDays(String(data.deadline_days));
+    setAttempts(String(data.max_attempts));
+    setEnforce(data.enforce_deadline);
+  }, [data.deadline_days, data.max_attempts, data.enforce_deadline]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      updateKycResubmissionSettings({
+        data: {
+          deadline_days: Number(days),
+          max_attempts: Number(attempts),
+          enforce_deadline: enforce,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Resubmission rules saved");
+      qc.invalidateQueries({ queryKey: ["admin", "kyc-resubmission-settings"] });
+    },
+    onError: (err: any) => toast.error(err?.message ?? "Could not save the rules"),
+  });
+
+  const dayNum = Number(days);
+  const attemptNum = Number(attempts);
+  const valid =
+    Number.isInteger(dayNum) && dayNum >= 1 && dayNum <= 365 &&
+    Number.isInteger(attemptNum) && attemptNum >= 1 && attemptNum <= 20;
+
+  return (
+    <SectionCard title="Resubmission deadlines & attempt limits">
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Deadline (days after rejection)
+          <input
+            type="number"
+            min={1}
+            max={365}
+            value={days}
+            onChange={(e) => setDays(e.target.value)}
+            className="w-28 rounded border border-border bg-card px-2 py-1.5 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Max attempts
+          <input
+            type="number"
+            min={1}
+            max={20}
+            value={attempts}
+            onChange={(e) => setAttempts(e.target.value)}
+            className="w-28 rounded border border-border bg-card px-2 py-1.5 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary"
+          />
+        </label>
+        <label className="flex items-center gap-2 pb-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={enforce}
+            onChange={(e) => setEnforce(e.target.checked)}
+            className="h-3.5 w-3.5 accent-primary"
+          />
+          Block resubmission once the deadline passes
+        </label>
+        <button
+          type="button"
+          disabled={!valid || save.isPending}
+          onClick={() => save.mutate()}
+          className={`${BUTTON_TONE.primary} ml-auto disabled:opacity-50`}
+        >
+          Save rules
+        </button>
+      </div>
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        Applies to rejections taken from now on — members already rejected keep the deadline and
+        allowance recorded at the time of their decision.
+        {data.updated_at ? ` Last changed ${new Date(data.updated_at).toLocaleString()}.` : ""}
+      </p>
+    </SectionCard>
+  );
+}

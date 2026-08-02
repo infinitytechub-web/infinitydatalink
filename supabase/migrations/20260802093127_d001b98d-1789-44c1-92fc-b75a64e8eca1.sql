@@ -1,0 +1,1 @@
+GRANT UPDATE ON public.kyc_resubmission_settings TO authenticated;

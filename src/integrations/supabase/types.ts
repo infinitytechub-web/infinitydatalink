@@ -1246,6 +1246,44 @@ export type Database = {
           },
         ]
       }
+      kyc_resubmission_settings: {
+        Row: {
+          created_at: string
+          deadline_days: number
+          enforce_deadline: boolean
+          id: boolean
+          max_attempts: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          deadline_days?: number
+          enforce_deadline?: boolean
+          id?: boolean
+          max_attempts?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          deadline_days?: number
+          enforce_deadline?: boolean
+          id?: boolean
+          max_attempts?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_resubmission_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loan_collateral: {
         Row: {
           created_at: string
@@ -2035,8 +2073,11 @@ export type Database = {
           kyc: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at: string | null
           kyc_assigned_to: string | null
+          kyc_attempts: number
+          kyc_max_attempts: number | null
           kyc_notes: string | null
           kyc_remediation_items: Json
+          kyc_resubmission_deadline: string | null
           kyc_resubmitted_at: string | null
           kyc_reviewed_at: string | null
           kyc_reviewed_by: string | null
@@ -2067,8 +2108,11 @@ export type Database = {
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
+          kyc_attempts?: number
+          kyc_max_attempts?: number | null
           kyc_notes?: string | null
           kyc_remediation_items?: Json
+          kyc_resubmission_deadline?: string | null
           kyc_resubmitted_at?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
@@ -2099,8 +2143,11 @@ export type Database = {
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
+          kyc_attempts?: number
+          kyc_max_attempts?: number | null
           kyc_notes?: string | null
           kyc_remediation_items?: Json
+          kyc_resubmission_deadline?: string | null
           kyc_resubmitted_at?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
