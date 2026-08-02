@@ -75,7 +75,7 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
       sb
         .from("profiles")
         .select(
-          "id, full_name, phone, date_of_birth, gender, region, address_line, digital_address, occupation, employer, national_id, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, kyc_remediation_items, kyc_resubmitted_at",
+          "id, full_name, phone, date_of_birth, gender, region, address_line, digital_address, occupation, employer, national_id, kyc, kyc_notes, kyc_reviewed_at, kyc_reviewed_by, kyc_remediation_items, kyc_resubmitted_at, kyc_resubmission_deadline, kyc_attempts, kyc_max_attempts",
         )
         .eq("id", uid)
         .maybeSingle(),
@@ -181,10 +181,52 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
       };
     });
 
-    const canResubmit =
-      kyc === "rejected" && remediation.length > 0 && remediation.every((r) => r.resolved);
+    // Resubmission window + attempt allowance. Both are enforced in
+    // resubmit_own_kyc; surfaced here so the UI can explain the block up front.
+    const { data: resubSettings } = await sb
+      .from("kyc_resubmission_settings")
+      .select("deadline_days, max_attempts, enforce_deadline")
+      .maybeSingle();
+    const deadline = ((profile as any)?.kyc_resubmission_deadline as string | null) ?? null;
+    const attemptsUsed = Number((profile as any)?.kyc_attempts ?? 0);
+    const attemptLimit = Number(
+      (profile as any)?.kyc_max_attempts ?? (resubSettings as any)?.max_attempts ?? 3,
+    );
+    const enforceDeadline = ((resubSettings as any)?.enforce_deadline ?? true) as boolean;
+    const attemptsLeft = Math.max(0, attemptLimit - attemptsUsed);
+    const deadlinePassed =
+      enforceDeadline && deadline != null && Date.now() > new Date(deadline).getTime();
 
-    if (kyc === "rejected") {
+    const resubmission = {
+      deadline,
+      deadline_passed: deadlinePassed,
+      enforce_deadline: enforceDeadline,
+      attempts_used: attemptsUsed,
+      attempt_limit: attemptLimit,
+      attempts_left: attemptsLeft,
+      window_days: Number((resubSettings as any)?.deadline_days ?? 14),
+      blocked_reason: deadlinePassed
+        ? ("deadline" as const)
+        : attemptsLeft === 0
+          ? ("attempts" as const)
+          : null,
+    };
+
+    const canResubmit =
+      kyc === "rejected" &&
+      remediation.length > 0 &&
+      remediation.every((r) => r.resolved) &&
+      resubmission.blocked_reason === null;
+
+    if (kyc === "rejected" && resubmission.blocked_reason !== null) {
+      next_action = {
+        label:
+          resubmission.blocked_reason === "deadline"
+            ? "Your resubmission deadline has passed — contact support"
+            : "You have used all resubmission attempts — contact support",
+        link: "/app/support",
+      };
+    } else if (kyc === "rejected") {
       next_action = remediation.some((r) => !r.resolved)
         ? { label: "Revise the requested items and resubmit", link: "/app/kyc" }
         : { label: "Resubmit your verification for review", link: "/app/kyc" };
@@ -195,6 +237,7 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
       review_state: reviewState,
       remediation,
       can_resubmit: canResubmit,
+      resubmission,
       resubmitted_at: ((profile as any)?.kyc_resubmitted_at as string | null) ?? null,
       steps: { profile: profileStep, documents: documentsStep, review: reviewStep },
       profile_missing_fields: missingFields,
