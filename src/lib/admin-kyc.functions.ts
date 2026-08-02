@@ -348,7 +348,7 @@ export const decideKyc = createServerFn({ method: "POST" })
     });
 
     // In-app + email/SMS fan-out per the member's notification preferences.
-    await notifyUser({
+    const fanOut = await notifyUser({
       userId: data.member_id,
       category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
       title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
@@ -363,6 +363,18 @@ export const decideKyc = createServerFn({ method: "POST" })
       meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
       dedupeKey: `kyc.${data.decision}:${data.member_id}:${now}`,
     });
+
+    // Mirror the queued SMS into the member-visible notification timeline.
+    if (fanOut.delivered.includes("sms")) {
+      await sb.from("kyc_notifications").insert({
+        member_id: data.member_id,
+        channel: "sms",
+        decision: data.decision,
+        recipient: null,
+        subject: null,
+        status: "pending",
+      });
+    }
 
     // Fire-and-log notification email (never fails the decision)
     try {
@@ -663,7 +675,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           meta: { notes: data.notes || null, member_id: memberId, remediation_items: remediation },
         });
 
-        await notifyUser({
+        const fanOut = await notifyUser({
           userId: memberId,
           category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
           title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
@@ -676,6 +688,17 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
           dedupeKey: `kyc.${data.decision}:${memberId}:${now}`,
         });
+
+        if (fanOut.delivered.includes("sms")) {
+          await sb.from("kyc_notifications").insert({
+            member_id: memberId,
+            channel: "sms",
+            decision: data.decision,
+            recipient: null,
+            subject: null,
+            status: "pending",
+          });
+        }
 
         // Enqueue notification
         try {
