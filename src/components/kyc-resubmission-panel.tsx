@@ -31,14 +31,27 @@ export type RemediationEntry = {
  * Lets a member fix exactly the items a reviewer flagged, then resubmit.
  * Nothing outside the flagged list is editable here.
  */
+export type ResubmissionWindow = {
+  deadline: string | null;
+  deadline_passed: boolean;
+  enforce_deadline: boolean;
+  attempts_used: number;
+  attempt_limit: number;
+  attempts_left: number;
+  window_days: number;
+  blocked_reason: "deadline" | "attempts" | null;
+};
+
 export function KycResubmissionPanel({
   items,
   canResubmit,
   reviewerNotes,
+  window: resubWindow,
 }: {
   items: RemediationEntry[];
   canResubmit: boolean;
   reviewerNotes: string | null;
+  window: ResubmissionWindow;
 }) {
   const qc = useQueryClient();
   const saveFields = useServerFn(saveKycRemediationFields);
@@ -106,6 +119,39 @@ export function KycResubmissionPanel({
           Your verification was returned. Update only the {items.length} item
           {items.length === 1 ? "" : "s"} below, then resubmit — everything else stays as reviewed.
         </p>
+        <div
+          className={
+            "rounded border px-3 py-2 text-sm " +
+            (resubWindow.blocked_reason
+              ? "border-destructive/30 bg-destructive/5 text-destructive"
+              : "border-emerald-deep/10 bg-cream/40 text-emerald-deep/80")
+          }
+          role={resubWindow.blocked_reason ? "alert" : undefined}
+        >
+          {resubWindow.blocked_reason === "deadline" ? (
+            <>
+              <span className="font-semibold">Deadline passed.</span> Your resubmission window closed
+              on {new Date(resubWindow.deadline as string).toLocaleDateString()}. Contact support to
+              have it reopened.
+            </>
+          ) : resubWindow.blocked_reason === "attempts" ? (
+            <>
+              <span className="font-semibold">No attempts left.</span> You have used all{" "}
+              {resubWindow.attempt_limit} resubmission attempts. Contact support for assistance.
+            </>
+          ) : (
+            <>
+              <span className="font-semibold">
+                {resubWindow.attempts_left} of {resubWindow.attempt_limit} attempt
+                {resubWindow.attempt_limit === 1 ? "" : "s"} remaining.
+              </span>{" "}
+              {resubWindow.deadline && resubWindow.enforce_deadline
+                ? `Resubmit by ${new Date(resubWindow.deadline).toLocaleDateString()} (${resubWindow.window_days}-day window).`
+                : "No deadline is currently enforced on your resubmission."}
+            </>
+          )}
+        </div>
+
         {reviewerNotes ? (
           <div className="rounded border border-emerald-deep/10 bg-cream/40 px-3 py-2 text-sm text-emerald-deep/80">
             <span className="font-semibold">Reviewer note:</span> {reviewerNotes}
@@ -185,7 +231,11 @@ export function KycResubmissionPanel({
             </Button>
             {!canResubmit ? (
               <span className="text-[11px] text-emerald-deep/60">
-                {outstanding} item{outstanding === 1 ? "" : "s"} still outstanding.
+                {resubWindow.blocked_reason === "deadline"
+                  ? "The resubmission deadline has passed."
+                  : resubWindow.blocked_reason === "attempts"
+                    ? "All resubmission attempts have been used."
+                    : `${outstanding} item${outstanding === 1 ? "" : "s"} still outstanding.`}
               </span>
             ) : null}
           </div>
