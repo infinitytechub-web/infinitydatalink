@@ -8,10 +8,14 @@ export type PendingUserRow = {
   email: string | null;
   full_name: string | null;
   member_no: string | null;
+  ghana_card: string | null;
+  phone: string | null;
+  membership_type: string | null;
   status: string;
   rejection_reason: string | null;
   created_at: string;
 };
+
 
 async function assertReviewer(supabase: any, userId: string) {
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
@@ -38,6 +42,10 @@ export const listPendingUsers = createServerFn({ method: "GET" })
     z
       .object({
         status: z.enum(["pending", "rejected", "deactivated", "approved", "all"]).default("pending"),
+        membership_type: z
+          .enum(["individual", "group", "department", "institution", "all"])
+          .optional()
+          .default("all"),
         search: z.string().trim().max(200).optional().default(""),
         page: z.number().int().min(1).optional().default(1),
         pageSize: z.number().int().min(5).max(100).optional().default(25),
@@ -49,11 +57,15 @@ export const listPendingUsers = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = (supabaseAdmin as any)
       .from("profiles")
-      .select("id, full_name, member_no, status, rejection_reason, created_at", { count: "exact" });
+      .select(
+        "id, full_name, member_no, ghana_card, phone, membership_type, status, rejection_reason, created_at",
+        { count: "exact" },
+      );
     if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.membership_type !== "all") q = q.eq("membership_type", data.membership_type);
     if (data.search) {
       const s = `%${data.search.replace(/[%,()*]/g, "")}%`;
-      q = q.or(`full_name.ilike.${s},member_no.ilike.${s}`);
+      q = q.or(`full_name.ilike.${s},member_no.ilike.${s},ghana_card.ilike.${s},phone.ilike.${s}`);
     }
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
@@ -73,10 +85,14 @@ export const listPendingUsers = createServerFn({ method: "GET" })
       email: emailMap.get(p.id) ?? null,
       full_name: p.full_name,
       member_no: p.member_no,
+      ghana_card: p.ghana_card ?? null,
+      phone: p.phone ?? null,
+      membership_type: p.membership_type ?? null,
       status: p.status,
       rejection_reason: p.rejection_reason,
       created_at: p.created_at,
     }));
+
     return { rows, total: count ?? rows.length };
   });
 
@@ -87,10 +103,15 @@ export const approveUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const actorRole = await assertReviewerRole(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("approve_user", {
+    // The decision routines are service_role-only (no client write path), so we
+    // pass the already-authenticated officer id explicitly; the routine re-checks
+    // the officer's role before writing.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("approve_user", {
       _uid: data.user_id,
-      _note: data.note ?? undefined,
-    });
+      _note: data.note ?? null,
+      _actor: context.userId,
+    } as never);
     if (error) throw new Error(error.message);
     await recordDecision({
       actorId: context.userId,
@@ -102,8 +123,22 @@ export const approveUser = createServerFn({ method: "POST" })
       subjectId: data.user_id,
       note: data.note ?? null,
     });
+    // In-app notification so the member knows they can now sign in and start
+    // verification. Never fail the approval on notification errors.
+    const { error: notifyErr } = await supabaseAdmin.rpc("notify_user", {
+      _user_id: data.user_id,
+      _category: "account",
+      _title: "Membership approved",
+      _body: "Your registration has been approved. Sign in and complete your KYC verification to unlock your dashboard.",
+      _link: "/app/kyc",
+      _meta: { note: data.note ?? null },
+      _dedupe_key: `user.approved:${data.user_id}`,
+    } as never);
+    if (notifyErr) console.error("approval notification failed", notifyErr.message);
     return { ok: true as const };
   });
+
+
 
 export const rejectUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -114,11 +149,24 @@ export const rejectUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const actorRole = await assertReviewerRole(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("reject_user", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("reject_user", {
       _uid: data.user_id,
       _reason: data.reason,
-    });
+      _actor: context.userId,
+    } as never);
     if (error) throw new Error(error.message);
+    const { error: notifyErr } = await supabaseAdmin.rpc("notify_user", {
+      _user_id: data.user_id,
+      _category: "account",
+      _title: "Registration not approved",
+      _body: `Your registration could not be approved. Reason: ${data.reason}`,
+      _link: "/auth",
+      _meta: { reason: data.reason },
+      _dedupe_key: `user.rejected:${data.user_id}`,
+    } as never);
+    if (notifyErr) console.error("rejection notification failed", notifyErr.message);
+
     await recordDecision({
       actorId: context.userId,
       actorEmail: (context.claims as any)?.email ?? null,
@@ -145,12 +193,15 @@ export const setUserActive = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const actorRole = await assertReviewerRole(context.supabase, context.userId);
-    const { error } = await context.supabase.rpc("set_user_active", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("set_user_active", {
       _uid: data.user_id,
       _active: data.active,
-      _reason: data.reason ?? undefined,
-    });
+      _reason: data.reason ?? null,
+      _actor: context.userId,
+    } as never);
     if (error) throw new Error(error.message);
+
     await recordDecision({
       actorId: context.userId,
       actorEmail: (context.claims as any)?.email ?? null,

@@ -2030,6 +2030,7 @@ export type Database = {
           employer: string | null
           full_name: string | null
           gender: string | null
+          ghana_card: string | null
           id: string
           kyc: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at: string | null
@@ -2037,7 +2038,9 @@ export type Database = {
           kyc_notes: string | null
           kyc_reviewed_at: string | null
           kyc_reviewed_by: string | null
+          kyc_submitted_at: string | null
           member_no: string | null
+          membership_type: string
           national_id: string | null
           occupation: string | null
           phone: string | null
@@ -2057,6 +2060,7 @@ export type Database = {
           employer?: string | null
           full_name?: string | null
           gender?: string | null
+          ghana_card?: string | null
           id: string
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
@@ -2064,7 +2068,9 @@ export type Database = {
           kyc_notes?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
+          kyc_submitted_at?: string | null
           member_no?: string | null
+          membership_type?: string
           national_id?: string | null
           occupation?: string | null
           phone?: string | null
@@ -2084,6 +2090,7 @@ export type Database = {
           employer?: string | null
           full_name?: string | null
           gender?: string | null
+          ghana_card?: string | null
           id?: string
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
@@ -2091,7 +2098,9 @@ export type Database = {
           kyc_notes?: string | null
           kyc_reviewed_at?: string | null
           kyc_reviewed_by?: string | null
+          kyc_submitted_at?: string | null
           member_no?: string | null
+          membership_type?: string
           national_id?: string | null
           occupation?: string | null
           phone?: string | null
@@ -3662,10 +3671,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      approve_user: {
-        Args: { _note?: string; _uid: string }
-        Returns: undefined
-      }
+      approve_user:
+        | { Args: { _note?: string; _uid: string }; Returns: undefined }
+        | {
+            Args: { _actor: string; _note: string; _uid: string }
+            Returns: undefined
+          }
       assess_loan_penalties: { Args: never; Returns: Json }
       break_fixed_deposit: {
         Args: { _actor_id?: string; _id: string; _reason: string }
@@ -3768,6 +3779,10 @@ export type Database = {
           _term_months: number
           _user_id: string
         }
+        Returns: Json
+      }
+      check_registration_availability: {
+        Args: { _ghana_card: string; _phone: string }
         Returns: Json
       }
       claim_cron_run: {
@@ -4749,10 +4764,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      reject_user: {
-        Args: { _reason: string; _uid: string }
-        Returns: undefined
-      }
+      reject_user:
+        | { Args: { _reason: string; _uid: string }; Returns: undefined }
+        | {
+            Args: { _actor: string; _reason: string; _uid: string }
+            Returns: undefined
+          }
       release_loan_collateral: {
         Args: { _actor_id: string; _collateral_id: string; _note: string }
         Returns: {
@@ -5056,10 +5073,20 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      set_user_active: {
-        Args: { _active: boolean; _reason?: string; _uid: string }
-        Returns: undefined
-      }
+      set_user_active:
+        | {
+            Args: { _active: boolean; _reason?: string; _uid: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _active: boolean
+              _actor: string
+              _reason: string
+              _uid: string
+            }
+            Returns: undefined
+          }
       submit_dividend_run_for_approval: {
         Args: { _actor_id: string; _run_id: string }
         Returns: {

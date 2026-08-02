@@ -23,6 +23,12 @@ import {
   setUserActive,
   type PendingUserRow,
 } from "@/lib/admin-approvals.functions";
+import {
+  MEMBERSHIP_TYPES,
+  MEMBERSHIP_TYPE_LABEL,
+  type MembershipType,
+} from "@/lib/member-registration";
+
 
 export const Route = createFileRoute("/_admin/admin/approvals")({
   head: () => ({
@@ -35,6 +41,8 @@ export const Route = createFileRoute("/_admin/admin/approvals")({
 });
 
 type Status = "pending" | "approved" | "rejected" | "deactivated" | "all";
+type MembershipFilter = MembershipType | "all";
+
 
 function ApprovalsPage() {
   const { hasRole, hasAnyPermission, loading } = useAuth();
@@ -47,6 +55,7 @@ function ApprovalsPage() {
 function ApprovalsInner() {
   const qc = useQueryClient();
   const [status, setStatus] = useState<Status>("pending");
+  const [membershipType, setMembershipType] = useState<MembershipFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 25;
@@ -57,9 +66,11 @@ function ApprovalsInner() {
   const activeFn = useServerFn(setUserActive);
 
   const query = useQuery({
-    queryKey: ["admin-approvals", status, search, page],
-    queryFn: () => listFn({ data: { status, search, page, pageSize } }),
+    queryKey: ["admin-approvals", status, membershipType, search, page],
+    queryFn: () =>
+      listFn({ data: { status, membership_type: membershipType, search, page, pageSize } }),
   });
+
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-approvals"] });
 
@@ -124,8 +135,26 @@ function ApprovalsInner() {
               <option value="all">All</option>
             </select>
           </div>
+          <div className="w-56">
+            <Label className="text-xs">Membership type</Label>
+            <select
+              value={membershipType}
+              onChange={(e) => {
+                setMembershipType(e.target.value as MembershipFilter);
+                setPage(1);
+              }}
+              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="all">All categories</option>
+              {MEMBERSHIP_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {MEMBERSHIP_TYPE_LABEL[t]}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="min-w-[240px] flex-1">
-            <Label className="text-xs">Search (name or member no.)</Label>
+            <Label className="text-xs">Search (name, member no., Ghana Card or phone)</Label>
             <Input
               value={search}
               onChange={(e) => {
@@ -135,6 +164,7 @@ function ApprovalsInner() {
               placeholder="Search…"
             />
           </div>
+
           <div className="text-xs text-muted-foreground">
             {total} result{total === 1 ? "" : "s"}
           </div>
@@ -154,6 +184,10 @@ function ApprovalsInner() {
                   <th className="py-2 pr-3">Member</th>
                   <th className="py-2 pr-3">Email</th>
                   <th className="py-2 pr-3">Member No.</th>
+                  <th className="py-2 pr-3">Ghana Card</th>
+                  <th className="py-2 pr-3">Phone</th>
+                  <th className="py-2 pr-3">Category</th>
+
                   <th className="py-2 pr-3">Status</th>
                   <th className="py-2 pr-3">Registered</th>
                   <th className="py-2 pr-3 text-right">Actions</th>
@@ -165,6 +199,10 @@ function ApprovalsInner() {
                     <td className="py-2 pr-3 font-medium">{r.full_name ?? "—"}</td>
                     <td className="py-2 pr-3 text-muted-foreground">{r.email ?? "—"}</td>
                     <td className="py-2 pr-3">{r.member_no ?? "—"}</td>
+                    <td className="py-2 pr-3 font-mono text-xs">{r.ghana_card ?? "—"}</td>
+                    <td className="py-2 pr-3 text-xs">{r.phone ?? "—"}</td>
+                    <td className="py-2 pr-3 text-xs capitalize">{r.membership_type ?? "—"}</td>
+
                     <td className="py-2 pr-3">
                       <StatusPill status={r.status} />
                       {r.status === "rejected" && r.rejection_reason ? (
