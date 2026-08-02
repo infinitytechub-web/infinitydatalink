@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { CheckCircle2, Circle, Clock, ShieldCheck, ShieldAlert, Mail, Smartphone } from "lucide-react";
+import { KycResubmissionPanel } from "@/components/kyc-resubmission-panel";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMyKycStatus, type MyKycStatus, type KycStepState } from "@/lib/member-kyc.functions";
@@ -99,6 +100,14 @@ function Body() {
           )}
         </SectionCard>
       </div>
+
+      {data.remediation.length > 0 && data.kyc === "rejected" ? (
+        <KycResubmissionPanel
+          items={data.remediation}
+          canResubmit={data.can_resubmit}
+          reviewerNotes={data.latest_decision?.notes ?? null}
+        />
+      ) : null}
 
       {data.latest_decision ? (
         <SectionCard
