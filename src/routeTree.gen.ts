@@ -42,6 +42,7 @@ import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.se
 import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.savings'
 import { Route as AdminAdminRolesRouteImport } from './routes/_admin.admin.roles'
 import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.reports'
+import { Route as AdminAdminRelationshipsRouteImport } from './routes/_admin.admin.relationships'
 import { Route as AdminAdminRecurringRouteImport } from './routes/_admin.admin.recurring'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
 import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.admin.notifications'
@@ -277,6 +278,11 @@ const AdminAdminRolesRoute = AdminAdminRolesRouteImport.update({
 const AdminAdminReportsRoute = AdminAdminReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminRelationshipsRoute = AdminAdminRelationshipsRouteImport.update({
+  id: '/relationships',
+  path: '/relationships',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminRecurringRoute = AdminAdminRecurringRouteImport.update({
@@ -711,6 +717,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AdminAdminNotificationsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
+  '/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
@@ -813,6 +820,7 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AdminAdminNotificationsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
+  '/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
@@ -921,6 +929,7 @@ export interface FileRoutesById {
   '/_admin/admin/notifications': typeof AdminAdminNotificationsRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/recurring': typeof AdminAdminRecurringRoute
+  '/_admin/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/_admin/admin/reports': typeof AdminAdminReportsRoute
   '/_admin/admin/roles': typeof AdminAdminRolesRoute
   '/_admin/admin/savings': typeof AdminAdminSavingsRouteWithChildren
@@ -1029,6 +1038,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/payments'
     | '/admin/recurring'
+    | '/admin/relationships'
     | '/admin/reports'
     | '/admin/roles'
     | '/admin/savings'
@@ -1131,6 +1141,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/payments'
     | '/admin/recurring'
+    | '/admin/relationships'
     | '/admin/reports'
     | '/admin/roles'
     | '/admin/savings'
@@ -1238,6 +1249,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/notifications'
     | '/_admin/admin/payments'
     | '/_admin/admin/recurring'
+    | '/_admin/admin/relationships'
     | '/_admin/admin/reports'
     | '/_admin/admin/roles'
     | '/_admin/admin/savings'
@@ -1562,6 +1574,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/admin/reports'
       preLoaderRoute: typeof AdminAdminReportsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/relationships': {
+      id: '/_admin/admin/relationships'
+      path: '/relationships'
+      fullPath: '/admin/relationships'
+      preLoaderRoute: typeof AdminAdminRelationshipsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/recurring': {
@@ -2241,6 +2260,7 @@ interface AdminAdminRouteChildren {
   AdminAdminNotificationsRoute: typeof AdminAdminNotificationsRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminRecurringRoute: typeof AdminAdminRecurringRoute
+  AdminAdminRelationshipsRoute: typeof AdminAdminRelationshipsRoute
   AdminAdminReportsRoute: typeof AdminAdminReportsRoute
   AdminAdminRolesRoute: typeof AdminAdminRolesRoute
   AdminAdminSavingsRoute: typeof AdminAdminSavingsRouteWithChildren
@@ -2277,6 +2297,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminNotificationsRoute: AdminAdminNotificationsRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminRecurringRoute: AdminAdminRecurringRoute,
+  AdminAdminRelationshipsRoute: AdminAdminRelationshipsRoute,
   AdminAdminReportsRoute: AdminAdminReportsRoute,
   AdminAdminRolesRoute: AdminAdminRolesRoute,
   AdminAdminSavingsRoute: AdminAdminSavingsRouteWithChildren,
