@@ -2076,6 +2076,7 @@ export type Database = {
           kyc_attempts: number
           kyc_max_attempts: number | null
           kyc_notes: string | null
+          kyc_rejection_snapshot: Json | null
           kyc_remediation_items: Json
           kyc_resubmission_deadline: string | null
           kyc_resubmitted_at: string | null
@@ -2111,6 +2112,7 @@ export type Database = {
           kyc_attempts?: number
           kyc_max_attempts?: number | null
           kyc_notes?: string | null
+          kyc_rejection_snapshot?: Json | null
           kyc_remediation_items?: Json
           kyc_resubmission_deadline?: string | null
           kyc_resubmitted_at?: string | null
@@ -2146,6 +2148,7 @@ export type Database = {
           kyc_attempts?: number
           kyc_max_attempts?: number | null
           kyc_notes?: string | null
+          kyc_rejection_snapshot?: Json | null
           kyc_remediation_items?: Json
           kyc_resubmission_deadline?: string | null
           kyc_resubmitted_at?: string | null

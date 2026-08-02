@@ -4,7 +4,14 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
 import { notifyUser } from "@/lib/notify.server";
-import { REMEDIATION_DOC_TYPES, REMEDIATION_KEYS, remediationLabel } from "@/lib/kyc-remediation";
+import {
+  ALL_REMEDIATION_ITEMS,
+  REMEDIATION_DOC_TYPES,
+  REMEDIATION_KEYS,
+  REMEDIATION_PROFILE_FIELDS,
+  parseRemediationItems,
+  remediationLabel,
+} from "@/lib/kyc-remediation";
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -325,6 +332,55 @@ async function resubmissionStamp(
   };
 }
 
+/**
+ * Captures the state a reviewer actually saw when rejecting, so a later
+ * resubmission can be diffed field-by-field and file-by-file. Stored on the
+ * profile row because it is decision evidence, not member-editable data.
+ */
+async function captureRejectionSnapshot(
+  sb: { from: (t: string) => any },
+  memberId: string,
+): Promise<any> {
+  const [{ data: prof }, { data: docs }] = await Promise.all([
+    sb
+      .from("profiles")
+      .select(REMEDIATION_PROFILE_FIELDS.join(", "))
+      .eq("id", memberId)
+      .maybeSingle(),
+    sb
+      .from("kyc_documents")
+      .select("id, doc_type, storage_path, size_bytes, mime_type, created_at")
+      .eq("member_id", memberId),
+  ]);
+  if (!prof) return null;
+
+  // Keep only the newest upload per doc type — that is the one under review.
+  const latest = new Map<string, any>();
+  for (const d of (docs ?? []) as any[]) {
+    const cur = latest.get(d.doc_type);
+    if (!cur || String(d.created_at) > String(cur.created_at)) latest.set(d.doc_type, d);
+  }
+
+  return {
+    captured_at: new Date().toISOString(),
+    fields: Object.fromEntries(
+      REMEDIATION_PROFILE_FIELDS.map((f) => [f, ((prof as any)[f] ?? null) as string | null]),
+    ),
+    documents: Object.fromEntries(
+      Array.from(latest.entries()).map(([type, d]) => [
+        type,
+        {
+          id: d.id as string,
+          storage_path: d.storage_path as string,
+          size_bytes: d.size_bytes as number | null,
+          mime_type: d.mime_type as string | null,
+          created_at: d.created_at as string,
+        },
+      ]),
+    ),
+  };
+}
+
 export const decideKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => decideInput.parse(data))
@@ -337,6 +393,8 @@ export const decideKyc = createServerFn({ method: "POST" })
 
     const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
     const window = await resubmissionStamp(sb, data.decision);
+    const snapshot =
+      data.decision === "rejected" ? await captureRejectionSnapshot(sb, data.member_id) : null;
 
     const { data: profile, error: pErr } = await sb
       .from("profiles")
@@ -346,6 +404,7 @@ export const decideKyc = createServerFn({ method: "POST" })
         kyc_reviewed_by: context.userId,
         kyc_reviewed_at: now,
         kyc_remediation_items: remediation,
+        kyc_rejection_snapshot: snapshot,
         ...window,
       })
       .eq("id", data.member_id)
@@ -676,6 +735,8 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
 
     for (const memberId of data.member_ids) {
       try {
+        const snapshot =
+          data.decision === "rejected" ? await captureRejectionSnapshot(sb, memberId) : null;
         const { data: prof, error: pErr } = await sb
           .from("profiles")
           .update({
@@ -684,6 +745,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
             kyc_reviewed_by: context.userId,
             kyc_reviewed_at: now,
             kyc_remediation_items: remediation,
+            kyc_rejection_snapshot: snapshot,
             ...window,
           })
           .eq("id", memberId)
@@ -831,4 +893,138 @@ export const updateKycResubmissionSettings = createServerFn({ method: "POST" })
     });
 
     return { ok: true as const };
+  });
+
+export type KycDiffRow = {
+  key: string;
+  kind: "profile" | "document";
+  label: string;
+  requested: boolean;
+  changed: boolean;
+  /** Value / file the reviewer saw at rejection time. */
+  before: string | null;
+  /** Current value / file after the member's revisions. */
+  after: string | null;
+  before_url: string | null;
+  after_url: string | null;
+  before_at: string | null;
+  after_at: string | null;
+};
+
+export type KycResubmissionDiff = {
+  member_id: string;
+  has_snapshot: boolean;
+  captured_at: string | null;
+  reviewed_at: string | null;
+  resubmitted_at: string | null;
+  attempts_used: number;
+  rows: KycDiffRow[];
+  changed_count: number;
+  unchanged_requested_count: number;
+};
+
+/**
+ * Field-by-field and file-by-file comparison between what a reviewer rejected
+ * and what the member resubmitted. Requested items are listed first so the
+ * reviewer can confirm each flagged item actually moved.
+ */
+export const getKycResubmissionDiff = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ member_id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }): Promise<KycResubmissionDiff> => {
+    await assertKycAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
+
+    const [{ data: profile, error }, { data: docs }] = await Promise.all([
+      sb
+        .from("profiles")
+        .select(
+          `${REMEDIATION_PROFILE_FIELDS.join(", ")}, kyc_remediation_items, kyc_rejection_snapshot, kyc_reviewed_at, kyc_resubmitted_at, kyc_attempts`,
+        )
+        .eq("id", data.member_id)
+        .maybeSingle(),
+      sb
+        .from("kyc_documents")
+        .select("id, doc_type, storage_path, size_bytes, mime_type, created_at")
+        .eq("member_id", data.member_id)
+        .order("created_at", { ascending: false }),
+    ]);
+    if (error) throw new Error(error.message);
+    if (!profile) throw new Error("Member not found");
+
+    const snapshot = ((profile as any).kyc_rejection_snapshot ?? null) as any;
+    const snapFields = (snapshot?.fields ?? {}) as Record<string, string | null>;
+    const snapDocs = (snapshot?.documents ?? {}) as Record<string, any>;
+    const requested = new Set(
+      parseRemediationItems((profile as any).kyc_remediation_items).map((i) => i.key),
+    );
+
+    const latestDoc = new Map<string, any>();
+    for (const d of (docs ?? []) as any[]) {
+      if (!latestDoc.has(d.doc_type)) latestDoc.set(d.doc_type, d);
+    }
+
+    const sign = async (path: string | null | undefined) => {
+      if (!path) return null;
+      const { data: s } = await sb.storage.from(BUCKET).createSignedUrl(path, 300);
+      return s?.signedUrl ?? null;
+    };
+
+    const fileLabel = (d: any | null) =>
+      d ? `${d.storage_path.split("/").pop()} (${Math.round(Number(d.size_bytes ?? 0) / 1024)} KB)` : null;
+
+    const rows: KycDiffRow[] = [];
+    for (const item of ALL_REMEDIATION_ITEMS) {
+      if (item.kind === "profile") {
+        const before = snapshot ? ((snapFields[item.field] ?? null) as string | null) : null;
+        const after = ((profile as any)[item.field] ?? null) as string | null;
+        rows.push({
+          key: item.key,
+          kind: "profile",
+          label: item.label,
+          requested: requested.has(item.key),
+          changed: Boolean(snapshot) && (before ?? "") !== (after ?? ""),
+          before,
+          after,
+          before_url: null,
+          after_url: null,
+          before_at: null,
+          after_at: null,
+        });
+        continue;
+      }
+      const beforeDoc = snapDocs[item.docType] ?? null;
+      const afterDoc = latestDoc.get(item.docType) ?? null;
+      const changed =
+        Boolean(snapshot) &&
+        (beforeDoc?.id ?? null) !== (afterDoc?.id ?? null);
+      rows.push({
+        key: item.key,
+        kind: "document",
+        label: item.label,
+        requested: requested.has(item.key),
+        changed,
+        before: fileLabel(beforeDoc),
+        after: fileLabel(afterDoc),
+        before_url: await sign(beforeDoc?.storage_path),
+        after_url: await sign(afterDoc?.storage_path),
+        before_at: (beforeDoc?.created_at as string | null) ?? null,
+        after_at: (afterDoc?.created_at as string | null) ?? null,
+      });
+    }
+
+    // Requested items first, then anything else that moved.
+    rows.sort((a, b) => Number(b.requested) - Number(a.requested) || Number(b.changed) - Number(a.changed));
+
+    return {
+      member_id: data.member_id,
+      has_snapshot: Boolean(snapshot),
+      captured_at: (snapshot?.captured_at as string | null) ?? null,
+      reviewed_at: ((profile as any).kyc_reviewed_at as string | null) ?? null,
+      resubmitted_at: ((profile as any).kyc_resubmitted_at as string | null) ?? null,
+      attempts_used: Number((profile as any).kyc_attempts ?? 0),
+      rows,
+      changed_count: rows.filter((r) => r.changed).length,
+      unchanged_requested_count: rows.filter((r) => r.requested && !r.changed).length,
+    };
   });
