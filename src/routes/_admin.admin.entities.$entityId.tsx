@@ -13,6 +13,7 @@ import {
   StatusPill,
 } from "@/components/primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { KycRecordActions } from "@/components/kyc-record-actions";
 import {
   Dialog,
   DialogContent,
