@@ -1254,7 +1254,10 @@ export type Database = {
           deadline_days: number
           enforce_deadline: boolean
           id: boolean
+          low_attempts_threshold: number
           max_attempts: number
+          reminder_enabled: boolean
+          reminder_lead_days: number
           updated_at: string
           updated_by: string | null
         }
@@ -1265,7 +1268,10 @@ export type Database = {
           deadline_days?: number
           enforce_deadline?: boolean
           id?: boolean
+          low_attempts_threshold?: number
           max_attempts?: number
+          reminder_enabled?: boolean
+          reminder_lead_days?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -1276,7 +1282,10 @@ export type Database = {
           deadline_days?: number
           enforce_deadline?: boolean
           id?: boolean
+          low_attempts_threshold?: number
           max_attempts?: number
+          reminder_enabled?: boolean
+          reminder_lead_days?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -2088,8 +2097,12 @@ export type Database = {
           kyc_assigned_at: string | null
           kyc_assigned_to: string | null
           kyc_attempts: number
+          kyc_deadline_expired_notified_at: string | null
+          kyc_deadline_reminded_at: string | null
+          kyc_final_reminded_at: string | null
           kyc_flag_reason: string | null
           kyc_flagged_at: string | null
+          kyc_low_attempts_reminded_at: string | null
           kyc_max_attempts: number | null
           kyc_notes: string | null
           kyc_rejection_snapshot: Json | null
@@ -2131,8 +2144,12 @@ export type Database = {
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
           kyc_attempts?: number
+          kyc_deadline_expired_notified_at?: string | null
+          kyc_deadline_reminded_at?: string | null
+          kyc_final_reminded_at?: string | null
           kyc_flag_reason?: string | null
           kyc_flagged_at?: string | null
+          kyc_low_attempts_reminded_at?: string | null
           kyc_max_attempts?: number | null
           kyc_notes?: string | null
           kyc_rejection_snapshot?: Json | null
@@ -2174,8 +2191,12 @@ export type Database = {
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
           kyc_attempts?: number
+          kyc_deadline_expired_notified_at?: string | null
+          kyc_deadline_reminded_at?: string | null
+          kyc_final_reminded_at?: string | null
           kyc_flag_reason?: string | null
           kyc_flagged_at?: string | null
+          kyc_low_attempts_reminded_at?: string | null
           kyc_max_attempts?: number | null
           kyc_notes?: string | null
           kyc_rejection_snapshot?: Json | null
@@ -5103,6 +5124,15 @@ export type Database = {
             Args: { _actor_id?: string; _reason?: string; _user_id: string }
             Returns: undefined
           }
+      run_kyc_resubmission_reminders: {
+        Args: never
+        Returns: {
+          deadline_soon: number
+          expired: number
+          final_day: number
+          low_attempts: number
+        }[]
+      }
       run_loan_arrears_job: {
         Args: { _caller?: string; _run_key?: string }
         Returns: Json

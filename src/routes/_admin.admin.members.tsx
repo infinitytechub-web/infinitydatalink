@@ -685,6 +685,9 @@ function ResubmissionRules() {
   const [minSeverity, setMinSeverity] = useState<"low" | "medium" | "high">(
     data.auto_flag_min_severity,
   );
+  const [remind, setRemind] = useState(data.reminder_enabled);
+  const [lead, setLead] = useState(String(data.reminder_lead_days));
+  const [lowLeft, setLowLeft] = useState(String(data.low_attempts_threshold));
 
   useEffect(() => {
     setDays(String(data.deadline_days));
@@ -692,12 +695,18 @@ function ResubmissionRules() {
     setEnforce(data.enforce_deadline);
     setAutoFlag(data.auto_flag_enabled);
     setMinSeverity(data.auto_flag_min_severity);
+    setRemind(data.reminder_enabled);
+    setLead(String(data.reminder_lead_days));
+    setLowLeft(String(data.low_attempts_threshold));
   }, [
     data.deadline_days,
     data.max_attempts,
     data.enforce_deadline,
     data.auto_flag_enabled,
     data.auto_flag_min_severity,
+    data.reminder_enabled,
+    data.reminder_lead_days,
+    data.low_attempts_threshold,
   ]);
 
   const save = useMutation({
@@ -709,8 +718,12 @@ function ResubmissionRules() {
           enforce_deadline: enforce,
           auto_flag_enabled: autoFlag,
           auto_flag_min_severity: minSeverity,
+          reminder_enabled: remind,
+          reminder_lead_days: Number(lead),
+          low_attempts_threshold: Number(lowLeft),
         },
       }),
+
 
     onSuccess: () => {
       toast.success("Resubmission rules saved");
@@ -721,9 +734,14 @@ function ResubmissionRules() {
 
   const dayNum = Number(days);
   const attemptNum = Number(attempts);
+  const leadNum = Number(lead);
+  const lowNum = Number(lowLeft);
   const valid =
     Number.isInteger(dayNum) && dayNum >= 1 && dayNum <= 365 &&
-    Number.isInteger(attemptNum) && attemptNum >= 1 && attemptNum <= 20;
+    Number.isInteger(attemptNum) && attemptNum >= 1 && attemptNum <= 20 &&
+    Number.isInteger(leadNum) && leadNum >= 0 && leadNum <= 60 &&
+    Number.isInteger(lowNum) && lowNum >= 0 && lowNum <= 20;
+
 
   return (
     <SectionCard title="Resubmission deadlines & attempt limits">
@@ -781,6 +799,39 @@ function ResubmissionRules() {
             <option value="high">High</option>
           </select>
         </label>
+        <label className="flex items-center gap-2 pb-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={remind}
+            onChange={(e) => setRemind(e.target.checked)}
+            className="h-3.5 w-3.5 accent-primary"
+          />
+          Send automated deadline &amp; attempt reminders
+        </label>
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Remind (days before deadline)
+          <input
+            type="number"
+            min={0}
+            max={60}
+            value={lead}
+            disabled={!remind}
+            onChange={(e) => setLead(e.target.value)}
+            className="w-28 rounded border border-border bg-card px-2 py-1.5 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary disabled:opacity-50"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Warn at attempts left
+          <input
+            type="number"
+            min={0}
+            max={20}
+            value={lowLeft}
+            disabled={!remind}
+            onChange={(e) => setLowLeft(e.target.value)}
+            className="w-28 rounded border border-border bg-card px-2 py-1.5 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary disabled:opacity-50"
+          />
+        </label>
 
         <button
           type="button"
@@ -793,9 +844,11 @@ function ResubmissionRules() {
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground">
         Applies to rejections taken from now on — members already rejected keep the deadline and
-        allowance recorded at the time of their decision.
+        allowance recorded at the time of their decision. Reminders run once a day and each member
+        receives a given notice only once.
         {data.updated_at ? ` Last changed ${new Date(data.updated_at).toLocaleString()}.` : ""}
       </p>
+
     </SectionCard>
   );
 }
