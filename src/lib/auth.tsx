@@ -1,6 +1,15 @@
 // Supabase-backed auth context with RBAC. Roles come from the `user_roles` table.
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
+import {
+  can as canDo,
+  capabilitiesForRoles,
+  loadCapabilities,
+  type Capability,
+  type CapabilitySet,
+  type PermAction,
+  type PermModule,
+} from "@/lib/permissions";
 
 // The Supabase client (and the whole supabase-js runtime) is loaded lazily so
 // public pages — landing, marketing routes — don't pay for it in the initial
@@ -152,11 +161,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // events (email/metadata edits) don't trigger duplicate roles+profile
   // fetches every time Supabase refreshes the token.
   const lastHydratedId = useRef<string | null>(null);
+  const [capabilities, setCapabilities] = useState<Set<Capability>>(() => new Set());
 
   const hydrate = async (authUser: User | null, opts: { force?: boolean } = {}) => {
     if (!authUser) {
       lastHydratedId.current = null;
       setUser(null);
+      setCapabilities(new Set());
       return;
     }
     if (!opts.force && lastHydratedId.current === authUser.id) {
@@ -166,6 +177,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     lastHydratedId.current = authUser.id;
     const [roles, statusInfo] = await Promise.all([loadRoles(authUser.id), loadStatus(authUser.id)]);
     setUser(toSessionUser(authUser, roles, statusInfo.status, statusInfo.rejectionReason));
+    // Capabilities come from the database matrix so the UI mirrors what RLS and
+    // the server functions will actually allow.
+    try {
+      const supabase = await getSupabase();
+      setCapabilities(await loadCapabilities(supabase, roles));
+    } catch {
+      setCapabilities(capabilitiesForRoles(roles));
+    }
   };
 
   useEffect(() => {
@@ -216,17 +235,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const supabase = await getSupabase();
       await supabase.auth.signOut();
       setUser(null);
+      setCapabilities(new Set());
     };
     const refresh = async () => {
       const supabase = await getSupabase();
       const { data } = await supabase.auth.getSession();
       await hydrate(data.session?.user ?? null);
     };
+    const can = (module: PermModule, action: PermAction) => canDo(capabilities, module, action);
     return {
-      user, loading, permissions, isMember, isAdmin,
-      hasRole, hasPermission, hasAnyPermission, signOut, refresh,
+      user, loading, permissions, capabilities: capabilities as CapabilitySet, isMember, isAdmin,
+      hasRole, hasPermission, hasAnyPermission, can, signOut, refresh,
     };
-  }, [user, loading, permissions]);
+  }, [user, loading, permissions, capabilities]);
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
