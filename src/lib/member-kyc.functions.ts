@@ -294,7 +294,7 @@ export const saveKycRemediationFields = createServerFn({ method: "POST" })
 
     const { data: profile, error: pErr } = await sb
       .from("profiles")
-      .select("kyc, kyc_remediation_items")
+      .select("kyc, kyc_remediation_items, is_minor, date_of_birth")
       .eq("id", context.userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
@@ -332,6 +332,21 @@ export const saveKycRemediationFields = createServerFn({ method: "POST" })
 
     const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
     if (error) throw new Error(error.message);
+
+    if ("date_of_birth" in patch) {
+      const { alertMinorFlipIfChanged } = await import("@/lib/minor-flip-alert.server");
+      await alertMinorFlipIfChanged({
+        memberId: context.userId,
+        before: {
+          is_minor: ((profile as any)?.is_minor as boolean | null) ?? null,
+          date_of_birth: ((profile as any)?.date_of_birth as string | null) ?? null,
+        },
+        actorId: context.userId,
+        actorEmail: (context.claims as any)?.email ?? null,
+        actorRole: "member",
+        source: "member.kyc_remediation",
+      });
+    }
 
     await writeAudit({
       actor_id: context.userId,
