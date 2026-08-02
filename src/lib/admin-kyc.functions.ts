@@ -464,6 +464,19 @@ export const decideKyc = createServerFn({ method: "POST" })
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const now = new Date().toISOString();
 
+    // Minor accounts: guardian checklist + longer note + fresh re-authentication
+    // are enforced before anything is written.
+    const minor = await enforceMinorReview(sb, {
+      memberId: data.member_id,
+      decision: data.decision,
+      notes: data.notes,
+      minorReview: data.minor_review,
+      stepUpToken: data.step_up_token,
+      officerId: context.userId,
+    });
+
+
+
     const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
     const window = await resubmissionStamp(sb, data.decision);
     const snapshot =
