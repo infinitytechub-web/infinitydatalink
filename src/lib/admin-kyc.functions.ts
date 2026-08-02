@@ -194,8 +194,12 @@ export type MemberKycDetail = {
     member_no: string | null;
     phone: string | null;
     national_id: string | null;
+    national_id_type: string | null;
     region: string | null;
+    district: string | null;
     date_of_birth: string | null;
+    is_minor: boolean;
+
     gender: string | null;
     digital_address: string | null;
     address_line: string | null;
