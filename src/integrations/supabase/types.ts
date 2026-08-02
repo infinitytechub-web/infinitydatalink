@@ -1875,8 +1875,10 @@ export type Database = {
           id: string
           member_id: string
           national_id: string | null
+          national_id_type: string | null
           phone: string | null
           relationship: string
+          relationship_code: string | null
           updated_at: string
         }
         Insert: {
@@ -1887,8 +1889,10 @@ export type Database = {
           id?: string
           member_id: string
           national_id?: string | null
+          national_id_type?: string | null
           phone?: string | null
           relationship: string
+          relationship_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -1899,8 +1903,10 @@ export type Database = {
           id?: string
           member_id?: string
           national_id?: string | null
+          national_id_type?: string | null
           phone?: string | null
           relationship?: string
+          relationship_code?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2065,11 +2071,13 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           digital_address: string | null
+          district: string | null
           employer: string | null
           full_name: string | null
           gender: string | null
           ghana_card: string | null
           id: string
+          is_minor: boolean
           kyc: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at: string | null
           kyc_assigned_to: string | null
@@ -2086,6 +2094,7 @@ export type Database = {
           member_no: string | null
           membership_type: string
           national_id: string | null
+          national_id_type: string | null
           occupation: string | null
           phone: string | null
           region: string | null
@@ -2101,11 +2110,13 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           digital_address?: string | null
+          district?: string | null
           employer?: string | null
           full_name?: string | null
           gender?: string | null
           ghana_card?: string | null
           id: string
+          is_minor?: boolean
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
@@ -2122,6 +2133,7 @@ export type Database = {
           member_no?: string | null
           membership_type?: string
           national_id?: string | null
+          national_id_type?: string | null
           occupation?: string | null
           phone?: string | null
           region?: string | null
@@ -2137,11 +2149,13 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           digital_address?: string | null
+          district?: string | null
           employer?: string | null
           full_name?: string | null
           gender?: string | null
           ghana_card?: string | null
           id?: string
+          is_minor?: boolean
           kyc?: Database["public"]["Enums"]["kyc_status"]
           kyc_assigned_at?: string | null
           kyc_assigned_to?: string | null
@@ -2158,6 +2172,7 @@ export type Database = {
           member_no?: string | null
           membership_type?: string
           national_id?: string | null
+          national_id_type?: string | null
           occupation?: string | null
           phone?: string | null
           region?: string | null
@@ -2195,6 +2210,36 @@ export type Database = {
           id?: string
           payload?: Json
           purge_after?: string
+        }
+        Relationships: []
+      }
+      relationship_types: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
