@@ -178,17 +178,11 @@ function MemberDetailBody() {
 
 
           <div id="kyc-documents" />
-          <SectionCard title="Documents">
-            {documents.length === 0 ? (
-              <div className="p-6 text-sm text-emerald-deep/60">No documents uploaded.</div>
-            ) : (
-              <ul className="divide-y divide-emerald-deep/5">
-                {documents.map((d) => (
-                  <DocumentRow key={d.id} doc={d} />
-                ))}
-              </ul>
-            )}
-          </SectionCard>
+          <DocumentPreviewPanel
+            documents={documents}
+            isMinor={resolveMinorStatus(profile.date_of_birth, profile.is_minor).effective}
+          />
+
 
           <SectionCard title="Next of kin">
             <div
