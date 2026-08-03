@@ -7,7 +7,11 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getBranding, type BrandingSettings } from "@/lib/branding.functions";
+import {
+  getBranding,
+  getBrandingVersion,
+  type BrandingSettings,
+} from "@/lib/branding.functions";
 
 const DEFAULTS: BrandingSettings = {
   app_name: "IT-360 CashApp",
@@ -19,6 +23,8 @@ const DEFAULTS: BrandingSettings = {
   favicon_url: null,
   logo_path: null,
   favicon_path: null,
+  logo_version: 1,
+  favicon_version: 1,
   login_hero_url: null,
   login_tagline: null,
   org_legal_name: null,
@@ -88,6 +94,8 @@ function applyBranding(branding: BrandingSettings) {
       link.rel = "icon";
       document.head.appendChild(link);
     }
+    // The URL already carries ?v=<favicon_version>, so assigning it replaces
+    // any cached icon immediately.
     link.href = branding.favicon_url;
   }
 }
@@ -104,6 +112,31 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
 
   const branding = query.data ?? DEFAULTS;
 
+  // Lightweight version poll: whenever an admin uploads or clears a logo /
+  // favicon, the version counter bumps and every open device refetches full
+  // branding, picking up the new cache-busted asset URL right away.
+  const fetchVersion = useServerFn(getBrandingVersion);
+  const versionQuery = useQuery({
+    queryKey: ["branding", "version"],
+    queryFn: () => fetchVersion(),
+    refetchInterval: 30 * 1000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+
+  const remoteLogoVersion = versionQuery.data?.logo_version;
+  const remoteFaviconVersion = versionQuery.data?.favicon_version;
+
+  useEffect(() => {
+    if (remoteLogoVersion === undefined || remoteFaviconVersion === undefined) return;
+    if (
+      remoteLogoVersion !== branding.logo_version ||
+      remoteFaviconVersion !== branding.favicon_version
+    ) {
+      qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY });
+    }
+  }, [remoteLogoVersion, remoteFaviconVersion, branding.logo_version, branding.favicon_version, qc]);
+
   useEffect(() => {
     applyBranding(branding);
   }, [branding]);
@@ -112,7 +145,10 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     () => ({
       branding,
       isLoading: query.isLoading,
-      refresh: () => qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY }),
+      refresh: () => {
+        qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY });
+        qc.invalidateQueries({ queryKey: ["branding", "version"] });
+      },
     }),
     [branding, query.isLoading, qc],
   );
