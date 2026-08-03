@@ -476,13 +476,23 @@ function DecisionPanel({
         ) : null}
         <div className="flex gap-2">
           <button
-            disabled={mutation.isPending || !canDecide || approveBlockers.length > 0}
+            disabled={
+              mutation.isPending ||
+              !canDecide ||
+              notes.trim().length < 5 ||
+              approveBlockers.length > 0
+            }
             onClick={() => mutation.mutate({ decision: "approved" })}
-            title={approveBlockers[0] ?? ""}
+            title={
+              notes.trim().length < 5
+                ? "Add a reviewer note of at least 5 characters to approve"
+                : (approveBlockers[0] ?? "")
+            }
             className="inline-flex flex-1 items-center justify-center gap-1 rounded bg-emerald-deep px-3 py-2 text-xs font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
           >
             <Check className="h-3 w-3" /> Approve
           </button>
+
           <button
             disabled={
               mutation.isPending ||
