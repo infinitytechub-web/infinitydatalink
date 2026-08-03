@@ -92,7 +92,7 @@ const groups: NavGroup[] = [
       { to: "/admin/loan-settlements", label: "Settlement approvals", icon: <ClipboardCheck /> },
       { to: "/admin/loan-provisions", label: "Loan provisioning", icon: <ShieldAlert /> },
       { to: "/admin/payments", label: "Payments", icon: <CreditCard />, cap: "payments.view" },
-      { to: "/admin/payment-config", label: "Payment configuration", icon: <PlugZap />, cap: "payments.manage" },
+      { to: "/admin/payment-config", label: "Payment configuration", icon: <PlugZap />, cap: "payments.view" },
       { to: "/admin/investments", label: "Investments & Shares", icon: <TrendingUp /> },
     ],
   },
