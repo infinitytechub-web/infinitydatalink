@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 import { MinorTag } from "@/components/biodata-fields";
 import { KycRecordActions } from "@/components/kyc-record-actions";
+import { useAuth } from "@/lib/auth";
 import { formatAge, resolveMinorStatus } from "@/lib/age";
 
 
@@ -31,6 +32,8 @@ import {
   assignKyc,
   bulkDecideKyc,
   decideKyc,
+  deleteKycReview,
+
   getKycResubmissionSettings,
   updateKycResubmissionSettings,
   type KycQueueRow,
@@ -203,6 +206,10 @@ function QueueBody() {
   const s = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const qc = useQueryClient();
+  const { hasRole } = useAuth();
+  // Deleting a review record is destructive: system super admins and admins only.
+  const canDeleteReview = hasRole("super_admin") || hasRole("admin");
+
   const { data } = useSuspenseQuery(queueQuery(s));
   const { data: reviewers = [] } = useQuery(reviewersQuery);
 
@@ -218,6 +225,9 @@ function QueueBody() {
   const [bulkNotes, setBulkNotes] = useState("");
   const [bulkItems, setBulkItems] = useState<string[]>([]);
   const [assignOpenFor, setAssignOpenFor] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<KycQueueRow | null>(null);
+  const [deleteReason, setDeleteReason] = useState("");
+
 
   const setSearch = (patch: Partial<SearchInput>) => {
     setSelected(new Set());
@@ -264,6 +274,7 @@ function QueueBody() {
   });
 
   const decideOne = useServerFn(decideKyc);
+  const removeReview = useServerFn(deleteKycReview);
 
   const rowDecision = async (row: KycQueueRow, decision: "approved" | "rejected", note: string) => {
     const minor = resolveMinorStatus(row.date_of_birth ?? null, row.is_minor ?? null).effective;
@@ -276,6 +287,20 @@ function QueueBody() {
     toast.success(`${row.full_name ?? "Member"} ${decision}`);
     invalidate();
   };
+
+  const deleteMutation = useMutation({
+    mutationFn: (args: { member_id: string; reason: string }) => removeReview({ data: args }),
+    onSuccess: (res) => {
+      toast.success(
+        `KYC review deleted · ${res.documents_deleted} document${res.documents_deleted === 1 ? "" : "s"} removed`,
+      );
+      setDeleteTarget(null);
+      setDeleteReason("");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Delete failed"),
+  });
+
 
 
   const selectedList = useMemo(() => Array.from(selected), [selected]);
@@ -498,9 +523,12 @@ function QueueBody() {
                       onView={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
                       onEdit={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
                       onDecide={(decision, note) => rowDecision(m, decision, note)}
+                      {...(canDeleteReview ? { onDelete: () => setDeleteTarget(m) } : {})}
+                      noConfirm={["delete"]}
                       disabled={{ approve: m.kyc === "active", reject: m.kyc === "rejected" }}
                       className="justify-end"
                     />
+
                   </td>
                 </tr>
               ))
@@ -633,7 +661,69 @@ function QueueBody() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => {
+          if (!o) {
+            setDeleteTarget(null);
+            setDeleteReason("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete KYC review record</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground">
+            This permanently removes the uploaded KYC documents, the reviewer decision, remediation
+            checklist and resubmission counters for{" "}
+            <span className="font-semibold text-foreground">
+              {deleteTarget?.full_name ?? deleteTarget?.member_no ?? "this member"}
+            </span>
+            . The member account stays active and returns to an un-submitted state so KYC can be
+            started again. The action is audit-logged.
+          </p>
+          <textarea
+            value={deleteReason}
+            onChange={(e) => setDeleteReason(e.target.value)}
+            rows={4}
+            placeholder="Why is this KYC review record being deleted?"
+            className="w-full rounded-md border border-border bg-background p-2 text-sm"
+          />
+          <p className="text-[11px] text-muted-foreground">
+            {deleteReason.trim().length}/5 characters minimum.
+          </p>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => {
+                setDeleteTarget(null);
+                setDeleteReason("");
+              }}
+              className="rounded border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-widest"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={deleteMutation.isPending || deleteReason.trim().length < 5}
+              onClick={() =>
+                deleteTarget &&
+                deleteMutation.mutate({
+                  member_id: deleteTarget.member_id,
+                  reason: deleteReason.trim(),
+                })
+              }
+              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${BUTTON_TONE.danger}`}
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Delete review"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }
 

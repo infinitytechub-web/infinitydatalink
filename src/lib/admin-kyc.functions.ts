@@ -1349,3 +1349,124 @@ export const listMinorStatusChanges = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { changes: (rows ?? []) as MinorStatusChange[] };
   });
+
+/**
+ * Delete a member's KYC review entry (super admins and admins only).
+ *
+ * This clears the review queue record — the uploaded KYC documents (storage
+ * objects and rows), the reviewer decision, remediation checklist, rejection
+ * snapshot and resubmission counters — and returns the member to an
+ * un-submitted `pending` state so they can start over. The member account
+ * itself is never touched.
+ *
+ * Restricted to `super_admin` / `admin` roles AND the `kyc.delete`
+ * capability, requires a written reason, and is fully audit-logged.
+ */
+export const deleteKycReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        member_id: z.string().uuid(),
+        reason: z.string().trim().min(5).max(500),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { assertCapability } = await import("@/lib/capability-guard.server");
+    const sb = context.supabase;
+
+    const { data: roleRows, error: rErr } = await sb
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    if (rErr) throw new Error(rErr.message);
+    const roles = (roleRows ?? []).map((r: any) => r.role as string);
+    const actorRole = roles.find((r) => r === "super_admin" || r === "admin");
+    if (!actorRole) throw new Error("Forbidden: super_admin or admin role required");
+    await assertCapability(sb, "kyc", "delete");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+
+    const { data: profile, error: pErr } = await admin
+      .from("profiles")
+      .select("id, full_name, member_no, kyc")
+      .eq("id", data.member_id)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+    if (!profile) throw new Error("Member not found");
+
+    const { data: docs, error: dErr } = await admin
+      .from("kyc_documents")
+      .select("id, storage_path, doc_type")
+      .eq("member_id", data.member_id);
+    if (dErr) throw new Error(dErr.message);
+
+    const paths = (docs ?? []).map((d: any) => d.storage_path).filter(Boolean);
+    if (paths.length > 0) {
+      await admin.storage.from(BUCKET).remove(paths);
+      const { error: delErr } = await admin
+        .from("kyc_documents")
+        .delete()
+        .eq("member_id", data.member_id);
+      if (delErr) throw new Error(delErr.message);
+    }
+
+    const { error: uErr } = await admin
+      .from("profiles")
+      .update({
+        kyc: "pending",
+        kyc_notes: null,
+        kyc_reviewed_by: null,
+        kyc_reviewed_at: null,
+        kyc_assigned_to: null,
+        kyc_assigned_at: null,
+        kyc_submitted_at: null,
+        kyc_resubmitted_at: null,
+        kyc_resubmission_deadline: null,
+        kyc_attempts: 0,
+        kyc_remediation_items: [],
+        kyc_rejection_snapshot: null,
+        kyc_risk_level: null,
+        kyc_risk_flags: null,
+        kyc_flagged_at: null,
+        kyc_flag_reason: null,
+        kyc_deadline_reminded_at: null,
+        kyc_final_reminded_at: null,
+        kyc_low_attempts_reminded_at: null,
+        kyc_deadline_expired_notified_at: null,
+      })
+      .eq("id", data.member_id);
+    if (uErr) throw new Error(uErr.message);
+
+    await writeAudit({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: actorRole,
+      action: "kyc.review_deleted",
+      target: data.member_id,
+      meta: {
+        member_id: data.member_id,
+        member_no: profile.member_no ?? null,
+        member_name: profile.full_name ?? null,
+        previous_kyc: profile.kyc,
+        reason: data.reason,
+        documents_deleted: (docs ?? []).length,
+        document_types: (docs ?? []).map((d: any) => d.doc_type),
+      },
+    });
+
+    await notifyStaff({
+      roles: ["super_admin", "compliance_officer"],
+      category: "kyc.review.deleted",
+      title: "KYC review record deleted",
+      body: `${profile.full_name ?? profile.member_no ?? data.member_id} had their KYC review deleted by ${actorRole}. Reason: ${data.reason}`,
+      link: `/admin/members/${data.member_id}`,
+      meta: { member_id: data.member_id, reason: data.reason },
+      dedupeKey: `kyc.review.deleted:${data.member_id}:${Date.now()}`,
+      excludeUserId: context.userId,
+    });
+
+    return { deleted: true, documents_deleted: (docs ?? []).length };
+  });

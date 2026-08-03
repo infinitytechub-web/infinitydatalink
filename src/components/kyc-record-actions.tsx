@@ -48,6 +48,9 @@ export type KycRecordActionsProps = {
   /** Minimum note length; approvals default to 5 like the server rule. */
   noteMin?: number;
   disabled?: Partial<Record<RecordActionKey, boolean>>;
+  /** Actions whose confirm prompt is handled by the caller's own dialog. */
+  noConfirm?: RecordActionKey[];
+
   approveLabel?: string;
   rejectLabel?: string;
   className?: string;
@@ -72,6 +75,7 @@ export function KycRecordActions({
   onDecide,
   noteMin = 5,
   disabled,
+  noConfirm,
   approveLabel = "Approve",
   rejectLabel = "Reject",
   className,
@@ -111,7 +115,7 @@ export function KycRecordActions({
         size={size}
         className={className}
         disabled={disabled}
-        noConfirm={["approve", "reject"]}
+        noConfirm={["approve", "reject", ...(noConfirm ?? [])]}
         onView={onView}
         onEdit={onEdit}
         onDelete={onDelete}
