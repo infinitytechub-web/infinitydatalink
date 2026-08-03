@@ -423,7 +423,7 @@ function ColorField({
 function AssetUploader({
   kind, currentUrl, accept, onUpload, onClear, busy,
 }: {
-  kind: "logo" | "favicon";
+  kind: "logo" | "favicon" | "touch_icon";
   currentUrl: string | null;
   accept: string;
   onUpload: (file: File) => void;
