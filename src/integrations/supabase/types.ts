@@ -250,6 +250,51 @@ export type Database = {
         }
         Relationships: []
       }
+      change_sla_settings: {
+        Row: {
+          breach_after_hours: number
+          channels: string[]
+          created_at: string
+          enabled: boolean
+          escalate_roles: string[]
+          id: boolean
+          notify_requester: boolean
+          notify_roles: string[]
+          repeat_hours: number
+          updated_at: string
+          updated_by: string | null
+          warn_after_hours: number
+        }
+        Insert: {
+          breach_after_hours?: number
+          channels?: string[]
+          created_at?: string
+          enabled?: boolean
+          escalate_roles?: string[]
+          id?: boolean
+          notify_requester?: boolean
+          notify_roles?: string[]
+          repeat_hours?: number
+          updated_at?: string
+          updated_by?: string | null
+          warn_after_hours?: number
+        }
+        Update: {
+          breach_after_hours?: number
+          channels?: string[]
+          created_at?: string
+          enabled?: boolean
+          escalate_roles?: string[]
+          id?: boolean
+          notify_requester?: boolean
+          notify_roles?: string[]
+          repeat_hours?: number
+          updated_at?: string
+          updated_by?: string | null
+          warn_after_hours?: number
+        }
+        Relationships: []
+      }
       cron_job_runs: {
         Row: {
           attempt: number

@@ -87,6 +87,7 @@ import { Route as ApiPublicHooksLoanRemindersRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksLoanArrearsRouteImport } from './routes/api/public/hooks/loan-arrears'
 import { Route as ApiPublicHooksKycRemindersRouteImport } from './routes/api/public/hooks/kyc-reminders'
 import { Route as ApiPublicHooksGuardianConsentRemindersRouteImport } from './routes/api/public/hooks/guardian-consent-reminders'
+import { Route as ApiPublicHooksChangeApprovalSlaRouteImport } from './routes/api/public/hooks/change-approval-sla'
 import { Route as MemberAppSavingsStatementsRouteImport } from './routes/_member.app.savings.statements'
 import { Route as MemberAppSavingsPotsRouteImport } from './routes/_member.app.savings.pots'
 import { Route as MemberAppSavingsLedgerRouteImport } from './routes/_member.app.savings.ledger'
@@ -125,6 +126,7 @@ import { Route as AdminAdminEntitiesEntityIdRouteImport } from './routes/_admin.
 import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.admin.console.snapshots'
 import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
 import { Route as AdminAdminComplianceApprovalsRouteImport } from './routes/_admin.admin.compliance.approvals'
+import { Route as AdminAdminChangeApprovalsSlaRouteImport } from './routes/_admin.admin.change-approvals.sla'
 import { Route as AdminAdminChangeApprovalsNewRouteImport } from './routes/_admin.admin.change-approvals.new'
 import { Route as AdminAdminChangeApprovalsHistoryRouteImport } from './routes/_admin.admin.change-approvals.history'
 import { Route as AdminAdminChangeApprovalsIdRouteImport } from './routes/_admin.admin.change-approvals.$id'
@@ -533,6 +535,12 @@ const ApiPublicHooksGuardianConsentRemindersRoute =
     path: '/api/public/hooks/guardian-consent-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksChangeApprovalSlaRoute =
+  ApiPublicHooksChangeApprovalSlaRouteImport.update({
+    id: '/api/public/hooks/change-approval-sla',
+    path: '/api/public/hooks/change-approval-sla',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MemberAppSavingsStatementsRoute =
   MemberAppSavingsStatementsRouteImport.update({
     id: '/statements',
@@ -747,6 +755,12 @@ const AdminAdminComplianceApprovalsRoute =
     path: '/compliance/approvals',
     getParentRoute: () => AdminAdminRoute,
   } as any)
+const AdminAdminChangeApprovalsSlaRoute =
+  AdminAdminChangeApprovalsSlaRouteImport.update({
+    id: '/sla',
+    path: '/sla',
+    getParentRoute: () => AdminAdminChangeApprovalsRoute,
+  } as any)
 const AdminAdminChangeApprovalsNewRoute =
   AdminAdminChangeApprovalsNewRouteImport.update({
     id: '/new',
@@ -842,6 +856,7 @@ export interface FileRoutesByFullPath {
   '/admin/change-approvals/$id': typeof AdminAdminChangeApprovalsIdRoute
   '/admin/change-approvals/history': typeof AdminAdminChangeApprovalsHistoryRoute
   '/admin/change-approvals/new': typeof AdminAdminChangeApprovalsNewRoute
+  '/admin/change-approvals/sla': typeof AdminAdminChangeApprovalsSlaRoute
   '/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
   '/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
@@ -880,6 +895,7 @@ export interface FileRoutesByFullPath {
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/change-approval-sla': typeof ApiPublicHooksChangeApprovalSlaRoute
   '/api/public/hooks/guardian-consent-reminders': typeof ApiPublicHooksGuardianConsentRemindersRoute
   '/api/public/hooks/kyc-reminders': typeof ApiPublicHooksKycRemindersRoute
   '/api/public/hooks/loan-arrears': typeof ApiPublicHooksLoanArrearsRoute
@@ -956,6 +972,7 @@ export interface FileRoutesByTo {
   '/admin/change-approvals/$id': typeof AdminAdminChangeApprovalsIdRoute
   '/admin/change-approvals/history': typeof AdminAdminChangeApprovalsHistoryRoute
   '/admin/change-approvals/new': typeof AdminAdminChangeApprovalsNewRoute
+  '/admin/change-approvals/sla': typeof AdminAdminChangeApprovalsSlaRoute
   '/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
   '/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
@@ -994,6 +1011,7 @@ export interface FileRoutesByTo {
   '/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/change-approval-sla': typeof ApiPublicHooksChangeApprovalSlaRoute
   '/api/public/hooks/guardian-consent-reminders': typeof ApiPublicHooksGuardianConsentRemindersRoute
   '/api/public/hooks/kyc-reminders': typeof ApiPublicHooksKycRemindersRoute
   '/api/public/hooks/loan-arrears': typeof ApiPublicHooksLoanArrearsRoute
@@ -1080,6 +1098,7 @@ export interface FileRoutesById {
   '/_admin/admin/change-approvals/$id': typeof AdminAdminChangeApprovalsIdRoute
   '/_admin/admin/change-approvals/history': typeof AdminAdminChangeApprovalsHistoryRoute
   '/_admin/admin/change-approvals/new': typeof AdminAdminChangeApprovalsNewRoute
+  '/_admin/admin/change-approvals/sla': typeof AdminAdminChangeApprovalsSlaRoute
   '/_admin/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/_admin/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
   '/_admin/admin/console/snapshots': typeof AdminAdminConsoleSnapshotsRoute
@@ -1118,6 +1137,7 @@ export interface FileRoutesById {
   '/_member/app/savings/ledger': typeof MemberAppSavingsLedgerRoute
   '/_member/app/savings/pots': typeof MemberAppSavingsPotsRoute
   '/_member/app/savings/statements': typeof MemberAppSavingsStatementsRoute
+  '/api/public/hooks/change-approval-sla': typeof ApiPublicHooksChangeApprovalSlaRoute
   '/api/public/hooks/guardian-consent-reminders': typeof ApiPublicHooksGuardianConsentRemindersRoute
   '/api/public/hooks/kyc-reminders': typeof ApiPublicHooksKycRemindersRoute
   '/api/public/hooks/loan-arrears': typeof ApiPublicHooksLoanArrearsRoute
@@ -1203,6 +1223,7 @@ export interface FileRouteTypes {
     | '/admin/change-approvals/$id'
     | '/admin/change-approvals/history'
     | '/admin/change-approvals/new'
+    | '/admin/change-approvals/sla'
     | '/admin/compliance/approvals'
     | '/admin/console/approvals'
     | '/admin/console/snapshots'
@@ -1241,6 +1262,7 @@ export interface FileRouteTypes {
     | '/app/savings/ledger'
     | '/app/savings/pots'
     | '/app/savings/statements'
+    | '/api/public/hooks/change-approval-sla'
     | '/api/public/hooks/guardian-consent-reminders'
     | '/api/public/hooks/kyc-reminders'
     | '/api/public/hooks/loan-arrears'
@@ -1317,6 +1339,7 @@ export interface FileRouteTypes {
     | '/admin/change-approvals/$id'
     | '/admin/change-approvals/history'
     | '/admin/change-approvals/new'
+    | '/admin/change-approvals/sla'
     | '/admin/compliance/approvals'
     | '/admin/console/approvals'
     | '/admin/console/snapshots'
@@ -1355,6 +1378,7 @@ export interface FileRouteTypes {
     | '/app/savings/ledger'
     | '/app/savings/pots'
     | '/app/savings/statements'
+    | '/api/public/hooks/change-approval-sla'
     | '/api/public/hooks/guardian-consent-reminders'
     | '/api/public/hooks/kyc-reminders'
     | '/api/public/hooks/loan-arrears'
@@ -1440,6 +1464,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/change-approvals/$id'
     | '/_admin/admin/change-approvals/history'
     | '/_admin/admin/change-approvals/new'
+    | '/_admin/admin/change-approvals/sla'
     | '/_admin/admin/compliance/approvals'
     | '/_admin/admin/console/approvals'
     | '/_admin/admin/console/snapshots'
@@ -1478,6 +1503,7 @@ export interface FileRouteTypes {
     | '/_member/app/savings/ledger'
     | '/_member/app/savings/pots'
     | '/_member/app/savings/statements'
+    | '/api/public/hooks/change-approval-sla'
     | '/api/public/hooks/guardian-consent-reminders'
     | '/api/public/hooks/kyc-reminders'
     | '/api/public/hooks/loan-arrears'
@@ -1507,6 +1533,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksChangeApprovalSlaRoute: typeof ApiPublicHooksChangeApprovalSlaRoute
   ApiPublicHooksGuardianConsentRemindersRoute: typeof ApiPublicHooksGuardianConsentRemindersRoute
   ApiPublicHooksKycRemindersRoute: typeof ApiPublicHooksKycRemindersRoute
   ApiPublicHooksLoanArrearsRoute: typeof ApiPublicHooksLoanArrearsRoute
@@ -2070,6 +2097,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksGuardianConsentRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/change-approval-sla': {
+      id: '/api/public/hooks/change-approval-sla'
+      path: '/api/public/hooks/change-approval-sla'
+      fullPath: '/api/public/hooks/change-approval-sla'
+      preLoaderRoute: typeof ApiPublicHooksChangeApprovalSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_member/app/savings/statements': {
       id: '/_member/app/savings/statements'
       path: '/statements'
@@ -2336,6 +2370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminComplianceApprovalsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/change-approvals/sla': {
+      id: '/_admin/admin/change-approvals/sla'
+      path: '/sla'
+      fullPath: '/admin/change-approvals/sla'
+      preLoaderRoute: typeof AdminAdminChangeApprovalsSlaRouteImport
+      parentRoute: typeof AdminAdminChangeApprovalsRoute
+    }
     '/_admin/admin/change-approvals/new': {
       id: '/_admin/admin/change-approvals/new'
       path: '/new'
@@ -2390,6 +2431,7 @@ interface AdminAdminChangeApprovalsRouteChildren {
   AdminAdminChangeApprovalsIdRoute: typeof AdminAdminChangeApprovalsIdRoute
   AdminAdminChangeApprovalsHistoryRoute: typeof AdminAdminChangeApprovalsHistoryRoute
   AdminAdminChangeApprovalsNewRoute: typeof AdminAdminChangeApprovalsNewRoute
+  AdminAdminChangeApprovalsSlaRoute: typeof AdminAdminChangeApprovalsSlaRoute
   AdminAdminChangeApprovalsIndexRoute: typeof AdminAdminChangeApprovalsIndexRoute
 }
 
@@ -2399,6 +2441,7 @@ const AdminAdminChangeApprovalsRouteChildren: AdminAdminChangeApprovalsRouteChil
     AdminAdminChangeApprovalsHistoryRoute:
       AdminAdminChangeApprovalsHistoryRoute,
     AdminAdminChangeApprovalsNewRoute: AdminAdminChangeApprovalsNewRoute,
+    AdminAdminChangeApprovalsSlaRoute: AdminAdminChangeApprovalsSlaRoute,
     AdminAdminChangeApprovalsIndexRoute: AdminAdminChangeApprovalsIndexRoute,
   }
 
@@ -2756,6 +2799,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksChangeApprovalSlaRoute: ApiPublicHooksChangeApprovalSlaRoute,
   ApiPublicHooksGuardianConsentRemindersRoute:
     ApiPublicHooksGuardianConsentRemindersRoute,
   ApiPublicHooksKycRemindersRoute: ApiPublicHooksKycRemindersRoute,
