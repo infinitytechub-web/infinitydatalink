@@ -103,9 +103,11 @@ function MemberLayout() {
   if (user.status !== "approved") return <PendingApprovalGate />;
 
   const kyc = kycQuery.data;
-  const kycComplete = !!kyc && kyc.steps.profile === "done" && kyc.steps.documents === "done";
+  // Full access requires an administrator-approved KYC review, not just a
+  // completed submission.
+  const kycApproved = kyc?.review_state === "approved";
   const allowed = KYC_ALLOWED_PATHS.some((p) => pathname.startsWith(p));
-  if (kyc && !kycComplete && !allowed) {
+  if (kyc && !kycApproved && !allowed) {
     return <Navigate to="/app/kyc" replace />;
   }
 
@@ -121,28 +123,45 @@ function MemberLayout() {
         </button>
       }
     >
-      {kyc && !kycComplete ? <KycBanner nextLabel={kyc.next_action?.label ?? null} /> : null}
+      {kyc && !kycApproved ? (
+        <KycBanner
+          reviewState={kyc.review_state}
+          nextLabel={kyc.next_action?.label ?? null}
+        />
+      ) : null}
       <Outlet />
     </PortalShell>
   );
 }
 
-function KycBanner({ nextLabel }: { nextLabel: string | null }) {
+function KycBanner({
+  reviewState,
+  nextLabel,
+}: {
+  reviewState: "not_started" | "in_review" | "approved" | "rejected";
+  nextLabel: string | null;
+}) {
+  const inReview = reviewState === "in_review";
   return (
     <div className="mb-4 rounded-xl border border-gold/40 bg-gold/10 p-4">
-      <p className="text-sm font-semibold text-foreground">Verification required</p>
+      <p className="text-sm font-semibold text-foreground">
+        {inReview ? "Verification under review" : "Verification required"}
+      </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        {nextLabel ?? "Complete your KYC details and documents to unlock the full dashboard."}
+        {inReview
+          ? "Your KYC submission is with an administrator. Full access unlocks once it is approved."
+          : (nextLabel ?? "Complete your KYC details and documents to unlock the full dashboard.")}
       </p>
       <Link
         to="/app/kyc"
         className="mt-3 inline-block rounded-md bg-emerald-deep px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
       >
-        Continue verification
+        {inReview ? "View status" : "Continue verification"}
       </Link>
     </div>
   );
 }
+
 
 
 function PendingApprovalGate() {

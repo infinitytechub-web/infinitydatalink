@@ -263,7 +263,8 @@ const signInSchema = z.object({
 });
 
 const signUpSchema = signInSchema.extend({
-  fullName: z.string().trim().min(2, "Enter your full name"),
+  firstName: z.string().trim().min(2, "Enter your first name"),
+  lastName: z.string().trim().min(2, "Enter your last name"),
   ghanaCard: z
     .string()
     .regex(GHANA_CARD_REGEX, "Ghana Card must be 10 digits after the GHA- prefix"),
@@ -275,13 +276,15 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [cardDigits, setCardDigits] = useState("");
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState("");
   const [membershipType, setMembershipType] = useState<MembershipType>("individual");
+
 
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -334,11 +337,13 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
         const parsed = signUpSchema.safeParse({
           email,
           password,
-          fullName,
+          firstName,
+          lastName,
           ghanaCard: canonicalCard,
           phone: canonicalPhone,
           membershipType,
         });
+
         if (!parsed.success) {
           setErr(parsed.error.issues[0]?.message ?? "Invalid input");
           return;
@@ -371,7 +376,10 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
           options: {
             emailRedirectTo: `${window.location.origin}/app`,
             data: {
-              full_name: parsed.data.fullName,
+              full_name: `${parsed.data.firstName} ${parsed.data.lastName}`,
+              first_name: parsed.data.firstName,
+              last_name: parsed.data.lastName,
+
               ghana_card: canonicalCard,
               phone: canonicalPhone,
               membership_type: membershipType,
@@ -418,17 +426,29 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
     <form onSubmit={onSubmit} className="space-y-4">
       {mode === "signup" ? (
         <>
-          <Field label="Full name">
+          <Field label="First name">
             <input
               type="text"
               required
-              autoComplete="name"
+              autoComplete="given-name"
               className={inputClass(focusRing)}
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Ada Lovelace"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Ada"
             />
           </Field>
+          <Field label="Last name">
+            <input
+              type="text"
+              required
+              autoComplete="family-name"
+              className={inputClass(focusRing)}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Lovelace"
+            />
+          </Field>
+
           <Field label="Ghana Card number" hint={<span className="text-[11px] text-emerald-deep/50">10 digits</span>}>
             <div className="flex items-stretch gap-0">
               <span className="flex items-center rounded-l-lg border border-r-0 border-emerald-deep/15 bg-emerald-deep/5 px-3 text-sm font-semibold text-emerald-deep/70">
