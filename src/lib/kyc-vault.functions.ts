@@ -167,6 +167,36 @@ export const restoreKycVault = createServerFn({ method: "POST" })
       },
     });
 
+    // Tell the affected member their verification record is back, what came
+    // back with it and who performed the restore. In-app always; email/SMS
+    // follow the member's notification preferences.
+    const { notifyUser } = await import("@/lib/notify.server");
+    const actor = email ?? (actorRole ? `a ${String(actorRole).replace(/_/g, " ")}` : "an administrator");
+    const restoredStatus = entry.previous_kyc ? ` Verification status restored to "${entry.previous_kyc}".` : "";
+    const docLine =
+      restoredDocs.length > 0
+        ? ` ${restoredDocs.length} document${restoredDocs.length === 1 ? "" : "s"} (${restoredDocs
+            .map((d) => String(d.doc_type).replace(/_/g, " "))
+            .join(", ")}) were restored.`
+        : " No documents were attached to the archive.";
+    await notifyUser({
+      userId: entry.member_id,
+      category: "account.kyc.restored",
+      title: "Your KYC record has been restored",
+      body: `Your identity verification record was restored from the account vault by ${actor}.${restoredStatus}${docLine} Reason: ${data.reason}`,
+      link: "/app/kyc",
+      meta: {
+        vault_id: data.id,
+        restored_kyc: entry.previous_kyc,
+        documents_restored: restoredDocs.length,
+        document_types: restoredDocs.map((d) => d.doc_type),
+        restored_by_email: email,
+        restored_by_role: actorRole,
+        reason: data.reason,
+      },
+      dedupeKey: `kyc.restored:${data.id}`,
+    });
+
     return { restored: true, documents_restored: restoredDocs.length };
   });
 
