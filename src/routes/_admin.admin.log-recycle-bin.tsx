@@ -98,7 +98,7 @@ function LogRecycleBinPage() {
     <div className="space-y-6">
       <PageHeader
         title="Log recycle bin"
-        subtitle="Purged audit and runtime event log entries, retained for 2 years and restorable."
+        description="Purged audit and runtime event log entries, retained for 2 years and restorable."
       />
       <Suspense fallback={<SectionCardSkeleton />}>
         <BinTable />
@@ -154,9 +154,8 @@ function BinTable() {
 
   return (
     <SectionCard
-      title="Purged entries"
-      description={`${data.total} snapshot${data.total === 1 ? "" : "s"} in the bin`}
-      actions={
+      title={`Purged entries · ${data.total}`}
+      action={
         <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="ghost" asChild>
             <Link to="/admin/audit">Audit log</Link>
@@ -209,7 +208,7 @@ function BinTable() {
         <EmptyState
           icon={<Trash2 />}
           title="Nothing in the log recycle bin"
-          description="Purged audit and event log entries appear here for 2 years before they are permanently removed."
+          hint="Purged audit and event log entries appear here for 2 years before they are permanently removed."
         />
       ) : (
         <div className="overflow-x-auto">
@@ -271,8 +270,8 @@ function BinTable() {
           page={s.page}
           pageSize={s.pageSize}
           total={data.total}
-          onPageChange={(page) => update({ page })}
-          onPageSizeChange={(pageSize) => update({ pageSize, page: 1 })}
+          onPage={(page: number) => update({ page })}
+          onPageSize={(pageSize: number) => update({ pageSize, page: 1 })}
         />
       </div>
     </SectionCard>
