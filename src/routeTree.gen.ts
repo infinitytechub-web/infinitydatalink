@@ -125,6 +125,7 @@ import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.
 import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
 import { Route as AdminAdminComplianceApprovalsRouteImport } from './routes/_admin.admin.compliance.approvals'
 import { Route as AdminAdminChangeApprovalsNewRouteImport } from './routes/_admin.admin.change-approvals.new'
+import { Route as AdminAdminChangeApprovalsIdRouteImport } from './routes/_admin.admin.change-approvals.$id'
 import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
 import { Route as ApiPublicHooksPaymentsProviderRouteImport } from './routes/api/public/hooks/payments.$provider'
 
@@ -744,6 +745,12 @@ const AdminAdminChangeApprovalsNewRoute =
     path: '/new',
     getParentRoute: () => AdminAdminChangeApprovalsRoute,
   } as any)
+const AdminAdminChangeApprovalsIdRoute =
+  AdminAdminChangeApprovalsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AdminAdminChangeApprovalsRoute,
+  } as any)
 const AdminAdminAuditTransfersRoute =
   AdminAdminAuditTransfersRouteImport.update({
     id: '/transfers',
@@ -818,6 +825,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
+  '/admin/change-approvals/$id': typeof AdminAdminChangeApprovalsIdRoute
   '/admin/change-approvals/new': typeof AdminAdminChangeApprovalsNewRoute
   '/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
@@ -929,6 +937,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
   '/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
+  '/admin/change-approvals/$id': typeof AdminAdminChangeApprovalsIdRoute
   '/admin/change-approvals/new': typeof AdminAdminChangeApprovalsNewRoute
   '/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
@@ -1050,6 +1059,7 @@ export interface FileRoutesById {
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
   '/_admin/admin/audit/transfers': typeof AdminAdminAuditTransfersRoute
+  '/_admin/admin/change-approvals/$id': typeof AdminAdminChangeApprovalsIdRoute
   '/_admin/admin/change-approvals/new': typeof AdminAdminChangeApprovalsNewRoute
   '/_admin/admin/compliance/approvals': typeof AdminAdminComplianceApprovalsRoute
   '/_admin/admin/console/approvals': typeof AdminAdminConsoleApprovalsRoute
@@ -1170,6 +1180,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/admin/audit/transfers'
+    | '/admin/change-approvals/$id'
     | '/admin/change-approvals/new'
     | '/admin/compliance/approvals'
     | '/admin/console/approvals'
@@ -1281,6 +1292,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/admin/audit/transfers'
+    | '/admin/change-approvals/$id'
     | '/admin/change-approvals/new'
     | '/admin/compliance/approvals'
     | '/admin/console/approvals'
@@ -1401,6 +1413,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/'
     | '/_member/app/'
     | '/_admin/admin/audit/transfers'
+    | '/_admin/admin/change-approvals/$id'
     | '/_admin/admin/change-approvals/new'
     | '/_admin/admin/compliance/approvals'
     | '/_admin/admin/console/approvals'
@@ -2297,6 +2310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminChangeApprovalsNewRouteImport
       parentRoute: typeof AdminAdminChangeApprovalsRoute
     }
+    '/_admin/admin/change-approvals/$id': {
+      id: '/_admin/admin/change-approvals/$id'
+      path: '/$id'
+      fullPath: '/admin/change-approvals/$id'
+      preLoaderRoute: typeof AdminAdminChangeApprovalsIdRouteImport
+      parentRoute: typeof AdminAdminChangeApprovalsRoute
+    }
     '/_admin/admin/audit/transfers': {
       id: '/_admin/admin/audit/transfers'
       path: '/transfers'
@@ -2327,12 +2347,14 @@ const AdminAdminAuditRouteWithChildren = AdminAdminAuditRoute._addFileChildren(
 )
 
 interface AdminAdminChangeApprovalsRouteChildren {
+  AdminAdminChangeApprovalsIdRoute: typeof AdminAdminChangeApprovalsIdRoute
   AdminAdminChangeApprovalsNewRoute: typeof AdminAdminChangeApprovalsNewRoute
   AdminAdminChangeApprovalsIndexRoute: typeof AdminAdminChangeApprovalsIndexRoute
 }
 
 const AdminAdminChangeApprovalsRouteChildren: AdminAdminChangeApprovalsRouteChildren =
   {
+    AdminAdminChangeApprovalsIdRoute: AdminAdminChangeApprovalsIdRoute,
     AdminAdminChangeApprovalsNewRoute: AdminAdminChangeApprovalsNewRoute,
     AdminAdminChangeApprovalsIndexRoute: AdminAdminChangeApprovalsIndexRoute,
   }
