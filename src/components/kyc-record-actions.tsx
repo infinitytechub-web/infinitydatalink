@@ -44,7 +44,16 @@ export type KycRecordActionsProps = {
   onEdit?: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
   /** Called after the reviewer supplies a note. Omit to hide approve/reject. */
-  onDecide?: (decision: KycDecision, note: string) => void | Promise<void>;
+  onDecide?: (
+    decision: KycDecision,
+    note: string,
+    remediationItems: string[],
+  ) => void | Promise<void>;
+  /**
+   * Checklist of items a rejected record must revise. When provided, rejections
+   * require at least one selection — mirroring the server-side rule.
+   */
+  remediationOptions?: { key: string; label: string }[];
   /** Minimum note length; approvals default to 5 like the server rule. */
   noteMin?: number;
   disabled?: Partial<Record<RecordActionKey, boolean>>;
