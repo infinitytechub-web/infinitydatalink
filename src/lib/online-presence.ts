@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { resolvePresenceIdentities } from "@/lib/presence-directory.functions";
+
+/** What is actually broadcast on the (public) realtime channel — no PII. */
+export type PresencePayload = {
+  user_id: string;
+  online_at: string;
+};
 
 export type PresenceUser = {
   user_id: string;
@@ -82,6 +89,33 @@ function resetThrottle() {
   lastEmit = 0;
 }
 
+/** Cache of resolved display identities, keyed by user id. */
+const directory = new Map<string, { name: string; role: string }>();
+let resolving = false;
+
+async function enrich(ids: { user_id: string; online_at: string }[]) {
+  const unknown = ids.filter((i) => !directory.has(i.user_id)).map((i) => i.user_id);
+  if (unknown.length > 0 && !resolving) {
+    resolving = true;
+    try {
+      const rows = await resolvePresenceIdentities({ data: { userIds: unknown } });
+      for (const r of rows) directory.set(r.user_id, { name: r.name, role: r.role });
+    } catch {
+      // Unauthenticated or transient failure — fall back to opaque labels.
+    } finally {
+      resolving = false;
+    }
+  }
+  const flat: PresenceUser[] = ids.map((i) => ({
+    user_id: i.user_id,
+    online_at: i.online_at,
+    name: directory.get(i.user_id)?.name ?? "Member",
+    role: directory.get(i.user_id)?.role ?? "Member",
+  }));
+  flat.sort((a, b) => a.name.localeCompare(b.name));
+  scheduleCommit(flat);
+}
+
 function acquire(me: PresenceUser) {
   refCount += 1;
   if (channel) return;
@@ -90,17 +124,17 @@ function acquire(me: PresenceUser) {
   });
   channel = ch;
   ch.on("presence", { event: "sync" }, () => {
-    const state = ch.presenceState<PresenceUser>();
-    const flat: PresenceUser[] = [];
+    const state = ch.presenceState<PresencePayload>();
+    const ids: { user_id: string; online_at: string }[] = [];
     for (const entries of Object.values(state)) {
       const first = entries[0];
-      if (first) flat.push(first);
+      if (first?.user_id) ids.push({ user_id: first.user_id, online_at: first.online_at });
     }
-    flat.sort((a, b) => a.name.localeCompare(b.name));
-    scheduleCommit(flat);
+    void enrich(ids);
   }).subscribe(async (status) => {
     if (status !== "SUBSCRIBED") return;
-    await ch.track(me);
+    // Only opaque, non-identifying fields are broadcast on this channel.
+    await ch.track({ user_id: me.user_id, online_at: me.online_at } satisfies PresencePayload);
   });
 }
 
