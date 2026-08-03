@@ -17,7 +17,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { listKycVault, restoreKycVault, purgeKycVaultEntry } from "@/lib/kyc-vault.functions";
+import {
+  listKycVault,
+  restoreKycVault,
+  purgeKycVaultEntry,
+  bulkRestoreKycVault,
+} from "@/lib/kyc-vault.functions";
 import type { VaultEntry } from "@/lib/kyc-vault.shared";
 
 export const Route = createFileRoute("/_admin/admin/vault")({
@@ -43,10 +48,14 @@ function VaultPage() {
   const [page, setPage] = useState(1);
   const [action, setAction] = useState<{ kind: "restore" | "purge"; entry: VaultEntry } | null>(null);
   const [reason, setReason] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkReason, setBulkReason] = useState("");
 
   const listFn = useServerFn(listKycVault);
   const restoreFn = useServerFn(restoreKycVault);
   const purgeFn = useServerFn(purgeKycVaultEntry);
+  const bulkRestoreFn = useServerFn(bulkRestoreKycVault);
 
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["kyc-vault", q, page],
@@ -68,8 +77,36 @@ function VaultPage() {
     onError: (e: any) => toast.error(e?.message ?? "Action failed"),
   });
 
+  const bulkMut = useMutation({
+    mutationFn: async () =>
+      await bulkRestoreFn({
+        data: { ids: Array.from(selected), reason: bulkReason.trim() },
+      }),
+    onSuccess: (res) => {
+      if (res.failed === 0)
+        toast.success(`${res.restored} record${res.restored === 1 ? "" : "s"} restored`);
+      else toast.warning(`${res.restored} restored · ${res.failed} blocked`);
+      for (const r of res.results.filter((x) => !x.ok)) {
+        toast.error(`${r.member_name ?? r.id.slice(0, 8)}: ${r.error}`);
+      }
+      setSelected(new Set());
+      setBulkOpen(false);
+      setBulkReason("");
+      void qc.invalidateQueries();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Bulk restore failed"),
+  });
+
   const entries = data?.entries ?? [];
   const total = data?.total ?? 0;
+  const allChecked = entries.length > 0 && entries.every((e) => selected.has(e.id));
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   return (
     <>
@@ -109,6 +146,27 @@ function VaultPage() {
           </Button>
         </div>
 
+        {selected.size > 0 ? (
+          <div className="flex flex-wrap items-center gap-3 border-b border-border/60 bg-muted/30 px-6 py-3 text-xs">
+            <span className="font-semibold">{selected.size} selected</span>
+            <Button
+              size="sm"
+              onClick={() => {
+                setBulkReason("");
+                setBulkOpen(true);
+              }}
+            >
+              <RotateCcw className="mr-1 size-3.5" /> Restore selected
+            </Button>
+            <button
+              onClick={() => setSelected(new Set())}
+              className="ml-auto text-[11px] underline text-muted-foreground"
+            >
+              Clear selection
+            </button>
+          </div>
+        ) : null}
+
         {error ? (
           <p className="px-6 py-8 text-sm text-red-600 dark:text-red-400">
             {(error as any)?.message ?? "Unable to load the vault."}
@@ -118,6 +176,16 @@ function VaultPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
+                  <th className="px-3 py-3">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all vault entries"
+                      checked={allChecked}
+                      onChange={(e) =>
+                        setSelected(e.target.checked ? new Set(entries.map((x) => x.id)) : new Set())
+                      }
+                    />
+                  </th>
                   <th className="px-6 py-3">Member</th>
                   <th className="px-6 py-3">Previous status</th>
                   <th className="px-6 py-3">Docs</th>
@@ -130,7 +198,7 @@ function VaultPage() {
               <tbody>
                 {entries.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-muted-foreground">
+                    <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground">
                       {isFetching ? (
                         "Loading…"
                       ) : (
@@ -143,6 +211,14 @@ function VaultPage() {
                 ) : (
                   entries.map((e) => (
                     <tr key={e.id} className="border-t border-border/40 align-top">
+                      <td className="px-3 py-3">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${e.member_name ?? e.member_id}`}
+                          checked={selected.has(e.id)}
+                          onChange={() => toggle(e.id)}
+                        />
+                      </td>
                       <td className="px-6 py-3">
                         <p className="font-semibold">{e.member_name ?? "—"}</p>
                         <p className="font-mono text-[11px] text-muted-foreground">
@@ -218,6 +294,41 @@ function VaultPage() {
           </div>
         </div>
       </SectionCard>
+
+      <Dialog open={bulkOpen} onOpenChange={(o) => !o && setBulkOpen(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Restore {selected.size} KYC record{selected.size === 1 ? "" : "s"}</DialogTitle>
+            <DialogDescription>
+              Each record is validated before anything is written: entries whose archived status is not
+              a valid verification state, whose member no longer exists, or whose member has submitted
+              again since deletion are skipped and reported instead of overwriting newer data. Every
+              member gets their own audit entry and notification.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="vault-bulk-reason">Reason (min 5 characters)</Label>
+            <Textarea
+              id="vault-bulk-reason"
+              rows={3}
+              value={bulkReason}
+              onChange={(e) => setBulkReason(e.target.value)}
+              placeholder="Why are these records being restored?"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={bulkReason.trim().length < 5 || bulkMut.isPending}
+              onClick={() => bulkMut.mutate()}
+            >
+              {bulkMut.isPending ? "Restoring…" : "Restore selected"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!action} onOpenChange={(o) => !o && setAction(null)}>
         <DialogContent>
