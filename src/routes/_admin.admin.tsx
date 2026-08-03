@@ -101,7 +101,8 @@ const groups: NavGroup[] = [
     items: [
       { to: "/admin/compliance/approvals", label: "Approval Audit Trail", icon: <ShieldCheck /> },
       { to: "/admin/console", label: "Admin Console", icon: <Settings2 /> },
-      { to: "/admin/console/approvals", label: "Change approvals", icon: <ClipboardList /> },
+      { to: "/admin/change-approvals", label: "Change approvals", icon: <ClipboardList /> },
+      { to: "/admin/console/approvals", label: "Staged settings queue", icon: <ClipboardList /> },
       { to: "/admin/console/snapshots", label: "Backup & restore", icon: <ClipboardCheck /> },
       { to: "/admin/security", label: "Security Centre", icon: <ShieldAlert /> },
       { to: "/admin/logs", label: "Runtime Logs", icon: <Bug /> },
@@ -170,7 +171,10 @@ const CRUMBS: Record<string, string> = {
   "/admin/branding": "Branding",
   "/admin/compliance/approvals": "Approval Audit Trail",
   "/admin/console": "Admin Console",
-  "/admin/console/approvals": "Change approvals",
+  "/admin/change-approvals": "Change Approvals",
+  "/admin/change-approvals/new": "Request a Change",
+  "/admin/change-approvals/history": "Change Audit History",
+  "/admin/console/approvals": "Staged settings queue",
   "/admin/console/snapshots": "Backup & restore",
   "/admin/settings": "Settings",
 };
@@ -178,6 +182,7 @@ const CRUMBS: Record<string, string> = {
 function crumbFor(pathname: string) {
   if (pathname.startsWith("/admin/members/")) return "Member review";
   if (pathname.startsWith("/admin/entities/")) return "Entity details";
+  if (/^\/admin\/change-approvals\/[0-9a-f-]{36}$/.test(pathname)) return "Change request";
   return CRUMBS[pathname] ?? "Administration";
 }
 
