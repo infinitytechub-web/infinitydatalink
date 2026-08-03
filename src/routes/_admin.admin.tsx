@@ -182,6 +182,7 @@ const CRUMBS: Record<string, string> = {
 function crumbFor(pathname: string) {
   if (pathname.startsWith("/admin/members/")) return "Member review";
   if (pathname.startsWith("/admin/entities/")) return "Entity details";
+  if (/^\/admin\/change-approvals\/[0-9a-f-]{36}$/.test(pathname)) return "Change request";
   return CRUMBS[pathname] ?? "Administration";
 }
 
