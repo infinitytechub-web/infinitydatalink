@@ -4069,6 +4069,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_set_role_permissions: {
+        Args: { _actor: string; _capabilities: string[]; _role: string }
+        Returns: number
+      }
       advance_recurring_next_run: {
         Args: {
           _dom: number

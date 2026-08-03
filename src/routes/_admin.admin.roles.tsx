@@ -25,6 +25,7 @@ import {
   type AssignableRole,
   type UserWithRolesRow,
 } from "@/lib/admin-role-management.functions";
+import { PermissionMatrixEditor } from "@/components/permission-matrix-editor";
 import { Search, X } from "lucide-react";
 
 export const Route = createFileRoute("/_admin/admin/roles")({
@@ -46,17 +47,22 @@ const usersQuery = (search: string, role: string, page: number) =>
   });
 
 function RolesPage() {
-  const { user, hasRole, loading } = useAuth();
+  const { user, hasRole, can, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/auth" />;
-  if (!hasRole("super_admin")) return <Navigate to="/admin" />;
+  if (!hasRole("super_admin") && !can("users", "view")) return <Navigate to="/admin" />;
   return (
     <>
       <PageHeader
         eyebrow="Governance"
         title="Roles & Permissions"
       />
-      <PermissionsMatrix />
+      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+        <PermissionMatrixEditor />
+      </Suspense>
+      <div className="mt-6">
+        <PermissionsMatrix />
+      </div>
       <Suspense fallback={<Skeleton className="mt-6 h-96 w-full" />}>
         <UsersTable />
       </Suspense>
@@ -66,6 +72,8 @@ function RolesPage() {
 
 const ROLE_LABEL: Record<AppRole, string> = {
   super_admin: "Super Admin",
+  admin: "Admin",
+  manager: "Manager",
   compliance_officer: "Compliance Officer",
   loan_officer: "Loan Officer",
   finance_officer: "Finance Officer",
@@ -75,6 +83,8 @@ const ROLE_LABEL: Record<AppRole, string> = {
 
 const ROLE_TONE: Record<AppRole, "success" | "warning" | "info" | "neutral" | "danger"> = {
   super_admin: "danger",
+  admin: "danger",
+  manager: "warning",
   compliance_officer: "info",
   loan_officer: "warning",
   finance_officer: "success",
