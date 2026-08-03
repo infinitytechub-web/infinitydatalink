@@ -302,3 +302,91 @@ export const bulkArchiveKycReviews = createServerFn({ method: "POST" })
       results,
     };
   });
+
+/**
+ * Detail view for one vault entry: full metadata (previous status, reviewer /
+ * archiver context, per-document type, upload date, size, reviewer notes) plus
+ * short-lived signed URLs so an admin can preview the actual archived files
+ * before restoring. Read-only — requires the `kyc.view` capability.
+ */
+export const getKycVaultEntry = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { admin } = await ctx(context, "view");
+
+    const { data: row, error } = await admin
+      .from("recycle_bin")
+      .select("*")
+      .eq("id", data.id)
+      .eq("entity_table", "kyc_review")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Vault entry not found");
+
+    const entry = toEntry(row);
+
+    const documents = await Promise.all(
+      entry.documents.map(async (d) => {
+        const path = d.vault_path ?? d.storage_path;
+        let signed_url: string | null = null;
+        if (path) {
+          const { data: s } = await admin.storage.from(BUCKET).createSignedUrl(path, 300);
+          signed_url = s?.signedUrl ?? null;
+        }
+        return { ...d, signed_url };
+      }),
+    );
+
+    // Reviewer / archiver context
+    const snap = entry.profile_snapshot ?? {};
+    const staffIds = [snap.kyc_reviewed_by, snap.kyc_assigned_to]
+      .filter(Boolean)
+      .map((v: any) => String(v));
+    const staff: Record<string, { full_name: string | null; email: string | null }> = {};
+    if (staffIds.length > 0) {
+      const { data: rows } = await admin
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", staffIds);
+      for (const r of rows ?? []) {
+        staff[r.id] = { full_name: r.full_name ?? null, email: null };
+      }
+    }
+
+    let restorable = true;
+    let restore_blocker: string | null = null;
+    try {
+      const { assertRestorable } = await import("@/lib/kyc-vault-core.server");
+      await assertRestorable(admin, entry);
+    } catch (err: any) {
+      restorable = false;
+      restore_blocker = err?.message ?? "Not restorable";
+    }
+
+    return {
+      entry: { ...entry, documents },
+      review: {
+        previous_kyc: entry.previous_kyc,
+        kyc_notes: snap.kyc_notes ?? null,
+        reviewed_at: snap.kyc_reviewed_at ?? null,
+        reviewed_by: snap.kyc_reviewed_by
+          ? (staff[String(snap.kyc_reviewed_by)] ?? null)
+          : null,
+        assigned_at: snap.kyc_assigned_at ?? null,
+        assigned_to: snap.kyc_assigned_to
+          ? (staff[String(snap.kyc_assigned_to)] ?? null)
+          : null,
+        submitted_at: snap.kyc_submitted_at ?? null,
+        resubmitted_at: snap.kyc_resubmitted_at ?? null,
+        attempts: snap.kyc_attempts ?? null,
+        risk_level: snap.kyc_risk_level ?? null,
+        risk_flags: Array.isArray(snap.kyc_risk_flags) ? snap.kyc_risk_flags : [],
+        remediation_items: Array.isArray(snap.kyc_remediation_items)
+          ? snap.kyc_remediation_items
+          : [],
+      },
+      restorable,
+      restore_blocker,
+    };
+  });
