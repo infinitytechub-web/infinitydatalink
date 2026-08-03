@@ -97,7 +97,9 @@ const SECTIONS: Section[] = [
       { to: "/admin/approvals", label: "User approvals", description: "Verify or reject pending sign-ups.", icon: UserCheck, allowedRoles: COMPLIANCE },
       { to: "/admin/members", label: "KYC queue", description: "Review individual verification submissions.", icon: Users, allowedRoles: COMPLIANCE },
       { to: "/admin/entities", label: "Entities registry", description: "Groups, departments, institutions.", icon: Building2, allowedRoles: COMPLIANCE },
+      { to: "/admin/vault", label: "Account vault", description: "Restore deleted member KYC records within 30 days.", icon: Archive, allowedRoles: VAULT, badge: "Restore" },
     ],
+
   },
   {
     title: "Operations",
