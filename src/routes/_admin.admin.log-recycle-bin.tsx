@@ -195,7 +195,10 @@ function BinTable() {
             <Link to="/admin/audit">Audit log</Link>
           </Button>
           <Button size="sm" variant="ghost" asChild>
-            <Link to="/admin/logs">Event log</Link>
+            <Link to="/admin/logs" search={{}}>
+              Event log
+            </Link>
+
           </Button>
           {canRestore ? (
             <>
