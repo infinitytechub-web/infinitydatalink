@@ -24,6 +24,8 @@ export type BrandingSettings = {
   favicon_url: string | null;
   logo_path: string | null;
   favicon_path: string | null;
+  logo_version: number;
+  favicon_version: number;
   login_hero_url: string | null;
   login_tagline: string | null;
   org_legal_name: string | null;
@@ -49,6 +51,8 @@ const DEFAULTS: BrandingSettings = {
   favicon_url: null,
   logo_path: null,
   favicon_path: null,
+  logo_version: 1,
+  favicon_version: 1,
   login_hero_url: null,
   login_tagline: null,
   org_legal_name: null,
@@ -75,14 +79,28 @@ async function assertSuperAdmin(supabase: any, userId: string) {
   if (!data) throw new Error("Forbidden: super_admin role required");
 }
 
-async function signBrandingUrl(path: string | null): Promise<string | null> {
+/**
+ * Signs a branding asset URL and appends a deterministic cache-busting token
+ * (`?v=<version>`), so a new upload produces a brand-new URL and browsers /
+ * service workers never serve a stale logo.
+ */
+async function signBrandingUrl(
+  path: string | null,
+  version: number | null | undefined,
+): Promise<string | null> {
   if (!path) return null;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await (supabaseAdmin as any).storage
     .from(BUCKET)
     .createSignedUrl(path, 60 * 60 * 24 * 7); // 7 days
   if (error) return null;
-  return data?.signedUrl ?? null;
+  const signed: string | null = data?.signedUrl ?? null;
+  if (!signed) return null;
+  return withVersion(signed, version ?? 1);
+}
+
+function withVersion(url: string, version: number): string {
+  return `${url}${url.includes("?") ? "&" : "?"}v=${version}`;
 }
 
 /** Public read — used by BrandingProvider on every visit. */
@@ -99,14 +117,14 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
         // Public projection only. Legal name, registered address, registration
         // number and outbound email branding are staff-only (anon lacks
         // column privileges); support contacts are intentionally public.
-        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, footer_html, support_email, support_phone, updated_at",
+        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, logo_version, favicon_version, login_hero_url, login_tagline, footer_html, support_email, support_phone, updated_at",
       )
       .eq("id", 1)
       .maybeSingle();
     if (!data) return DEFAULTS;
     const [logo_url, favicon_url] = await Promise.all([
-      signBrandingUrl((data as any).logo_path),
-      signBrandingUrl((data as any).favicon_path),
+      signBrandingUrl((data as any).logo_path, (data as any).logo_version),
+      signBrandingUrl((data as any).favicon_path, (data as any).favicon_version),
     ]);
     return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
   },
@@ -129,8 +147,8 @@ export const getBrandingFull = createServerFn({ method: "GET" })
       .maybeSingle();
     if (!data) return DEFAULTS;
     const [logo_url, favicon_url] = await Promise.all([
-      signBrandingUrl((data as any).logo_path),
-      signBrandingUrl((data as any).favicon_path),
+      signBrandingUrl((data as any).logo_path, (data as any).logo_version),
+      signBrandingUrl((data as any).favicon_path, (data as any).favicon_version),
     ]);
     return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
   });
@@ -243,15 +261,30 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
     // Fetch current path to clean up old asset
     const { data: prev } = await context.supabase
       .from("branding_settings")
-      .select("logo_path, favicon_path")
+      .select("logo_path, favicon_path, logo_version, favicon_version")
       .eq("id", 1)
       .maybeSingle();
     const oldPath = data.kind === "logo" ? (prev as any)?.logo_path : (prev as any)?.favicon_path;
 
+    const prevVersion =
+      data.kind === "logo"
+        ? Number((prev as any)?.logo_version ?? 1)
+        : Number((prev as any)?.favicon_version ?? 1);
+    const nextVersion = prevVersion + 1;
     const patch =
       data.kind === "logo"
-        ? { logo_path: path, updated_at: new Date().toISOString(), updated_by: context.userId }
-        : { favicon_path: path, updated_at: new Date().toISOString(), updated_by: context.userId };
+        ? {
+            logo_path: path,
+            logo_version: nextVersion,
+            updated_at: new Date().toISOString(),
+            updated_by: context.userId,
+          }
+        : {
+            favicon_path: path,
+            favicon_version: nextVersion,
+            updated_at: new Date().toISOString(),
+            updated_by: context.userId,
+          };
     const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
     if (error) throw new Error(error.message);
 
@@ -263,7 +296,7 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: "super_admin",
       action: `branding.${data.kind}.uploaded`,
-      meta: { path, size_bytes: buffer.byteLength },
+      meta: { path, size_bytes: buffer.byteLength, version: nextVersion },
     });
     return getBranding();
   });
@@ -275,14 +308,28 @@ export const clearBrandingAsset = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.supabase, context.userId);
     const { data: prev } = await context.supabase
       .from("branding_settings")
-      .select("logo_path, favicon_path")
+      .select("logo_path, favicon_path, logo_version, favicon_version")
       .eq("id", 1)
       .maybeSingle();
     const oldPath = data.kind === "logo" ? (prev as any)?.logo_path : (prev as any)?.favicon_path;
+    const nextVersion =
+      Number(
+        data.kind === "logo" ? (prev as any)?.logo_version ?? 1 : (prev as any)?.favicon_version ?? 1,
+      ) + 1;
     const patch =
       data.kind === "logo"
-        ? { logo_path: null, updated_at: new Date().toISOString(), updated_by: context.userId }
-        : { favicon_path: null, updated_at: new Date().toISOString(), updated_by: context.userId };
+        ? {
+            logo_path: null,
+            logo_version: nextVersion,
+            updated_at: new Date().toISOString(),
+            updated_by: context.userId,
+          }
+        : {
+            favicon_path: null,
+            favicon_version: nextVersion,
+            updated_at: new Date().toISOString(),
+            updated_by: context.userId,
+          };
     const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
     if (error) throw new Error(error.message);
     if (oldPath) {
@@ -297,3 +344,29 @@ export const clearBrandingAsset = createServerFn({ method: "POST" })
     });
     return getBranding();
   });
+
+
+/**
+ * Tiny public read used to poll for branding asset changes. Devices compare the
+ * returned versions against what they rendered and refetch full branding (and
+ * therefore new cache-busted asset URLs) the moment a version bumps.
+ */
+export const getBrandingVersion = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ logo_version: number; favicon_version: number; updated_at: string }> => {
+    const client = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
+    const { data } = await client
+      .from("branding_settings")
+      .select("logo_version, favicon_version, updated_at")
+      .eq("id", 1)
+      .maybeSingle();
+    return {
+      logo_version: Number((data as any)?.logo_version ?? 1),
+      favicon_version: Number((data as any)?.favicon_version ?? 1),
+      updated_at: (data as any)?.updated_at ?? DEFAULTS.updated_at,
+    };
+  },
+);
