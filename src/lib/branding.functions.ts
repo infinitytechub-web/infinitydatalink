@@ -96,9 +96,10 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
     const { data } = await client
       .from("branding_settings")
       .select(
-        // Public projection only. Registered address, registration number and
-        // outbound email branding are staff-only (anon lacks column privileges).
-        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, org_legal_name, footer_html, support_email, support_phone, updated_at",
+        // Public projection only. Legal name, registered address, registration
+        // number and outbound email branding are staff-only (anon lacks
+        // column privileges); support contacts are intentionally public.
+        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, login_hero_url, login_tagline, footer_html, support_email, support_phone, updated_at",
       )
       .eq("id", 1)
       .maybeSingle();
