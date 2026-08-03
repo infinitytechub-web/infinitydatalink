@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { applyBrandPalette } from "@/lib/brand-theme";
 import {
   getBranding,
   getBrandingVersion,
@@ -75,6 +76,14 @@ function applyBranding(branding: BrandingSettings) {
   root.style.setProperty("--brand-primary", branding.primary_color);
   root.style.setProperty("--brand-accent", branding.accent_color);
   root.style.setProperty("--brand-secondary", branding.secondary_color);
+
+  // Drive the actual design tokens (buttons, focus rings, sidebar accents)
+  // from the admin-selected brand colors, for light and dark mode alike.
+  applyBrandPalette({
+    primary_color: branding.primary_color,
+    secondary_color: branding.secondary_color,
+    accent_color: branding.accent_color,
+  });
 
   // Update <title> suffix
   if (branding.app_name) {
