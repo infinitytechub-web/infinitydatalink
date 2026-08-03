@@ -48,6 +48,9 @@ export type KycRecordActionsProps = {
   /** Minimum note length; approvals default to 5 like the server rule. */
   noteMin?: number;
   disabled?: Partial<Record<RecordActionKey, boolean>>;
+  /** Actions whose confirm prompt is handled by the caller's own dialog. */
+  noConfirm?: RecordActionKey[];
+
   approveLabel?: string;
   rejectLabel?: string;
   className?: string;
