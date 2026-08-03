@@ -36,6 +36,7 @@ import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
 import { Route as MemberAppInvestmentsRouteImport } from './routes/_member.app.investments'
 import { Route as MemberAppInboxRouteImport } from './routes/_member.app.inbox'
 import { Route as MemberAppGuaranteesRouteImport } from './routes/_member.app.guarantees'
+import { Route as AdminAdminVaultRouteImport } from './routes/_admin.admin.vault'
 import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
 import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
@@ -265,6 +266,11 @@ const MemberAppGuaranteesRoute = MemberAppGuaranteesRouteImport.update({
   id: '/guarantees',
   path: '/guarantees',
   getParentRoute: () => MemberAppRoute,
+} as any)
+const AdminAdminVaultRoute = AdminAdminVaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminSuperAdminsRoute = AdminAdminSuperAdminsRouteImport.update({
   id: '/super-admins',
@@ -836,6 +842,7 @@ export interface FileRoutesByFullPath {
   '/admin/security': typeof AdminAdminSecurityRouteWithChildren
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/admin/vault': typeof AdminAdminVaultRoute
   '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/inbox': typeof MemberAppInboxRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
@@ -953,6 +960,7 @@ export interface FileRoutesByTo {
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/admin/vault': typeof AdminAdminVaultRoute
   '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/inbox': typeof MemberAppInboxRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
@@ -1078,6 +1086,7 @@ export interface FileRoutesById {
   '/_admin/admin/security': typeof AdminAdminSecurityRouteWithChildren
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
   '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/_admin/admin/vault': typeof AdminAdminVaultRoute
   '/_member/app/guarantees': typeof MemberAppGuaranteesRoute
   '/_member/app/inbox': typeof MemberAppInboxRoute
   '/_member/app/investments': typeof MemberAppInvestmentsRoute
@@ -1203,6 +1212,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/settings'
     | '/admin/super-admins'
+    | '/admin/vault'
     | '/app/guarantees'
     | '/app/inbox'
     | '/app/investments'
@@ -1320,6 +1330,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/super-admins'
+    | '/admin/vault'
     | '/app/guarantees'
     | '/app/inbox'
     | '/app/investments'
@@ -1444,6 +1455,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/security'
     | '/_admin/admin/settings'
     | '/_admin/admin/super-admins'
+    | '/_admin/admin/vault'
     | '/_member/app/guarantees'
     | '/_member/app/inbox'
     | '/_member/app/investments'
@@ -1739,6 +1751,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/guarantees'
       preLoaderRoute: typeof MemberAppGuaranteesRouteImport
       parentRoute: typeof MemberAppRoute
+    }
+    '/_admin/admin/vault': {
+      id: '/_admin/admin/vault'
+      path: '/vault'
+      fullPath: '/admin/vault'
+      preLoaderRoute: typeof AdminAdminVaultRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/super-admins': {
       id: '/_admin/admin/super-admins'
@@ -2629,6 +2648,7 @@ interface AdminAdminRouteChildren {
   AdminAdminSecurityRoute: typeof AdminAdminSecurityRouteWithChildren
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
   AdminAdminSuperAdminsRoute: typeof AdminAdminSuperAdminsRouteWithChildren
+  AdminAdminVaultRoute: typeof AdminAdminVaultRoute
   AdminAdminIndexRoute: typeof AdminAdminIndexRoute
   AdminAdminComplianceApprovalsRoute: typeof AdminAdminComplianceApprovalsRoute
 }
@@ -2668,6 +2688,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminSecurityRoute: AdminAdminSecurityRouteWithChildren,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
   AdminAdminSuperAdminsRoute: AdminAdminSuperAdminsRouteWithChildren,
+  AdminAdminVaultRoute: AdminAdminVaultRoute,
   AdminAdminIndexRoute: AdminAdminIndexRoute,
   AdminAdminComplianceApprovalsRoute: AdminAdminComplianceApprovalsRoute,
 }
