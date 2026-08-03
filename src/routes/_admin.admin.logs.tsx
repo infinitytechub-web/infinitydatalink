@@ -120,6 +120,7 @@ function Body() {
   const { data: kpi } = useSuspenseQuery(kpiQuery);
   const [live, setLive] = useState(true);
   const [selected, setSelected] = useState<LogRow | null>(null);
+  const [picked, setPicked] = useState<string[]>([]);
 
   // Realtime subscription
   useEffect(() => {
