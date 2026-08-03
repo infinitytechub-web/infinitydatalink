@@ -24,5 +24,17 @@ export async function writeAudit(entry: AuditEntry | AuditEntry[]): Promise<void
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { error } = await supabaseAdmin.from("audit_log").insert(rows as never);
   // Audit writes must never break the primary operation; surface in server logs.
-  if (error) console.error("audit_log write failed", error.message);
+  if (error) {
+    console.error("audit_log write failed", error.message);
+    return;
+  }
+
+  // Configurable security alerting (email/SMS/in-app) for qualifying events.
+  try {
+    const { alertOnAuditEvents } = await import("./security-alerts.server");
+    await alertOnAuditEvents(rows);
+  } catch (err) {
+    console.error("audit alert dispatch failed", (err as Error)?.message);
+  }
 }
+
