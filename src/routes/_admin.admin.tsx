@@ -35,6 +35,7 @@ import {
   Radio,
   Coins,
   FileText,
+  PlugZap,
 
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
