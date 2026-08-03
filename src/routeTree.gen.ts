@@ -64,6 +64,7 @@ import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.en
 import { Route as AdminAdminDocumentsRouteImport } from './routes/_admin.admin.documents'
 import { Route as AdminAdminCronRunsRouteImport } from './routes/_admin.admin.cron-runs'
 import { Route as AdminAdminConsoleRouteImport } from './routes/_admin.admin.console'
+import { Route as AdminAdminChangeApprovalsRouteImport } from './routes/_admin.admin.change-approvals'
 import { Route as AdminAdminBrandingRouteImport } from './routes/_admin.admin.branding'
 import { Route as AdminAdminAuditRouteImport } from './routes/_admin.admin.audit'
 import { Route as AdminAdminApprovalsRouteImport } from './routes/_admin.admin.approvals'
@@ -400,6 +401,12 @@ const AdminAdminConsoleRoute = AdminAdminConsoleRouteImport.update({
   path: '/console',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminChangeApprovalsRoute =
+  AdminAdminChangeApprovalsRouteImport.update({
+    id: '/change-approvals',
+    path: '/change-approvals',
+    getParentRoute: () => AdminAdminRoute,
+  } as any)
 const AdminAdminBrandingRoute = AdminAdminBrandingRouteImport.update({
   id: '/branding',
   path: '/branding',
@@ -751,6 +758,7 @@ export interface FileRoutesByFullPath {
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
+  '/admin/change-approvals': typeof AdminAdminChangeApprovalsRoute
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
@@ -864,6 +872,7 @@ export interface FileRoutesByTo {
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
+  '/admin/change-approvals': typeof AdminAdminChangeApprovalsRoute
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
@@ -978,6 +987,7 @@ export interface FileRoutesById {
   '/_admin/admin/approvals': typeof AdminAdminApprovalsRoute
   '/_admin/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/_admin/admin/branding': typeof AdminAdminBrandingRoute
+  '/_admin/admin/change-approvals': typeof AdminAdminChangeApprovalsRoute
   '/_admin/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/_admin/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/_admin/admin/documents': typeof AdminAdminDocumentsRoute
@@ -1095,6 +1105,7 @@ export interface FileRouteTypes {
     | '/admin/approvals'
     | '/admin/audit'
     | '/admin/branding'
+    | '/admin/change-approvals'
     | '/admin/console'
     | '/admin/cron-runs'
     | '/admin/documents'
@@ -1208,6 +1219,7 @@ export interface FileRouteTypes {
     | '/admin/approvals'
     | '/admin/audit'
     | '/admin/branding'
+    | '/admin/change-approvals'
     | '/admin/console'
     | '/admin/cron-runs'
     | '/admin/documents'
@@ -1321,6 +1333,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/approvals'
     | '/_admin/admin/audit'
     | '/_admin/admin/branding'
+    | '/_admin/admin/change-approvals'
     | '/_admin/admin/console'
     | '/_admin/admin/cron-runs'
     | '/_admin/admin/documents'
@@ -1831,6 +1844,13 @@ declare module '@tanstack/react-router' {
       path: '/console'
       fullPath: '/admin/console'
       preLoaderRoute: typeof AdminAdminConsoleRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/change-approvals': {
+      id: '/_admin/admin/change-approvals'
+      path: '/change-approvals'
+      fullPath: '/admin/change-approvals'
+      preLoaderRoute: typeof AdminAdminChangeApprovalsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/branding': {
@@ -2416,6 +2436,7 @@ interface AdminAdminRouteChildren {
   AdminAdminApprovalsRoute: typeof AdminAdminApprovalsRoute
   AdminAdminAuditRoute: typeof AdminAdminAuditRouteWithChildren
   AdminAdminBrandingRoute: typeof AdminAdminBrandingRoute
+  AdminAdminChangeApprovalsRoute: typeof AdminAdminChangeApprovalsRoute
   AdminAdminConsoleRoute: typeof AdminAdminConsoleRouteWithChildren
   AdminAdminCronRunsRoute: typeof AdminAdminCronRunsRoute
   AdminAdminDocumentsRoute: typeof AdminAdminDocumentsRoute
@@ -2454,6 +2475,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminApprovalsRoute: AdminAdminApprovalsRoute,
   AdminAdminAuditRoute: AdminAdminAuditRouteWithChildren,
   AdminAdminBrandingRoute: AdminAdminBrandingRoute,
+  AdminAdminChangeApprovalsRoute: AdminAdminChangeApprovalsRoute,
   AdminAdminConsoleRoute: AdminAdminConsoleRouteWithChildren,
   AdminAdminCronRunsRoute: AdminAdminCronRunsRoute,
   AdminAdminDocumentsRoute: AdminAdminDocumentsRoute,
