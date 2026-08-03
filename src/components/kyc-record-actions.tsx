@@ -145,7 +145,7 @@ export function KycRecordActions({
         onReject={onDecide ? () => setDecision("rejected") : undefined}
       />
 
-      <Dialog open={decision !== null} onOpenChange={(o) => (o ? null : setDecision(null))}>
+      <Dialog open={decision !== null} onOpenChange={(o) => (o ? null : close())}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -165,18 +165,50 @@ export function KycRecordActions({
           <p className="text-[11px] text-muted-foreground">
             {note.trim().length}/{noteMin} characters minimum.
           </p>
+
+          {needsItems ? (
+            <fieldset className="rounded-md border border-border p-3">
+              <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Items the member must revise
+              </legend>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {remediationOptions!.map((opt) => (
+                  <label key={opt.key} className="flex items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={items.includes(opt.key)}
+                      onChange={() =>
+                        setItems((prev) =>
+                          prev.includes(opt.key)
+                            ? prev.filter((k) => k !== opt.key)
+                            : [...prev, opt.key],
+                        )
+                      }
+                      className="h-3.5 w-3.5 accent-primary"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Select at least one item so the member knows what to fix.
+              </p>
+            </fieldset>
+          ) : null}
+
           <DialogFooter>
             <button
               type="button"
-              onClick={() => setDecision(null)}
+              onClick={close}
               className="rounded border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-widest"
             >
               Cancel
             </button>
             <button
               type="button"
-              disabled={busy || note.trim().length < noteMin}
+              disabled={busy || note.trim().length < noteMin || (needsItems && items.length === 0)}
               onClick={() => void submit()}
+
               className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${
                 decision === "approved" ? BUTTON_TONE.success : BUTTON_TONE.danger
               }`}
