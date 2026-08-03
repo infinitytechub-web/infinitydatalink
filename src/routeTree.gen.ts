@@ -70,6 +70,7 @@ import { Route as AdminAdminApprovalsRouteImport } from './routes/_admin.admin.a
 import { Route as AdminAdminAnalyticsRouteImport } from './routes/_admin.admin.analytics'
 import { Route as AdminAdminActivityRouteImport } from './routes/_admin.admin.activity'
 import { Route as MemberAppSavingsIndexRouteImport } from './routes/_member.app.savings.index'
+import { Route as AdminAdminSecurityIndexRouteImport } from './routes/_admin.admin.security.index'
 import { Route as AdminAdminFinanceIndexRouteImport } from './routes/_admin.admin.finance.index'
 import { Route as AdminAdminEntitiesIndexRouteImport } from './routes/_admin.admin.entities.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -426,6 +427,11 @@ const MemberAppSavingsIndexRoute = MemberAppSavingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MemberAppSavingsRoute,
 } as any)
+const AdminAdminSecurityIndexRoute = AdminAdminSecurityIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminSecurityRoute,
+} as any)
 const AdminAdminFinanceIndexRoute = AdminAdminFinanceIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -749,7 +755,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
-  '/admin/security': typeof AdminAdminSecurityRoute
+  '/admin/security': typeof AdminAdminSecurityRouteWithChildren
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/app/guarantees': typeof MemberAppGuaranteesRoute
@@ -817,6 +823,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance/': typeof AdminAdminFinanceIndexRoute
+  '/admin/security/': typeof AdminAdminSecurityIndexRoute
   '/app/savings/': typeof MemberAppSavingsIndexRoute
   '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
@@ -856,7 +863,6 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
-  '/admin/security': typeof AdminAdminSecurityRoute
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/app/guarantees': typeof MemberAppGuaranteesRoute
@@ -923,6 +929,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/entities': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance': typeof AdminAdminFinanceIndexRoute
+  '/admin/security': typeof AdminAdminSecurityIndexRoute
   '/app/savings': typeof MemberAppSavingsIndexRoute
   '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
@@ -969,7 +976,7 @@ export interface FileRoutesById {
   '/_admin/admin/reports': typeof AdminAdminReportsRoute
   '/_admin/admin/roles': typeof AdminAdminRolesRoute
   '/_admin/admin/savings': typeof AdminAdminSavingsRouteWithChildren
-  '/_admin/admin/security': typeof AdminAdminSecurityRoute
+  '/_admin/admin/security': typeof AdminAdminSecurityRouteWithChildren
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
   '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/_member/app/guarantees': typeof MemberAppGuaranteesRoute
@@ -1037,6 +1044,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_admin/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/_admin/admin/finance/': typeof AdminAdminFinanceIndexRoute
+  '/_admin/admin/security/': typeof AdminAdminSecurityIndexRoute
   '/_member/app/savings/': typeof MemberAppSavingsIndexRoute
   '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
@@ -1150,6 +1158,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
     | '/admin/entities/'
     | '/admin/finance/'
+    | '/admin/security/'
     | '/app/savings/'
     | '/api/public/hooks/payments/$provider'
   fileRoutesByTo: FileRoutesByTo
@@ -1189,7 +1198,6 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/roles'
     | '/admin/savings'
-    | '/admin/security'
     | '/admin/settings'
     | '/admin/super-admins'
     | '/app/guarantees'
@@ -1256,6 +1264,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
     | '/admin/entities'
     | '/admin/finance'
+    | '/admin/security'
     | '/app/savings'
     | '/api/public/hooks/payments/$provider'
   id:
@@ -1369,6 +1378,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
     | '/_admin/admin/entities/'
     | '/_admin/admin/finance/'
+    | '/_admin/admin/security/'
     | '/_member/app/savings/'
     | '/api/public/hooks/payments/$provider'
   fileRoutesById: FileRoutesById
@@ -1825,6 +1835,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/savings/'
       preLoaderRoute: typeof MemberAppSavingsIndexRouteImport
       parentRoute: typeof MemberAppSavingsRoute
+    }
+    '/_admin/admin/security/': {
+      id: '/_admin/admin/security/'
+      path: '/'
+      fullPath: '/admin/security/'
+      preLoaderRoute: typeof AdminAdminSecurityIndexRouteImport
+      parentRoute: typeof AdminAdminSecurityRoute
     }
     '/_admin/admin/finance/': {
       id: '/_admin/admin/finance/'
@@ -2303,6 +2320,17 @@ const AdminAdminSavingsRouteChildren: AdminAdminSavingsRouteChildren = {
 const AdminAdminSavingsRouteWithChildren =
   AdminAdminSavingsRoute._addFileChildren(AdminAdminSavingsRouteChildren)
 
+interface AdminAdminSecurityRouteChildren {
+  AdminAdminSecurityIndexRoute: typeof AdminAdminSecurityIndexRoute
+}
+
+const AdminAdminSecurityRouteChildren: AdminAdminSecurityRouteChildren = {
+  AdminAdminSecurityIndexRoute: AdminAdminSecurityIndexRoute,
+}
+
+const AdminAdminSecurityRouteWithChildren =
+  AdminAdminSecurityRoute._addFileChildren(AdminAdminSecurityRouteChildren)
+
 interface AdminAdminSuperAdminsRouteChildren {
   AdminAdminSuperAdminsHistoryRoute: typeof AdminAdminSuperAdminsHistoryRoute
 }
@@ -2347,7 +2375,7 @@ interface AdminAdminRouteChildren {
   AdminAdminReportsRoute: typeof AdminAdminReportsRoute
   AdminAdminRolesRoute: typeof AdminAdminRolesRoute
   AdminAdminSavingsRoute: typeof AdminAdminSavingsRouteWithChildren
-  AdminAdminSecurityRoute: typeof AdminAdminSecurityRoute
+  AdminAdminSecurityRoute: typeof AdminAdminSecurityRouteWithChildren
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
   AdminAdminSuperAdminsRoute: typeof AdminAdminSuperAdminsRouteWithChildren
   AdminAdminIndexRoute: typeof AdminAdminIndexRoute
@@ -2385,7 +2413,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminReportsRoute: AdminAdminReportsRoute,
   AdminAdminRolesRoute: AdminAdminRolesRoute,
   AdminAdminSavingsRoute: AdminAdminSavingsRouteWithChildren,
-  AdminAdminSecurityRoute: AdminAdminSecurityRoute,
+  AdminAdminSecurityRoute: AdminAdminSecurityRouteWithChildren,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
   AdminAdminSuperAdminsRoute: AdminAdminSuperAdminsRouteWithChildren,
   AdminAdminIndexRoute: AdminAdminIndexRoute,

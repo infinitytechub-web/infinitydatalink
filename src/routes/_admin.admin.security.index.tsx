@@ -175,7 +175,7 @@ function Content() {
         </div>
 
         {data.rows.length === 0 ? (
-          <EmptyState title="No security events" message="Nothing matches the current filters." />
+          <EmptyState title="No security events" hint="Nothing matches the current filters." />
         ) : (
           <>
             <table className="w-full">
