@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyKycStatus } from "@/lib/member-kyc.functions";
 import { KycDecisionBanner } from "@/components/kyc-decision-banner";
+import { useKycRealtime } from "@/hooks/use-kyc-realtime";
 
 import {
   LayoutDashboard,
