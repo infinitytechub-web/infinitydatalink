@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Archive, RotateCcw, Trash2, ShieldCheck, Search } from "lucide-react";
+import { Archive, RotateCcw, Trash2, ShieldCheck, Search, Eye } from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import {
 } from "@/lib/kyc-vault.functions";
 import type { VaultEntry } from "@/lib/kyc-vault.shared";
 import { VaultRetentionPanel } from "@/components/vault-retention-panel";
+import { VaultEntryDetailsDialog } from "@/components/vault-entry-details";
 
 
 export const Route = createFileRoute("/_admin/admin/vault")({
@@ -53,6 +54,7 @@ function VaultPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkReason, setBulkReason] = useState("");
+  const [details, setDetails] = useState<VaultEntry | null>(null);
 
   const listFn = useServerFn(listKycVault);
   const restoreFn = useServerFn(restoreKycVault);
@@ -249,6 +251,9 @@ function VaultPage() {
                       </td>
                       <td className="px-6 py-3">
                         <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" onClick={() => setDetails(e)}>
+                            <Eye className="mr-1 size-3.5" /> Preview
+                          </Button>
                           <Button
                             size="sm"
                             onClick={() => {
@@ -300,6 +305,16 @@ function VaultPage() {
           </div>
         </div>
       </SectionCard>
+
+      <VaultEntryDetailsDialog
+        entry={details}
+        onClose={() => setDetails(null)}
+        onRestore={(entry) => {
+          setDetails(null);
+          setAction({ kind: "restore", entry });
+          setReason("");
+        }}
+      />
 
       <Dialog open={bulkOpen} onOpenChange={(o) => !o && setBulkOpen(false)}>
         <DialogContent>
