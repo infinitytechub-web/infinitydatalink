@@ -78,10 +78,11 @@ export const listKycVault = createServerFn({ method: "GET" })
       .range(from, from + data.pageSize - 1);
     if (error) throw new Error(error.message);
 
-    let entries = (rows ?? []).map(toEntry);
+    let entries: VaultEntry[] = (rows ?? []).map(toEntry);
     const q = data.q?.toLowerCase();
     if (q) {
-      entries = entries.filter((e) =>
+      entries = entries.filter((e: VaultEntry) =>
+
         [e.member_name, e.member_no, e.member_id, e.deleted_by_email]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(q)),
