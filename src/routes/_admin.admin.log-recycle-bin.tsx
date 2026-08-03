@@ -15,6 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/table-controls";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -25,8 +33,10 @@ import { useAuth } from "@/lib/auth";
 import {
   listLogRecycleBin,
   restoreLogEntries,
+  deleteLogEntriesForever,
   type LogBinRow,
 } from "@/lib/log-recycle-bin.functions";
+
 
 const search = z.object({
   kind: fallback(z.enum(["all", "audit_log", "runtime_error_logs"]), "all").default("all"),
