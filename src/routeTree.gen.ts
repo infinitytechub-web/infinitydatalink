@@ -102,6 +102,7 @@ import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admi
 import { Route as AdminAdminSecurityUploadsRouteImport } from './routes/_admin.admin.security.uploads'
 import { Route as AdminAdminSecuritySessionsRouteImport } from './routes/_admin.admin.security.sessions'
 import { Route as AdminAdminSecurityFirewallRouteImport } from './routes/_admin.admin.security.firewall'
+import { Route as AdminAdminSecurityAlertsRouteImport } from './routes/_admin.admin.security.alerts'
 import { Route as AdminAdminSavingsWithdrawalsRouteImport } from './routes/_admin.admin.savings.withdrawals'
 import { Route as AdminAdminSavingsReconciliationRouteImport } from './routes/_admin.admin.savings.reconciliation'
 import { Route as AdminAdminSavingsPotsRouteImport } from './routes/_admin.admin.savings.pots'
@@ -615,6 +616,12 @@ const AdminAdminSecurityFirewallRoute =
     path: '/firewall',
     getParentRoute: () => AdminAdminSecurityRoute,
   } as any)
+const AdminAdminSecurityAlertsRoute =
+  AdminAdminSecurityAlertsRouteImport.update({
+    id: '/alerts',
+    path: '/alerts',
+    getParentRoute: () => AdminAdminSecurityRoute,
+  } as any)
 const AdminAdminSavingsWithdrawalsRoute =
   AdminAdminSavingsWithdrawalsRouteImport.update({
     id: '/withdrawals',
@@ -857,6 +864,7 @@ export interface FileRoutesByFullPath {
   '/admin/savings/pots': typeof AdminAdminSavingsPotsRoute
   '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
+  '/admin/security/alerts': typeof AdminAdminSecurityAlertsRoute
   '/admin/security/firewall': typeof AdminAdminSecurityFirewallRoute
   '/admin/security/sessions': typeof AdminAdminSecuritySessionsRoute
   '/admin/security/uploads': typeof AdminAdminSecurityUploadsRoute
@@ -970,6 +978,7 @@ export interface FileRoutesByTo {
   '/admin/savings/pots': typeof AdminAdminSavingsPotsRoute
   '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
+  '/admin/security/alerts': typeof AdminAdminSecurityAlertsRoute
   '/admin/security/firewall': typeof AdminAdminSecurityFirewallRoute
   '/admin/security/sessions': typeof AdminAdminSecuritySessionsRoute
   '/admin/security/uploads': typeof AdminAdminSecurityUploadsRoute
@@ -1093,6 +1102,7 @@ export interface FileRoutesById {
   '/_admin/admin/savings/pots': typeof AdminAdminSavingsPotsRoute
   '/_admin/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/_admin/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
+  '/_admin/admin/security/alerts': typeof AdminAdminSecurityAlertsRoute
   '/_admin/admin/security/firewall': typeof AdminAdminSecurityFirewallRoute
   '/_admin/admin/security/sessions': typeof AdminAdminSecuritySessionsRoute
   '/_admin/admin/security/uploads': typeof AdminAdminSecurityUploadsRoute
@@ -1215,6 +1225,7 @@ export interface FileRouteTypes {
     | '/admin/savings/pots'
     | '/admin/savings/reconciliation'
     | '/admin/savings/withdrawals'
+    | '/admin/security/alerts'
     | '/admin/security/firewall'
     | '/admin/security/sessions'
     | '/admin/security/uploads'
@@ -1328,6 +1339,7 @@ export interface FileRouteTypes {
     | '/admin/savings/pots'
     | '/admin/savings/reconciliation'
     | '/admin/savings/withdrawals'
+    | '/admin/security/alerts'
     | '/admin/security/firewall'
     | '/admin/security/sessions'
     | '/admin/security/uploads'
@@ -1450,6 +1462,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/savings/pots'
     | '/_admin/admin/savings/reconciliation'
     | '/_admin/admin/savings/withdrawals'
+    | '/_admin/admin/security/alerts'
     | '/_admin/admin/security/firewall'
     | '/_admin/admin/security/sessions'
     | '/_admin/admin/security/uploads'
@@ -2162,6 +2175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSecurityFirewallRouteImport
       parentRoute: typeof AdminAdminSecurityRoute
     }
+    '/_admin/admin/security/alerts': {
+      id: '/_admin/admin/security/alerts'
+      path: '/alerts'
+      fullPath: '/admin/security/alerts'
+      preLoaderRoute: typeof AdminAdminSecurityAlertsRouteImport
+      parentRoute: typeof AdminAdminSecurityRoute
+    }
     '/_admin/admin/savings/withdrawals': {
       id: '/_admin/admin/savings/withdrawals'
       path: '/withdrawals'
@@ -2500,6 +2520,7 @@ const AdminAdminSavingsRouteWithChildren =
   AdminAdminSavingsRoute._addFileChildren(AdminAdminSavingsRouteChildren)
 
 interface AdminAdminSecurityRouteChildren {
+  AdminAdminSecurityAlertsRoute: typeof AdminAdminSecurityAlertsRoute
   AdminAdminSecurityFirewallRoute: typeof AdminAdminSecurityFirewallRoute
   AdminAdminSecuritySessionsRoute: typeof AdminAdminSecuritySessionsRoute
   AdminAdminSecurityUploadsRoute: typeof AdminAdminSecurityUploadsRoute
@@ -2507,6 +2528,7 @@ interface AdminAdminSecurityRouteChildren {
 }
 
 const AdminAdminSecurityRouteChildren: AdminAdminSecurityRouteChildren = {
+  AdminAdminSecurityAlertsRoute: AdminAdminSecurityAlertsRoute,
   AdminAdminSecurityFirewallRoute: AdminAdminSecurityFirewallRoute,
   AdminAdminSecuritySessionsRoute: AdminAdminSecuritySessionsRoute,
   AdminAdminSecurityUploadsRoute: AdminAdminSecurityUploadsRoute,
