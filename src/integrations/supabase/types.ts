@@ -3271,6 +3271,54 @@ export type Database = {
         }
         Relationships: []
       }
+      security_alert_settings: {
+        Row: {
+          audit_action_prefixes: string[]
+          audit_alerts_enabled: boolean
+          audit_min_severity: string
+          channels: string[]
+          created_at: string
+          enabled: boolean
+          id: boolean
+          notify_roles: string[]
+          rate_limit_alerts_enabled: boolean
+          throttle_minutes: number
+          updated_at: string
+          updated_by: string | null
+          upload_alerts_enabled: boolean
+        }
+        Insert: {
+          audit_action_prefixes?: string[]
+          audit_alerts_enabled?: boolean
+          audit_min_severity?: string
+          channels?: string[]
+          created_at?: string
+          enabled?: boolean
+          id?: boolean
+          notify_roles?: string[]
+          rate_limit_alerts_enabled?: boolean
+          throttle_minutes?: number
+          updated_at?: string
+          updated_by?: string | null
+          upload_alerts_enabled?: boolean
+        }
+        Update: {
+          audit_action_prefixes?: string[]
+          audit_alerts_enabled?: boolean
+          audit_min_severity?: string
+          channels?: string[]
+          created_at?: string
+          enabled?: boolean
+          id?: boolean
+          notify_roles?: string[]
+          rate_limit_alerts_enabled?: boolean
+          throttle_minutes?: number
+          updated_at?: string
+          updated_by?: string | null
+          upload_alerts_enabled?: boolean
+        }
+        Relationships: []
+      }
       security_ip_rules: {
         Row: {
           cidr: string
