@@ -184,11 +184,13 @@ export type Database = {
           email_header_html: string | null
           email_reply_to: string | null
           favicon_path: string | null
+          favicon_version: number
           footer_html: string | null
           id: number
           login_hero_url: string | null
           login_tagline: string | null
           logo_path: string | null
+          logo_version: number
           org_address: string | null
           org_legal_name: string | null
           org_registration_no: string | null
@@ -208,11 +210,13 @@ export type Database = {
           email_header_html?: string | null
           email_reply_to?: string | null
           favicon_path?: string | null
+          favicon_version?: number
           footer_html?: string | null
           id?: number
           login_hero_url?: string | null
           login_tagline?: string | null
           logo_path?: string | null
+          logo_version?: number
           org_address?: string | null
           org_legal_name?: string | null
           org_registration_no?: string | null
@@ -232,11 +236,13 @@ export type Database = {
           email_header_html?: string | null
           email_reply_to?: string | null
           favicon_path?: string | null
+          favicon_version?: number
           footer_html?: string | null
           id?: number
           login_hero_url?: string | null
           login_tagline?: string | null
           logo_path?: string | null
+          logo_version?: number
           org_address?: string | null
           org_legal_name?: string | null
           org_registration_no?: string | null
