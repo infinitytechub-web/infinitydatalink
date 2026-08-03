@@ -69,17 +69,11 @@ export type SelfTestResult = {
 };
 
 export async function assertPaymentsPermission(
-  supabase: { rpc: (...args: never[]) => unknown },
+  supabase: unknown,
   action: "view" | "manage",
 ): Promise<void> {
-  const { data, error } = await (supabase as unknown as {
-    rpc: (
-      fn: "has_permission_for",
-      args: { _module: string; _action: string },
-    ) => Promise<{ data: unknown; error: { message: string } | null }>;
-  }).rpc("has_permission_for", { _module: "payments", _action: action });
-  if (error) throw new Error(error.message);
-  if (data !== true) throw new Error(`Forbidden: payments.${action} permission required`);
+  const { assertCapability } = await import("@/lib/capability-guard.server");
+  await assertCapability(supabase, "payments", action);
 }
 
 function redact(config: unknown): Record<string, string> {
