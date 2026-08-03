@@ -3,13 +3,16 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
   type ReactNode,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { applyBrandPalette } from "@/lib/brand-theme";
+import { supabase } from "@/integrations/supabase/client";
 import {
   getBranding,
+  getBrandingContacts,
   getBrandingVersion,
   type BrandingSettings,
 } from "@/lib/branding.functions";
