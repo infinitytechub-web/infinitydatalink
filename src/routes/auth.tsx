@@ -263,7 +263,8 @@ const signInSchema = z.object({
 });
 
 const signUpSchema = signInSchema.extend({
-  fullName: z.string().trim().min(2, "Enter your full name"),
+  firstName: z.string().trim().min(2, "Enter your first name"),
+  lastName: z.string().trim().min(2, "Enter your last name"),
   ghanaCard: z
     .string()
     .regex(GHANA_CARD_REGEX, "Ghana Card must be 10 digits after the GHA- prefix"),
@@ -275,13 +276,15 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [cardDigits, setCardDigits] = useState("");
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState("");
   const [membershipType, setMembershipType] = useState<MembershipType>("individual");
+
 
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
