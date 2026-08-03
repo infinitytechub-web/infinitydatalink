@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyKycStatus } from "@/lib/member-kyc.functions";
 import { KycDecisionBanner } from "@/components/kyc-decision-banner";
+import { useKycRealtime } from "@/hooks/use-kyc-realtime";
 
 import {
   LayoutDashboard,
@@ -96,6 +97,9 @@ function MemberLayout() {
     enabled: !!user && user.status === "approved" && !isAdmin,
     staleTime: 60_000,
   });
+  // Reviewer decisions land instantly instead of waiting for a refetch.
+  useKycRealtime(!isAdmin && user?.status === "approved" ? user?.id : undefined);
+
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth" />;
