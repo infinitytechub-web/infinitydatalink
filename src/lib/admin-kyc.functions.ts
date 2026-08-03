@@ -316,11 +316,13 @@ const decideInput = z
     step_up_token: z.string().min(16).max(200).optional(),
   })
   .superRefine((v, ctx) => {
-    if (v.decision === "rejected" && v.notes.trim().length < 5) {
+    // Every decision is auditable: reviewers must record why they approved or
+    // rejected, not just rejections.
+    if (v.notes.trim().length < 5) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["notes"],
-        message: "Rejection notes must be at least 5 characters.",
+        message: "Reviewer notes must be at least 5 characters.",
       });
     }
     if (v.decision === "rejected" && v.remediation_items.length === 0) {
@@ -331,6 +333,7 @@ const decideInput = z
       });
     }
   });
+
 
 /**
  * Enforces the minor-specific review steps. Returns audit-ready metadata when
@@ -461,8 +464,14 @@ export const decideKyc = createServerFn({ method: "POST" })
     const role = await assertKycAdmin(context.supabase, context.userId);
     const sb = context.supabase;
 
+    // Status-transition gate: no double decisions, and no approving a
+    // submission that is still missing required details or documents.
+    const { assertKycDecidable } = await import("@/lib/kyc-transition.server");
+    const transition = await assertKycDecidable(sb, data.member_id, data.decision);
+
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const now = new Date().toISOString();
+
 
     // Minor accounts: guardian checklist + longer note + fresh re-authentication
     // are enforced before anything is written.
@@ -530,6 +539,8 @@ export const decideKyc = createServerFn({ method: "POST" })
         member_id: data.member_id,
         remediation_items: remediation,
         is_minor: !!minor,
+        transition: { from: transition.from, to: transition.to },
+
         ...(minor
           ? {
               minor_review: {
@@ -825,14 +836,15 @@ const bulkDecideInput = z
       .default([]),
   })
   .superRefine((v, ctx) => {
-    if (v.decision === "rejected" && v.notes.trim().length < 5) {
+    if (v.notes.trim().length < 5) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["notes"],
-        message: "Rejection notes must be at least 5 characters.",
+        message: "Reviewer notes must be at least 5 characters.",
       });
     }
   });
+
 
 export const bulkDecideKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -870,12 +882,18 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
 
     const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
 
+    const { assertKycDecidable } = await import("@/lib/kyc-transition.server");
+
     for (const memberId of data.member_ids) {
       if (minorIds.has(memberId)) continue;
       try {
+        // Same transition rules as a single decision — incomplete submissions
+        // are skipped with a reason instead of being silently approved.
+        await assertKycDecidable(sb, memberId, data.decision);
         const snapshot =
 
           data.decision === "rejected" ? await captureRejectionSnapshot(sb, memberId) : null;
+
         const { data: prof, error: pErr } = await sb
           .from("profiles")
           .update({

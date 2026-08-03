@@ -364,8 +364,9 @@ function DecisionPanel({
     <SectionCard title="Compliance decision">
       <div className="space-y-4 p-6">
         <p className="text-xs text-emerald-deep/60">
-          Approving marks the member as verified and clears all pending documents. Rejecting requires a note explaining
-          the reason so the member can resubmit.
+          Approving marks the member as verified and unlocks full portal access. Every decision needs a
+          reviewer note of at least 5 characters, and approval is only possible once all required details
+          and documents have been submitted.
         </p>
         {isMinor ? (
           <div className="rounded border border-gold/40 bg-gold/10 p-3 text-[11px] text-emerald-deep/80">
@@ -376,7 +377,7 @@ function DecisionPanel({
           </div>
         ) : null}
         <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
-          Notes
+          Reviewer notes (required)
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -384,11 +385,12 @@ function DecisionPanel({
             placeholder={
               isMinor
                 ? `Required for minors — at least ${MINOR_DECISION_NOTE_MIN} characters.`
-                : "Optional for approval, required for rejection."
+                : "Required — at least 5 characters explaining the decision."
             }
             className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal text-emerald-deep outline-none focus:border-emerald-mid"
           />
         </label>
+
         {isMinor ? (
           <fieldset className="space-y-3 rounded border border-gold/40 p-3">
             <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
@@ -474,13 +476,23 @@ function DecisionPanel({
         ) : null}
         <div className="flex gap-2">
           <button
-            disabled={mutation.isPending || !canDecide || approveBlockers.length > 0}
+            disabled={
+              mutation.isPending ||
+              !canDecide ||
+              notes.trim().length < 5 ||
+              approveBlockers.length > 0
+            }
             onClick={() => mutation.mutate({ decision: "approved" })}
-            title={approveBlockers[0] ?? ""}
+            title={
+              notes.trim().length < 5
+                ? "Add a reviewer note of at least 5 characters to approve"
+                : (approveBlockers[0] ?? "")
+            }
             className="inline-flex flex-1 items-center justify-center gap-1 rounded bg-emerald-deep px-3 py-2 text-xs font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
           >
             <Check className="h-3 w-3" /> Approve
           </button>
+
           <button
             disabled={
               mutation.isPending ||

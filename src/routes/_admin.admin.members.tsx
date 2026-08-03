@@ -572,9 +572,8 @@ function QueueBody() {
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-emerald-deep/70">
-              {bulkDialog === "approved"
-                ? "An optional note is stored on each member's audit log."
-                : "A shared note (at least 5 characters) is required for rejection."}
+              A reviewer note of at least 5 characters is required and stored on each member's audit
+              log. Incomplete submissions are skipped and reported back instead of being approved.
             </p>
             <textarea
               value={bulkNotes}
@@ -582,11 +581,12 @@ function QueueBody() {
               placeholder={
                 bulkDialog === "rejected"
                   ? "Reason shown to the member in their notification email"
-                  : "Optional note"
+                  : "Why these submissions are approved"
               }
               rows={4}
               className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
             />
+
             <p className="rounded border border-gold/40 bg-gold/10 px-3 py-2 text-[11px] text-emerald-deep/80">
               Minor (under 18) accounts are skipped in bulk decisions — open each one to complete
               guardian verification and re-authentication.
@@ -634,10 +634,8 @@ function QueueBody() {
               Cancel
             </button>
             <button
-              disabled={
-                bulkMutation.isPending ||
-                (bulkDialog === "rejected" && bulkNotes.trim().length < 5)
-              }
+              disabled={bulkMutation.isPending || bulkNotes.trim().length < 5}
+
               onClick={() =>
                 bulkDialog &&
                 bulkMutation.mutate({
