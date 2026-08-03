@@ -205,6 +205,10 @@ function QueueBody() {
   const s = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const qc = useQueryClient();
+  const { hasRole } = useAuth();
+  // Deleting a review record is destructive: system super admins and admins only.
+  const canDeleteReview = hasRole("super_admin") || hasRole("admin");
+
   const { data } = useSuspenseQuery(queueQuery(s));
   const { data: reviewers = [] } = useQuery(reviewersQuery);
 
