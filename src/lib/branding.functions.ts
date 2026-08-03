@@ -167,6 +167,29 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
 );
 
 /**
+ * Organisation contact + legal footer. These columns are revoked from `anon`,
+ * so only signed-in users (RBAC enforced by the auth middleware) can read them.
+ */
+export const getBrandingContacts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(
+    async ({
+      context,
+    }): Promise<Pick<BrandingSettings, "footer_html" | "support_email" | "support_phone">> => {
+      const { data } = await (context.supabase as any)
+        .from("branding_settings")
+        .select("footer_html, support_email, support_phone")
+        .eq("id", 1)
+        .maybeSingle();
+      return {
+        footer_html: (data as any)?.footer_html ?? null,
+        support_email: (data as any)?.support_email ?? null,
+        support_phone: (data as any)?.support_phone ?? null,
+      };
+    },
+  );
+
+/**
  * Full read including staff-only org/email fields — signed-in super admins only.
  * The sensitive columns are revoked from `anon`/`authenticated` at the database
  * level, so the read runs through the privileged client *after* the role check.
