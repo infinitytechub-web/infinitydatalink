@@ -10,7 +10,9 @@ import { AgeBadge } from "@/components/biodata-fields";
 import { idTypeLabel } from "@/lib/ghana-id-types";
 import { MinorAttestationUploads } from "@/components/minor-attestation-uploads";
 import { KycRecordActions } from "@/components/kyc-record-actions";
+import { DocumentPreviewPanel } from "@/components/document-preview-panel";
 import { IfCan } from "@/components/record-actions";
+
 
 
 import {
