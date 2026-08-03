@@ -2,29 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertPermission } from "@/lib/permissions";
-import { ACTIONS, MODULES } from "@/lib/permissions";
-
-const EDITABLE_ROLES = [
-  "admin",
-  "manager",
-  "compliance_officer",
-  "loan_officer",
-  "finance_officer",
-  "auditor",
-  "member",
-] as const;
-
-export type EditableRole = (typeof EDITABLE_ROLES)[number];
-
-const CapabilitySchema = z
-  .string()
-  .refine((c) => {
-    const [m, a] = c.split(".");
-    return (
-      (MODULES as readonly string[]).includes(m ?? "") &&
-      (ACTIONS as readonly string[]).includes(a ?? "")
-    );
-  }, "Unknown capability");
+import { EDITABLE_ROLES, isValidCapability } from "@/lib/permission-matrix";
 
 export type RoleMatrixRow = { role: string; capabilities: string[] };
 
@@ -58,7 +36,7 @@ export const saveRolePermissions = createServerFn({ method: "POST" })
     z
       .object({
         role: z.enum(EDITABLE_ROLES),
-        capabilities: z.array(CapabilitySchema).max(400),
+        capabilities: z.array(z.string().refine(isValidCapability, "Unknown capability")).max(400),
       })
       .parse(data),
   )
@@ -74,5 +52,3 @@ export const saveRolePermissions = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { count: (count as number) ?? unique.length };
   });
-
-export { EDITABLE_ROLES };
