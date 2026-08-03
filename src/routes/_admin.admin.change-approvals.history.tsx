@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { listChangeAuditHistory } from "@/lib/change-approvals.functions";
-import { exportCsv } from "@/lib/export-utils";
+import { exportCsv } from "@/lib/exports";
 
 const ACTIONS = [
   "settings.change.requested",
@@ -73,17 +73,18 @@ function ChangeAuditHistoryPage() {
           variant="outline"
           disabled={rows.length === 0}
           onClick={() =>
-            exportCsv(
-              "change-approval-audit",
-              ["Timestamp", "Event", "Actor", "Role", "Request"],
-              rows.map((r) => [
-                new Date(r.created_at).toISOString(),
-                ACTION_LABELS[r.action] ?? r.action,
-                r.actor_email ?? "system",
-                r.actor_role ?? "",
-                r.target ?? "",
-              ]),
-            )
+            exportCsv({
+              title: "Change approval audit history",
+              filename: "change-approval-audit",
+              columns: [
+                { header: "Timestamp", accessor: (r) => new Date(r.created_at).toISOString() },
+                { header: "Event", accessor: (r) => ACTION_LABELS[r.action] ?? r.action },
+                { header: "Actor", accessor: (r) => r.actor_email ?? "system" },
+                { header: "Role", accessor: (r) => r.actor_role ?? "" },
+                { header: "Request", accessor: (r) => r.target ?? "" },
+              ],
+              rows,
+            })
           }
         >
           <Download className="mr-1.5 h-3.5 w-3.5" /> Export CSV
