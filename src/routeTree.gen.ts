@@ -98,6 +98,7 @@ import { Route as MemberAppLoansLoanIdRouteImport } from './routes/_member.app.l
 import { Route as MemberAppEntitiesRegisterRouteImport } from './routes/_member.app.entities.register'
 import { Route as AdminAdminSuperAdminsHistoryRouteImport } from './routes/_admin.admin.super-admins.history'
 import { Route as AdminAdminSecurityUploadsRouteImport } from './routes/_admin.admin.security.uploads'
+import { Route as AdminAdminSecuritySessionsRouteImport } from './routes/_admin.admin.security.sessions'
 import { Route as AdminAdminSecurityFirewallRouteImport } from './routes/_admin.admin.security.firewall'
 import { Route as AdminAdminSavingsWithdrawalsRouteImport } from './routes/_admin.admin.savings.withdrawals'
 import { Route as AdminAdminSavingsReconciliationRouteImport } from './routes/_admin.admin.savings.reconciliation'
@@ -585,6 +586,12 @@ const AdminAdminSecurityUploadsRoute =
     path: '/uploads',
     getParentRoute: () => AdminAdminSecurityRoute,
   } as any)
+const AdminAdminSecuritySessionsRoute =
+  AdminAdminSecuritySessionsRouteImport.update({
+    id: '/sessions',
+    path: '/sessions',
+    getParentRoute: () => AdminAdminSecurityRoute,
+  } as any)
 const AdminAdminSecurityFirewallRoute =
   AdminAdminSecurityFirewallRouteImport.update({
     id: '/firewall',
@@ -812,6 +819,7 @@ export interface FileRoutesByFullPath {
   '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
   '/admin/security/firewall': typeof AdminAdminSecurityFirewallRoute
+  '/admin/security/sessions': typeof AdminAdminSecuritySessionsRoute
   '/admin/security/uploads': typeof AdminAdminSecurityUploadsRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
@@ -920,6 +928,7 @@ export interface FileRoutesByTo {
   '/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
   '/admin/security/firewall': typeof AdminAdminSecurityFirewallRoute
+  '/admin/security/sessions': typeof AdminAdminSecuritySessionsRoute
   '/admin/security/uploads': typeof AdminAdminSecurityUploadsRoute
   '/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/app/entities/register': typeof MemberAppEntitiesRegisterRoute
@@ -1037,6 +1046,7 @@ export interface FileRoutesById {
   '/_admin/admin/savings/reconciliation': typeof AdminAdminSavingsReconciliationRoute
   '/_admin/admin/savings/withdrawals': typeof AdminAdminSavingsWithdrawalsRoute
   '/_admin/admin/security/firewall': typeof AdminAdminSecurityFirewallRoute
+  '/_admin/admin/security/sessions': typeof AdminAdminSecuritySessionsRoute
   '/_admin/admin/security/uploads': typeof AdminAdminSecurityUploadsRoute
   '/_admin/admin/super-admins/history': typeof AdminAdminSuperAdminsHistoryRoute
   '/_member/app/entities/register': typeof MemberAppEntitiesRegisterRoute
@@ -1153,6 +1163,7 @@ export interface FileRouteTypes {
     | '/admin/savings/reconciliation'
     | '/admin/savings/withdrawals'
     | '/admin/security/firewall'
+    | '/admin/security/sessions'
     | '/admin/security/uploads'
     | '/admin/super-admins/history'
     | '/app/entities/register'
@@ -1261,6 +1272,7 @@ export interface FileRouteTypes {
     | '/admin/savings/reconciliation'
     | '/admin/savings/withdrawals'
     | '/admin/security/firewall'
+    | '/admin/security/sessions'
     | '/admin/security/uploads'
     | '/admin/super-admins/history'
     | '/app/entities/register'
@@ -1377,6 +1389,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/savings/reconciliation'
     | '/_admin/admin/savings/withdrawals'
     | '/_admin/admin/security/firewall'
+    | '/_admin/admin/security/sessions'
     | '/_admin/admin/security/uploads'
     | '/_admin/admin/super-admins/history'
     | '/_member/app/entities/register'
@@ -2058,6 +2071,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSecurityUploadsRouteImport
       parentRoute: typeof AdminAdminSecurityRoute
     }
+    '/_admin/admin/security/sessions': {
+      id: '/_admin/admin/security/sessions'
+      path: '/sessions'
+      fullPath: '/admin/security/sessions'
+      preLoaderRoute: typeof AdminAdminSecuritySessionsRouteImport
+      parentRoute: typeof AdminAdminSecurityRoute
+    }
     '/_admin/admin/security/firewall': {
       id: '/_admin/admin/security/firewall'
       path: '/firewall'
@@ -2362,12 +2382,14 @@ const AdminAdminSavingsRouteWithChildren =
 
 interface AdminAdminSecurityRouteChildren {
   AdminAdminSecurityFirewallRoute: typeof AdminAdminSecurityFirewallRoute
+  AdminAdminSecuritySessionsRoute: typeof AdminAdminSecuritySessionsRoute
   AdminAdminSecurityUploadsRoute: typeof AdminAdminSecurityUploadsRoute
   AdminAdminSecurityIndexRoute: typeof AdminAdminSecurityIndexRoute
 }
 
 const AdminAdminSecurityRouteChildren: AdminAdminSecurityRouteChildren = {
   AdminAdminSecurityFirewallRoute: AdminAdminSecurityFirewallRoute,
+  AdminAdminSecuritySessionsRoute: AdminAdminSecuritySessionsRoute,
   AdminAdminSecurityUploadsRoute: AdminAdminSecurityUploadsRoute,
   AdminAdminSecurityIndexRoute: AdminAdminSecurityIndexRoute,
 }
