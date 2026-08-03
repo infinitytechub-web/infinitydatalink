@@ -836,14 +836,15 @@ const bulkDecideInput = z
       .default([]),
   })
   .superRefine((v, ctx) => {
-    if (v.decision === "rejected" && v.notes.trim().length < 5) {
+    if (v.notes.trim().length < 5) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["notes"],
-        message: "Rejection notes must be at least 5 characters.",
+        message: "Reviewer notes must be at least 5 characters.",
       });
     }
   });
+
 
 export const bulkDecideKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
