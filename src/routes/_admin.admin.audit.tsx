@@ -6,6 +6,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { EmptyState, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
+import { LogArchiveBar } from "@/components/log-archive-bar";
 import { Pagination } from "@/components/table-controls";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
