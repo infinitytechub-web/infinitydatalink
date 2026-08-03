@@ -85,8 +85,10 @@ function resetThrottle() {
 function acquire(me: PresenceUser) {
   refCount += 1;
   if (channel) return;
+  // Private channel: Realtime enforces the `realtime.messages` RLS policy, so
+  // only authenticated sessions can join and read the roster (names/roles).
   const ch = supabase.channel("presence:online-users", {
-    config: { presence: { key: me.user_id } },
+    config: { private: true, presence: { key: me.user_id } },
   });
   channel = ch;
   ch.on("presence", { event: "sync" }, () => {
@@ -98,10 +100,19 @@ function acquire(me: PresenceUser) {
     }
     flat.sort((a, b) => a.name.localeCompare(b.name));
     scheduleCommit(flat);
-  }).subscribe(async (status) => {
-    if (status !== "SUBSCRIBED") return;
-    await ch.track(me);
   });
+  // Private channels authorize using the current user's JWT.
+  void (async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (token) await supabase.realtime.setAuth(token);
+    } catch {}
+    ch.subscribe(async (status) => {
+      if (status !== "SUBSCRIBED") return;
+      await ch.track(me);
+    });
+  })();
 }
 
 function release() {
