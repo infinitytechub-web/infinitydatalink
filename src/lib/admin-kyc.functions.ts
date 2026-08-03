@@ -882,12 +882,18 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
 
     const { sendKycDecisionEmail } = await import("@/lib/email/send-kyc-notification.server");
 
+    const { assertKycDecidable } = await import("@/lib/kyc-transition.server");
+
     for (const memberId of data.member_ids) {
       if (minorIds.has(memberId)) continue;
       try {
+        // Same transition rules as a single decision — incomplete submissions
+        // are skipped with a reason instead of being silently approved.
+        await assertKycDecidable(sb, memberId, data.decision);
         const snapshot =
 
           data.decision === "rejected" ? await captureRejectionSnapshot(sb, memberId) : null;
+
         const { data: prof, error: pErr } = await sb
           .from("profiles")
           .update({
