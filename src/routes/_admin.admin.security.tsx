@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { Activity, ShieldAlert, FileSearch, Radio } from "lucide-react";
+import { Activity, ShieldAlert, FileSearch, Radio, BellRing } from "lucide-react";
 import { ErrorState, PageHeader } from "@/components/primitives";
 
 export const Route = createFileRoute("/_admin/admin/security")({
@@ -35,6 +35,7 @@ const TABS = [
   { to: "/admin/security/firewall", label: "Firewall & rate limits", icon: ShieldAlert },
   { to: "/admin/security/uploads", label: "Upload scanning", icon: FileSearch },
   { to: "/admin/security/sessions", label: "Live sessions", icon: Radio },
+  { to: "/admin/security/alerts", label: "Alert notifications", icon: BellRing },
 ] as const;
 
 function SecurityLayout() {
