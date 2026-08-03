@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useBranding } from "@/components/branding-provider";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -57,14 +58,24 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const { branding } = useBranding();
+  const appName = branding.app_name || "IT-360 CashApp";
   return (
     <div className="min-h-screen bg-cream font-sans text-emerald-deep">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-deep">
-            <div className="size-3 rotate-45 border-2 border-gold" />
-          </div>
-          <span className="font-serif text-lg">IT-360 CashApp</span>
+          {branding.logo_url ? (
+            <img
+              src={branding.logo_url}
+              alt={`${appName} logo`}
+              className="size-8 shrink-0 rounded-sm object-contain"
+            />
+          ) : (
+            <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-deep">
+              <div className="size-3 rotate-45 border-2 border-gold" />
+            </div>
+          )}
+          <span className="font-serif text-lg">{appName}</span>
         </div>
         <Link
           to="/auth"
