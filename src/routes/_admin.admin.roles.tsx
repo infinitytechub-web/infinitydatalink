@@ -46,17 +46,22 @@ const usersQuery = (search: string, role: string, page: number) =>
   });
 
 function RolesPage() {
-  const { user, hasRole, loading } = useAuth();
+  const { user, hasRole, can, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/auth" />;
-  if (!hasRole("super_admin")) return <Navigate to="/admin" />;
+  if (!hasRole("super_admin") && !can("users", "view")) return <Navigate to="/admin" />;
   return (
     <>
       <PageHeader
         eyebrow="Governance"
         title="Roles & Permissions"
       />
-      <PermissionsMatrix />
+      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+        <PermissionMatrixEditor />
+      </Suspense>
+      <div className="mt-6">
+        <PermissionsMatrix />
+      </div>
       <Suspense fallback={<Skeleton className="mt-6 h-96 w-full" />}>
         <UsersTable />
       </Suspense>
