@@ -22,6 +22,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Save,
+  Archive,
   Lock,
   type LucideIcon,
 } from "lucide-react";
@@ -66,6 +67,7 @@ const SUPER: AppRole[] = ["super_admin"];
 const COMPLIANCE: AppRole[] = ["super_admin", "compliance_officer"];
 const FINANCE: AppRole[] = ["super_admin", "finance_officer"];
 const LOAN: AppRole[] = ["super_admin", "finance_officer", "loan_officer"];
+const VAULT: AppRole[] = ["super_admin", "admin", "manager", "compliance_officer"];
 const AUDIT: AppRole[] = ["super_admin", "auditor", "compliance_officer"];
 
 const SECTIONS: Section[] = [
