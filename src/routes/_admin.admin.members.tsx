@@ -31,6 +31,8 @@ import {
   assignKyc,
   bulkDecideKyc,
   decideKyc,
+  deleteKycReview,
+
   getKycResubmissionSettings,
   updateKycResubmissionSettings,
   type KycQueueRow,
