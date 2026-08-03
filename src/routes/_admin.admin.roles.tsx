@@ -66,6 +66,8 @@ function RolesPage() {
 
 const ROLE_LABEL: Record<AppRole, string> = {
   super_admin: "Super Admin",
+  admin: "Admin",
+  manager: "Manager",
   compliance_officer: "Compliance Officer",
   loan_officer: "Loan Officer",
   finance_officer: "Finance Officer",
@@ -75,6 +77,8 @@ const ROLE_LABEL: Record<AppRole, string> = {
 
 const ROLE_TONE: Record<AppRole, "success" | "warning" | "info" | "neutral" | "danger"> = {
   super_admin: "danger",
+  admin: "danger",
+  manager: "warning",
   compliance_officer: "info",
   loan_officer: "warning",
   finance_officer: "success",
