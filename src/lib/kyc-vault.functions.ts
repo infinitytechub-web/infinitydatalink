@@ -347,10 +347,10 @@ export const getKycVaultEntry = createServerFn({ method: "GET" })
     if (staffIds.length > 0) {
       const { data: rows } = await admin
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name")
         .in("id", staffIds);
       for (const r of rows ?? []) {
-        staff[r.id] = { full_name: r.full_name ?? null, email: r.email ?? null };
+        staff[r.id] = { full_name: r.full_name ?? null, email: null };
       }
     }
 
