@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,6 +17,7 @@ import {
   adminReconcilePayment,
   type AdminPendingPayment,
 } from "@/lib/admin-loans.functions";
+import { useAuth } from "@/lib/auth";
 
 const KIND_FILTERS = ["all", "deposit", "withdrawal", "loan_repayment"] as const;
 type KindFilter = (typeof KIND_FILTERS)[number];
@@ -38,6 +39,10 @@ export const Route = createFileRoute("/_admin/admin/payments")({
 });
 
 function AdminPayments() {
+  const { user, can, hasRole, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/auth" />;
+  if (!hasRole("super_admin") && !can("payments", "view")) return <Navigate to="/admin" />;
   return (
     <>
       <PageHeader
