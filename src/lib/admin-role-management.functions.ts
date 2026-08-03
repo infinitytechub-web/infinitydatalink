@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const ASSIGNABLE_ROLES = [
+  "admin",
+  "manager",
   "compliance_officer",
   "loan_officer",
   "finance_officer",
@@ -18,6 +20,16 @@ export const ROLE_PERMISSIONS: Record<AppRole, string[]> = {
     "Assign and revoke all roles (incl. super admin)",
     "Manage branding, settings, security centre",
     "View & export all audit logs",
+  ],
+  admin: [
+    "Administer every module except system settings",
+    "Approve / reject records across KYC, savings, loans & payments",
+    "Manage users, documents & notifications",
+  ],
+  manager: [
+    "Review and decide operational records",
+    "Approve / reject KYC, savings, loans & payments",
+    "Export and print operational reports",
   ],
   compliance_officer: [
     "Review KYC submissions",
