@@ -11,7 +11,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { writeAudit } from "@/lib/audit-log";
 import {
-  KYC_SNAPSHOT_FIELDS,
   type VaultDocument,
   type VaultEntry,
 } from "@/lib/kyc-vault.shared";
