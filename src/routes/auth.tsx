@@ -8,6 +8,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useBranding } from "@/components/branding-provider";
+import { AuthBrandMark } from "@/components/auth-brand-mark";
 import DOMPurify from "isomorphic-dompurify";
 import { calculateAge, isMinor, validateDateOfBirth } from "@/lib/age";
 import { GHANA_REGIONS, districtsForRegion } from "@/lib/ghana-locations";
@@ -74,16 +75,7 @@ function AuthPage() {
       }
     >
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
-        <Link to="/" className="flex items-center gap-2">
-          {branding.logo_url ? (
-            <img src={branding.logo_url} alt={appName} className="h-9 w-9 rounded-md object-contain" />
-          ) : (
-            <div className="flex size-9 items-center justify-center rounded-md bg-emerald-deep shadow-sm">
-              <div className="size-3 rotate-45 border-2 border-gold" />
-            </div>
-          )}
-          <span className="font-serif text-lg tracking-tight">{appName}</span>
-        </Link>
+        <AuthBrandMark />
         <div className="flex items-center gap-3">
           <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
             Secure session · TLS 1.3
