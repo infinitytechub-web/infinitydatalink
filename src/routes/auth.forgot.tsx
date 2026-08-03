@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { AuthBrandMark } from "@/components/auth-brand-mark";
 
 export const Route = createFileRoute("/auth/forgot")({
   head: () => ({
@@ -17,6 +18,7 @@ function Forgot() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-6 font-sans">
       <div className="w-full max-w-md rounded-sm border border-emerald-deep/5 bg-card p-8 shadow-sm">
+        <AuthBrandMark className="mb-6" />
         <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">
           Password reset
         </p>
