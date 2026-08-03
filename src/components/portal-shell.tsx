@@ -40,7 +40,21 @@ export function PortalShell({
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, signOut } = useAuth();
+  const { user, signOut, can, hasRole } = useAuth();
+  // RBAC: drop nav items whose capability the signed-in user lacks, then drop
+  // groups that end up empty. Super admins always see everything.
+  const visibleGroups = useMemo(() => {
+    const allow = (item: NavItem) =>
+      !item.cap ||
+      hasRole("super_admin") ||
+      (() => {
+        const [m, a] = item.cap.split(".") as [Parameters<typeof can>[0], Parameters<typeof can>[1]];
+        return can(m, a);
+      })();
+    return groups
+      .map((g) => ({ ...g, items: g.items.filter(allow) }))
+      .filter((g) => g.items.length > 0);
+  }, [groups, can, hasRole]);
   const [open, setOpen] = useState(false); // mobile drawer
   const [collapsed, setCollapsed] = useState(false); // desktop rail
   const navigate = useNavigate();
@@ -173,14 +187,14 @@ export function PortalShell({
               <SidebarWidgetSkeleton rows={5} collapsed={collapsed} />
               <SidebarWidgetSkeleton rows={3} collapsed={collapsed} />
             </>
-          ) : groups.length === 0 ? (
+          ) : visibleGroups.length === 0 ? (
             <SidebarWidgetEmpty
               label="Navigation"
               message="No sections available"
               collapsed={collapsed}
             />
           ) : (
-            groups.map((g, gi) => {
+            visibleGroups.map((g, gi) => {
               const accent = GROUP_ACCENTS[gi % GROUP_ACCENTS.length];
               return (
                 <SidebarWidget key={g.label} collapsed={collapsed}>
