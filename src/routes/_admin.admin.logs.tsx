@@ -143,8 +143,10 @@ function Body() {
 
   const totalPages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
 
-  const update = (patch: Partial<Search>) =>
+  const update = (patch: Partial<Search>) => {
+    setPicked([]);
     navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
+  };
 
   return (
     <>
