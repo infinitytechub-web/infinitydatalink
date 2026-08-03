@@ -234,3 +234,76 @@ export const getMyApprovalStatus = createServerFn({ method: "GET" })
       rejection_reason: ((data as any)?.rejection_reason ?? null) as string | null,
     };
   });
+
+/**
+ * Permanently deletes a user account (auth user + profile) so the person can
+ * re-register from scratch. Super admin only, reason mandatory. A snapshot of
+ * the profile is archived into the recycle bin before removal.
+ */
+export const deleteUserPermanently = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({ user_id: z.string().uuid(), reason: z.string().trim().min(10).max(500) })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: roleRows, error: roleErr } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    if (roleErr) throw new Error(roleErr.message);
+    const roles = (roleRows ?? []).map((r: any) => r.role as string);
+    if (!roles.includes("super_admin")) throw new Error("Forbidden: super_admin required");
+    if (data.user_id === context.userId) throw new Error("You cannot delete your own account");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Refuse to delete accounts that still hold financial records.
+    for (const table of ["savings_accounts", "loans", "transactions"] as const) {
+      const { count, error } = await (supabaseAdmin as any)
+        .from(table)
+        .select("id", { count: "exact", head: true })
+        .eq(table === "transactions" ? "user_id" : "member_id", data.user_id);
+      if (!error && (count ?? 0) > 0) {
+        throw new Error(
+          `This member has ${count} ${table.replace("_", " ")} record(s). Deactivate instead of deleting.`,
+        );
+      }
+    }
+
+    const { data: profile } = await (supabaseAdmin as any)
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user_id)
+      .maybeSingle();
+
+    const { error: binErr } = await (supabaseAdmin as any).from("recycle_bin").insert({
+      entity_table: "profiles",
+      entity_id: data.user_id,
+      payload: { profile: profile ?? null, reason: data.reason, deleted_by: context.userId },
+      deleted_by: context.userId,
+    });
+    if (binErr) throw new Error(binErr.message);
+
+    const { error: delProfileErr } = await (supabaseAdmin as any)
+      .from("profiles")
+      .delete()
+      .eq("id", data.user_id);
+    if (delProfileErr) throw new Error(delProfileErr.message);
+
+    const { error: authErr } = await (supabaseAdmin as any).auth.admin.deleteUser(data.user_id);
+    if (authErr && !/not found/i.test(authErr.message)) throw new Error(authErr.message);
+
+    await recordDecision({
+      actorId: context.userId,
+      actorEmail: (context.claims as any)?.email ?? null,
+      actorRole: "super_admin",
+      module: "user",
+      outcome: "deleted",
+      target: data.user_id,
+      subjectId: data.user_id,
+      note: data.reason,
+    });
+    return { ok: true as const };
+  });
