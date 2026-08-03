@@ -1407,9 +1407,11 @@ export const deleteKycReview = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
 
+    const { KYC_SNAPSHOT_FIELDS, VAULT_PREFIX } = await import("@/lib/kyc-vault.shared");
+
     const { data: profile, error: pErr } = await admin
       .from("profiles")
-      .select("id, full_name, member_no, kyc")
+      .select(["id", "full_name", "member_no", ...KYC_SNAPSHOT_FIELDS].join(", "))
       .eq("id", data.member_id)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
@@ -1417,19 +1419,50 @@ export const deleteKycReview = createServerFn({ method: "POST" })
 
     const { data: docs, error: dErr } = await admin
       .from("kyc_documents")
-      .select("id, storage_path, doc_type")
+      .select("*")
       .eq("member_id", data.member_id);
     if (dErr) throw new Error(dErr.message);
 
-    const paths = (docs ?? []).map((d: any) => d.storage_path).filter(Boolean);
-    if (paths.length > 0) {
-      await admin.storage.from(BUCKET).remove(paths);
+    // Archive (never destroy): documents move into the vault prefix and the
+    // review snapshot is stored in the recycle bin for a 30-day restore window.
+    const archiveId = crypto.randomUUID();
+    const archivedDocs: any[] = [];
+    for (const d of docs ?? []) {
+      const from = d.storage_path as string;
+      if (!from) continue;
+      const to = `${VAULT_PREFIX}/${archiveId}/${from}`;
+      const { error: mvErr } = await admin.storage.from(BUCKET).move(from, to);
+      archivedDocs.push({ ...d, vault_path: mvErr ? null : to, original_path: from });
+    }
+    if ((docs ?? []).length > 0) {
       const { error: delErr } = await admin
         .from("kyc_documents")
         .delete()
         .eq("member_id", data.member_id);
       if (delErr) throw new Error(delErr.message);
     }
+
+    const snapshot: Record<string, unknown> = {};
+    for (const f of KYC_SNAPSHOT_FIELDS) snapshot[f] = (profile as any)[f] ?? null;
+
+    const { error: vErr } = await admin.from("recycle_bin").insert({
+      id: archiveId,
+      entity_table: "kyc_review",
+      entity_id: data.member_id,
+      deleted_by: context.userId,
+      payload: {
+        member_id: data.member_id,
+        member_no: profile.member_no ?? null,
+        member_name: profile.full_name ?? null,
+        previous_kyc: (profile as any).kyc ?? null,
+        reason: data.reason,
+        deleted_by_role: actorRole,
+        deleted_by_email: (context.claims as any)?.email ?? null,
+        profile_snapshot: snapshot,
+        documents: archivedDocs,
+      },
+    });
+    if (vErr) throw new Error(vErr.message);
 
     const { error: uErr } = await admin
       .from("profiles")
@@ -1457,6 +1490,7 @@ export const deleteKycReview = createServerFn({ method: "POST" })
       })
       .eq("id", data.member_id);
     if (uErr) throw new Error(uErr.message);
+
 
     await writeAudit({
       actor_id: context.userId,
