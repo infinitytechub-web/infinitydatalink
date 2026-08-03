@@ -535,7 +535,9 @@ function QueueBody() {
                       ]}
                       onView={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
                       onEdit={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
-                      onDecide={(decision, note) => rowDecision(m, decision, note)}
+                      onDecide={(decision, note, items) => rowDecision(m, decision, note, items)}
+                      remediationOptions={ALL_REMEDIATION_ITEMS}
+
                       {...(canDeleteReview ? { onDelete: () => setDeleteTarget(m) } : {})}
                       noConfirm={["delete"]}
                       disabled={{ approve: m.kyc === "active", reject: m.kyc === "rejected" }}
