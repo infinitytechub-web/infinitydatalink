@@ -210,7 +210,10 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
   };
 
   return (
-    <SectionCard title="IP firewall rules" hint={`${view.ip_rules.length} rule(s)`}>
+    <SectionCard
+      title="IP firewall rules"
+      action={<span className="text-[10px] uppercase tracking-widest text-emerald-deep/45">{view.ip_rules.length} rule(s)</span>}
+    >
       {!disabled ? (
         <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 px-6 py-4">
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
@@ -346,7 +349,11 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
   return (
     <SectionCard
       title="Rate limits"
-      hint={view.settings.rate_limiting_enabled ? "Enforcement on" : "Enforcement off"}
+      action={
+        <span className="text-[10px] uppercase tracking-widest text-emerald-deep/45">
+          {view.settings.rate_limiting_enabled ? "Enforcement on" : "Enforcement off"}
+        </span>
+      }
     >
       {!disabled ? (
         <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 px-6 py-4">
