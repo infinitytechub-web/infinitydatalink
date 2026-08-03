@@ -2,6 +2,7 @@ import { createFileRoute, Link, Navigate, Outlet, useRouterState } from "@tansta
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyKycStatus } from "@/lib/member-kyc.functions";
+import { KycDecisionBanner } from "@/components/kyc-decision-banner";
 
 import {
   LayoutDashboard,
