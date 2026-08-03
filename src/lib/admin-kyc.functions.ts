@@ -1407,118 +1407,26 @@ export const deleteKycReview = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
 
-    const { KYC_SNAPSHOT_FIELDS, VAULT_PREFIX } = await import("@/lib/kyc-vault.shared");
-
-    const { data: profile, error: pErr } = await admin
-      .from("profiles")
-      .select(["id", "full_name", "member_no", ...KYC_SNAPSHOT_FIELDS].join(", "))
-      .eq("id", data.member_id)
-      .maybeSingle();
-    if (pErr) throw new Error(pErr.message);
-    if (!profile) throw new Error("Member not found");
-
-    const { data: docs, error: dErr } = await admin
-      .from("kyc_documents")
-      .select("*")
-      .eq("member_id", data.member_id);
-    if (dErr) throw new Error(dErr.message);
-
-    // Archive (never destroy): documents move into the vault prefix and the
-    // review snapshot is stored in the recycle bin for a 30-day restore window.
-    const archiveId = crypto.randomUUID();
-    const archivedDocs: any[] = [];
-    for (const d of docs ?? []) {
-      const from = d.storage_path as string;
-      if (!from) continue;
-      const to = `${VAULT_PREFIX}/${archiveId}/${from}`;
-      const { error: mvErr } = await admin.storage.from(BUCKET).move(from, to);
-      archivedDocs.push({ ...d, vault_path: mvErr ? null : to, original_path: from });
-    }
-    if ((docs ?? []).length > 0) {
-      const { error: delErr } = await admin
-        .from("kyc_documents")
-        .delete()
-        .eq("member_id", data.member_id);
-      if (delErr) throw new Error(delErr.message);
-    }
-
-    const snapshot: Record<string, unknown> = {};
-    for (const f of KYC_SNAPSHOT_FIELDS) snapshot[f] = (profile as any)[f] ?? null;
-
-    const { error: vErr } = await admin.from("recycle_bin").insert({
-      id: archiveId,
-      entity_table: "kyc_review",
-      entity_id: data.member_id,
-      deleted_by: context.userId,
-      payload: {
-        member_id: data.member_id,
-        member_no: profile.member_no ?? null,
-        member_name: profile.full_name ?? null,
-        previous_kyc: (profile as any).kyc ?? null,
-        reason: data.reason,
-        deleted_by_role: actorRole,
-        deleted_by_email: (context.claims as any)?.email ?? null,
-        profile_snapshot: snapshot,
-        documents: archivedDocs,
-      },
-    });
-    if (vErr) throw new Error(vErr.message);
-
-    const { error: uErr } = await admin
-      .from("profiles")
-      .update({
-        kyc: "pending",
-        kyc_notes: null,
-        kyc_reviewed_by: null,
-        kyc_reviewed_at: null,
-        kyc_assigned_to: null,
-        kyc_assigned_at: null,
-        kyc_submitted_at: null,
-        kyc_resubmitted_at: null,
-        kyc_resubmission_deadline: null,
-        kyc_attempts: 0,
-        kyc_remediation_items: [],
-        kyc_rejection_snapshot: null,
-        kyc_risk_level: null,
-        kyc_risk_flags: null,
-        kyc_flagged_at: null,
-        kyc_flag_reason: null,
-        kyc_deadline_reminded_at: null,
-        kyc_final_reminded_at: null,
-        kyc_low_attempts_reminded_at: null,
-        kyc_deadline_expired_notified_at: null,
-      })
-      .eq("id", data.member_id);
-    if (uErr) throw new Error(uErr.message);
-
-
-    await writeAudit({
-      actor_id: context.userId,
-      actor_email: (context.claims as any)?.email ?? null,
-      actor_role: actorRole,
-      action: "kyc.review_deleted",
-      target: data.member_id,
-      meta: {
-        member_id: data.member_id,
-        member_no: profile.member_no ?? null,
-        member_name: profile.full_name ?? null,
-        previous_kyc: profile.kyc,
-        reason: data.reason,
-        documents_deleted: (docs ?? []).length,
-        document_types: (docs ?? []).map((d: any) => d.doc_type),
-      },
-    });
+    // Shared with the bulk console action: archives documents + snapshot into
+    // the vault, resets the live review and writes the per-member audit row.
+    const { archiveKycReview } = await import("@/lib/kyc-vault-core.server");
+    const res = await archiveKycReview(
+      admin,
+      data.member_id,
+      { userId: context.userId, email: (context.claims as any)?.email ?? null, role: actorRole },
+      data.reason,
+    );
 
     await notifyStaff({
       roles: ["super_admin", "compliance_officer"],
       category: "kyc.review.deleted",
       title: "KYC review record deleted",
-      body: `${profile.full_name ?? profile.member_no ?? data.member_id} had their KYC review deleted by ${actorRole}. Reason: ${data.reason}`,
+      body: `${res.member_name ?? res.member_no ?? data.member_id} had their KYC review deleted by ${actorRole}. Reason: ${data.reason}`,
       link: `/admin/members/${data.member_id}`,
       meta: { member_id: data.member_id, reason: data.reason },
       dedupeKey: `kyc.review.deleted:${data.member_id}:${Date.now()}`,
       excludeUserId: context.userId,
     });
 
-    return { deleted: true, documents_deleted: (docs ?? []).length };
+    return { deleted: true, documents_deleted: res.documents_archived };
   });
