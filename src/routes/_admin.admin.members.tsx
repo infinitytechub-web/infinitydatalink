@@ -518,9 +518,12 @@ function QueueBody() {
                       onView={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
                       onEdit={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
                       onDecide={(decision, note) => rowDecision(m, decision, note)}
+                      {...(canDeleteReview ? { onDelete: () => setDeleteTarget(m) } : {})}
+                      noConfirm={["delete"]}
                       disabled={{ approve: m.kyc === "active", reject: m.kyc === "rejected" }}
                       className="justify-end"
                     />
+
                   </td>
                 </tr>
               ))
