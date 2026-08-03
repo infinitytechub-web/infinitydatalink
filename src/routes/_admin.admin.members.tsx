@@ -220,6 +220,9 @@ function QueueBody() {
   const [bulkNotes, setBulkNotes] = useState("");
   const [bulkItems, setBulkItems] = useState<string[]>([]);
   const [assignOpenFor, setAssignOpenFor] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<KycQueueRow | null>(null);
+  const [deleteReason, setDeleteReason] = useState("");
+
 
   const setSearch = (patch: Partial<SearchInput>) => {
     setSelected(new Set());
