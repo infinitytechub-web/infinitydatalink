@@ -82,6 +82,7 @@ export function KycRecordActions({
   onEdit,
   onDelete,
   onDecide,
+  remediationOptions,
   noteMin = 5,
   disabled,
   noConfirm,
@@ -92,7 +93,11 @@ export function KycRecordActions({
 }: KycRecordActionsProps) {
   const [decision, setDecision] = useState<KycDecision | null>(null);
   const [note, setNote] = useState("");
+  const [items, setItems] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+
+  // Rejections must name at least one item to revise when a checklist exists.
+  const needsItems = decision === "rejected" && !!remediationOptions?.length;
 
   const exportOpts = {
     title,
@@ -102,19 +107,25 @@ export function KycRecordActions({
     rows: fields,
   };
 
+  const close = () => {
+    setDecision(null);
+    setNote("");
+    setItems([]);
+  };
+
   const submit = async () => {
     if (!decision || !onDecide) return;
     setBusy(true);
     try {
-      await onDecide(decision, note.trim());
-      setDecision(null);
-      setNote("");
+      await onDecide(decision, note.trim(), decision === "rejected" ? items : []);
+      close();
     } catch (err: any) {
       toast.error(err?.message ?? "Decision failed");
     } finally {
       setBusy(false);
     }
   };
+
 
   return (
     <>
