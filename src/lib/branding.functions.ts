@@ -13,6 +13,28 @@ const ALLOWED_FAVICON_MIMES = new Set([
   "image/x-icon",
   "image/vnd.microsoft.icon",
 ]);
+// Apple / Android home-screen icons must be a raster square (no .ico, no SVG).
+const ALLOWED_TOUCH_ICON_MIMES = new Set(["image/png", "image/jpeg", "image/webp"]);
+
+type BrandingAssetKind = "logo" | "favicon" | "touch_icon";
+
+const ASSET_COLUMNS: Record<BrandingAssetKind, { path: string; version: string }> = {
+  logo: { path: "logo_path", version: "logo_version" },
+  favicon: { path: "favicon_path", version: "favicon_version" },
+  touch_icon: { path: "touch_icon_path", version: "touch_icon_version" },
+};
+
+const ASSET_MIMES: Record<BrandingAssetKind, Set<string>> = {
+  logo: ALLOWED_LOGO_MIMES,
+  favicon: ALLOWED_FAVICON_MIMES,
+  touch_icon: ALLOWED_TOUCH_ICON_MIMES,
+};
+
+const ASSET_MIME_HINT: Record<BrandingAssetKind, string> = {
+  logo: "Logo must be PNG, JPEG, SVG, or WEBP",
+  favicon: "Favicon must be PNG, SVG, or ICO",
+  touch_icon: "Touch icon must be a square PNG, JPEG, or WEBP (180x180 or larger)",
+};
 
 export type BrandingSettings = {
   app_name: string;
@@ -22,10 +44,13 @@ export type BrandingSettings = {
   secondary_color: string;
   logo_url: string | null;
   favicon_url: string | null;
+  touch_icon_url: string | null;
   logo_path: string | null;
   favicon_path: string | null;
+  touch_icon_path: string | null;
   logo_version: number;
   favicon_version: number;
+  touch_icon_version: number;
   login_hero_url: string | null;
   login_tagline: string | null;
   org_legal_name: string | null;
@@ -49,10 +74,13 @@ const DEFAULTS: BrandingSettings = {
   secondary_color: "#0f766e",
   logo_url: null,
   favicon_url: null,
+  touch_icon_url: null,
   logo_path: null,
   favicon_path: null,
+  touch_icon_path: null,
   logo_version: 1,
   favicon_version: 1,
+  touch_icon_version: 1,
   login_hero_url: null,
   login_tagline: null,
   org_legal_name: null,
@@ -117,16 +145,23 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
         // Public projection only. Legal name, registered address, registration
         // number and outbound email branding are staff-only (anon lacks
         // column privileges); support contacts are intentionally public.
-        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, logo_version, favicon_version, login_hero_url, login_tagline, footer_html, support_email, support_phone, updated_at",
+        "app_name, tagline, primary_color, accent_color, secondary_color, logo_path, favicon_path, touch_icon_path, logo_version, favicon_version, touch_icon_version, login_hero_url, login_tagline, footer_html, support_email, support_phone, updated_at",
       )
       .eq("id", 1)
       .maybeSingle();
     if (!data) return DEFAULTS;
-    const [logo_url, favicon_url] = await Promise.all([
+    const [logo_url, favicon_url, touch_icon_url] = await Promise.all([
       signBrandingUrl((data as any).logo_path, (data as any).logo_version),
       signBrandingUrl((data as any).favicon_path, (data as any).favicon_version),
+      signBrandingUrl((data as any).touch_icon_path, (data as any).touch_icon_version),
     ]);
-    return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
+    return {
+      ...DEFAULTS,
+      ...(data as any),
+      logo_url,
+      favicon_url,
+      touch_icon_url,
+    } as BrandingSettings;
   },
 );
 
@@ -146,11 +181,18 @@ export const getBrandingFull = createServerFn({ method: "GET" })
       .eq("id", 1)
       .maybeSingle();
     if (!data) return DEFAULTS;
-    const [logo_url, favicon_url] = await Promise.all([
+    const [logo_url, favicon_url, touch_icon_url] = await Promise.all([
       signBrandingUrl((data as any).logo_path, (data as any).logo_version),
       signBrandingUrl((data as any).favicon_path, (data as any).favicon_version),
+      signBrandingUrl((data as any).touch_icon_path, (data as any).touch_icon_version),
     ]);
-    return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
+    return {
+      ...DEFAULTS,
+      ...(data as any),
+      logo_url,
+      favicon_url,
+      touch_icon_url,
+    } as BrandingSettings;
   });
 
 
@@ -228,7 +270,7 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
       .object({
-        kind: z.enum(["logo", "favicon"]),
+        kind: z.enum(["logo", "favicon", "touch_icon"]),
         filename: z.string().min(1).max(160),
         mime_type: z.string().min(3).max(80),
         content_base64: z.string().min(4),
@@ -237,13 +279,9 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<BrandingSettings> => {
     await assertSuperAdmin(context.supabase, context.userId);
-    const allowed = data.kind === "logo" ? ALLOWED_LOGO_MIMES : ALLOWED_FAVICON_MIMES;
-    if (!allowed.has(data.mime_type)) {
-      throw new Error(
-        data.kind === "logo"
-          ? "Logo must be PNG, JPEG, SVG, or WEBP"
-          : "Favicon must be PNG, SVG, or ICO",
-      );
+    const kind = data.kind as BrandingAssetKind;
+    if (!ASSET_MIMES[kind].has(data.mime_type)) {
+      throw new Error(ASSET_MIME_HINT[kind]);
     }
     const b64 = data.content_base64.replace(/^data:[^;]+;base64,/, "");
     const buffer = Buffer.from(b64, "base64");
@@ -259,32 +297,23 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
     if (upErr) throw new Error(upErr.message);
 
     // Fetch current path to clean up old asset
+    const cols = ASSET_COLUMNS[kind];
     const { data: prev } = await context.supabase
       .from("branding_settings")
-      .select("logo_path, favicon_path, logo_version, favicon_version")
+      .select(
+        "logo_path, favicon_path, touch_icon_path, logo_version, favicon_version, touch_icon_version",
+      )
       .eq("id", 1)
       .maybeSingle();
-    const oldPath = data.kind === "logo" ? (prev as any)?.logo_path : (prev as any)?.favicon_path;
+    const oldPath = (prev as any)?.[cols.path] ?? null;
 
-    const prevVersion =
-      data.kind === "logo"
-        ? Number((prev as any)?.logo_version ?? 1)
-        : Number((prev as any)?.favicon_version ?? 1);
-    const nextVersion = prevVersion + 1;
-    const patch =
-      data.kind === "logo"
-        ? {
-            logo_path: path,
-            logo_version: nextVersion,
-            updated_at: new Date().toISOString(),
-            updated_by: context.userId,
-          }
-        : {
-            favicon_path: path,
-            favicon_version: nextVersion,
-            updated_at: new Date().toISOString(),
-            updated_by: context.userId,
-          };
+    const nextVersion = Number((prev as any)?.[cols.version] ?? 1) + 1;
+    const patch: Record<string, any> = {
+      [cols.path]: path,
+      [cols.version]: nextVersion,
+      updated_at: new Date().toISOString(),
+      updated_by: context.userId,
+    };
     const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
     if (error) throw new Error(error.message);
 
@@ -303,33 +332,27 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
 
 export const clearBrandingAsset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ kind: z.enum(["logo", "favicon"]) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ kind: z.enum(["logo", "favicon", "touch_icon"]) }).parse(d),
+  )
   .handler(async ({ data, context }): Promise<BrandingSettings> => {
     await assertSuperAdmin(context.supabase, context.userId);
+    const cols = ASSET_COLUMNS[data.kind as BrandingAssetKind];
     const { data: prev } = await context.supabase
       .from("branding_settings")
-      .select("logo_path, favicon_path, logo_version, favicon_version")
+      .select(
+        "logo_path, favicon_path, touch_icon_path, logo_version, favicon_version, touch_icon_version",
+      )
       .eq("id", 1)
       .maybeSingle();
-    const oldPath = data.kind === "logo" ? (prev as any)?.logo_path : (prev as any)?.favicon_path;
-    const nextVersion =
-      Number(
-        data.kind === "logo" ? (prev as any)?.logo_version ?? 1 : (prev as any)?.favicon_version ?? 1,
-      ) + 1;
-    const patch =
-      data.kind === "logo"
-        ? {
-            logo_path: null,
-            logo_version: nextVersion,
-            updated_at: new Date().toISOString(),
-            updated_by: context.userId,
-          }
-        : {
-            favicon_path: null,
-            favicon_version: nextVersion,
-            updated_at: new Date().toISOString(),
-            updated_by: context.userId,
-          };
+    const oldPath = (prev as any)?.[cols.path] ?? null;
+    const nextVersion = Number((prev as any)?.[cols.version] ?? 1) + 1;
+    const patch: Record<string, any> = {
+      [cols.path]: null,
+      [cols.version]: nextVersion,
+      updated_at: new Date().toISOString(),
+      updated_by: context.userId,
+    };
     const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
     if (error) throw new Error(error.message);
     if (oldPath) {
@@ -352,7 +375,12 @@ export const clearBrandingAsset = createServerFn({ method: "POST" })
  * therefore new cache-busted asset URLs) the moment a version bumps.
  */
 export const getBrandingVersion = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{ logo_version: number; favicon_version: number; updated_at: string }> => {
+  async (): Promise<{
+    logo_version: number;
+    favicon_version: number;
+    touch_icon_version: number;
+    updated_at: string;
+  }> => {
     const client = createClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PUBLISHABLE_KEY!,
@@ -360,12 +388,13 @@ export const getBrandingVersion = createServerFn({ method: "GET" }).handler(
     );
     const { data } = await client
       .from("branding_settings")
-      .select("logo_version, favicon_version, updated_at")
+      .select("logo_version, favicon_version, touch_icon_version, updated_at")
       .eq("id", 1)
       .maybeSingle();
     return {
       logo_version: Number((data as any)?.logo_version ?? 1),
       favicon_version: Number((data as any)?.favicon_version ?? 1),
+      touch_icon_version: Number((data as any)?.touch_icon_version ?? 1),
       updated_at: (data as any)?.updated_at ?? DEFAULTS.updated_at,
     };
   },
