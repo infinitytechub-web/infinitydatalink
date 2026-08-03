@@ -246,48 +246,8 @@ function MemberDetailBody() {
   );
 }
 
-function DocumentRow({ doc }: { doc: KycDocumentWithUrl }) {
-  const label = doc.doc_type.replace(/_/g, " ");
-  return (
-    <li className="flex items-center justify-between gap-3 px-6 py-3">
-      <div className="flex min-w-0 items-center gap-3">
-        <FileText className="h-4 w-4 shrink-0 text-emerald-deep/60" />
-        <div className="min-w-0">
-          <p className="text-sm font-semibold capitalize">{label}</p>
-          <p className="text-[11px] text-emerald-deep/50">
-            Uploaded {new Date(doc.created_at).toLocaleString()} · {(doc.size_bytes / 1024).toFixed(0)} KB · {doc.mime_type}
-          </p>
-          {doc.review_notes ? (
-            <p className="mt-0.5 text-[11px] text-emerald-deep/70">Notes: {doc.review_notes}</p>
-          ) : null}
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <span
-          className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
-            doc.status === "approved"
-              ? "bg-emerald-mid/10 text-emerald-mid"
-              : doc.status === "rejected"
-              ? "bg-destructive/10 text-destructive"
-              : "bg-gold/10 text-gold"
-          }`}
-        >
-          {doc.status}
-        </span>
-        {doc.signed_url ? (
-          <a
-            href={doc.signed_url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream"
-          >
-            View <ExternalLink className="h-3 w-3" />
-          </a>
-        ) : null}
-      </div>
-    </li>
-  );
-}
+
+
 
 function DecisionPanel({
   memberId,
