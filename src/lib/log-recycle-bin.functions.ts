@@ -69,3 +69,26 @@ export const restoreLogEntries = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { restored: Number(restored ?? 0) };
   });
+
+const deleteInput = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(500),
+  confirm: z.literal("DELETE"),
+});
+
+/**
+ * Permanent, irreversible removal of recycle-bin snapshots. Super-admin only
+ * (re-checked inside the `SECURITY DEFINER` RPC), and every call writes a final
+ * `system.log_permanent_delete` audit entry listing what was destroyed.
+ */
+export const deleteLogEntriesForever = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => deleteInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: deleted, error } = await context.supabase.rpc(
+      "delete_log_recycle_bin_entries",
+      { _ids: data.ids },
+    );
+    if (error) throw new Error(error.message);
+    return { deleted: Number(deleted ?? 0) };
+  });
+

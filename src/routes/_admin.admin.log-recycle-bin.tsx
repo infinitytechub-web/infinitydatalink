@@ -15,6 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/table-controls";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -25,8 +33,10 @@ import { useAuth } from "@/lib/auth";
 import {
   listLogRecycleBin,
   restoreLogEntries,
+  deleteLogEntriesForever,
   type LogBinRow,
 } from "@/lib/log-recycle-bin.functions";
+
 
 const search = z.object({
   kind: fallback(z.enum(["all", "audit_log", "runtime_error_logs"]), "all").default("all"),
@@ -115,6 +125,9 @@ function BinTable() {
   const { data } = useSuspenseQuery(binQuery(s));
   const [picked, setPicked] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+
 
   const canRestore = hasRole("super_admin");
   const update = (patch: Partial<Search>) => {
@@ -152,6 +165,27 @@ function BinTable() {
     }
   };
 
+  const deleteForever = async () => {
+    setBusy(true);
+    try {
+      const res = await deleteLogEntriesForever({
+        data: { ids: picked, confirm: "DELETE" },
+      });
+      toast.success(
+        `${res.deleted} snapshot${res.deleted === 1 ? "" : "s"} permanently deleted`,
+      );
+      setPicked([]);
+      setConfirmOpen(false);
+      setConfirmText("");
+      await qc.invalidateQueries({ queryKey: ["admin", "log-recycle-bin"] });
+      await qc.invalidateQueries({ queryKey: ["admin", "loan-audit"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Permanent delete failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <SectionCard
       title={`Purged entries · ${data.total}`}
@@ -164,14 +198,66 @@ function BinTable() {
             <Link to="/admin/logs">Event log</Link>
           </Button>
           {canRestore ? (
-            <Button size="sm" disabled={picked.length === 0 || busy} onClick={restore}>
-              <RotateCcw className="mr-1 h-3.5 w-3.5" />
-              {busy ? "Restoring…" : `Restore selected${picked.length ? ` (${picked.length})` : ""}`}
-            </Button>
+            <>
+              <Button size="sm" disabled={picked.length === 0 || busy} onClick={restore}>
+                <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                {busy
+                  ? "Restoring…"
+                  : `Restore selected${picked.length ? ` (${picked.length})` : ""}`}
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={picked.length === 0 || busy}
+                onClick={() => {
+                  setConfirmText("");
+                  setConfirmOpen(true);
+                }}
+              >
+                <Trash2 className="mr-1 h-3.5 w-3.5" />
+                Delete forever{picked.length ? ` (${picked.length})` : ""}
+              </Button>
+            </>
           ) : null}
         </div>
       }
     >
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Permanently delete {picked.length} snapshot(s)?</DialogTitle>
+            <DialogDescription>
+              This is irreversible — the selected purged log entries can never be restored.
+              A final audit entry recording this deletion will be written.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <p className="text-xs text-emerald-deep/70">
+              Type <span className="font-mono font-semibold">DELETE</span> to confirm.
+            </p>
+            <Input
+              aria-label="Type DELETE to confirm"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="DELETE"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={busy}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={busy || confirmText !== "DELETE" || picked.length === 0}
+              onClick={deleteForever}
+            >
+              {busy ? "Deleting…" : "Permanently delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       <div className="grid gap-3 border-b border-emerald-deep/10 p-4 md:grid-cols-4">
         <Select value={s.kind} onValueChange={(v) => update({ kind: v as Search["kind"] })}>
           <SelectTrigger>
