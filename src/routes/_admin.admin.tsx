@@ -106,6 +106,7 @@ const groups: NavGroup[] = [
       { to: "/admin/console/snapshots", label: "Backup & restore", icon: <ClipboardCheck /> },
       { to: "/admin/security", label: "Security Centre", icon: <ShieldAlert /> },
       { to: "/admin/logs", label: "Runtime Logs", icon: <Bug /> },
+      { to: "/admin/log-recycle-bin", label: "Log recycle bin", icon: <History /> },
       { to: "/admin/health", label: "Integration Health", icon: <Activity /> },
       { to: "/admin/cron-runs", label: "Scheduled job runs", icon: <History /> },
       { to: "/admin/documents", label: "Document Management", icon: <FileText /> },
