@@ -168,6 +168,14 @@ function Body() {
             <Button size="sm" variant="outline" onClick={() => setLive((v) => !v)}>
               {live ? "Pause" : "Resume"}
             </Button>
+            <LogArchiveBar
+              kind="event"
+              ids={picked}
+              onDone={() => {
+                setPicked([]);
+                void qc.invalidateQueries({ queryKey: ["admin", "runtime-error-logs"] });
+              }}
+            />
             <Button
               size="sm"
               variant="outline"
