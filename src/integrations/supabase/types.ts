@@ -5812,7 +5812,9 @@ export type Database = {
         }
       }
       reset_own_kyc_pending: { Args: never; Returns: undefined }
+      restore_audit_log_entries: { Args: { _ids: string[] }; Returns: number }
       restore_recycled_notification: { Args: { _id: string }; Returns: boolean }
+      restore_runtime_error_logs: { Args: { _ids: string[] }; Returns: number }
       restore_settings_snapshot: { Args: { _id: string }; Returns: undefined }
       resubmit_own_kyc: { Args: { _note?: string }; Returns: string }
       revoke_super_admin:

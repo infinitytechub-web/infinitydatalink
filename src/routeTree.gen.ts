@@ -50,6 +50,7 @@ import { Route as AdminAdminPaymentConfigRouteImport } from './routes/_admin.adm
 import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.admin.notifications'
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
+import { Route as AdminAdminLogRecycleBinRouteImport } from './routes/_admin.admin.log-recycle-bin'
 import { Route as AdminAdminLoansRouteImport } from './routes/_admin.admin.loans'
 import { Route as AdminAdminLoanWorkoutsRouteImport } from './routes/_admin.admin.loan-workouts'
 import { Route as AdminAdminLoanSettlementsRouteImport } from './routes/_admin.admin.loan-settlements'
@@ -336,6 +337,11 @@ const AdminAdminMembersRoute = AdminAdminMembersRouteImport.update({
 const AdminAdminLogsRoute = AdminAdminLogsRouteImport.update({
   id: '/logs',
   path: '/logs',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminLogRecycleBinRoute = AdminAdminLogRecycleBinRouteImport.update({
+  id: '/log-recycle-bin',
+  path: '/log-recycle-bin',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminLoansRoute = AdminAdminLoansRouteImport.update({
@@ -836,6 +842,7 @@ export interface FileRoutesByFullPath {
   '/admin/loan-settlements': typeof AdminAdminLoanSettlementsRoute
   '/admin/loan-workouts': typeof AdminAdminLoanWorkoutsRoute
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
+  '/admin/log-recycle-bin': typeof AdminAdminLogRecycleBinRoute
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/notifications': typeof AdminAdminNotificationsRoute
@@ -956,6 +963,7 @@ export interface FileRoutesByTo {
   '/admin/loan-settlements': typeof AdminAdminLoanSettlementsRoute
   '/admin/loan-workouts': typeof AdminAdminLoanWorkoutsRoute
   '/admin/loans': typeof AdminAdminLoansRouteWithChildren
+  '/admin/log-recycle-bin': typeof AdminAdminLogRecycleBinRoute
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/notifications': typeof AdminAdminNotificationsRoute
@@ -1082,6 +1090,7 @@ export interface FileRoutesById {
   '/_admin/admin/loan-settlements': typeof AdminAdminLoanSettlementsRoute
   '/_admin/admin/loan-workouts': typeof AdminAdminLoanWorkoutsRoute
   '/_admin/admin/loans': typeof AdminAdminLoansRouteWithChildren
+  '/_admin/admin/log-recycle-bin': typeof AdminAdminLogRecycleBinRoute
   '/_admin/admin/logs': typeof AdminAdminLogsRoute
   '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/_admin/admin/notifications': typeof AdminAdminNotificationsRoute
@@ -1209,6 +1218,7 @@ export interface FileRouteTypes {
     | '/admin/loan-settlements'
     | '/admin/loan-workouts'
     | '/admin/loans'
+    | '/admin/log-recycle-bin'
     | '/admin/logs'
     | '/admin/members'
     | '/admin/notifications'
@@ -1329,6 +1339,7 @@ export interface FileRouteTypes {
     | '/admin/loan-settlements'
     | '/admin/loan-workouts'
     | '/admin/loans'
+    | '/admin/log-recycle-bin'
     | '/admin/logs'
     | '/admin/members'
     | '/admin/notifications'
@@ -1454,6 +1465,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/loan-settlements'
     | '/_admin/admin/loan-workouts'
     | '/_admin/admin/loans'
+    | '/_admin/admin/log-recycle-bin'
     | '/_admin/admin/logs'
     | '/_admin/admin/members'
     | '/_admin/admin/notifications'
@@ -1862,6 +1874,13 @@ declare module '@tanstack/react-router' {
       path: '/logs'
       fullPath: '/admin/logs'
       preLoaderRoute: typeof AdminAdminLogsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/log-recycle-bin': {
+      id: '/_admin/admin/log-recycle-bin'
+      path: '/log-recycle-bin'
+      fullPath: '/admin/log-recycle-bin'
+      preLoaderRoute: typeof AdminAdminLogRecycleBinRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/loans': {
@@ -2656,6 +2675,7 @@ interface AdminAdminRouteChildren {
   AdminAdminLoanSettlementsRoute: typeof AdminAdminLoanSettlementsRoute
   AdminAdminLoanWorkoutsRoute: typeof AdminAdminLoanWorkoutsRoute
   AdminAdminLoansRoute: typeof AdminAdminLoansRouteWithChildren
+  AdminAdminLogRecycleBinRoute: typeof AdminAdminLogRecycleBinRoute
   AdminAdminLogsRoute: typeof AdminAdminLogsRoute
   AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
   AdminAdminNotificationsRoute: typeof AdminAdminNotificationsRoute
@@ -2696,6 +2716,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminLoanSettlementsRoute: AdminAdminLoanSettlementsRoute,
   AdminAdminLoanWorkoutsRoute: AdminAdminLoanWorkoutsRoute,
   AdminAdminLoansRoute: AdminAdminLoansRouteWithChildren,
+  AdminAdminLogRecycleBinRoute: AdminAdminLogRecycleBinRoute,
   AdminAdminLogsRoute: AdminAdminLogsRoute,
   AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
   AdminAdminNotificationsRoute: AdminAdminNotificationsRoute,
