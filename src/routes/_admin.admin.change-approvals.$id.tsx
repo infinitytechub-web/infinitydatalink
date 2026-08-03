@@ -84,7 +84,7 @@ function ChangeRequestDetailPage() {
         hint={(query.error as Error | null)?.message ?? "It may have been removed."}
         action={
           <Button asChild size="sm" variant="outline">
-            <Link to="/admin/change-approvals">Back to pending review</Link>
+            <Link to="/admin/change-approvals" search={{ status: "pending", kind: "all", q: "", page: 1, pageSize: 25 }}>Back to pending review</Link>
           </Button>
         }
       />
@@ -99,7 +99,7 @@ function ChangeRequestDetailPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button asChild size="sm" variant="outline">
-          <Link to="/admin/change-approvals">
+          <Link to="/admin/change-approvals" search={{ status: "pending", kind: "all", q: "", page: 1, pageSize: 25 }}>
             <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back to pending review
           </Link>
         </Button>

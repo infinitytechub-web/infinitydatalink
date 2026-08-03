@@ -410,12 +410,13 @@ export type AdminPendingPayment = {
   plan_name: string | null;
 };
 
-async function assertFinanceOrAdmin(supabase: any, userId: string) {
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = new Set((data ?? []).map((r: any) => r.role as string));
-  if (!roles.has("super_admin") && !roles.has("finance_officer")) {
-    throw new Error("Forbidden: finance role required");
-  }
+/**
+ * Payments reconciliation is gated by the RBAC matrix (`payments.<action>`),
+ * evaluated in the database so a forged client capability set cannot pass.
+ */
+async function assertPaymentsCapability(supabase: unknown, action: "view" | "approve") {
+  const { assertCapability } = await import("@/lib/capability-guard.server");
+  await assertCapability(supabase, "payments", action);
 }
 
 export const adminListPendingPayments = createServerFn({ method: "GET" })
@@ -429,7 +430,7 @@ export const adminListPendingPayments = createServerFn({ method: "GET" })
       .parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<AdminPendingPayment[]> => {
-    await assertFinanceOrAdmin(context.supabase, context.userId);
+    await assertPaymentsCapability(context.supabase, "view");
     let q = context.supabase
       .from("transactions")
       .select(
@@ -480,7 +481,7 @@ export type AdminPaymentsSummary = {
 export const adminGetPaymentsSummary = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AdminPaymentsSummary> => {
-    await assertFinanceOrAdmin(context.supabase, context.userId);
+    await assertPaymentsCapability(context.supabase, "view");
     const since24h = new Date(Date.now() - 24 * 3600_000).toISOString();
     const [{ data: pend }, { data: cleared }, { count: failed }] = await Promise.all([
       context.supabase.from("transactions").select("kind").eq("status", "pending"),
@@ -507,7 +508,7 @@ export const adminReconcilePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ReconcileSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    await assertFinanceOrAdmin(context.supabase, context.userId);
+    await assertPaymentsCapability(context.supabase, "approve");
     if (data.decision === "reject" && !data.note?.trim()) {
       throw new Error("A note is required when rejecting a payment.");
     }

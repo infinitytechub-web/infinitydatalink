@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,6 +17,7 @@ import {
   adminReconcilePayment,
   type AdminPendingPayment,
 } from "@/lib/admin-loans.functions";
+import { useAuth } from "@/lib/auth";
 
 const KIND_FILTERS = ["all", "deposit", "withdrawal", "loan_repayment"] as const;
 type KindFilter = (typeof KIND_FILTERS)[number];
@@ -38,6 +39,10 @@ export const Route = createFileRoute("/_admin/admin/payments")({
 });
 
 function AdminPayments() {
+  const { user, can, hasRole, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/auth" />;
+  if (!hasRole("super_admin") && !can("payments", "view")) return <Navigate to="/admin" />;
   return (
     <>
       <PageHeader
@@ -145,6 +150,8 @@ function Queue({ kind }: { kind: KindFilter }) {
 }
 
 function PendingRow({ row }: { row: AdminPendingPayment }) {
+  const { can, hasRole } = useAuth();
+  const canDecide = hasRole("super_admin") || can("payments", "approve");
   const qc = useQueryClient();
   const call = useServerFn(adminReconcilePayment);
   const approve = useMutation({
@@ -181,18 +188,19 @@ function PendingRow({ row }: { row: AdminPendingPayment }) {
             variant="outline"
             className="border-emerald-mid/40 text-emerald-mid hover:bg-emerald-mid/10"
             onClick={() => approve.mutate()}
-            disabled={approve.isPending}
+            disabled={!canDecide || approve.isPending}
+            title={canDecide ? undefined : "payments.approve permission required"}
           >
             <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Clear
           </Button>
-          <RejectDialog row={row} />
+          <RejectDialog row={row} disabled={!canDecide} />
         </div>
       </td>
     </tr>
   );
 }
 
-function RejectDialog({ row }: { row: AdminPendingPayment }) {
+function RejectDialog({ row, disabled }: { row: AdminPendingPayment; disabled?: boolean }) {
   const qc = useQueryClient();
   const call = useServerFn(adminReconcilePayment);
   const [open, setOpen] = useState(false);
@@ -210,7 +218,7 @@ function RejectDialog({ row }: { row: AdminPendingPayment }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="border-destructive/40 text-destructive hover:bg-destructive/10">
+        <Button size="sm" variant="outline" disabled={disabled} title={disabled ? "payments.reject permission required" : undefined} className="border-destructive/40 text-destructive hover:bg-destructive/10">
           <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
         </Button>
       </DialogTrigger>
