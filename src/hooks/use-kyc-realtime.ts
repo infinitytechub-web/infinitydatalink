@@ -17,8 +17,16 @@ export function useKycRealtime(userId: string | undefined) {
     if (!userId) return;
 
     const invalidate = () => {
-      void qc.invalidateQueries({ queryKey: ["my-kyc-gate"] });
-      void qc.invalidateQueries({ queryKey: ["my-kyc"] });
+      // Every member-facing surface that renders KYC state: the layout gate/banner,
+      // the KYC page itself, and the profile record used by dashboard + settings.
+      for (const queryKey of [
+        ["my-kyc-gate"],
+        ["my-kyc"],
+        ["member", "kyc"],
+        ["member", "profile"],
+      ]) {
+        void qc.invalidateQueries({ queryKey, refetchType: "all" });
+      }
     };
 
     const channel = supabase
