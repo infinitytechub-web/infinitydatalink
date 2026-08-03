@@ -316,11 +316,13 @@ const decideInput = z
     step_up_token: z.string().min(16).max(200).optional(),
   })
   .superRefine((v, ctx) => {
-    if (v.decision === "rejected" && v.notes.trim().length < 5) {
+    // Every decision is auditable: reviewers must record why they approved or
+    // rejected, not just rejections.
+    if (v.notes.trim().length < 5) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["notes"],
-        message: "Rejection notes must be at least 5 characters.",
+        message: "Reviewer notes must be at least 5 characters.",
       });
     }
     if (v.decision === "rejected" && v.remediation_items.length === 0) {
@@ -331,6 +333,7 @@ const decideInput = z
       });
     }
   });
+
 
 /**
  * Enforces the minor-specific review steps. Returns audit-ready metadata when
