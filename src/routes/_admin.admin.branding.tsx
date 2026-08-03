@@ -146,7 +146,7 @@ function BrandingEditor() {
   });
 
   const uploadMut = useMutation({
-    mutationFn: async ({ kind, file }: { kind: "logo" | "favicon"; file: File }) => {
+    mutationFn: async ({ kind, file }: { kind: "logo" | "favicon" | "touch_icon"; file: File }) => {
       const base64 = await fileToBase64(file);
       return uploadFn({
         data: { kind, filename: file.name, mime_type: file.type, content_base64: base64 },
@@ -161,7 +161,7 @@ function BrandingEditor() {
   });
 
   const clearMut = useMutation({
-    mutationFn: (kind: "logo" | "favicon") => clearFn({ data: { kind } }),
+    mutationFn: (kind: "logo" | "favicon" | "touch_icon") => clearFn({ data: { kind } }),
     onSuccess: () => {
       toast.success("Cleared");
       invalidate();
@@ -262,6 +262,21 @@ function BrandingEditor() {
           accept="image/png,image/svg+xml,image/x-icon,image/vnd.microsoft.icon,.ico"
           onUpload={(file) => uploadMut.mutate({ kind: "favicon", file })}
           onClear={() => clearMut.mutate("favicon")}
+          busy={uploadMut.isPending || clearMut.isPending}
+        />
+      </SectionCard>
+
+      <SectionCard title="Home screen touch icon">
+        <p className="mb-3 text-xs text-muted-foreground">
+          Square PNG, JPEG, or WEBP (180x180 or larger). Used as the app icon when
+          members add the app to a phone home screen. Falls back to the favicon.
+        </p>
+        <AssetUploader
+          kind="touch_icon"
+          currentUrl={branding.touch_icon_url}
+          accept="image/png,image/jpeg,image/webp"
+          onUpload={(file) => uploadMut.mutate({ kind: "touch_icon", file })}
+          onClear={() => clearMut.mutate("touch_icon")}
           busy={uploadMut.isPending || clearMut.isPending}
         />
       </SectionCard>
