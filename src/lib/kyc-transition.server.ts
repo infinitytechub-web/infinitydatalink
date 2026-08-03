@@ -20,11 +20,9 @@ export const KYC_REQUIRED_PROFILE_FIELDS = [
   "national_id",
 ] as const;
 
-export const KYC_REQUIRED_DOC_TYPES = [
-  "national_id_front",
-  "national_id_back",
-  "selfie",
-] as const;
+export { KYC_REQUIRED_DOC_TYPES } from "@/lib/kyc-document-checklist";
+import { KYC_REQUIRED_DOC_TYPES } from "@/lib/kyc-document-checklist";
+
 
 const FIELD_LABEL: Record<string, string> = {
   full_name: "Full name",
