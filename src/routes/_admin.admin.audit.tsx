@@ -69,10 +69,14 @@ function AuditPage() {
 function AuditContent() {
   const s = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
+  const qc = useQueryClient();
   const { data } = useSuspenseQuery(auditQuery(s));
+  const [picked, setPicked] = useState<string[]>([]);
 
-  const setSearch = (patch: Partial<SearchInput>) =>
+  const setSearch = (patch: Partial<SearchInput>) => {
+    setPicked([]);
     navigate({ search: (prev: SearchInput) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
+  };
 
   const selectEntry = (id: string | null) =>
     navigate({ search: (prev: SearchInput) => ({ ...prev, selected: id ?? "" }) });
@@ -86,26 +90,37 @@ function AuditContent() {
     <SectionCard
       title="Approval & rejection log"
       action={
-        <ExportBar
-          permission="export:audit"
-          title="Loan Decision Audit"
-          subtitle={`${data.total} events`}
-          filename="loan_audit"
-          columns={[
-            { header: "Timestamp", accessor: (e: LoanAuditEntry) => new Date(e.created_at).toISOString() },
-            { header: "Decision", accessor: (e) => (e.action === "loan.approved" ? "APPROVED" : "REJECTED") },
-            { header: "Loan Ref", accessor: (e) => e.loan_ref ?? e.target ?? "—" },
-            { header: "Member", accessor: (e) => e.member_name ?? e.member_id ?? "—" },
-            { header: "Member No", accessor: (e) => e.member_no ?? "—" },
-            { header: "Amount", accessor: (e) => (e.amount != null ? formatMoney(e.amount) : "—"), align: "right" },
-            { header: "Officer", accessor: (e) => e.actor_email ?? e.actor_id ?? "—" },
-            { header: "Role", accessor: (e) => e.actor_role ?? "—" },
-            { header: "Note", accessor: (e) => e.note ?? "" },
-          ]}
-          rows={rows}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <LogArchiveBar
+            kind="audit"
+            ids={picked}
+            onDone={() => {
+              setPicked([]);
+              void qc.invalidateQueries({ queryKey: ["admin", "loan-audit"] });
+            }}
+          />
+          <ExportBar
+            permission="export:audit"
+            title="Loan Decision Audit"
+            subtitle={`${data.total} events`}
+            filename="loan_audit"
+            columns={[
+              { header: "Timestamp", accessor: (e: LoanAuditEntry) => new Date(e.created_at).toISOString() },
+              { header: "Decision", accessor: (e) => (e.action === "loan.approved" ? "APPROVED" : "REJECTED") },
+              { header: "Loan Ref", accessor: (e) => e.loan_ref ?? e.target ?? "—" },
+              { header: "Member", accessor: (e) => e.member_name ?? e.member_id ?? "—" },
+              { header: "Member No", accessor: (e) => e.member_no ?? "—" },
+              { header: "Amount", accessor: (e) => (e.amount != null ? formatMoney(e.amount) : "—"), align: "right" },
+              { header: "Officer", accessor: (e) => e.actor_email ?? e.actor_id ?? "—" },
+              { header: "Role", accessor: (e) => e.actor_role ?? "—" },
+              { header: "Note", accessor: (e) => e.note ?? "" },
+            ]}
+            rows={rows}
+          />
+        </div>
       }
     >
+
       <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 bg-cream/30 px-6 py-4">
         <Field label="Decision">
           <select
