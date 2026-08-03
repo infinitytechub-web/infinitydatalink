@@ -12,21 +12,9 @@
 import { notifyStaff, type NotifyChannel } from "./notify.server";
 import { severityFor, type Json } from "./security-centre.server";
 
-export type AlertKind = "audit" | "upload_blocked" | "rate_limit";
-export type AlertSeverity = "info" | "warning" | "critical";
+import type { AlertKind, AlertSeverity, SecurityAlertSettings } from "./security-alerts.types";
 
-export type SecurityAlertSettings = {
-  enabled: boolean;
-  channels: NotifyChannel[];
-  notify_roles: string[];
-  audit_alerts_enabled: boolean;
-  audit_min_severity: AlertSeverity;
-  audit_action_prefixes: string[];
-  upload_alerts_enabled: boolean;
-  rate_limit_alerts_enabled: boolean;
-  throttle_minutes: number;
-  updated_at: string | null;
-};
+export type { AlertKind, AlertSeverity, SecurityAlertSettings };
 
 export const ALERT_DEFAULTS: SecurityAlertSettings = {
   enabled: true,

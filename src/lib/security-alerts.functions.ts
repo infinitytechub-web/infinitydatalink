@@ -10,9 +10,22 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { writeAudit } from "@/lib/audit-log";
 import { assertSecurityPermission, canManageSecurity } from "@/lib/security-centre.server";
-import { ALERT_DEFAULTS, type SecurityAlertSettings } from "@/lib/security-alerts.server";
+import type { SecurityAlertSettings } from "@/lib/security-alerts.types";
 
 export type { SecurityAlertSettings };
+
+const ALERT_DEFAULTS: SecurityAlertSettings = {
+  enabled: true,
+  channels: ["in_app", "email"],
+  notify_roles: ["super_admin", "compliance_officer"],
+  audit_alerts_enabled: true,
+  audit_min_severity: "critical",
+  audit_action_prefixes: [],
+  upload_alerts_enabled: true,
+  rate_limit_alerts_enabled: true,
+  throttle_minutes: 15,
+  updated_at: null,
+};
 
 export const ALERT_CHANNELS = [
   { key: "in_app", label: "In-app", hint: "Notification centre entry for each recipient" },
