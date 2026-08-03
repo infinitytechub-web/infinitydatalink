@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
@@ -164,25 +164,31 @@ function subscribe(listener: () => void) {
 function usePresenceChannel() {
   const { user } = useAuth();
   const id = user?.id;
+  const [myToken, setMyToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     let joined = false;
+    let cancelled = false;
     void (async () => {
       try {
         const { token } = await registerPresenceSession();
+        if (cancelled) return;
         joined = true;
+        setMyToken(token);
         acquire({ token, online_at: new Date().toISOString() });
       } catch {
         // Not signed in / transient failure — stay off the roster.
       }
     })();
     return () => {
+      cancelled = true;
+      setMyToken(null);
       if (joined) release();
     };
   }, [id]);
 
-  return id;
+  return myToken;
 }
 
 /**

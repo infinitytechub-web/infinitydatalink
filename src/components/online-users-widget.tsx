@@ -39,7 +39,7 @@ export function OnlineUsersWidget({ className }: { className?: string }) {
       ) : (
         <ul className="divide-y divide-border">
           {users.map((u) => (
-            <li key={u.user_id} className="flex items-center gap-3 px-4 py-2.5">
+            <li key={u.token} className="flex items-center gap-3 px-4 py-2.5">
               <span className="relative">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-royal/10 text-[11px] font-bold text-royal">
                   {initials(u.name)}
@@ -49,7 +49,7 @@ export function OnlineUsersWidget({ className }: { className?: string }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">
                   {u.name}
-                  {u.user_id === meId ? <span className="ml-1 text-xs text-muted-foreground">(you)</span> : null}
+                  {u.token === meId ? <span className="ml-1 text-xs text-muted-foreground">(you)</span> : null}
                 </p>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   {u.role} · since {new Date(u.online_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
