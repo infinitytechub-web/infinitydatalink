@@ -118,6 +118,7 @@ import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.
 import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
 import { Route as AdminAdminComplianceApprovalsRouteImport } from './routes/_admin.admin.compliance.approvals'
 import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
+import { Route as ApiPublicHooksPaymentsProviderRouteImport } from './routes/api/public/hooks/payments.$provider'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -695,6 +696,12 @@ const AdminAdminAuditTransfersRoute =
     path: '/transfers',
     getParentRoute: () => AdminAdminAuditRoute,
   } as any)
+const ApiPublicHooksPaymentsProviderRoute =
+  ApiPublicHooksPaymentsProviderRouteImport.update({
+    id: '/api/public/hooks/payments/$provider',
+    path: '/api/public/hooks/payments/$provider',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -804,6 +811,7 @@ export interface FileRoutesByFullPath {
   '/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/app/savings/': typeof MemberAppSavingsIndexRoute
+  '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -908,6 +916,7 @@ export interface FileRoutesByTo {
   '/admin/entities': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance': typeof AdminAdminFinanceIndexRoute
   '/app/savings': typeof MemberAppSavingsIndexRoute
+  '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1020,6 +1029,7 @@ export interface FileRoutesById {
   '/_admin/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/_admin/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/_member/app/savings/': typeof MemberAppSavingsIndexRoute
+  '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1131,6 +1141,7 @@ export interface FileRouteTypes {
     | '/admin/entities/'
     | '/admin/finance/'
     | '/app/savings/'
+    | '/api/public/hooks/payments/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1235,6 +1246,7 @@ export interface FileRouteTypes {
     | '/admin/entities'
     | '/admin/finance'
     | '/app/savings'
+    | '/api/public/hooks/payments/$provider'
   id:
     | '__root__'
     | '/'
@@ -1346,6 +1358,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/entities/'
     | '/_admin/admin/finance/'
     | '/_member/app/savings/'
+    | '/api/public/hooks/payments/$provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1369,6 +1382,7 @@ export interface RootRouteChildren {
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
+  ApiPublicHooksPaymentsProviderRoute: typeof ApiPublicHooksPaymentsProviderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2136,6 +2150,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminAuditTransfersRouteImport
       parentRoute: typeof AdminAdminAuditRoute
     }
+    '/api/public/hooks/payments/$provider': {
+      id: '/api/public/hooks/payments/$provider'
+      path: '/api/public/hooks/payments/$provider'
+      fullPath: '/api/public/hooks/payments/$provider'
+      preLoaderRoute: typeof ApiPublicHooksPaymentsProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2491,6 +2512,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
+  ApiPublicHooksPaymentsProviderRoute: ApiPublicHooksPaymentsProviderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
