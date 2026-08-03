@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { resolvePresenceIdentities } from "@/lib/presence-directory.functions";
+
+/** What is actually broadcast on the (public) realtime channel — no PII. */
+export type PresencePayload = {
+  user_id: string;
+  online_at: string;
+};
 
 export type PresenceUser = {
   user_id: string;
