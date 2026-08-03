@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, Outlet } from "@tanstack/react-router";
-import { ClipboardList, FilePlus2, History } from "lucide-react";
+import { ClipboardList, FilePlus2, History, Timer } from "lucide-react";
 import { ErrorState, PageHeader } from "@/components/primitives";
 import { useAuth } from "@/lib/auth";
 
@@ -35,6 +35,7 @@ const TABS = [
   { to: "/admin/change-approvals", label: "Pending review", icon: ClipboardList, exact: true },
   { to: "/admin/change-approvals/new", label: "Request a change", icon: FilePlus2 },
   { to: "/admin/change-approvals/history", label: "Audit history", icon: History },
+  { to: "/admin/change-approvals/sla", label: "SLA reminders", icon: Timer },
 ] as const;
 
 function ChangeApprovalsLayout() {

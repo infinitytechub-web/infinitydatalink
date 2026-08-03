@@ -37,6 +37,14 @@ import {
   rejectChangeRequest,
   type ChangeRequestRow,
 } from "@/lib/change-approvals.functions";
+import {
+  CHANGE_SLA_DEFAULTS,
+  SLA_STAGE_LABELS,
+  SLA_STAGE_TONE,
+  formatWaited,
+  slaStageFor,
+} from "@/lib/change-sla";
+import { getChangeSlaSettings } from "@/lib/change-sla.functions";
 
 const SearchSchema = z.object({
   status: z.enum(["all", ...CHANGE_STATUSES]).default("pending"),
@@ -62,6 +70,7 @@ function PendingRequestsPage() {
   const { can } = useAuth();
 
   const list = useServerFn(listChangeRequests);
+  const slaSettingsFn = useServerFn(getChangeSlaSettings);
   const approveFn = useServerFn(approveChangeRequest);
   const rejectFn = useServerFn(rejectChangeRequest);
   const applyFn = useServerFn(applyChangeRequest);
@@ -82,6 +91,13 @@ function PendingRequestsPage() {
         },
       }),
   });
+
+  const slaQuery = useQuery({
+    queryKey: ["change-sla-settings"],
+    queryFn: () => slaSettingsFn(),
+    staleTime: 5 * 60_000,
+  });
+  const sla = slaQuery.data?.settings ?? CHANGE_SLA_DEFAULTS;
 
   const closeDialog = () => {
     setDecision(null);
@@ -201,6 +217,7 @@ function PendingRequestsPage() {
                     <th className="px-5 py-3 text-left font-medium">Kind</th>
                     <th className="px-5 py-3 text-left font-medium">Summary</th>
                     <th className="px-5 py-3 text-left font-medium">Requester</th>
+                    <th className="px-5 py-3 text-left font-medium">Waiting</th>
                     <th className="px-5 py-3 text-left font-medium">Status</th>
                     <th className="px-5 py-3 text-right font-medium">Actions</th>
                   </tr>
@@ -225,6 +242,32 @@ function PendingRequestsPage() {
                             you
                           </span>
                         ) : null}
+                      </td>
+                      <td className="px-5 py-3">
+                        {row.status === "pending" ? (
+                          (() => {
+                            const stage = slaStageFor(row.requested_at, sla);
+                            return (
+                              <div className="space-y-1">
+                                <p className="text-xs tabular-nums text-foreground">
+                                  {formatWaited(row.requested_at)}
+                                </p>
+                                <span
+                                  className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${SLA_STAGE_TONE[stage]}`}
+                                  title={
+                                    sla.enabled
+                                      ? `Warns after ${sla.warn_after_hours}h · breaches after ${sla.breach_after_hours}h`
+                                      : "SLA reminders are switched off"
+                                  }
+                                >
+                                  {SLA_STAGE_LABELS[stage]}
+                                </span>
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-3">
                         <span
