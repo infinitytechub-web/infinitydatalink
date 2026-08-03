@@ -13,7 +13,7 @@ export type LogBinRow = {
   id: string;
   entity_table: "audit_log" | "runtime_error_logs";
   entity_id: string;
-  payload: Record<string, unknown>;
+  payload: Record<string, string | number | boolean | null>;
   deleted_by: string | null;
   deleted_at: string;
   purge_after: string;
