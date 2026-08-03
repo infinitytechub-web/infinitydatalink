@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { z } from "zod";
-import { CheckCircle2, XCircle, PlayCircle, Loader2, Eye } from "lucide-react";
+import { CheckCircle2, XCircle, PlayCircle, Loader2, Eye, ListChecks } from "lucide-react";
 import { EmptyState, KPIStat, SectionCard } from "@/components/primitives";
 import { Pagination } from "@/components/table-controls";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,10 @@ import {
 import {
   applyChangeRequest,
   approveChangeRequest,
+  bulkDecideChangeRequests,
   listChangeRequests,
   rejectChangeRequest,
+  type BulkChangeMode,
   type ChangeRequestRow,
 } from "@/lib/change-approvals.functions";
 import {
@@ -74,9 +76,14 @@ function PendingRequestsPage() {
   const approveFn = useServerFn(approveChangeRequest);
   const rejectFn = useServerFn(rejectChangeRequest);
   const applyFn = useServerFn(applyChangeRequest);
+  const bulkFn = useServerFn(bulkDecideChangeRequests);
 
   const [decision, setDecision] = useState<Decision | null>(null);
   const [note, setNote] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkMode, setBulkMode] = useState<BulkChangeMode | null>(null);
+  const [bulkNotes, setBulkNotes] = useState<Record<string, string>>({});
+  const [bulkFill, setBulkFill] = useState("");
 
   const query = useQuery({
     queryKey: ["change-requests", search],
@@ -104,6 +111,12 @@ function PendingRequestsPage() {
     setNote("");
   };
 
+  const closeBulk = () => {
+    setBulkMode(null);
+    setBulkNotes({});
+    setBulkFill("");
+  };
+
   const decide = useMutation({
     mutationFn: async ({ row, mode }: Decision) => {
       if (mode === "approve") return approveFn({ data: { id: row.id, note } });
@@ -129,6 +142,58 @@ function PendingRequestsPage() {
 
   const rows = query.data?.rows ?? [];
   const counts = query.data?.counts ?? {};
+
+  const eligibleFor = (row: ChangeRequestRow, mode: BulkChangeMode) => {
+    if (mode === "approve") return row.status === "pending" && !row.is_own_request;
+    if (mode === "reject") return row.status === "pending";
+    return isAppliable(row.status) && !row.is_own_request;
+  };
+
+  const selectableRows = rows.filter(
+    (row) =>
+      (row.status === "pending" && (can("approvals", "approve") || can("approvals", "reject"))) ||
+      (isAppliable(row.status) && can("approvals", "approve")),
+  );
+  const selectedRows = rows.filter((row) => selected.includes(row.id));
+  const bulkRows = bulkMode ? selectedRows.filter((row) => eligibleFor(row, bulkMode)) : [];
+  const skippedRows = bulkMode ? selectedRows.filter((row) => !eligibleFor(row, bulkMode)) : [];
+  const invalidCount = bulkRows.filter((row) => (bulkNotes[row.id] ?? "").trim().length < 5).length;
+
+  const countEligible = (mode: BulkChangeMode) =>
+    selectedRows.filter((row) => eligibleFor(row, mode)).length;
+
+  const toggleRow = (id: string) =>
+    setSelected((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+
+  const openBulk = (mode: BulkChangeMode) => {
+    setBulkMode(mode);
+    setBulkFill("");
+    setBulkNotes(Object.fromEntries(selectedRows.map((row) => [row.id, ""])));
+  };
+
+  const bulk = useMutation({
+    mutationFn: async (mode: BulkChangeMode) =>
+      bulkFn({
+        data: {
+          mode,
+          items: bulkRows.map((row) => ({ id: row.id, note: (bulkNotes[row.id] ?? "").trim() })),
+        },
+      }),
+    onSuccess: (result) => {
+      const okCount = result.results.filter((r) => r.ok).length;
+      const failed = result.results.filter((r) => !r.ok);
+      if (okCount) toast.success(`${okCount} request(s) processed`);
+      if (failed.length)
+        toast.error(
+          `${failed.length} failed — ${friendly(failed[0]?.error ?? "unknown error")}`,
+        );
+      setSelected((prev) => prev.filter((id) => failed.some((f) => f.id === id)));
+      void queryClient.invalidateQueries({ queryKey: ["change-requests"] });
+      void queryClient.invalidateQueries({ queryKey: ["change-audit-history"] });
+      closeBulk();
+    },
+    onError: (error: Error) => toast.error(friendly(error.message)),
+  });
 
   const setSearch = (patch: Partial<Search>) =>
     navigate({ search: (prev: Search) => ({ ...prev, page: 1, ...patch }) });
@@ -209,10 +274,60 @@ function PendingRequestsPage() {
           </div>
         ) : (
           <>
+            {selected.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2 border-b border-border/60 bg-muted/40 px-5 py-3">
+                <span className="inline-flex items-center gap-2 text-xs font-semibold">
+                  <ListChecks className="h-4 w-4" aria-hidden /> {selected.length} selected
+                </span>
+                {can("approvals", "approve") ? (
+                  <Button size="sm" disabled={countEligible("approve") === 0} onClick={() => openBulk("approve")}>
+                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Bulk approve ({countEligible("approve")})
+                  </Button>
+                ) : null}
+                {can("approvals", "reject") ? (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    disabled={countEligible("reject") === 0}
+                    onClick={() => openBulk("reject")}
+                  >
+                    <XCircle className="mr-1.5 h-3.5 w-3.5" /> Bulk reject ({countEligible("reject")})
+                  </Button>
+                ) : null}
+                {can("approvals", "approve") ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={countEligible("apply") === 0}
+                    onClick={() => openBulk("apply")}
+                  >
+                    <PlayCircle className="mr-1.5 h-3.5 w-3.5" /> Bulk apply ({countEligible("apply")})
+                  </Button>
+                ) : null}
+                <Button size="sm" variant="ghost" onClick={() => setSelected([])}>
+                  Clear selection
+                </Button>
+              </div>
+            ) : null}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground">
                   <tr>
+                    <th className="w-10 px-5 py-3 text-left font-medium">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4"
+                        aria-label="Select all actionable requests"
+                        disabled={selectableRows.length === 0}
+                        checked={
+                          selectableRows.length > 0 &&
+                          selectableRows.every((row) => selected.includes(row.id))
+                        }
+                        onChange={(e) =>
+                          setSelected(e.target.checked ? selectableRows.map((row) => row.id) : [])
+                        }
+                      />
+                    </th>
                     <th className="px-5 py-3 text-left font-medium">Requested</th>
                     <th className="px-5 py-3 text-left font-medium">Kind</th>
                     <th className="px-5 py-3 text-left font-medium">Summary</th>
@@ -225,6 +340,16 @@ function PendingRequestsPage() {
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.id} className="border-b border-border/40 last:border-0 align-top">
+                      <td className="px-5 py-3">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4"
+                          aria-label={`Select request ${row.summary ?? row.id}`}
+                          disabled={!selectableRows.some((r) => r.id === row.id)}
+                          checked={selected.includes(row.id)}
+                          onChange={() => toggleRow(row.id)}
+                        />
+                      </td>
                       <td className="whitespace-nowrap px-5 py-3 text-xs text-muted-foreground tabular-nums">
                         {new Date(row.requested_at).toLocaleString()}
                       </td>
@@ -384,6 +509,100 @@ function PendingRequestsPage() {
             >
               {decide.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
               Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!bulkMode} onOpenChange={(open) => (open ? null : closeBulk())}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {bulkMode === "reject"
+                ? `Reject ${bulkRows.length} change request(s)`
+                : bulkMode === "apply"
+                  ? `Apply ${bulkRows.length} approved change(s)`
+                  : `Approve ${bulkRows.length} change request(s)`}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground">
+              Every request needs its own comment of at least 5 characters — the batch stays blocked
+              until each one is filled in. Comments are recorded permanently in the audit history.
+            </p>
+            <div className="flex flex-wrap items-end gap-2 rounded-md border border-border/60 p-3">
+              <div className="grid flex-1 gap-1.5">
+                <Label htmlFor="bulk-fill" className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Optional starting text for every comment
+                </Label>
+                <Input
+                  id="bulk-fill"
+                  value={bulkFill}
+                  onChange={(e) => setBulkFill(e.target.value)}
+                  placeholder="e.g. Reviewed in the governance meeting"
+                  className="h-9"
+                />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={bulkFill.trim().length < 5}
+                onClick={() =>
+                  setBulkNotes((prev) => {
+                    const next = { ...prev };
+                    for (const row of bulkRows) if (!(next[row.id] ?? "").trim()) next[row.id] = bulkFill;
+                    return next;
+                  })
+                }
+              >
+                Fill empty
+              </Button>
+            </div>
+
+            <div className="max-h-[22rem] space-y-3 overflow-y-auto pr-1">
+              {bulkRows.map((row) => {
+                const value = bulkNotes[row.id] ?? "";
+                const tooShort = value.trim().length < 5;
+                return (
+                  <div key={row.id} className="rounded-md border border-border/60 p-3">
+                    <p className="text-xs font-semibold">{KIND_LABELS[row.kind] ?? row.kind}</p>
+                    <p className="truncate text-xs text-muted-foreground">{row.summary ?? "—"}</p>
+                    <Textarea
+                      value={value}
+                      rows={2}
+                      className="mt-2"
+                      aria-invalid={tooShort}
+                      placeholder={bulkMode === "reject" ? "Rejection reason for this request" : "Decision comment for this request"}
+                      onChange={(e) => setBulkNotes((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                    />
+                    {tooShort ? (
+                      <p className="mt-1 text-[11px] font-medium text-rose-600">
+                        Minimum 5 characters required for this request.
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+
+            {skippedRows.length > 0 ? (
+              <p className="rounded-md bg-muted/60 p-3 text-[11px] text-muted-foreground">
+                {skippedRows.length} selected request(s) are skipped for this action — they are either
+                your own requests or not in the right state.
+              </p>
+            ) : null}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeBulk}>
+              Cancel
+            </Button>
+            <Button
+              variant={bulkMode === "reject" ? "destructive" : "default"}
+              disabled={bulkRows.length === 0 || invalidCount > 0 || bulk.isPending}
+              onClick={() => bulkMode && bulk.mutate(bulkMode)}
+            >
+              {bulk.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
+              {invalidCount > 0 ? `${invalidCount} comment(s) missing` : `Confirm ${bulkRows.length}`}
             </Button>
           </DialogFooter>
         </DialogContent>
