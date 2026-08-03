@@ -103,11 +103,12 @@ function Content() {
 
   return (
     <div className="space-y-6">
-      <SectionCard
-        title="Alert notifications"
-        description="Choose which security signals raise an email, SMS or in-app alert, who receives them, and how often the same alert may repeat."
-      >
+      <SectionCard title="Alert notifications">
         <div className="space-y-8 p-5">
+          <p className="text-xs text-muted-foreground">
+            Choose which security signals raise an email, SMS or in-app alert, who receives them,
+            and how often the same alert may repeat.
+          </p>
           <label className="flex items-start gap-3">
             <input
               type="checkbox"
