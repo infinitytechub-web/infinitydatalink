@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 import { MinorTag } from "@/components/biodata-fields";
 import { KycRecordActions } from "@/components/kyc-record-actions";
+import { useAuth } from "@/lib/auth";
 import { formatAge, resolveMinorStatus } from "@/lib/age";
 
 
