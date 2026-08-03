@@ -376,7 +376,10 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
           options: {
             emailRedirectTo: `${window.location.origin}/app`,
             data: {
-              full_name: parsed.data.fullName,
+              full_name: `${parsed.data.firstName} ${parsed.data.lastName}`,
+              first_name: parsed.data.firstName,
+              last_name: parsed.data.lastName,
+
               ghana_card: canonicalCard,
               phone: canonicalPhone,
               membership_type: membershipType,
