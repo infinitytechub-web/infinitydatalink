@@ -464,8 +464,14 @@ export const decideKyc = createServerFn({ method: "POST" })
     const role = await assertKycAdmin(context.supabase, context.userId);
     const sb = context.supabase;
 
+    // Status-transition gate: no double decisions, and no approving a
+    // submission that is still missing required details or documents.
+    const { assertKycDecidable } = await import("@/lib/kyc-transition.server");
+    const transition = await assertKycDecidable(sb, data.member_id, data.decision);
+
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const now = new Date().toISOString();
+
 
     // Minor accounts: guardian checklist + longer note + fresh re-authentication
     // are enforced before anything is written.
