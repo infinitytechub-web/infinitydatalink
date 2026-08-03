@@ -19,6 +19,7 @@ import {
   severityFor,
   summariseAgent,
   type EventCategory,
+  type Json,
   type IpRule,
   type LiveSession,
   type RateLimit,
@@ -29,6 +30,7 @@ import {
 
 export type {
   EventCategory,
+  Json,
   IpRule,
   LiveSession,
   RateLimit,
@@ -115,10 +117,10 @@ export const listSecurityEvents = createServerFn({ method: "POST" })
       actor_email: string | null;
       actor_role: string | null;
       target: string | null;
-      meta: Record<string, unknown> | null;
+      meta: Record<string, Json> | null;
     };
     let rows: SecurityEvent[] = ((res.data ?? []) as Raw[]).map((r) => {
-      const meta = (r.meta ?? {}) as Record<string, unknown>;
+      const meta = (r.meta ?? {}) as Record<string, Json>;
       const rawIp = ipFromMeta(meta);
       return {
         id: r.id,
@@ -140,7 +142,7 @@ export const listSecurityEvents = createServerFn({ method: "POST" })
       .select("action, meta")
       .gte("created_at", since)
       .limit(2000);
-    const dayRows = (day.data ?? []) as { action: string; meta: Record<string, unknown> | null }[];
+    const dayRows = (day.data ?? []) as { action: string; meta: Record<string, Json> | null }[];
     const critical24h = dayRows.filter((r) => severityFor(r.action, r.meta ?? {}) === "critical").length;
     const blocked24h = dayRows.filter((r) => /blocked|denied|forbidden/i.test(r.action)).length;
 

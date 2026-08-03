@@ -8,6 +8,8 @@
  * unmasked read is written to the audit trail by the calling server function.
  */
 
+export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+
 export type SecuritySettings = {
   firewall_enabled: boolean;
   ip_allowlist_only: boolean;
@@ -46,7 +48,7 @@ export type SecurityEvent = {
   target: string | null;
   ip: string | null;
   severity: "info" | "warning" | "critical";
-  meta: Record<string, unknown>;
+  meta: Record<string, Json>;
 };
 
 export type UploadScan = {
@@ -126,7 +128,7 @@ export type EventCategory = keyof typeof EVENT_CATEGORIES;
 const CRITICAL = /(blocked|denied|failed|revoke|forbidden|breach|malware|quarantine)/i;
 const WARNING = /(reject|suspend|purge|delete|escalat|flag|limit)/i;
 
-export function severityFor(action: string, meta: Record<string, unknown>): SecurityEvent["severity"] {
+export function severityFor(action: string, meta: Record<string, Json>): SecurityEvent["severity"] {
   const haystack = `${action} ${JSON.stringify(meta ?? {})}`;
   if (CRITICAL.test(haystack)) return "critical";
   if (WARNING.test(haystack)) return "warning";
@@ -134,7 +136,7 @@ export function severityFor(action: string, meta: Record<string, unknown>): Secu
 }
 
 /** Pull a network address out of an audit meta blob, whatever key it used. */
-export function ipFromMeta(meta: Record<string, unknown>): string | null {
+export function ipFromMeta(meta: Record<string, Json>): string | null {
   for (const key of ["ip", "ip_address", "client_ip", "remote_addr"]) {
     const value = meta?.[key];
     if (typeof value === "string" && value.trim()) return value.trim();
