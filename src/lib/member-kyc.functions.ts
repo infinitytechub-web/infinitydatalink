@@ -456,3 +456,95 @@ export const resubmitMyKyc = createServerFn({ method: "POST" })
 
     return { ok: true as const };
   });
+
+// --- Restored-KYC acknowledgment -------------------------------------------
+
+export type RestoreAcknowledgment = {
+  id: string;
+  vault_id: string | null;
+  restored_kyc: string | null;
+  restored_by_email: string | null;
+  restored_by_role: string | null;
+  documents_restored: number;
+  document_types: string[];
+  reason: string | null;
+  restored_at: string;
+  acknowledged_at: string | null;
+};
+
+/**
+ * Restores the member must confirm they reviewed. Pending items are surfaced on
+ * the verification page; acknowledged ones stay visible as an audit receipt.
+ */
+export const getMyRestoreAcknowledgments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<RestoreAcknowledgment[]> => {
+    const { data, error } = await context.supabase
+      .from("kyc_restore_acknowledgments")
+      .select(
+        "id, vault_id, restored_kyc, restored_by_email, restored_by_role, documents_restored, document_types, reason, restored_at, acknowledged_at",
+      )
+      .eq("member_id", context.userId)
+      .order("restored_at", { ascending: false })
+      .limit(20);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      vault_id: r.vault_id ?? null,
+      restored_kyc: r.restored_kyc ?? null,
+      restored_by_email: r.restored_by_email ?? null,
+      restored_by_role: r.restored_by_role ?? null,
+      documents_restored: Number(r.documents_restored ?? 0),
+      document_types: Array.isArray(r.document_types) ? r.document_types : [],
+      reason: r.reason ?? null,
+      restored_at: r.restored_at,
+      acknowledged_at: r.acknowledged_at ?? null,
+    }));
+  });
+
+/**
+ * Records that the member reviewed a restored KYC record. The timestamp is
+ * stamped by the database (never client-supplied), the row is immutable
+ * afterwards, and the confirmation is written to the audit log.
+ */
+export const acknowledgeKycRestore = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase;
+    const { data: row, error: rErr } = await sb
+      .from("kyc_restore_acknowledgments")
+      .select("id, vault_id, acknowledged_at")
+      .eq("id", data.id)
+      .eq("member_id", context.userId)
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!row) throw new Error("Restore record not found");
+    if ((row as any).acknowledged_at) {
+      return { ok: true as const, acknowledged_at: (row as any).acknowledged_at as string };
+    }
+
+    const { data: updated, error } = await sb
+      .from("kyc_restore_acknowledgments")
+      .update({ acknowledged_at: new Date().toISOString() } as never)
+      .eq("id", data.id)
+      .select("acknowledged_at")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+
+    const acknowledgedAt = ((updated as any)?.acknowledged_at as string) ?? new Date().toISOString();
+    await writeAudit({
+      actor_id: context.userId,
+      actor_email: (context.claims as any)?.email ?? null,
+      actor_role: "member",
+      action: "kyc.restore_acknowledged",
+      target: context.userId,
+      meta: {
+        acknowledgment_id: data.id,
+        vault_id: (row as any).vault_id ?? null,
+        acknowledged_at: acknowledgedAt,
+      },
+    });
+
+    return { ok: true as const, acknowledged_at: acknowledgedAt };
+  });

@@ -1324,6 +1324,51 @@ export type Database = {
           },
         ]
       }
+      kyc_restore_acknowledgments: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          document_types: string[]
+          documents_restored: number
+          id: string
+          member_id: string
+          reason: string | null
+          restored_at: string
+          restored_by_email: string | null
+          restored_by_role: string | null
+          restored_kyc: string | null
+          vault_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          document_types?: string[]
+          documents_restored?: number
+          id?: string
+          member_id: string
+          reason?: string | null
+          restored_at?: string
+          restored_by_email?: string | null
+          restored_by_role?: string | null
+          restored_kyc?: string | null
+          vault_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          document_types?: string[]
+          documents_restored?: number
+          id?: string
+          member_id?: string
+          reason?: string | null
+          restored_at?: string
+          restored_by_email?: string | null
+          restored_by_role?: string | null
+          restored_kyc?: string | null
+          vault_id?: string | null
+        }
+        Relationships: []
+      }
       kyc_resubmission_settings: {
         Row: {
           auto_flag_enabled: boolean

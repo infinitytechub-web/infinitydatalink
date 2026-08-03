@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { CheckCircle2, Circle, Clock, ShieldCheck, ShieldAlert, Mail, Smartphone } from "lucide-react";
 import { KycResubmissionPanel } from "@/components/kyc-resubmission-panel";
+import { KycRestoreAcknowledgment } from "@/components/kyc-restore-acknowledgment";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMyKycStatus, type MyKycStatus, type KycStepState } from "@/lib/member-kyc.functions";
@@ -43,6 +44,7 @@ function Body() {
   return (
     <div className="space-y-6">
       <StatusBanner data={data} />
+      <KycRestoreAcknowledgment />
       <div className="grid gap-6 md:grid-cols-3">
         <SectionCard title="Verification progress" className="md:col-span-2">
           <div className="divide-y divide-emerald-deep/5">
