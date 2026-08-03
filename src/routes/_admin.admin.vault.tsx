@@ -24,6 +24,8 @@ import {
   bulkRestoreKycVault,
 } from "@/lib/kyc-vault.functions";
 import type { VaultEntry } from "@/lib/kyc-vault.shared";
+import { VaultRetentionPanel } from "@/components/vault-retention-panel";
+
 
 export const Route = createFileRoute("/_admin/admin/vault")({
   head: () => ({
