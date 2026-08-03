@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth";
 import { useBranding, BRANDING_QUERY_KEY } from "@/components/branding-provider";
+import { applyBrandPalette } from "@/lib/brand-theme";
 import {
   getBrandingFull,
   updateBranding,
@@ -175,6 +176,30 @@ function BrandingEditor() {
     HEX.test(form.secondary_color);
   const canSave = form.app_name.trim().length > 0 && colorsValid && !saveMut.isPending;
 
+  // Live preview: while the colors in the form are valid, drive the real theme
+  // tokens so the admin sees buttons, rings and accents update as they pick.
+  // On leaving the page the saved branding is re-applied.
+  useEffect(() => {
+    if (!colorsValid) return;
+    applyBrandPalette({
+      primary_color: form.primary_color,
+      secondary_color: form.secondary_color,
+      accent_color: form.accent_color,
+    });
+  }, [colorsValid, form.primary_color, form.secondary_color, form.accent_color]);
+
+  useEffect(
+    () => () => {
+      applyBrandPalette({
+        primary_color: branding.primary_color,
+        secondary_color: branding.secondary_color,
+        accent_color: branding.accent_color,
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -203,6 +228,19 @@ function BrandingEditor() {
           <Swatch color={form.primary_color} label="Primary" light />
           <Swatch color={form.secondary_color} label="Secondary" light />
           <Swatch color={form.accent_color} label="Accent" />
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-3 rounded-lg border border-border/70 bg-card p-4">
+          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Live component preview
+          </span>
+          <Button size="sm">Primary action</Button>
+          <Button size="sm" variant="secondary">
+            Secondary
+          </Button>
+          <Button size="sm" variant="outline">
+            Outline
+          </Button>
+          <Input className="h-9 w-40" placeholder="Focus me" aria-label="Focus ring preview" />
         </div>
       </SectionCard>
 
