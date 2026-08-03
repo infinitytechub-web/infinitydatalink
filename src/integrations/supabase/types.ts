@@ -4476,6 +4476,8 @@ export type Database = {
             Args: { _actor: string; _note: string; _uid: string }
             Returns: undefined
           }
+      archive_audit_log_entries: { Args: { _ids: string[] }; Returns: number }
+      archive_runtime_error_logs: { Args: { _ids: string[] }; Returns: number }
       assess_loan_penalties: { Args: never; Returns: Json }
       break_fixed_deposit: {
         Args: { _actor_id?: string; _id: string; _reason: string }
