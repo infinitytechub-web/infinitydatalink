@@ -125,6 +125,9 @@ function BinTable() {
   const { data } = useSuspenseQuery(binQuery(s));
   const [picked, setPicked] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+
 
   const canRestore = hasRole("super_admin");
   const update = (patch: Partial<Search>) => {
