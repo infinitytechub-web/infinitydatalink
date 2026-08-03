@@ -123,44 +123,12 @@ function MemberLayout() {
         </button>
       }
     >
-      {kyc && !kycApproved ? (
-        <KycBanner
-          reviewState={kyc.review_state}
-          nextLabel={kyc.next_action?.label ?? null}
-        />
-      ) : null}
+      {kyc ? <KycDecisionBanner status={kyc} /> : null}
       <Outlet />
     </PortalShell>
   );
 }
 
-function KycBanner({
-  reviewState,
-  nextLabel,
-}: {
-  reviewState: "not_started" | "in_review" | "approved" | "rejected";
-  nextLabel: string | null;
-}) {
-  const inReview = reviewState === "in_review";
-  return (
-    <div className="mb-4 rounded-xl border border-gold/40 bg-gold/10 p-4">
-      <p className="text-sm font-semibold text-foreground">
-        {inReview ? "Verification under review" : "Verification required"}
-      </p>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {inReview
-          ? "Your KYC submission is with an administrator. Full access unlocks once it is approved."
-          : (nextLabel ?? "Complete your KYC details and documents to unlock the full dashboard.")}
-      </p>
-      <Link
-        to="/app/kyc"
-        className="mt-3 inline-block rounded-md bg-emerald-deep px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
-      >
-        {inReview ? "View status" : "Continue verification"}
-      </Link>
-    </div>
-  );
-}
 
 
 
