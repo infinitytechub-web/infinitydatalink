@@ -634,10 +634,8 @@ function QueueBody() {
               Cancel
             </button>
             <button
-              disabled={
-                bulkMutation.isPending ||
-                (bulkDialog === "rejected" && bulkNotes.trim().length < 5)
-              }
+              disabled={bulkMutation.isPending || bulkNotes.trim().length < 5}
+
               onClick={() =>
                 bulkDialog &&
                 bulkMutation.mutate({
