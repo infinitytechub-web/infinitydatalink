@@ -112,12 +112,17 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
   },
 );
 
-/** Full read including staff-only org/email fields — signed-in super admins only. */
+/**
+ * Full read including staff-only org/email fields — signed-in super admins only.
+ * The sensitive columns are revoked from `anon`/`authenticated` at the database
+ * level, so the read runs through the privileged client *after* the role check.
+ */
 export const getBrandingFull = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<BrandingSettings> => {
     await assertSuperAdmin(context.supabase, context.userId);
-    const { data } = await (context.supabase as any)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await (supabaseAdmin as any)
       .from("branding_settings")
       .select("*")
       .eq("id", 1)
@@ -129,6 +134,7 @@ export const getBrandingFull = createServerFn({ method: "GET" })
     ]);
     return { ...DEFAULTS, ...(data as any), logo_url, favicon_url } as BrandingSettings;
   });
+
 
 const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
