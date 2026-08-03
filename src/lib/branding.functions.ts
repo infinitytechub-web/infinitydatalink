@@ -314,7 +314,10 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
       updated_by: context.userId,
     };
-    const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
+    const { error } = await (context.supabase as any)
+      .from("branding_settings")
+      .update(patch)
+      .eq("id", 1);
     if (error) throw new Error(error.message);
 
     if (oldPath) {
@@ -353,7 +356,10 @@ export const clearBrandingAsset = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
       updated_by: context.userId,
     };
-    const { error } = await context.supabase.from("branding_settings").update(patch).eq("id", 1);
+    const { error } = await (context.supabase as any)
+      .from("branding_settings")
+      .update(patch)
+      .eq("id", 1);
     if (error) throw new Error(error.message);
     if (oldPath) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
