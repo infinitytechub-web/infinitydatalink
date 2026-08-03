@@ -92,7 +92,7 @@ function Content() {
         ) : (
           <ul className="divide-y divide-emerald-deep/5">
             {users.map((u) => (
-              <li key={u.user_id} className="flex items-center justify-between px-6 py-3">
+              <li key={u.token} className="flex items-center justify-between px-6 py-3">
                 <span className="flex items-center gap-3">
                   <LiveDot />
                   <span className="text-sm font-semibold text-emerald-deep">{u.name}</span>

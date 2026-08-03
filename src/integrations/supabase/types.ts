@@ -199,6 +199,8 @@ export type Database = {
           support_email: string | null
           support_phone: string | null
           tagline: string | null
+          touch_icon_path: string | null
+          touch_icon_version: number
           updated_at: string
           updated_by: string | null
         }
@@ -225,6 +227,8 @@ export type Database = {
           support_email?: string | null
           support_phone?: string | null
           tagline?: string | null
+          touch_icon_path?: string | null
+          touch_icon_version?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -251,6 +255,8 @@ export type Database = {
           support_email?: string | null
           support_phone?: string | null
           tagline?: string | null
+          touch_icon_path?: string | null
+          touch_icon_version?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -2495,6 +2501,24 @@ export type Database = {
           processed_at?: string | null
           provider_code?: string
           signature_verified?: boolean
+        }
+        Relationships: []
+      }
+      presence_sessions: {
+        Row: {
+          created_at: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          token?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          token?: string
+          user_id?: string
         }
         Relationships: []
       }

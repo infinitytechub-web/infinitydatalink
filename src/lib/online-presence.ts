@@ -1,16 +1,20 @@
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { resolvePresenceIdentities } from "@/lib/presence-directory.functions";
+import {
+  registerPresenceSession,
+  resolvePresenceIdentities,
+} from "@/lib/presence-directory.functions";
 
 /** What is actually broadcast on the (public) realtime channel — no PII. */
 export type PresencePayload = {
-  user_id: string;
+  /** Opaque per-tab session token — never a real user id. */
+  token: string;
   online_at: string;
 };
 
 export type PresenceUser = {
-  user_id: string;
+  token: string;
   name: string;
   role: string;
   online_at: string;
@@ -44,7 +48,7 @@ let pending: PresenceUser[] | null = null;
 function signatureOf(users: PresenceUser[]) {
   // Only fields the UI renders participate in change detection.
   let sig = "";
-  for (const u of users) sig += `${u.user_id}|${u.name}|${u.role};`;
+  for (const u of users) sig += `${u.token}|${u.name}|${u.role};`;
   return sig;
 }
 
@@ -93,13 +97,13 @@ function resetThrottle() {
 const directory = new Map<string, { name: string; role: string }>();
 let resolving = false;
 
-async function enrich(ids: { user_id: string; online_at: string }[]) {
-  const unknown = ids.filter((i) => !directory.has(i.user_id)).map((i) => i.user_id);
+async function enrich(ids: { token: string; online_at: string }[]) {
+  const unknown = ids.filter((i) => !directory.has(i.token)).map((i) => i.token);
   if (unknown.length > 0 && !resolving) {
     resolving = true;
     try {
-      const rows = await resolvePresenceIdentities({ data: { userIds: unknown } });
-      for (const r of rows) directory.set(r.user_id, { name: r.name, role: r.role });
+      const rows = await resolvePresenceIdentities({ data: { tokens: unknown } });
+      for (const r of rows) directory.set(r.token, { name: r.name, role: r.role });
     } catch {
       // Unauthenticated or transient failure — fall back to opaque labels.
     } finally {
@@ -107,34 +111,34 @@ async function enrich(ids: { user_id: string; online_at: string }[]) {
     }
   }
   const flat: PresenceUser[] = ids.map((i) => ({
-    user_id: i.user_id,
+    token: i.token,
     online_at: i.online_at,
-    name: directory.get(i.user_id)?.name ?? "Member",
-    role: directory.get(i.user_id)?.role ?? "Member",
+    name: directory.get(i.token)?.name ?? "Member",
+    role: directory.get(i.token)?.role ?? "Member",
   }));
   flat.sort((a, b) => a.name.localeCompare(b.name));
   scheduleCommit(flat);
 }
 
-function acquire(me: PresenceUser) {
+function acquire(me: { token: string; online_at: string }) {
   refCount += 1;
   if (channel) return;
   const ch = supabase.channel("presence:online-users", {
-    config: { presence: { key: me.user_id } },
+    config: { presence: { key: me.token } },
   });
   channel = ch;
   ch.on("presence", { event: "sync" }, () => {
     const state = ch.presenceState<PresencePayload>();
-    const ids: { user_id: string; online_at: string }[] = [];
+    const ids: { token: string; online_at: string }[] = [];
     for (const entries of Object.values(state)) {
       const first = entries[0];
-      if (first?.user_id) ids.push({ user_id: first.user_id, online_at: first.online_at });
+      if (first?.token) ids.push({ token: first.token, online_at: first.online_at });
     }
     void enrich(ids);
   }).subscribe(async (status) => {
     if (status !== "SUBSCRIBED") return;
-    // Only opaque, non-identifying fields are broadcast on this channel.
-    await ch.track({ user_id: me.user_id, online_at: me.online_at } satisfies PresencePayload);
+    // Only an opaque session token and a timestamp go on the wire.
+    await ch.track({ token: me.token, online_at: me.online_at } satisfies PresencePayload);
   });
 }
 
@@ -158,22 +162,33 @@ function subscribe(listener: () => void) {
 
 /** Keeps the shared channel alive for the lifetime of the calling component. */
 function usePresenceChannel() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const id = user?.id;
-  const name = user?.fullName || user?.email || "Member";
+  const [myToken, setMyToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
-    acquire({
-      user_id: id,
-      name,
-      role: isAdmin ? "Staff" : "Member",
-      online_at: new Date().toISOString(),
-    });
-    return release;
-  }, [id, name, isAdmin]);
+    let joined = false;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { token } = await registerPresenceSession();
+        if (cancelled) return;
+        joined = true;
+        setMyToken(token);
+        acquire({ token, online_at: new Date().toISOString() });
+      } catch {
+        // Not signed in / transient failure — stay off the roster.
+      }
+    })();
+    return () => {
+      cancelled = true;
+      setMyToken(null);
+      if (joined) release();
+    };
+  }, [id]);
 
-  return id;
+  return myToken;
 }
 
 /**

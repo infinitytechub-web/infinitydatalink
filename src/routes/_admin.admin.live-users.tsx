@@ -150,7 +150,7 @@ function LiveUsersPanel() {
               </thead>
               <tbody className="divide-y divide-border">
                 {sorted.map((u) => (
-                  <tr key={u.user_id} className="hover:bg-muted/40">
+                  <tr key={u.token} className="hover:bg-muted/40">
                     <th scope="row" className="px-4 py-2.5 text-left font-normal">
                       <span className="flex items-center gap-3">
                         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-royal/10 text-[11px] font-bold text-royal">
@@ -158,7 +158,7 @@ function LiveUsersPanel() {
                         </span>
                         <span className="font-medium">
                           {u.name}
-                          {u.user_id === meId ? (
+                          {u.token === meId ? (
                             <span className="ml-1 text-xs text-muted-foreground">(you)</span>
                           ) : null}
                         </span>

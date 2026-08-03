@@ -22,10 +22,13 @@ const DEFAULTS: BrandingSettings = {
   secondary_color: "#0f766e",
   logo_url: null,
   favicon_url: null,
+  touch_icon_url: null,
   logo_path: null,
   favicon_path: null,
+  touch_icon_path: null,
   logo_version: 1,
   favicon_version: 1,
+  touch_icon_version: 1,
   login_hero_url: null,
   login_tagline: null,
   org_legal_name: null,
@@ -64,6 +67,20 @@ function hexToRgb(hex: string): string | null {
   return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
 }
 
+function setIconLink(selector: string, rel: string, href: string | null) {
+  const existing = document.querySelector<HTMLLinkElement>(selector);
+  if (!href) {
+    // Only remove links this provider owns, leaving static template icons alone.
+    if (existing?.dataset["brandIcon"] === "1") existing.remove();
+    return;
+  }
+  const link = existing ?? document.createElement("link");
+  link.rel = rel;
+  link.dataset["brandIcon"] = "1";
+  if (link.href !== href) link.href = href;
+  if (!existing) document.head.appendChild(link);
+}
+
 function applyBranding(branding: BrandingSettings) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
@@ -95,18 +112,15 @@ function applyBranding(branding: BrandingSettings) {
     }
   }
 
-  // Update favicon <link>
-  if (branding.favicon_url) {
-    let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    if (!link) {
-      link = document.createElement("link");
-      link.rel = "icon";
-      document.head.appendChild(link);
-    }
-    // The URL already carries ?v=<favicon_version>, so assigning it replaces
-    // any cached icon immediately.
-    link.href = branding.favicon_url;
-  }
+  // Update favicon + home-screen touch icon <link> tags. Both URLs already
+  // carry ?v=<version>, so assigning them replaces any cached icon instantly.
+  setIconLink('link[rel="icon"]', "icon", branding.favicon_url);
+  setIconLink('link[rel="shortcut icon"]', "shortcut icon", branding.favicon_url);
+  setIconLink(
+    'link[rel="apple-touch-icon"]',
+    "apple-touch-icon",
+    branding.touch_icon_url ?? branding.favicon_url,
+  );
 }
 
 export function BrandingProvider({ children }: { children: ReactNode }) {
@@ -135,16 +149,31 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
 
   const remoteLogoVersion = versionQuery.data?.logo_version;
   const remoteFaviconVersion = versionQuery.data?.favicon_version;
+  const remoteTouchIconVersion = versionQuery.data?.touch_icon_version;
 
   useEffect(() => {
-    if (remoteLogoVersion === undefined || remoteFaviconVersion === undefined) return;
+    if (
+      remoteLogoVersion === undefined ||
+      remoteFaviconVersion === undefined ||
+      remoteTouchIconVersion === undefined
+    )
+      return;
     if (
       remoteLogoVersion !== branding.logo_version ||
-      remoteFaviconVersion !== branding.favicon_version
+      remoteFaviconVersion !== branding.favicon_version ||
+      remoteTouchIconVersion !== branding.touch_icon_version
     ) {
       qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY });
     }
-  }, [remoteLogoVersion, remoteFaviconVersion, branding.logo_version, branding.favicon_version, qc]);
+  }, [
+    remoteLogoVersion,
+    remoteFaviconVersion,
+    remoteTouchIconVersion,
+    branding.logo_version,
+    branding.favicon_version,
+    branding.touch_icon_version,
+    qc,
+  ]);
 
   useEffect(() => {
     applyBranding(branding);
