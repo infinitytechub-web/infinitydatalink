@@ -35,6 +35,7 @@ import {
   Radio,
   Coins,
   FileText,
+  PlugZap,
 
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
@@ -91,6 +92,7 @@ const groups: NavGroup[] = [
       { to: "/admin/loan-settlements", label: "Settlement approvals", icon: <ClipboardCheck /> },
       { to: "/admin/loan-provisions", label: "Loan provisioning", icon: <ShieldAlert /> },
       { to: "/admin/payments", label: "Payments", icon: <CreditCard /> },
+      { to: "/admin/payment-config", label: "Payment configuration", icon: <PlugZap /> },
       { to: "/admin/investments", label: "Investments & Shares", icon: <TrendingUp /> },
     ],
   },
@@ -149,6 +151,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/loan-settlements": "Early settlement approvals",
   "/admin/loan-provisions": "Loan loss provisioning",
   "/admin/payments": "Payments",
+  "/admin/payment-config": "Payment configuration",
   "/admin/investments": "Investments & Shares",
   "/admin/security": "Security Centre",
   "/admin/logs": "Runtime Logs",

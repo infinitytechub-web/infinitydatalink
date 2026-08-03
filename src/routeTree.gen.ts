@@ -45,6 +45,7 @@ import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.rep
 import { Route as AdminAdminRelationshipsRouteImport } from './routes/_admin.admin.relationships'
 import { Route as AdminAdminRecurringRouteImport } from './routes/_admin.admin.recurring'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
+import { Route as AdminAdminPaymentConfigRouteImport } from './routes/_admin.admin.payment-config'
 import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.admin.notifications'
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
@@ -118,6 +119,7 @@ import { Route as AdminAdminConsoleSnapshotsRouteImport } from './routes/_admin.
 import { Route as AdminAdminConsoleApprovalsRouteImport } from './routes/_admin.admin.console.approvals'
 import { Route as AdminAdminComplianceApprovalsRouteImport } from './routes/_admin.admin.compliance.approvals'
 import { Route as AdminAdminAuditTransfersRouteImport } from './routes/_admin.admin.audit.transfers'
+import { Route as ApiPublicHooksPaymentsProviderRouteImport } from './routes/api/public/hooks/payments.$provider'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -295,6 +297,11 @@ const AdminAdminRecurringRoute = AdminAdminRecurringRouteImport.update({
 const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminPaymentConfigRoute = AdminAdminPaymentConfigRouteImport.update({
+  id: '/payment-config',
+  path: '/payment-config',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminNotificationsRoute = AdminAdminNotificationsRouteImport.update({
@@ -695,6 +702,12 @@ const AdminAdminAuditTransfersRoute =
     path: '/transfers',
     getParentRoute: () => AdminAdminAuditRoute,
   } as any)
+const ApiPublicHooksPaymentsProviderRoute =
+  ApiPublicHooksPaymentsProviderRouteImport.update({
+    id: '/api/public/hooks/payments/$provider',
+    path: '/api/public/hooks/payments/$provider',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -729,6 +742,7 @@ export interface FileRoutesByFullPath {
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/notifications': typeof AdminAdminNotificationsRoute
+  '/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
   '/admin/relationships': typeof AdminAdminRelationshipsRoute
@@ -804,6 +818,7 @@ export interface FileRoutesByFullPath {
   '/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/app/savings/': typeof MemberAppSavingsIndexRoute
+  '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -834,6 +849,7 @@ export interface FileRoutesByTo {
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/notifications': typeof AdminAdminNotificationsRoute
+  '/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
   '/admin/relationships': typeof AdminAdminRelationshipsRoute
@@ -908,6 +924,7 @@ export interface FileRoutesByTo {
   '/admin/entities': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance': typeof AdminAdminFinanceIndexRoute
   '/app/savings': typeof MemberAppSavingsIndexRoute
+  '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -945,6 +962,7 @@ export interface FileRoutesById {
   '/_admin/admin/logs': typeof AdminAdminLogsRoute
   '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/_admin/admin/notifications': typeof AdminAdminNotificationsRoute
+  '/_admin/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/recurring': typeof AdminAdminRecurringRoute
   '/_admin/admin/relationships': typeof AdminAdminRelationshipsRoute
@@ -1020,6 +1038,7 @@ export interface FileRoutesById {
   '/_admin/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/_admin/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/_member/app/savings/': typeof MemberAppSavingsIndexRoute
+  '/api/public/hooks/payments/$provider': typeof ApiPublicHooksPaymentsProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1056,6 +1075,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/members'
     | '/admin/notifications'
+    | '/admin/payment-config'
     | '/admin/payments'
     | '/admin/recurring'
     | '/admin/relationships'
@@ -1131,6 +1151,7 @@ export interface FileRouteTypes {
     | '/admin/entities/'
     | '/admin/finance/'
     | '/app/savings/'
+    | '/api/public/hooks/payments/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1161,6 +1182,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/members'
     | '/admin/notifications'
+    | '/admin/payment-config'
     | '/admin/payments'
     | '/admin/recurring'
     | '/admin/relationships'
@@ -1235,6 +1257,7 @@ export interface FileRouteTypes {
     | '/admin/entities'
     | '/admin/finance'
     | '/app/savings'
+    | '/api/public/hooks/payments/$provider'
   id:
     | '__root__'
     | '/'
@@ -1271,6 +1294,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/logs'
     | '/_admin/admin/members'
     | '/_admin/admin/notifications'
+    | '/_admin/admin/payment-config'
     | '/_admin/admin/payments'
     | '/_admin/admin/recurring'
     | '/_admin/admin/relationships'
@@ -1346,6 +1370,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/entities/'
     | '/_admin/admin/finance/'
     | '/_member/app/savings/'
+    | '/api/public/hooks/payments/$provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1369,6 +1394,7 @@ export interface RootRouteChildren {
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
+  ApiPublicHooksPaymentsProviderRoute: typeof ApiPublicHooksPaymentsProviderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1623,6 +1649,13 @@ declare module '@tanstack/react-router' {
       path: '/payments'
       fullPath: '/admin/payments'
       preLoaderRoute: typeof AdminAdminPaymentsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/payment-config': {
+      id: '/_admin/admin/payment-config'
+      path: '/payment-config'
+      fullPath: '/admin/payment-config'
+      preLoaderRoute: typeof AdminAdminPaymentConfigRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/notifications': {
@@ -2136,6 +2169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminAuditTransfersRouteImport
       parentRoute: typeof AdminAdminAuditRoute
     }
+    '/api/public/hooks/payments/$provider': {
+      id: '/api/public/hooks/payments/$provider'
+      path: '/api/public/hooks/payments/$provider'
+      fullPath: '/api/public/hooks/payments/$provider'
+      preLoaderRoute: typeof ApiPublicHooksPaymentsProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2300,6 +2340,7 @@ interface AdminAdminRouteChildren {
   AdminAdminLogsRoute: typeof AdminAdminLogsRoute
   AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
   AdminAdminNotificationsRoute: typeof AdminAdminNotificationsRoute
+  AdminAdminPaymentConfigRoute: typeof AdminAdminPaymentConfigRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminRecurringRoute: typeof AdminAdminRecurringRoute
   AdminAdminRelationshipsRoute: typeof AdminAdminRelationshipsRoute
@@ -2337,6 +2378,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminLogsRoute: AdminAdminLogsRoute,
   AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
   AdminAdminNotificationsRoute: AdminAdminNotificationsRoute,
+  AdminAdminPaymentConfigRoute: AdminAdminPaymentConfigRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminRecurringRoute: AdminAdminRecurringRoute,
   AdminAdminRelationshipsRoute: AdminAdminRelationshipsRoute,
@@ -2491,6 +2533,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
+  ApiPublicHooksPaymentsProviderRoute: ApiPublicHooksPaymentsProviderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
