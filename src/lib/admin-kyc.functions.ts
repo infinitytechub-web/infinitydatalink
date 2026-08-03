@@ -539,6 +539,8 @@ export const decideKyc = createServerFn({ method: "POST" })
         member_id: data.member_id,
         remediation_items: remediation,
         is_minor: !!minor,
+        transition: { from: transition.from, to: transition.to },
+
         ...(minor
           ? {
               minor_review: {
