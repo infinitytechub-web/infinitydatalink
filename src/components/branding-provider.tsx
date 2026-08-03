@@ -220,6 +220,7 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
       refresh: () => {
         qc.invalidateQueries({ queryKey: BRANDING_QUERY_KEY });
         qc.invalidateQueries({ queryKey: ["branding", "version"] });
+        qc.invalidateQueries({ queryKey: ["branding", "contacts"] });
       },
     }),
     [branding, query.isLoading, qc],
