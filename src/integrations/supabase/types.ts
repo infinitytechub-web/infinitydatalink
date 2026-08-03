@@ -4082,6 +4082,31 @@ export type Database = {
         }
         Returns: string
       }
+      apply_settings_change: {
+        Args: { _id: string; _note: string }
+        Returns: {
+          applied_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          kind: Database["public"]["Enums"]["settings_change_kind"]
+          payload: Json
+          requested_at: string
+          requested_by: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["settings_change_status"]
+          summary: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "settings_change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_dividend_run: {
         Args: { _actor_id: string; _note?: string; _run_id: string }
         Returns: {
