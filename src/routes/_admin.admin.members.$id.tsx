@@ -3,7 +3,7 @@ import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Check, ExternalLink, FileText, X } from "lucide-react";
+import { ArrowLeft, Check, ExternalLink, X } from "lucide-react";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgeBadge } from "@/components/biodata-fields";
@@ -21,7 +21,6 @@ import {
   getMemberKyc,
   listMinorStatusChanges,
   type KycDiffRow,
-  type KycDocumentWithUrl,
 } from "@/lib/admin-kyc.functions";
 import { ALL_REMEDIATION_ITEMS } from "@/lib/kyc-remediation";
 import { RISK_SEVERITY_LABEL } from "@/lib/kyc-risk-rules";
