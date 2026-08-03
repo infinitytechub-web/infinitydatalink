@@ -81,6 +81,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicHooksVaultRetentionRouteImport } from './routes/api/public/hooks/vault-retention'
 import { Route as ApiPublicHooksSavingsSweepsRouteImport } from './routes/api/public/hooks/savings-sweeps'
 import { Route as ApiPublicHooksNotificationDispatchRouteImport } from './routes/api/public/hooks/notification-dispatch'
 import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/public/hooks/monthly-interest'
@@ -499,6 +500,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksVaultRetentionRoute =
+  ApiPublicHooksVaultRetentionRouteImport.update({
+    id: '/api/public/hooks/vault-retention',
+    path: '/api/public/hooks/vault-retention',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSavingsSweepsRoute =
   ApiPublicHooksSavingsSweepsRouteImport.update({
     id: '/api/public/hooks/savings-sweeps',
@@ -910,6 +917,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
+  '/api/public/hooks/vault-retention': typeof ApiPublicHooksVaultRetentionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1027,6 +1035,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
+  '/api/public/hooks/vault-retention': typeof ApiPublicHooksVaultRetentionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1154,6 +1163,7 @@ export interface FileRoutesById {
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
+  '/api/public/hooks/vault-retention': typeof ApiPublicHooksVaultRetentionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1280,6 +1290,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
+    | '/api/public/hooks/vault-retention'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1397,6 +1408,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
+    | '/api/public/hooks/vault-retention'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1523,6 +1535,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
+    | '/api/public/hooks/vault-retention'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1553,6 +1566,7 @@ export interface RootRouteChildren {
   ApiPublicHooksMonthlyInterestRoute: typeof ApiPublicHooksMonthlyInterestRoute
   ApiPublicHooksNotificationDispatchRoute: typeof ApiPublicHooksNotificationDispatchRoute
   ApiPublicHooksSavingsSweepsRoute: typeof ApiPublicHooksSavingsSweepsRoute
+  ApiPublicHooksVaultRetentionRoute: typeof ApiPublicHooksVaultRetentionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -2065,6 +2079,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/auth/preview'
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/vault-retention': {
+      id: '/api/public/hooks/vault-retention'
+      path: '/api/public/hooks/vault-retention'
+      fullPath: '/api/public/hooks/vault-retention'
+      preLoaderRoute: typeof ApiPublicHooksVaultRetentionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/savings-sweeps': {
@@ -2830,6 +2851,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNotificationDispatchRoute:
     ApiPublicHooksNotificationDispatchRoute,
   ApiPublicHooksSavingsSweepsRoute: ApiPublicHooksSavingsSweepsRoute,
+  ApiPublicHooksVaultRetentionRoute: ApiPublicHooksVaultRetentionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

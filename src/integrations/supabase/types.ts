@@ -1377,6 +1377,48 @@ export type Database = {
           },
         ]
       }
+      kyc_vault_retention: {
+        Row: {
+          auto_purge_enabled: boolean
+          created_at: string
+          id: number
+          last_purge_actor: string | null
+          last_purge_at: string | null
+          last_purge_documents: number | null
+          last_purge_entries: number | null
+          legal_hold_days: number
+          retention_years: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auto_purge_enabled?: boolean
+          created_at?: string
+          id?: number
+          last_purge_actor?: string | null
+          last_purge_at?: string | null
+          last_purge_documents?: number | null
+          last_purge_entries?: number | null
+          legal_hold_days?: number
+          retention_years?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auto_purge_enabled?: boolean
+          created_at?: string
+          id?: number
+          last_purge_actor?: string | null
+          last_purge_at?: string | null
+          last_purge_documents?: number | null
+          last_purge_entries?: number | null
+          legal_hold_days?: number
+          retention_years?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       loan_collateral: {
         Row: {
           created_at: string
@@ -4830,6 +4872,16 @@ export type Database = {
         Args: { _action: string; _module: string }
         Returns: boolean
       }
+      kyc_vault_purge_candidates: {
+        Args: { _limit?: number }
+        Returns: {
+          deleted_at: string
+          entity_id: string
+          id: string
+          payload: Json
+          purge_after: string
+        }[]
+      }
       list_super_admins:
         | {
             Args: never
@@ -5257,6 +5309,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reapply_kyc_vault_retention: { Args: never; Returns: number }
       record_loan_repayment: {
         Args: {
           _actor_id: string
