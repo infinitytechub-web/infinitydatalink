@@ -38,6 +38,7 @@ import {
   updateKycResubmissionSettings,
   type KycQueueRow,
 } from "@/lib/admin-kyc.functions";
+import { bulkArchiveKycReviews } from "@/lib/kyc-vault.functions";
 
 import {
   AGING_ORDER,
@@ -224,6 +225,8 @@ function QueueBody() {
   const [bulkDialog, setBulkDialog] = useState<null | "approved" | "rejected">(null);
   const [bulkNotes, setBulkNotes] = useState("");
   const [bulkItems, setBulkItems] = useState<string[]>([]);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveReason, setArchiveReason] = useState("");
   const [assignOpenFor, setAssignOpenFor] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<KycQueueRow | null>(null);
   const [deleteReason, setDeleteReason] = useState("");
@@ -316,6 +319,24 @@ function QueueBody() {
 
 
 
+  const archiveMutation = useMutation({
+    mutationFn: (args: { member_ids: string[]; reason: string }) =>
+      bulkArchiveKycReviews({ data: args }),
+    onSuccess: (res) => {
+      if (res.failed === 0)
+        toast.success(`${res.archived} KYC review${res.archived === 1 ? "" : "s"} archived to the vault`);
+      else toast.warning(`${res.archived} archived · ${res.failed} failed`);
+      for (const r of res.results.filter((x: any) => !x.ok)) {
+        toast.error(`${r.member_id.slice(0, 8)}…: ${r.error}`);
+      }
+      setSelected(new Set());
+      setArchiveOpen(false);
+      setArchiveReason("");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Bulk archive failed"),
+  });
+
   const selectedList = useMemo(() => Array.from(selected), [selected]);
 
 
@@ -388,6 +409,10 @@ function QueueBody() {
               assignMutation.mutate({ member_ids: selectedList, assignee_id })
             }
             onBulk={(d) => setBulkDialog(d)}
+            onArchive={() => {
+              setArchiveReason("");
+              setArchiveOpen(true);
+            }}
             onClear={() => setSelected(new Set())}
           />
         ) : null}
@@ -577,6 +602,47 @@ function QueueBody() {
         </div>
       </SectionCard>
 
+      <Dialog open={archiveOpen} onOpenChange={(o) => (!o ? setArchiveOpen(false) : null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Archive to vault · {selected.size} member{selected.size === 1 ? "" : "s"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-emerald-deep/70">
+              Nothing is destroyed: each member's verification status, reviewer decision and uploaded
+              documents are snapshotted into the account vault for 30 days and their live review is
+              reset to pending. Every member gets their own audit entry, and any member that cannot be
+              archived is reported back.
+            </p>
+            <textarea
+              value={archiveReason}
+              onChange={(e) => setArchiveReason(e.target.value)}
+              placeholder="Why are these reviews being archived?"
+              className="h-24 w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+            />
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setArchiveOpen(false)}
+              className="rounded border border-emerald-deep/15 px-3 py-1.5 text-xs uppercase tracking-widest"
+            >
+              Cancel
+            </button>
+            <button
+              disabled={archiveMutation.isPending || archiveReason.trim().length < 5}
+              onClick={() =>
+                archiveMutation.mutate({ member_ids: selectedList, reason: archiveReason.trim() })
+              }
+              className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-50 ${BUTTON_TONE.danger}`}
+            >
+              {archiveMutation.isPending ? "Archiving…" : "Archive to vault"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!bulkDialog} onOpenChange={(o) => (!o ? setBulkDialog(null) : null)}>
         <DialogContent>
           <DialogHeader>
@@ -745,12 +811,14 @@ function SelectionToolbar({
   reviewers,
   onAssign,
   onBulk,
+  onArchive,
   onClear,
 }: {
   count: number;
   reviewers: { id: string; name: string; role: string }[];
   onAssign: (id: string | null) => void;
   onBulk: (d: "approved" | "rejected") => void;
+  onArchive: () => void;
   onClear: () => void;
 }) {
   return (
@@ -792,6 +860,12 @@ function SelectionToolbar({
         className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest ${BUTTON_TONE.danger}`}
       >
         Bulk reject
+      </button>
+      <button
+        onClick={onArchive}
+        className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs font-semibold uppercase tracking-widest hover:bg-cream"
+      >
+        Archive to vault
       </button>
 
       <button onClick={onClear} className="ml-auto text-[11px] text-emerald-deep/60 underline">

@@ -11,7 +11,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { writeAudit } from "@/lib/audit-log";
 import {
-  KYC_SNAPSHOT_FIELDS,
   type VaultDocument,
   type VaultEntry,
 } from "@/lib/kyc-vault.shared";
@@ -98,6 +97,7 @@ export const restoreKycVault = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { admin, actorRole, email } = await ctx(context, "edit");
+    const { restoreVaultEntry } = await import("@/lib/kyc-vault-core.server");
 
     const { data: row, error } = await admin
       .from("recycle_bin")
@@ -108,96 +108,13 @@ export const restoreKycVault = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Vault entry not found");
 
-    const entry = toEntry(row);
-
-    // Move archived documents back to their original paths, then re-insert rows.
-    const restoredDocs: any[] = [];
-    for (const d of entry.documents) {
-      const original = d.original_path ?? d.storage_path;
-      if (d.vault_path) {
-        await admin.storage.from(BUCKET).move(d.vault_path, original);
-      }
-      restoredDocs.push({
-        id: d.id,
-        member_id: entry.member_id,
-        doc_type: d.doc_type,
-        storage_path: original,
-        mime_type: d.mime_type,
-        size_bytes: d.size_bytes,
-        status: d.status,
-        review_notes: d.review_notes,
-        reviewed_by: d.reviewed_by,
-        reviewed_at: d.reviewed_at,
-        created_at: d.created_at,
-      });
-    }
-    if (restoredDocs.length > 0) {
-      const { error: iErr } = await admin
-        .from("kyc_documents")
-        .upsert(restoredDocs, { onConflict: "id" });
-      if (iErr) throw new Error(iErr.message);
-    }
-
-    const update: Record<string, unknown> = {};
-    for (const f of KYC_SNAPSHOT_FIELDS) {
-      if (f in entry.profile_snapshot) update[f] = (entry.profile_snapshot as any)[f];
-    }
-    if (Object.keys(update).length > 0) {
-      const { error: uErr } = await admin.from("profiles").update(update).eq("id", entry.member_id);
-      if (uErr) throw new Error(uErr.message);
-    }
-
-    const { error: dErr } = await admin.from("recycle_bin").delete().eq("id", data.id);
-    if (dErr) throw new Error(dErr.message);
-
-    await writeAudit({
-      actor_id: context.userId,
-      actor_email: email,
-      actor_role: actorRole,
-      action: "kyc.review_restored",
-      target: entry.member_id,
-      meta: {
-        vault_id: data.id,
-        member_id: entry.member_id,
-        member_no: entry.member_no,
-        member_name: entry.member_name,
-        restored_kyc: entry.previous_kyc,
-        documents_restored: restoredDocs.length,
-        reason: data.reason,
-      },
-    });
-
-    // Tell the affected member their verification record is back, what came
-    // back with it and who performed the restore. In-app always; email/SMS
-    // follow the member's notification preferences.
-    const { notifyUser } = await import("@/lib/notify.server");
-    const actor = email ?? (actorRole ? `a ${String(actorRole).replace(/_/g, " ")}` : "an administrator");
-    const restoredStatus = entry.previous_kyc ? ` Verification status restored to "${entry.previous_kyc}".` : "";
-    const docLine =
-      restoredDocs.length > 0
-        ? ` ${restoredDocs.length} document${restoredDocs.length === 1 ? "" : "s"} (${restoredDocs
-            .map((d) => String(d.doc_type).replace(/_/g, " "))
-            .join(", ")}) were restored.`
-        : " No documents were attached to the archive.";
-    await notifyUser({
-      userId: entry.member_id,
-      category: "account.kyc.restored",
-      title: "Your KYC record has been restored",
-      body: `Your identity verification record was restored from the account vault by ${actor}.${restoredStatus}${docLine} Reason: ${data.reason}`,
-      link: "/app/kyc",
-      meta: {
-        vault_id: data.id,
-        restored_kyc: entry.previous_kyc,
-        documents_restored: restoredDocs.length,
-        document_types: restoredDocs.map((d) => d.doc_type),
-        restored_by_email: email,
-        restored_by_role: actorRole,
-        reason: data.reason,
-      },
-      dedupeKey: `kyc.restored:${data.id}`,
-    });
-
-    return { restored: true, documents_restored: restoredDocs.length };
+    const res = await restoreVaultEntry(
+      admin,
+      row,
+      { userId: context.userId, email, role: actorRole },
+      data.reason,
+    );
+    return { restored: true, documents_restored: res.documents_restored };
   });
 
 export const purgeKycVaultEntry = createServerFn({ method: "POST" })
@@ -240,4 +157,148 @@ export const purgeKycVaultEntry = createServerFn({ method: "POST" })
     });
 
     return { purged: true, documents_purged: paths.length };
+  });
+
+// ============================================================================
+// Bulk console actions
+// ============================================================================
+
+const BULK_LIMIT = 50;
+
+/**
+ * Restore several vault entries in one pass.
+ *
+ * Each entry is validated independently (valid `kyc_status` snapshot, member
+ * still exists, no newer submission that would be overwritten) and gets its own
+ * audit row plus member notification. One failure never aborts the batch — the
+ * per-entry outcome is returned so the console can report exactly what happened.
+ */
+export const bulkRestoreKycVault = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        ids: z.array(z.string().uuid()).min(1).max(BULK_LIMIT),
+        reason: z.string().trim().min(5).max(500),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { admin, actorRole, email } = await ctx(context, "edit");
+    const { restoreVaultEntry } = await import("@/lib/kyc-vault-core.server");
+    const actor = { userId: context.userId, email, role: actorRole };
+
+    const { data: rows, error } = await admin
+      .from("recycle_bin")
+      .select("*")
+      .eq("entity_table", "kyc_review")
+      .in("id", data.ids);
+    if (error) throw new Error(error.message);
+
+    const byId = new Map<string, any>((rows ?? []).map((r: any) => [r.id, r]));
+    const results: {
+      id: string;
+      ok: boolean;
+      member_id?: string;
+      member_name?: string | null;
+      documents_restored?: number;
+      error?: string;
+    }[] = [];
+
+    for (const id of data.ids) {
+      const row = byId.get(id);
+      if (!row) {
+        results.push({ id, ok: false, error: "Vault entry not found" });
+        continue;
+      }
+      try {
+        const res = await restoreVaultEntry(admin, row, actor, data.reason);
+        results.push({ id, ok: true, ...res });
+      } catch (err: any) {
+        results.push({ id, ok: false, error: err?.message ?? "Restore failed" });
+        await writeAudit({
+          actor_id: context.userId,
+          actor_email: email,
+          actor_role: actorRole,
+          action: "kyc.review_restore_blocked",
+          target: (row.payload?.member_id ?? row.entity_id) as string,
+          meta: { vault_id: id, reason: data.reason, error: err?.message ?? "unknown" },
+        });
+      }
+    }
+
+    return {
+      restored: results.filter((r) => r.ok).length,
+      failed: results.filter((r) => !r.ok).length,
+      results,
+    };
+  });
+
+/**
+ * Archive (soft-delete into the vault) several members' KYC reviews at once.
+ * Requires admin/super_admin plus the `kyc.delete` capability, mirroring the
+ * single-record action, and writes one audit row per member.
+ */
+export const bulkArchiveKycReviews = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        member_ids: z.array(z.string().uuid()).min(1).max(BULK_LIMIT),
+        reason: z.string().trim().min(5).max(500),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { admin, actorRole, email } = await ctx(context, "delete");
+    if (actorRole !== "super_admin" && actorRole !== "admin") {
+      throw new Error("Forbidden: super_admin or admin role required");
+    }
+    const { archiveKycReview } = await import("@/lib/kyc-vault-core.server");
+    const { notifyStaff } = await import("@/lib/notify.server");
+    const actor = { userId: context.userId, email, role: actorRole };
+
+    const results: {
+      member_id: string;
+      ok: boolean;
+      member_name?: string | null;
+      documents_archived?: number;
+      error?: string;
+    }[] = [];
+
+    for (const memberId of data.member_ids) {
+      try {
+        const res = await archiveKycReview(admin, memberId, actor, data.reason);
+        results.push({
+          member_id: memberId,
+          ok: true,
+          member_name: res.member_name,
+          documents_archived: res.documents_archived,
+        });
+      } catch (err: any) {
+        results.push({ member_id: memberId, ok: false, error: err?.message ?? "Archive failed" });
+      }
+    }
+
+    const archived = results.filter((r) => r.ok);
+    if (archived.length > 0) {
+      await notifyStaff({
+        roles: ["super_admin", "compliance_officer"],
+        category: "kyc.review.deleted",
+        title: `${archived.length} KYC review${archived.length === 1 ? "" : "s"} archived to the vault`,
+        body: `${archived
+          .map((r) => r.member_name ?? r.member_id)
+          .join(", ")} archived by ${actorRole}. Reason: ${data.reason}`,
+        link: "/admin/vault",
+        meta: { member_ids: archived.map((r) => r.member_id), reason: data.reason },
+        dedupeKey: `kyc.review.bulk_deleted:${context.userId}:${Date.now()}`,
+        excludeUserId: context.userId,
+      });
+    }
+
+    return {
+      archived: archived.length,
+      failed: results.length - archived.length,
+      results,
+    };
   });
