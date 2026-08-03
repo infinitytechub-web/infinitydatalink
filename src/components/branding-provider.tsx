@@ -136,7 +136,38 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     placeholderData: DEFAULTS,
   });
 
-  const branding = query.data ?? DEFAULTS;
+  // Support contacts and the legal footer are not readable anonymously, so they
+  // are fetched separately once a session exists.
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) setSignedIn(Boolean(data.session));
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(Boolean(session));
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const fetchContacts = useServerFn(getBrandingContacts);
+  const contactsQuery = useQuery({
+    queryKey: ["branding", "contacts"],
+    queryFn: () => fetchContacts(),
+    enabled: signedIn,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const base = query.data ?? DEFAULTS;
+  const branding = useMemo<BrandingSettings>(
+    () => (contactsQuery.data ? { ...base, ...contactsQuery.data } : base),
+    [base, contactsQuery.data],
+  );
+
 
   // Lightweight version poll: whenever an admin uploads or clears a logo /
   // favicon, the version counter bumps and every open device refetches full
