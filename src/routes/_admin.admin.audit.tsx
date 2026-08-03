@@ -163,6 +163,14 @@ function AuditContent() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <th className="px-4 py-3 font-medium">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all entries on this page"
+                    checked={rows.length > 0 && picked.length === rows.length}
+                    onChange={(ev) => setPicked(ev.target.checked ? rows.map((r) => r.id) : [])}
+                  />
+                </th>
                 <th className="px-6 py-3 font-medium">Timestamp</th>
                 <th className="px-6 py-3 font-medium">Decision</th>
                 <th className="px-6 py-3 font-medium">Loan</th>
@@ -179,6 +187,19 @@ function AuditContent() {
                   onClick={() => selectEntry(e.id)}
                   className="align-top cursor-pointer hover:bg-cream/40"
                 >
+                  <td className="px-4 py-4" onClick={(ev) => ev.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      aria-label="Select entry"
+                      checked={picked.includes(e.id)}
+                      onChange={(ev) =>
+                        setPicked((prev) =>
+                          ev.target.checked ? [...prev, e.id] : prev.filter((id) => id !== e.id),
+                        )
+                      }
+                    />
+                  </td>
+
                   <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
                     {new Date(e.created_at).toLocaleString()}
                   </td>
