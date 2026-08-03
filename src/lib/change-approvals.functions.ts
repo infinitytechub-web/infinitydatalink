@@ -318,3 +318,87 @@ export const applyChangeRequest = createServerFn({ method: "POST" })
     const result = (row ?? {}) as Record<string, any>;
     return { status: (result["status"] ?? "applied") as ChangeStatus, error: result["error"] ?? null };
   });
+
+export type BulkChangeMode = "approve" | "reject" | "apply";
+
+export type BulkChangeItemResult = {
+  id: string;
+  ok: boolean;
+  status: ChangeStatus | null;
+  error: string | null;
+};
+
+const BulkSchema = z.object({
+  mode: z.enum(["approve", "reject", "apply"]),
+  items: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        note: z
+          .string()
+          .trim()
+          .min(5, "Every request needs its own comment of at least 5 characters")
+          .max(500),
+      }),
+    )
+    .min(1, "Select at least one request")
+    .max(50, "Bulk actions are limited to 50 requests at a time")
+    .refine(
+      (items) => new Set(items.map((i) => i.id)).size === items.length,
+      "The same request was included more than once",
+    ),
+});
+
+/**
+ * Bulk approve / reject / apply. Each request carries its own mandatory comment,
+ * so the batch is rejected outright when any comment is missing or too short.
+ * Requests are processed one by one and each outcome is reported individually —
+ * a single failure never rolls back the rest of the batch.
+ */
+export const bulkDecideChangeRequests = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => BulkSchema.parse(data))
+  .handler(async ({ data, context }): Promise<{ results: BulkChangeItemResult[] }> => {
+    const action = data.mode === "reject" ? "reject" : "approve";
+    await assertPermission(context.supabase, context.userId, "approvals", action);
+
+    const rpc =
+      data.mode === "approve"
+        ? "approve_settings_change"
+        : data.mode === "reject"
+          ? "reject_settings_change"
+          : "apply_settings_change";
+
+    const results: BulkChangeItemResult[] = [];
+    for (const item of data.items) {
+      try {
+        const args =
+          data.mode === "reject"
+            ? { _id: item.id, _reason: item.note }
+            : { _id: item.id, _note: item.note };
+        const { data: row, error } = await (context.supabase as any).rpc(rpc, args);
+        if (error) throw new Error(error.message);
+        const result = (row ?? {}) as Record<string, any>;
+        const status = (result["status"] ?? (data.mode === "reject" ? "rejected" : "applied")) as ChangeStatus;
+        const failure = (result["error"] ?? null) as string | null;
+
+        if (data.mode !== "apply") {
+          await recordDecision({
+            actorId: context.userId,
+            actorEmail: (context.claims as any)?.email ?? null,
+            actorRole: "admin",
+            module: "settings",
+            outcome: data.mode === "reject" ? "rejected" : "approved",
+            target: item.id,
+            note: item.note,
+            meta: { bulk: true, batch_size: data.items.length, status },
+          });
+        }
+
+        results.push({ id: item.id, ok: status !== "failed", status, error: failure });
+      } catch (err: any) {
+        results.push({ id: item.id, ok: false, status: null, error: err?.message ?? String(err) });
+      }
+    }
+    return { results };
+  });
