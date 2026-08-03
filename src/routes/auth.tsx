@@ -337,11 +337,13 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
         const parsed = signUpSchema.safeParse({
           email,
           password,
-          fullName,
+          firstName,
+          lastName,
           ghanaCard: canonicalCard,
           phone: canonicalPhone,
           membershipType,
         });
+
         if (!parsed.success) {
           setErr(parsed.error.issues[0]?.message ?? "Invalid input");
           return;
