@@ -580,7 +580,7 @@ export const decideKyc = createServerFn({ method: "POST" })
       title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
       body:
         data.decision === "approved"
-          ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
+          ? `Your identity verification has been approved. Your full member dashboard, savings and loan facilities are now unlocked.${data.notes ? ` Reviewer note: ${data.notes}` : ""}`
           : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
       link: "/app/kyc",
       // The branded decision email is sent below via the transactional template,
@@ -936,7 +936,7 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
           title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
           body:
             data.decision === "approved"
-              ? "Your identity verification has been approved. Your full member dashboard is now unlocked."
+              ? `Your identity verification has been approved. Your full member dashboard, savings and loan facilities are now unlocked.${data.notes ? ` Reviewer note: ${data.notes}` : ""}`
               : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
           link: "/app/kyc",
           channels: ["in_app", "sms"],
