@@ -276,17 +276,30 @@ function QueueBody() {
   const decideOne = useServerFn(decideKyc);
   const removeReview = useServerFn(deleteKycReview);
 
-  const rowDecision = async (row: KycQueueRow, decision: "approved" | "rejected", note: string) => {
+  const rowDecision = async (
+    row: KycQueueRow,
+    decision: "approved" | "rejected",
+    note: string,
+    remediationItems: string[] = [],
+  ) => {
     const minor = resolveMinorStatus(row.date_of_birth ?? null, row.is_minor ?? null).effective;
     if (minor) {
       toast.info("Minor accounts need the guardian checklist — opening the full review.");
       void navigate({ to: "/admin/members/$id", params: { id: row.member_id } });
       return;
     }
-    await decideOne({ data: { member_id: row.member_id, decision, notes: note } });
+    await decideOne({
+      data: {
+        member_id: row.member_id,
+        decision,
+        notes: note,
+        remediation_items: decision === "rejected" ? remediationItems : [],
+      },
+    });
     toast.success(`${row.full_name ?? "Member"} ${decision}`);
     invalidate();
   };
+
 
   const deleteMutation = useMutation({
     mutationFn: (args: { member_id: string; reason: string }) => removeReview({ data: args }),
@@ -522,7 +535,9 @@ function QueueBody() {
                       ]}
                       onView={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
                       onEdit={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
-                      onDecide={(decision, note) => rowDecision(m, decision, note)}
+                      onDecide={(decision, note, items) => rowDecision(m, decision, note, items)}
+                      remediationOptions={ALL_REMEDIATION_ITEMS}
+
                       {...(canDeleteReview ? { onDelete: () => setDeleteTarget(m) } : {})}
                       noConfirm={["delete"]}
                       disabled={{ approve: m.kyc === "active", reject: m.kyc === "rejected" }}

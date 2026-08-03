@@ -44,7 +44,16 @@ export type KycRecordActionsProps = {
   onEdit?: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
   /** Called after the reviewer supplies a note. Omit to hide approve/reject. */
-  onDecide?: (decision: KycDecision, note: string) => void | Promise<void>;
+  onDecide?: (
+    decision: KycDecision,
+    note: string,
+    remediationItems: string[],
+  ) => void | Promise<void>;
+  /**
+   * Checklist of items a rejected record must revise. When provided, rejections
+   * require at least one selection — mirroring the server-side rule.
+   */
+  remediationOptions?: { key: string; label: string }[];
   /** Minimum note length; approvals default to 5 like the server rule. */
   noteMin?: number;
   disabled?: Partial<Record<RecordActionKey, boolean>>;
@@ -73,6 +82,7 @@ export function KycRecordActions({
   onEdit,
   onDelete,
   onDecide,
+  remediationOptions,
   noteMin = 5,
   disabled,
   noConfirm,
@@ -83,7 +93,11 @@ export function KycRecordActions({
 }: KycRecordActionsProps) {
   const [decision, setDecision] = useState<KycDecision | null>(null);
   const [note, setNote] = useState("");
+  const [items, setItems] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+
+  // Rejections must name at least one item to revise when a checklist exists.
+  const needsItems = decision === "rejected" && !!remediationOptions?.length;
 
   const exportOpts = {
     title,
@@ -93,19 +107,25 @@ export function KycRecordActions({
     rows: fields,
   };
 
+  const close = () => {
+    setDecision(null);
+    setNote("");
+    setItems([]);
+  };
+
   const submit = async () => {
     if (!decision || !onDecide) return;
     setBusy(true);
     try {
-      await onDecide(decision, note.trim());
-      setDecision(null);
-      setNote("");
+      await onDecide(decision, note.trim(), decision === "rejected" ? items : []);
+      close();
     } catch (err: any) {
       toast.error(err?.message ?? "Decision failed");
     } finally {
       setBusy(false);
     }
   };
+
 
   return (
     <>
@@ -125,7 +145,7 @@ export function KycRecordActions({
         onReject={onDecide ? () => setDecision("rejected") : undefined}
       />
 
-      <Dialog open={decision !== null} onOpenChange={(o) => (o ? null : setDecision(null))}>
+      <Dialog open={decision !== null} onOpenChange={(o) => (o ? null : close())}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -145,18 +165,50 @@ export function KycRecordActions({
           <p className="text-[11px] text-muted-foreground">
             {note.trim().length}/{noteMin} characters minimum.
           </p>
+
+          {needsItems ? (
+            <fieldset className="rounded-md border border-border p-3">
+              <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Items the member must revise
+              </legend>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {remediationOptions!.map((opt) => (
+                  <label key={opt.key} className="flex items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={items.includes(opt.key)}
+                      onChange={() =>
+                        setItems((prev) =>
+                          prev.includes(opt.key)
+                            ? prev.filter((k) => k !== opt.key)
+                            : [...prev, opt.key],
+                        )
+                      }
+                      className="h-3.5 w-3.5 accent-primary"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Select at least one item so the member knows what to fix.
+              </p>
+            </fieldset>
+          ) : null}
+
           <DialogFooter>
             <button
               type="button"
-              onClick={() => setDecision(null)}
+              onClick={close}
               className="rounded border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-widest"
             >
               Cancel
             </button>
             <button
               type="button"
-              disabled={busy || note.trim().length < noteMin}
+              disabled={busy || note.trim().length < noteMin || (needsItems && items.length === 0)}
               onClick={() => void submit()}
+
               className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${
                 decision === "approved" ? BUTTON_TONE.success : BUTTON_TONE.danger
               }`}
