@@ -426,17 +426,29 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
     <form onSubmit={onSubmit} className="space-y-4">
       {mode === "signup" ? (
         <>
-          <Field label="Full name">
+          <Field label="First name">
             <input
               type="text"
               required
-              autoComplete="name"
+              autoComplete="given-name"
               className={inputClass(focusRing)}
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Ada Lovelace"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Ada"
             />
           </Field>
+          <Field label="Last name">
+            <input
+              type="text"
+              required
+              autoComplete="family-name"
+              className={inputClass(focusRing)}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Lovelace"
+            />
+          </Field>
+
           <Field label="Ghana Card number" hint={<span className="text-[11px] text-emerald-deep/50">10 digits</span>}>
             <div className="flex items-stretch gap-0">
               <span className="flex items-center rounded-l-lg border border-r-0 border-emerald-deep/15 bg-emerald-deep/5 px-3 text-sm font-semibold text-emerald-deep/70">
