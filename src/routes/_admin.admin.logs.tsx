@@ -220,6 +220,14 @@ function Body() {
           <table className="w-full text-xs">
             <thead className="bg-cream/40 text-[10px] uppercase tracking-wider text-emerald-deep/60">
               <tr>
+                <th className="p-3 text-left">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all events on this page"
+                    checked={list.rows.length > 0 && picked.length === list.rows.length}
+                    onChange={(e) => setPicked(e.target.checked ? list.rows.map((r) => r.id) : [])}
+                  />
+                </th>
                 <th className="p-3 text-left">Time</th>
                 <th className="p-3 text-left">Kind</th>
                 <th className="p-3 text-left">Severity</th>
@@ -230,7 +238,7 @@ function Body() {
             </thead>
             <tbody>
               {list.rows.length === 0 ? (
-                <tr><td colSpan={6} className="p-6 text-center text-emerald-deep/50">No events match the filters.</td></tr>
+                <tr><td colSpan={7} className="p-6 text-center text-emerald-deep/50">No events match the filters.</td></tr>
               ) : (
                 list.rows.map((row) => (
                   <tr
@@ -238,6 +246,19 @@ function Body() {
                     onClick={() => setSelected(row)}
                     className="cursor-pointer border-t border-emerald-deep/5 hover:bg-cream/30"
                   >
+                    <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        aria-label="Select event"
+                        checked={picked.includes(row.id)}
+                        onChange={(e) =>
+                          setPicked((prev) =>
+                            e.target.checked ? [...prev, row.id] : prev.filter((id) => id !== row.id),
+                          )
+                        }
+                      />
+                    </td>
+
                     <td className="p-3 font-mono text-[11px]">{new Date(row.occurred_at).toLocaleString()}</td>
                     <td className="p-3"><Badge tone={kindTone(row.kind)}>{row.kind}</Badge></td>
                     <td className="p-3"><Badge tone={severityTone(row.severity)}>{row.severity}</Badge></td>
