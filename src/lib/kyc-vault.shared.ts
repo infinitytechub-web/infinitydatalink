@@ -59,5 +59,5 @@ export type VaultEntry = {
   purge_after: string;
   document_count: number;
   documents: VaultDocument[];
-  profile_snapshot: Record<string, unknown>;
+  profile_snapshot: Record<string, any>;
 };
