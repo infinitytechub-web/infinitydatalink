@@ -158,7 +158,24 @@ export async function restoreVaultEntry(
     },
   });
 
+  // Pending acknowledgment the member must confirm in-app (audit evidence that
+  // they reviewed the restored record).
+  {
+    const { error: ackErr } = await admin.from("kyc_restore_acknowledgments").insert({
+      member_id: entry.member_id,
+      vault_id: entry.id,
+      restored_kyc: target,
+      restored_by_email: actor.email,
+      restored_by_role: actor.role,
+      documents_restored: restoredDocs.length,
+      document_types: restoredDocs.map((d: any) => String(d.doc_type)),
+      reason,
+    });
+    if (ackErr) console.error("restore acknowledgment row failed", ackErr.message);
+  }
+
   // Tell the affected member what came back and who did it.
+
   try {
     const { notifyUser } = await import("@/lib/notify.server");
     const who =
