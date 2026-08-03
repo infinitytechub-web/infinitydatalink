@@ -264,6 +264,7 @@ function QueueBody() {
   });
 
   const decideOne = useServerFn(decideKyc);
+  const removeReview = useServerFn(deleteKycReview);
 
   const rowDecision = async (row: KycQueueRow, decision: "approved" | "rejected", note: string) => {
     const minor = resolveMinorStatus(row.date_of_birth ?? null, row.is_minor ?? null).effective;
@@ -276,6 +277,20 @@ function QueueBody() {
     toast.success(`${row.full_name ?? "Member"} ${decision}`);
     invalidate();
   };
+
+  const deleteMutation = useMutation({
+    mutationFn: (args: { member_id: string; reason: string }) => removeReview({ data: args }),
+    onSuccess: (res) => {
+      toast.success(
+        `KYC review deleted · ${res.documents_deleted} document${res.documents_deleted === 1 ? "" : "s"} removed`,
+      );
+      setDeleteTarget(null);
+      setDeleteReason("");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Delete failed"),
+  });
+
 
 
   const selectedList = useMemo(() => Array.from(selected), [selected]);
