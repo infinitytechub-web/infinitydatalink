@@ -21,6 +21,7 @@ import {
   approveUser,
   rejectUser,
   setUserActive,
+  deleteUserPermanently,
   type PendingUserRow,
 } from "@/lib/admin-approvals.functions";
 import {
@@ -54,6 +55,8 @@ function ApprovalsPage() {
 
 function ApprovalsInner() {
   const qc = useQueryClient();
+  const { hasRole } = useAuth();
+  const isSuperAdmin = hasRole("super_admin");
   const [status, setStatus] = useState<Status>("pending");
   const [membershipType, setMembershipType] = useState<MembershipFilter>("all");
   const [search, setSearch] = useState("");
@@ -64,6 +67,7 @@ function ApprovalsInner() {
   const approveFn = useServerFn(approveUser);
   const rejectFn = useServerFn(rejectUser);
   const activeFn = useServerFn(setUserActive);
+  const deleteFn = useServerFn(deleteUserPermanently);
 
   const query = useQuery({
     queryKey: ["admin-approvals", status, membershipType, search, page],
@@ -103,6 +107,19 @@ function ApprovalsInner() {
 
   const [rejectFor, setRejectFor] = useState<PendingUserRow | null>(null);
   const [reason, setReason] = useState("");
+  const [deleteFor, setDeleteFor] = useState<PendingUserRow | null>(null);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+
+  const deleteMut = useMutation({
+    mutationFn: (v: { user_id: string; reason: string }) => deleteFn({ data: v }),
+    onSuccess: () => {
+      toast.success("User permanently deleted");
+      invalidate();
+      setDeleteFor(null);
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Failed"),
+  });
 
   const rows = query.data?.rows ?? [];
   const total = query.data?.total ?? 0;
@@ -259,6 +276,19 @@ function ApprovalsInner() {
                             Reactivate
                           </Button>
                         ) : null}
+                        {isSuperAdmin ? (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              setDeleteFor(r);
+                              setDeleteReason("");
+                              setDeleteConfirm("");
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        ) : null}
                       </div>
                     </td>
                   </tr>
@@ -324,6 +354,65 @@ function ApprovalsInner() {
               }}
             >
               {rejectMut.isPending ? "Rejecting…" : "Confirm reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!deleteFor}
+        onOpenChange={(open) => {
+          if (!open) setDeleteFor(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete user permanently</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              This permanently removes <span className="font-medium">{deleteFor?.full_name ?? deleteFor?.email ?? "this account"}</span>{" "}
+              and its login, freeing the email, phone and Ghana Card for a fresh
+              registration. A snapshot is kept in the recycle bin for audit. Accounts
+              with savings, loans or transactions cannot be deleted — deactivate them
+              instead.
+            </p>
+            <div>
+              <Label className="text-xs">Reason (min. 10 characters)</Label>
+              <Textarea
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder="Why is this account being deleted?"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Type DELETE to confirm</Label>
+              <Input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder="DELETE"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteFor(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={
+                deleteReason.trim().length < 10 ||
+                deleteConfirm.trim() !== "DELETE" ||
+                deleteMut.isPending
+              }
+              onClick={() => {
+                if (!deleteFor) return;
+                deleteMut.mutate({ user_id: deleteFor.user_id, reason: deleteReason.trim() });
+              }}
+            >
+              {deleteMut.isPending ? "Deleting…" : "Delete permanently"}
             </Button>
           </DialogFooter>
         </DialogContent>
