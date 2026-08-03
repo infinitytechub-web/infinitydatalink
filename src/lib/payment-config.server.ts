@@ -68,18 +68,16 @@ export type SelfTestResult = {
   steps: { label: string; ok: boolean; detail: string }[];
 };
 
-type SupabaseLike = {
-  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
-};
-
 export async function assertPaymentsPermission(
-  supabase: SupabaseLike,
+  supabase: { rpc: (...args: never[]) => unknown },
   action: "view" | "manage",
 ): Promise<void> {
-  const { data, error } = await supabase.rpc("has_permission_for", {
-    _module: "payments",
-    _action: action,
-  });
+  const { data, error } = await (supabase as unknown as {
+    rpc: (
+      fn: "has_permission_for",
+      args: { _module: string; _action: string },
+    ) => Promise<{ data: unknown; error: { message: string } | null }>;
+  }).rpc("has_permission_for", { _module: "payments", _action: action });
   if (error) throw new Error(error.message);
   if (data !== true) throw new Error(`Forbidden: payments.${action} permission required`);
 }
