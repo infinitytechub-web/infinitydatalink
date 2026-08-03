@@ -4754,6 +4754,10 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      delete_log_recycle_bin_entries: {
+        Args: { _ids: string[] }
+        Returns: number
+      }
       disburse_loan: {
         Args: {
           _actor_id: string
