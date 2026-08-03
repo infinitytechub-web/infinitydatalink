@@ -75,6 +75,7 @@ export function KycRecordActions({
   onDecide,
   noteMin = 5,
   disabled,
+  noConfirm,
   approveLabel = "Approve",
   rejectLabel = "Reject",
   className,
@@ -114,7 +115,7 @@ export function KycRecordActions({
         size={size}
         className={className}
         disabled={disabled}
-        noConfirm={["approve", "reject"]}
+        noConfirm={["approve", "reject", ...(noConfirm ?? [])]}
         onView={onView}
         onEdit={onEdit}
         onDelete={onDelete}
