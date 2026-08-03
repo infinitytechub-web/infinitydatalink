@@ -113,8 +113,12 @@ function VaultPage() {
       <PageHeader
         eyebrow="Administrator"
         title="Account vault"
-        description="Deleted member KYC reviews are archived here for 30 days. Restore a record to put the member's verification, documents and reviewer decision back exactly as they were."
+        description="Deleted member KYC reviews are archived here for the configured retention window. Restore a record to put the member's verification, documents and reviewer decision back exactly as they were."
       />
+
+      <VaultRetentionPanel />
+
+
 
       <SectionCard
         title="Archived KYC reviews"
