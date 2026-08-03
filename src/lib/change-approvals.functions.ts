@@ -45,12 +45,12 @@ const CHANGE_ACTIONS = [
 
 async function emailsFor(ids: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
-  const unique = [...new Set(ids.filter(Boolean))];
-  if (!unique.length) return out;
+  const unique = new Set(ids.filter(Boolean));
+  if (!unique.size) return out;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.from("profiles").select("id, email").in("id", unique);
-  for (const row of (data ?? []) as Array<{ id: string; email: string | null }>) {
-    if (row.email) out.set(row.id, row.email);
+  const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  for (const user of list?.users ?? []) {
+    if (user.id && user.email && unique.has(user.id)) out.set(user.id, user.email);
   }
   return out;
 }
