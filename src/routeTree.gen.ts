@@ -74,6 +74,7 @@ import { Route as MemberAppSavingsIndexRouteImport } from './routes/_member.app.
 import { Route as AdminAdminSecurityIndexRouteImport } from './routes/_admin.admin.security.index'
 import { Route as AdminAdminFinanceIndexRouteImport } from './routes/_admin.admin.finance.index'
 import { Route as AdminAdminEntitiesIndexRouteImport } from './routes/_admin.admin.entities.index'
+import { Route as AdminAdminChangeApprovalsIndexRouteImport } from './routes/_admin.admin.change-approvals.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -452,6 +453,12 @@ const AdminAdminEntitiesIndexRoute = AdminAdminEntitiesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminAdminEntitiesRoute,
 } as any)
+const AdminAdminChangeApprovalsIndexRoute =
+  AdminAdminChangeApprovalsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminAdminChangeApprovalsRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -758,7 +765,7 @@ export interface FileRoutesByFullPath {
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
-  '/admin/change-approvals': typeof AdminAdminChangeApprovalsRoute
+  '/admin/change-approvals': typeof AdminAdminChangeApprovalsRouteWithChildren
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
@@ -853,6 +860,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/change-approvals/': typeof AdminAdminChangeApprovalsIndexRoute
   '/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/admin/security/': typeof AdminAdminSecurityIndexRoute
@@ -872,7 +880,6 @@ export interface FileRoutesByTo {
   '/admin/approvals': typeof AdminAdminApprovalsRoute
   '/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/admin/branding': typeof AdminAdminBrandingRoute
-  '/admin/change-approvals': typeof AdminAdminChangeApprovalsRoute
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
@@ -963,6 +970,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/change-approvals': typeof AdminAdminChangeApprovalsIndexRoute
   '/admin/entities': typeof AdminAdminEntitiesIndexRoute
   '/admin/finance': typeof AdminAdminFinanceIndexRoute
   '/admin/security': typeof AdminAdminSecurityIndexRoute
@@ -987,7 +995,7 @@ export interface FileRoutesById {
   '/_admin/admin/approvals': typeof AdminAdminApprovalsRoute
   '/_admin/admin/audit': typeof AdminAdminAuditRouteWithChildren
   '/_admin/admin/branding': typeof AdminAdminBrandingRoute
-  '/_admin/admin/change-approvals': typeof AdminAdminChangeApprovalsRoute
+  '/_admin/admin/change-approvals': typeof AdminAdminChangeApprovalsRouteWithChildren
   '/_admin/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/_admin/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/_admin/admin/documents': typeof AdminAdminDocumentsRoute
@@ -1082,6 +1090,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_admin/admin/change-approvals/': typeof AdminAdminChangeApprovalsIndexRoute
   '/_admin/admin/entities/': typeof AdminAdminEntitiesIndexRoute
   '/_admin/admin/finance/': typeof AdminAdminFinanceIndexRoute
   '/_admin/admin/security/': typeof AdminAdminSecurityIndexRoute
@@ -1200,6 +1209,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/change-approvals/'
     | '/admin/entities/'
     | '/admin/finance/'
     | '/admin/security/'
@@ -1219,7 +1229,6 @@ export interface FileRouteTypes {
     | '/admin/approvals'
     | '/admin/audit'
     | '/admin/branding'
-    | '/admin/change-approvals'
     | '/admin/console'
     | '/admin/cron-runs'
     | '/admin/documents'
@@ -1310,6 +1319,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/change-approvals'
     | '/admin/entities'
     | '/admin/finance'
     | '/admin/security'
@@ -1428,6 +1438,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_admin/admin/change-approvals/'
     | '/_admin/admin/entities/'
     | '/_admin/admin/finance/'
     | '/_admin/admin/security/'
@@ -1916,6 +1927,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminEntitiesIndexRouteImport
       parentRoute: typeof AdminAdminEntitiesRoute
     }
+    '/_admin/admin/change-approvals/': {
+      id: '/_admin/admin/change-approvals/'
+      path: '/'
+      fullPath: '/admin/change-approvals/'
+      preLoaderRoute: typeof AdminAdminChangeApprovalsIndexRouteImport
+      parentRoute: typeof AdminAdminChangeApprovalsRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -2288,6 +2306,20 @@ const AdminAdminAuditRouteWithChildren = AdminAdminAuditRoute._addFileChildren(
   AdminAdminAuditRouteChildren,
 )
 
+interface AdminAdminChangeApprovalsRouteChildren {
+  AdminAdminChangeApprovalsIndexRoute: typeof AdminAdminChangeApprovalsIndexRoute
+}
+
+const AdminAdminChangeApprovalsRouteChildren: AdminAdminChangeApprovalsRouteChildren =
+  {
+    AdminAdminChangeApprovalsIndexRoute: AdminAdminChangeApprovalsIndexRoute,
+  }
+
+const AdminAdminChangeApprovalsRouteWithChildren =
+  AdminAdminChangeApprovalsRoute._addFileChildren(
+    AdminAdminChangeApprovalsRouteChildren,
+  )
+
 interface AdminAdminConsoleRouteChildren {
   AdminAdminConsoleApprovalsRoute: typeof AdminAdminConsoleApprovalsRoute
   AdminAdminConsoleSnapshotsRoute: typeof AdminAdminConsoleSnapshotsRoute
@@ -2436,7 +2468,7 @@ interface AdminAdminRouteChildren {
   AdminAdminApprovalsRoute: typeof AdminAdminApprovalsRoute
   AdminAdminAuditRoute: typeof AdminAdminAuditRouteWithChildren
   AdminAdminBrandingRoute: typeof AdminAdminBrandingRoute
-  AdminAdminChangeApprovalsRoute: typeof AdminAdminChangeApprovalsRoute
+  AdminAdminChangeApprovalsRoute: typeof AdminAdminChangeApprovalsRouteWithChildren
   AdminAdminConsoleRoute: typeof AdminAdminConsoleRouteWithChildren
   AdminAdminCronRunsRoute: typeof AdminAdminCronRunsRoute
   AdminAdminDocumentsRoute: typeof AdminAdminDocumentsRoute
@@ -2475,7 +2507,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminApprovalsRoute: AdminAdminApprovalsRoute,
   AdminAdminAuditRoute: AdminAdminAuditRouteWithChildren,
   AdminAdminBrandingRoute: AdminAdminBrandingRoute,
-  AdminAdminChangeApprovalsRoute: AdminAdminChangeApprovalsRoute,
+  AdminAdminChangeApprovalsRoute: AdminAdminChangeApprovalsRouteWithChildren,
   AdminAdminConsoleRoute: AdminAdminConsoleRouteWithChildren,
   AdminAdminCronRunsRoute: AdminAdminCronRunsRoute,
   AdminAdminDocumentsRoute: AdminAdminDocumentsRoute,

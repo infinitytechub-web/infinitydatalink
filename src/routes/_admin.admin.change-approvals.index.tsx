@@ -46,6 +46,8 @@ const SearchSchema = z.object({
   pageSize: z.number().int().min(5).max(100).default(25),
 });
 
+type Search = z.infer<typeof SearchSchema>;
+
 export const Route = createFileRoute("/_admin/admin/change-approvals/")({
   validateSearch: (search) => SearchSchema.parse(search),
   component: PendingRequestsPage,
@@ -112,8 +114,8 @@ function PendingRequestsPage() {
   const rows = query.data?.rows ?? [];
   const counts = query.data?.counts ?? {};
 
-  const setSearch = (patch: Partial<z.infer<typeof SearchSchema>>) =>
-    navigate({ search: (prev) => ({ ...prev, page: 1, ...patch }) });
+  const setSearch = (patch: Partial<Search>) =>
+    navigate({ search: (prev: Search) => ({ ...prev, page: 1, ...patch }) });
 
   return (
     <div className="space-y-6">
@@ -292,8 +294,8 @@ function PendingRequestsPage() {
               page={search.page}
               pageSize={search.pageSize}
               total={query.data?.total ?? 0}
-              onPage={(n) => navigate({ search: (prev) => ({ ...prev, page: n }) })}
-              onPageSize={(n) => navigate({ search: (prev) => ({ ...prev, pageSize: n, page: 1 }) })}
+              onPage={(n) => navigate({ search: (prev: Search) => ({ ...prev, page: n }) })}
+              onPageSize={(n) => navigate({ search: (prev: Search) => ({ ...prev, pageSize: n, page: 1 }) })}
             />
           </>
         )}
