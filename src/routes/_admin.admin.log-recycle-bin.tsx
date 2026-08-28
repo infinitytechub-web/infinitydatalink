@@ -195,7 +195,7 @@ function BinTable() {
             <Link to="/admin/audit">Audit log</Link>
           </Button>
           <Button size="sm" variant="ghost" asChild>
-            <Link to="/admin/logs" search={{}}>
+            <Link to="/admin/logs" search={{ kind: "all", severity: "all", page: 1 }}>
               Event log
             </Link>
 
