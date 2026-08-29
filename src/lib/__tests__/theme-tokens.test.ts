@@ -224,3 +224,44 @@ for (const mode of MODES) {
     });
   });
 }
+
+describe("branded palette overrides stay AA", () => {
+  const contrastOf = (a: string, b: string) => {
+    const lum = (hex: string) => {
+      const n = parseInt(hex.replace("#", ""), 16);
+      const ch = (v: number) => {
+        const s = v / 255;
+        return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+      };
+      return 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
+    };
+    const [hi, lo] = lum(a) > lum(b) ? [lum(a), lum(b)] : [lum(b), lum(a)];
+    return (hi + 0.05) / (lo + 0.05);
+  };
+
+  const pick = (css: string, scope: "root" | "dark", name: string) => {
+    const block = css.split(scope === "root" ? ":root{" : ".dark{")[1]!.split("}")[0]!;
+    return block.match(new RegExp(`${name}: (#[0-9a-f]{6});`))![1]!;
+  };
+
+  for (const hex of ["#9fc516", "#f5c451", "#0f766e", "#06231d", "#ffffff"]) {
+    it(`derives readable primary tokens for ${hex}`, () => {
+      const css = buildBrandPaletteCss({
+        primary_color: hex,
+        secondary_color: hex,
+        accent_color: hex,
+      });
+      const lightPrimary = pick(css, "root", "--primary");
+      const lightFg = pick(css, "root", "--primary-foreground");
+      const darkPrimary = pick(css, "dark", "--primary");
+      const darkFg = pick(css, "dark", "--primary-foreground");
+
+      // usable as text on the light card surface and on the dark card surface
+      expect(contrastOf(lightPrimary, "#ffffff")).toBeGreaterThanOrEqual(4.4);
+      expect(contrastOf(darkPrimary, "#0a251f")).toBeGreaterThanOrEqual(4.4);
+      // usable as a fill with its paired foreground
+      expect(contrastOf(lightPrimary, lightFg)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastOf(darkPrimary, darkFg)).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+});
