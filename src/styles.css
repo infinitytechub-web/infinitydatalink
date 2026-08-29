@@ -229,6 +229,14 @@
 
 
 @layer base {
+  /* Gold fills always carry forest ink (7.4:1–12.5:1). Any explicit `text-*`
+     utility still wins, since utilities cascade after this base rule. */
+  .bg-gold,
+  .bg-brand-gold,
+  .bg-brand-gold-light,
+  .bg-brand-gold-deep {
+    color: var(--brand-forest);
+  }
   * {
     border-color: var(--color-border);
   }
