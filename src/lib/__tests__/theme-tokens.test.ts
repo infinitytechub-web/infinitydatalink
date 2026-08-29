@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { buildBrandPaletteCss } from "@/lib/brand-theme";
 
 import { BRAND, BRAND_DEFAULT_COLORS, BRAND_THEME_COLOR } from "@/lib/brand-palette";
 import {
