@@ -131,7 +131,7 @@ function Directory({ currentUserId }: { currentUserId: string }) {
         action={
           <button
             onClick={() => setGrantOpen(true)}
-            className="rounded bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-emerald-deep hover:opacity-90"
+            className="rounded bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-brand-forest hover:opacity-90"
           >
             Grant Super Admin
           </button>

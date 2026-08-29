@@ -183,7 +183,7 @@ function AdminInvestments() {
           </button>
           <button
             onClick={() => setShowNewRun(true)}
-            className="rounded-md bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-emerald-deep hover:opacity-90"
+            className="rounded-md bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-brand-forest hover:opacity-90"
           >
             + Dividend run
           </button>
@@ -310,7 +310,7 @@ function AdminInvestments() {
                         r.status === "executed"
                           ? "bg-emerald-deep/10 text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100"
                           : r.status === "draft"
-                            ? "bg-gold/20 text-emerald-deep"
+                            ? "bg-gold/20 text-brand-forest"
                             : r.status === "pending_approval"
                               ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
                               : r.status === "approved"

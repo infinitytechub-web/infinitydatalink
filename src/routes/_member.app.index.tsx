@@ -178,7 +178,7 @@ function Dashboard() {
               <p className="mb-2 font-medium">Recommendation</p>
               <p>Consider re-allocating GH₵ 500 from your low-yield checking to the high-yield Prosperity Fund.</p>
             </div>
-            <button className="mt-6 w-full rounded bg-gold py-3 text-[10px] font-bold uppercase tracking-widest text-emerald-deep hover:opacity-90">
+            <button className="mt-6 w-full rounded bg-gold py-3 text-[10px] font-bold uppercase tracking-widest text-brand-forest hover:opacity-90">
               Optimize Portfolio
             </button>
           </div>
@@ -231,7 +231,7 @@ function QuickAction({ label, variant }: { label: string; variant?: "primary" | 
     variant === "primary"
       ? "bg-emerald-deep text-white"
       : variant === "gold"
-        ? "bg-gold text-emerald-deep"
+        ? "bg-gold text-brand-forest"
         : "border border-emerald-deep/10 bg-card text-emerald-deep";
   return (
     <button className={`${base} ${style}`}>

@@ -288,7 +288,7 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const strength = useMemo(() => passwordStrength(password), [password]);
   const accent = isAdmin
     ? "bg-emerald-deep hover:bg-emerald-mid text-cream"
-    : "bg-primary hover:bg-teal-700 text-white";
+    : "bg-primary hover:brightness-110 text-primary-foreground";
   const focusRing = isAdmin ? "focus:border-emerald-mid" : "focus:border-teal-500";
 
   useEffect(() => {

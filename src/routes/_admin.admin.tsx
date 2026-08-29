@@ -204,7 +204,7 @@ function AdminLayout() {
       groups={groups}
       breadcrumb={breadcrumb}
       action={
-        <button className="rounded bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-emerald-deep hover:opacity-90">
+        <button className="rounded bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-brand-forest hover:opacity-90">
           System Report
         </button>
       }
