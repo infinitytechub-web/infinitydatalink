@@ -100,11 +100,9 @@ export function SidebarNavItem({
       <span
         aria-hidden="true"
         className={cn(
-          "grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)] bg-linear-to-br transition-transform lg:size-8",
+          "nav-3d-chip grid size-9 shrink-0 place-items-center rounded-lg text-white ring-1 ring-white/25 bg-linear-to-br lg:size-8",
           accent,
-          active
-            ? "scale-105"
-            : "opacity-95 group-hover:opacity-100 group-hover:scale-[1.03]",
+          active ? "scale-105" : "opacity-95 group-hover:opacity-100",
         )}
       >
         {item.icon ? (
@@ -116,10 +114,13 @@ export function SidebarNavItem({
         )}
       </span>
       {!collapsed && (
-        <span className={cn("min-w-0 truncate", active && "font-semibold")}>
+        <span
+          className={cn("nav-3d-label min-w-0 truncate", active && "font-semibold")}
+        >
           {item.label}
         </span>
       )}
+
       {active && !collapsed ? (
         <span
           aria-hidden="true"
