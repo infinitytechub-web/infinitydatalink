@@ -77,6 +77,19 @@ function readableOn(bg: Rgb): string {
   return contrast(bg, light) >= contrast(bg, dark) ? toHex(light) : toHex(dark);
 }
 
+/**
+ * Nudge `color` toward `target` until it clears `min` contrast against
+ * `against`. Keeps admin-chosen brand colors usable as both fills (white/near
+ * black label on top) and as text on the page surface.
+ */
+export function ensureContrast(color: Rgb, against: Rgb, min: number, target: Rgb): Rgb {
+  let out = color;
+  for (let step = 0; step < 20 && contrast(out, against) < min; step += 1) {
+    out = mix(out, target, 0.08);
+  }
+  return out;
+}
+
 function rgbTriplet({ r, g, b }: Rgb): string {
   return `${Math.round(r)} ${Math.round(g)} ${Math.round(b)}`;
 }
