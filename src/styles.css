@@ -49,10 +49,23 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Semantic / legacy brand aliases. Names retained for backwards compat with
-     class usage across the codebase (bg-emerald-deep, text-cream, bg-gold,
-     etc). Values now resolve to the enterprise Royal-Blue / Emerald / Gold
-     palette so no downstream file needs to change. */
+  /* ── Canonical brand ramp ───────────────────────────────────────────────
+     Single source of truth for the dark-green / teal / gold identity. Every
+     component should use these utilities (bg-brand-forest, from-brand-teal,
+     text-brand-gold, …) instead of inline hex values. JS/TS consumers import
+     the same values from `@/lib/brand-palette`. */
+  --color-brand-forest: var(--brand-forest);
+  --color-brand-forest-deep: var(--brand-forest-deep);
+  --color-brand-forest-soft: var(--brand-forest-soft);
+  --color-brand-teal-deep: var(--brand-teal-deep);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-teal-bright: var(--brand-teal-bright);
+  --color-brand-teal-glow: var(--brand-teal-glow);
+  --color-brand-gold-deep: var(--brand-gold-deep);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-light: var(--brand-gold-light);
+
+  /* Semantic / legacy brand aliases, resolved onto the ramp above. */
   --color-emerald-deep: var(--emerald-deep);
   --color-emerald-mid: var(--emerald-mid);
   --color-gold: var(--gold);
@@ -60,6 +73,7 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-info: var(--info);
+
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -92,28 +106,40 @@
 :root {
   --radius: 0.625rem; /* 10px — compact banking console cards */
 
-  /* Enterprise palette: Royal Blue primary, Emerald secondary, Gold accent. */
-  --emerald-deep: #06231d;      /* institutional navy ink (text) */
-  --emerald-mid: #0d9488;       /* teal accent */
-  --gold: #f5c451;              /* reserved highlight gold */
-  --cream: #f4f7f6;             /* off-white background */
+  /* ── Brand ramp (single source of truth) ─────────────────────────────── */
+  --brand-forest-deep: #04140f;   /* darkest ink / app bg in dark mode */
+  --brand-forest: #06231d;        /* dark-green rail + body ink */
+  --brand-forest-soft: #0a251f;   /* raised forest surface */
+  --brand-teal-deep: #0f5f57;
+  --brand-teal: #0f766e;          /* brand primary */
+  --brand-teal-bright: #0d9488;
+  --brand-teal-glow: #2dd4bf;
+  --brand-gold-deep: #d4a72c;
+  --brand-gold: #f5c451;          /* accent gold */
+  --brand-gold-light: #ffdc8a;
+
+  /* Semantic aliases — every value below points at the ramp above. */
+  --emerald-deep: var(--brand-forest);
+  --emerald-mid: var(--brand-teal-bright);
+  --gold: var(--brand-gold);
+  --cream: #f4f7f6;
   --success: #059669;
   --warning: #d97706;
   --info: #0284c7;
 
   --background: #f4f7f6;
-  --foreground: #06231d;
+  --foreground: var(--brand-forest);
   --card: #ffffff;
-  --card-foreground: #06231d;
+  --card-foreground: var(--brand-forest);
   --popover: #ffffff;
-  --popover-foreground: #06231d;
-  --primary: #0f766e;           /* Deep teal — brand primary */
+  --popover-foreground: var(--brand-forest);
+  --primary: var(--brand-teal);
   --primary-foreground: #ffffff;
   --secondary: #e6efec;
-  --secondary-foreground: #06231d;
+  --secondary-foreground: var(--brand-forest);
   --muted: #e9f0ee;
   --muted-foreground: #4b6560;
-  --accent: #0d9488;            /* Teal */
+  --accent: var(--brand-teal-bright);
   --accent-foreground: #ffffff;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
@@ -122,9 +148,9 @@
   --ring: rgba(13, 148, 136, 0.45);
 
   /* Chart series — dark-mode-safe palette lives in `.dark` below. */
-  --chart-1: #0f766e;   /* deep teal */
-  --chart-2: #0d9488;   /* teal */
-  --chart-3: #f5c451;   /* gold */
+  --chart-1: var(--brand-teal);
+  --chart-2: var(--brand-teal-bright);
+  --chart-3: var(--brand-gold);
   --chart-4: #0284c7;   /* sky */
   --chart-5: #7c3aed;   /* violet */
   --chart-6: #dc2626;   /* crimson */
@@ -132,40 +158,42 @@
   --chart-grid: rgba(6, 35, 29, 0.08);
   --chart-axis: #64748b;
 
-  /* Sidebar: deep navy premium rail with subtle gradient (applied in shell). */
-  --sidebar: #06231d;
+  /* Sidebar: dark-green premium rail with subtle gradient (applied in shell). */
+  --sidebar: var(--brand-forest);
   --sidebar-foreground: #d8e7e2;
-  --sidebar-primary: #f5c451;
-  --sidebar-primary-foreground: #06231d;
+  --sidebar-primary: var(--brand-gold);
+  --sidebar-primary-foreground: var(--brand-forest);
   --sidebar-accent: rgba(255, 255, 255, 0.08);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.10);
-  --sidebar-ring: #0d9488;
+  --sidebar-ring: var(--brand-teal-bright);
 }
 
+
 .dark {
+  /* Dark mode keeps the same ramp; only which rung each role uses changes. */
   --emerald-deep: #e3efec;      /* invert: bright body text */
-  --emerald-mid: #2dd4bf;
-  --gold: #f5c451;
-  --cream: #04140f;
+  --emerald-mid: var(--brand-teal-glow);
+  --gold: var(--brand-gold);
+  --cream: var(--brand-forest-deep);
   --success: #10b981;
   --warning: #f59e0b;
   --info: #38bdf8;
 
-  --background: #04140f;
+  --background: var(--brand-forest-deep);
   --foreground: #e3efec;
-  --card: #0a251f;
+  --card: var(--brand-forest-soft);
   --card-foreground: #e3efec;
-  --popover: #0a251f;
+  --popover: var(--brand-forest-soft);
   --popover-foreground: #e3efec;
   --primary: #14b8a6;
-  --primary-foreground: #04140f;
+  --primary-foreground: var(--brand-forest-deep);
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #e2e8f0;
   --muted: rgba(255, 255, 255, 0.05);
   --muted-foreground: rgba(226, 232, 240, 0.78);
-  --accent: #2dd4bf;
-  --accent-foreground: #071120;
+  --accent: var(--brand-teal-glow);
+  --accent-foreground: var(--brand-forest-deep);
   --destructive: #f87171;
   --destructive-foreground: #0b1220;
   --border: rgba(148, 163, 184, 0.16);
@@ -175,8 +203,8 @@
   /* Dark-mode chart palette — brighter, higher-chroma variants that clear
      WCAG contrast on the dark card surface. */
   --chart-1: #5eead4;   /* teal → aqua */
-  --chart-2: #2dd4bf;   /* teal */
-  --chart-3: #f5c451;   /* gold */
+  --chart-2: var(--brand-teal-glow);
+  --chart-3: var(--brand-gold);
   --chart-4: #38bdf8;   /* sky */
   --chart-5: #c084fc;   /* violet */
   --chart-6: #fb7185;   /* rose */
@@ -186,13 +214,14 @@
 
   --sidebar: #03110d;
   --sidebar-foreground: #e3efec;
-  --sidebar-primary: #f5c451;
+  --sidebar-primary: var(--brand-gold);
   --sidebar-primary-foreground: #03110d;
   --sidebar-accent: rgba(255, 255, 255, 0.06);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #2dd4bf;
+  --sidebar-ring: var(--brand-teal-glow);
 }
+
 
 @layer base {
   * {
@@ -288,5 +317,73 @@
   .recharts-area-area {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ── 3D sidebar navigation ──────────────────────────────────────────────────
+   The rail is a shallow 3D scene: groups sit as raised panels and each menu
+   row lifts/tilts toward the viewer on hover and while active. Colors come
+   from the brand ramp tokens, never inline hex. */
+@utility nav-3d-scene {
+  perspective: 900px;
+  perspective-origin: 0% 50%;
+  transform-style: preserve-3d;
+}
+
+@utility nav-3d-panel {
+  transform-style: preserve-3d;
+  transform: rotateY(1.5deg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 38px -26px rgba(0, 0, 0, 0.85);
+}
+
+@utility nav-3d-item {
+  transform-style: preserve-3d;
+  transform: translateZ(0) rotateY(0deg);
+  transition:
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 200ms ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 4px 10px -8px rgba(0, 0, 0, 0.7);
+  &:hover {
+    transform: translateZ(16px) translateX(2px) rotateY(-7deg) rotateX(1.5deg);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      -8px 14px 26px -14px rgba(0, 0, 0, 0.8);
+  }
+  &:active {
+    transform: translateZ(5px) rotateY(-3deg);
+  }
+}
+
+@utility nav-3d-item-active {
+  transform: translateZ(20px) rotateY(-6deg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    -10px 16px 32px -16px rgba(0, 0, 0, 0.85);
+}
+
+/* Icon chip floats above the row plane so the whole item reads as a solid. */
+@utility nav-3d-chip {
+  transform: translateZ(18px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 8px 16px -9px rgba(0, 0, 0, 0.8);
+}
+
+@utility nav-3d-label {
+  transform: translateZ(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-3d-panel,
+  .nav-3d-item,
+  .nav-3d-item-active,
+  .nav-3d-chip,
+  .nav-3d-label {
+    transform: none !important;
   }
 }

@@ -1,3 +1,4 @@
+import { BRAND, BRAND_THEME_COLOR } from "@/lib/brand-palette";
 import {
   createContext,
   useCallback,
@@ -62,7 +63,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Hint native UI (scrollbars, form controls, autofill) to match.
     root.style.colorScheme = theme;
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.content = theme === "dark" ? "#04140f" : "#06231d";
+    if (meta) meta.content = theme === "dark" ? BRAND_THEME_COLOR.dark : BRAND.forest;
   }, [theme]);
 
   const setTheme = useCallback((t: Theme) => {

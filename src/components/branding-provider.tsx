@@ -9,6 +9,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { applyBrandPalette } from "@/lib/brand-theme";
+import { BRAND_DEFAULT_COLORS } from "@/lib/brand-palette";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getBranding,
@@ -20,9 +21,9 @@ import {
 const DEFAULTS: BrandingSettings = {
   app_name: "IT-360 CashApp",
   tagline: null,
-  primary_color: "#0f766e",
-  accent_color: "#f5c451",
-  secondary_color: "#0d9488",
+  primary_color: BRAND_DEFAULT_COLORS.primary_color,
+  accent_color: BRAND_DEFAULT_COLORS.accent_color,
+  secondary_color: BRAND_DEFAULT_COLORS.secondary_color,
   logo_url: null,
   favicon_url: null,
   touch_icon_url: null,
