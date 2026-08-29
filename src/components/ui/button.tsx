@@ -23,7 +23,7 @@ const buttonVariants = cva(
         link:
           "text-primary underline-offset-4 hover:underline",
         premium:
-          "text-white shadow-sm ring-1 ring-amber-400/40 bg-linear-to-r from-[#d4a72c] via-[#f5c451] to-[#ffdc8a] hover:brightness-105 hover:-translate-y-px hover:shadow-md",
+          "text-white shadow-sm ring-1 ring-amber-400/40 bg-linear-to-r from-brand-gold-deep via-brand-gold to-brand-gold-light hover:brightness-105 hover:-translate-y-px hover:shadow-md",
         success:
           "text-white bg-linear-to-r from-emerald-600 to-teal-600 shadow-sm ring-1 ring-emerald-400/30 hover:brightness-105 hover:-translate-y-px hover:shadow-md",
       },

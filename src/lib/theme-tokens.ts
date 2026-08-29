@@ -31,13 +31,13 @@ export type ToneStyle = {
 
 const BASE_TONES = {
   royal: {
-    bg: "bg-linear-to-br from-[#06231d] via-[#0f766e] to-[#0d9488]",
-    ring: "ring-[#0d9488]/40",
+    bg: "bg-linear-to-br from-brand-forest via-brand-teal to-brand-teal-bright",
+    ring: "ring-brand-teal-bright/40",
     label: "text-blue-50/85",
     value: "text-white",
     hint: "text-blue-50/75",
-    bar: "bg-linear-to-r from-[#06231d] via-[#0f766e] to-[#0d9488]",
-    chip: "from-[#06231d] to-[#0f766e]",
+    bar: "bg-linear-to-r from-brand-forest via-brand-teal to-brand-teal-bright",
+    chip: "from-brand-forest to-brand-teal",
   },
   emerald: {
     bg: "bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800",
@@ -180,7 +180,7 @@ export const BUTTON_TONE = {
   success:
     "bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-sm ring-1 ring-emerald-400/40 hover:brightness-110",
   primary:
-    "bg-linear-to-r from-[#06231d] to-[#0f766e] text-white shadow-sm ring-1 ring-blue-400/40 hover:brightness-110",
+    "bg-linear-to-r from-brand-forest to-brand-teal text-white shadow-sm ring-1 ring-blue-400/40 hover:brightness-110",
 } as const;
 
 /** Chart palette — sourced from CSS variables so series colors flip with
