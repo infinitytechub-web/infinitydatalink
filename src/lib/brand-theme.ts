@@ -124,14 +124,15 @@ export function buildBrandPaletteCss(input: BrandPaletteInput): string {
     brandVars.push(["--brand-accent", toHex(accent)], ["--brand-accent-rgb", rgbTriplet(accent)]);
   }
 
-  // Light mode: primary as-is; secondary surfaces are a soft tint of the
-  // secondary brand color so secondary buttons stay legible.
+  // Light mode: darken the chosen primary just enough that it reads as AA text
+  // on white cards (links, ghost buttons) while still working as a fill.
   const lightSecondarySurface = secondary ? lighten(secondary, 0.88) : null;
+  const lightPrimary = ensureContrast(primary, WHITE, 4.5, BLACK);
   const light: Array<[string, string]> = [
     ...brandVars,
-    ["--primary", toHex(primary)],
-    ["--primary-foreground", readableOn(primary)],
-    ["--ring", rgba(primary, 0.45)],
+    ["--primary", toHex(lightPrimary)],
+    ["--primary-foreground", readableOn(lightPrimary)],
+    ["--ring", rgba(darken(primary, 0.15), 0.9)],
     ["--sidebar-ring", toHex(primary)],
   ];
   if (lightSecondarySurface) {
