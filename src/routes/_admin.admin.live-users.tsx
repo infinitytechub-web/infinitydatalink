@@ -169,7 +169,7 @@ function LiveUsersPanel() {
                         className={
                           "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider " +
                           (u.role === "Staff"
-                            ? "bg-gold/15 text-brand-forest"
+                            ? "bg-gold/15 text-brand-gold-ink dark:text-brand-gold"
                             : "bg-muted text-muted-foreground")
                         }
                       >
