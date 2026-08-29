@@ -49,13 +49,13 @@ const BASE_TONES = {
     chip: "from-emerald-500 to-teal-600",
   },
   gold: {
-    bg: "bg-linear-to-br from-[#b08a1e] via-[#d4a72c] to-[#f5c451]",
+    bg: "bg-linear-to-br from-brand-gold-deep via-brand-gold to-brand-gold-light",
     ring: "ring-amber-300/50",
     label: "text-amber-50/95",
     value: "text-white",
     hint: "text-amber-50/85",
-    bar: "bg-linear-to-r from-[#d4a72c] via-[#f5c451] to-[#ffd980]",
-    chip: "from-[#d4a72c] to-[#f5c451]",
+    bar: "bg-linear-to-r from-brand-gold-deep via-brand-gold to-brand-gold-light",
+    chip: "from-brand-gold-deep to-brand-gold",
   },
   sky: {
     bg: "bg-linear-to-br from-sky-600 via-blue-700 to-indigo-800",
