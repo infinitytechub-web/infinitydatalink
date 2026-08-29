@@ -97,7 +97,7 @@ function LoansContent() {
           <>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <SortHeader label="Reference" field="ref" sort={sort} onSort={setSort} />
                   <th className="px-6 py-3 font-medium">Product</th>
                   <SortHeader label="Principal" field="amount" sort={sort} onSort={setSort} align="right" />

@@ -69,7 +69,7 @@ function Page() {
       <div className="mb-3 flex justify-end">
         <Link
           to="/admin/investments"
-          className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 hover:bg-cream/50"
+          className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
         >
           ← Back to Investments
         </Link>
@@ -121,7 +121,7 @@ function Content() {
         {(s.action !== "all" || s.target || s.from || s.to) && (
           <button
             onClick={() => navigate({ search: { action: "all", target: "", from: "", to: "", page: 1, pageSize: s.pageSize } })}
-            className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+            className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
           >
             Reset
           </button>
@@ -134,7 +134,7 @@ function Content() {
         <>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Timestamp</th>
                 <th className="px-6 py-3 font-medium">Action</th>
                 <th className="px-6 py-3 font-medium">Target</th>
@@ -145,15 +145,15 @@ function Content() {
             <tbody className="divide-y divide-emerald-deep/5">
               {data.rows.map((e: DividendAuditEntry) => (
                 <tr key={e.id} className="align-top">
-                  <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">{new Date(e.created_at).toLocaleString()}</td>
+                  <td className="tabular px-6 py-4 text-xs text-muted-foreground">{new Date(e.created_at).toLocaleString()}</td>
                   <td className="px-6 py-4 text-xs font-mono">{e.action}</td>
                   <td className="px-6 py-4 text-xs font-mono break-all max-w-[14rem]">{e.target ?? "—"}</td>
                   <td className="px-6 py-4 text-xs">
                     <div className="font-medium">{e.actor_email ?? "—"}</div>
-                    <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">{e.actor_role ?? "—"}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{e.actor_role ?? "—"}</div>
                   </td>
                   <td className="px-6 py-4 text-[11px] max-w-lg">
-                    <pre className="whitespace-pre-wrap break-all rounded bg-cream/40 p-2 font-mono text-emerald-deep/80">
+                    <pre className="whitespace-pre-wrap break-all rounded bg-cream/40 p-2 font-mono text-muted-foreground">
                       {e.meta ? JSON.stringify(e.meta, null, 2) : "—"}
                     </pre>
                   </td>
@@ -177,7 +177,7 @@ function Content() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
       {children}
     </label>
   );

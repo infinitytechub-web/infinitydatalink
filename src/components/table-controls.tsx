@@ -52,13 +52,13 @@ export function Pagination({
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
   return (
-    <div className="flex items-center justify-between border-t border-emerald-deep/5 bg-cream/30 px-6 py-3 text-[11px] text-emerald-deep/70">
+    <div className="flex items-center justify-between border-t border-emerald-deep/5 bg-cream/30 px-6 py-3 text-[11px] text-muted-foreground">
       <div className="tabular">
         {from}–{to} of {total}
       </div>
       <div className="flex items-center gap-3">
         <label className="flex items-center gap-2">
-          <span className="uppercase tracking-widest text-[10px] text-emerald-deep/50">Per page</span>
+          <span className="uppercase tracking-widest text-[10px] text-muted-foreground">Per page</span>
           <select
             value={pageSize}
             onChange={(e) => onPageSize(Number(e.target.value))}

@@ -146,7 +146,7 @@ function Body({ rates }: { rates: Rates }) {
       >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-cream text-[10px] uppercase tracking-widest text-emerald-deep/60">
+            <thead className="bg-cream text-[10px] uppercase tracking-widest text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">Bucket</th>
                 <th className="px-4 py-3 text-right">Loans</th>
@@ -194,7 +194,7 @@ function Body({ rates }: { rates: Rates }) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-cream text-[10px] uppercase tracking-widest text-emerald-deep/60">
+              <thead className="bg-cream text-[10px] uppercase tracking-widest text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left">Product</th>
                   <th className="px-4 py-3 text-right">Loans</th>
@@ -237,7 +237,7 @@ function Body({ rates }: { rates: Rates }) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-cream text-[10px] uppercase tracking-widest text-emerald-deep/60">
+              <thead className="bg-cream text-[10px] uppercase tracking-widest text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left">Loan</th>
                   <th className="px-4 py-3 text-left">Member</th>
@@ -253,11 +253,11 @@ function Body({ rates }: { rates: Rates }) {
                   <tr key={e.id} className="border-t border-emerald-deep/10">
                     <td className="px-4 py-3">
                       <div className="font-semibold">{e.ref}</div>
-                      <div className="text-[11px] text-emerald-deep/50">{e.product}</div>
+                      <div className="text-[11px] text-muted-foreground">{e.product}</div>
                     </td>
                     <td className="px-4 py-3">
                       <div>{e.member_name ?? "—"}</div>
-                      <div className="text-[11px] text-emerald-deep/50">{e.member_no ?? ""}</div>
+                      <div className="text-[11px] text-muted-foreground">{e.member_no ?? ""}</div>
                     </td>
                     <td className="px-4 py-3">{e.bucket}</td>
                     <td className="px-4 py-3 text-right">{e.days_past_due}</td>

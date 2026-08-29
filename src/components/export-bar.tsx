@@ -56,7 +56,7 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
   if (!allowed) {
     return (
       <div
-        className="inline-flex items-center gap-2 rounded border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold"
+        className="inline-flex items-center gap-2 rounded border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold"
         title={
           user
             ? `Requires permission: ${permission}. Sign in with a role that grants export access.`
@@ -129,7 +129,7 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
             <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep">
               CSV & Excel columns
             </p>
-            <p className="mt-0.5 text-[10px] text-emerald-deep/60">
+            <p className="mt-0.5 text-[10px] text-muted-foreground">
               PDF and Print always include every column.
             </p>
           </div>
@@ -154,14 +154,14 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
           <div className="flex justify-between gap-2 border-t border-emerald-deep/10 px-3 py-2">
             <button
               type="button"
-              className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:text-emerald-deep"
+              className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-emerald-deep"
               onClick={() => setSelected(new Set(columns.map((c) => c.header)))}
             >
               Select all
             </button>
             <button
               type="button"
-              className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:text-emerald-deep"
+              className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-emerald-deep"
               onClick={() => setSelected(new Set())}
             >
               Clear

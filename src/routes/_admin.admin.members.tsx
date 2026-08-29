@@ -147,7 +147,7 @@ function SummaryCards() {
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
       {items.map((it) => (
         <div key={it.label} className="rounded border border-emerald-deep/10 bg-card p-4">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             {it.label}
           </div>
           <div className={`mt-1 text-2xl font-semibold tabular ${it.tone}`}>{it.value}</div>
@@ -168,7 +168,7 @@ function AgingChips() {
   const active = s.status === "pending" ? s.aging : "any";
   return (
     <div className="flex flex-wrap items-center gap-2 rounded border border-emerald-deep/10 bg-card px-3 py-2">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         Aging (pending)
       </span>
       <button
@@ -176,7 +176,7 @@ function AgingChips() {
         className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest ${
           active === "any"
             ? "bg-emerald-deep text-cream"
-            : "border border-emerald-deep/15 text-emerald-deep/70 hover:bg-cream"
+            : "border border-emerald-deep/15 text-muted-foreground hover:bg-cream"
         }`}
       >
         All · {data.pending}
@@ -374,7 +374,7 @@ function QueueBody() {
                   key={st}
                   onClick={() => setSearch({ status: st })}
                   className={`rounded px-2.5 py-1 font-bold ${
-                    s.status === st ? "bg-emerald-deep text-cream" : "text-emerald-deep/70 hover:bg-cream/50"
+                    s.status === st ? "bg-emerald-deep text-cream" : "text-muted-foreground hover:bg-cream/50"
                   }`}
                 >
                   {st}
@@ -419,7 +419,7 @@ function QueueBody() {
 
         <table className="w-full">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-3 py-3">
                 <input
                   type="checkbox"
@@ -443,7 +443,7 @@ function QueueBody() {
           <tbody className="divide-y divide-emerald-deep/5">
             {data.rows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-10 text-center text-sm text-emerald-deep/50">
+                <td colSpan={8} className="px-6 py-10 text-center text-sm text-muted-foreground">
                   No members match these filters.
                 </td>
               </tr>
@@ -475,7 +475,7 @@ function QueueBody() {
                           ) : null;
                         })()}
                       </div>
-                      <div className="tabular text-[11px] text-emerald-deep/50">
+                      <div className="tabular text-[11px] text-muted-foreground">
                         {m.member_no ?? ""} · {m.region ?? "—"}
                         {m.date_of_birth ? ` · ${formatAge(m.date_of_birth)}` : ""}
                       </div>
@@ -490,7 +490,7 @@ function QueueBody() {
                       <PopoverTrigger asChild>
                         <button className="rounded border border-transparent px-2 py-1 text-xs hover:border-emerald-deep/15">
                           {m.kyc_assigned_name ?? (
-                            <span className="text-emerald-deep/40">Unassigned</span>
+                            <span className="text-muted-foreground">Unassigned</span>
                           )}
                         </button>
                       </PopoverTrigger>
@@ -516,7 +516,7 @@ function QueueBody() {
                             className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream"
                           >
                             {r.name}
-                            <span className="ml-2 text-[10px] text-emerald-deep/40">{r.role}</span>
+                            <span className="ml-2 text-[10px] text-muted-foreground">{r.role}</span>
                           </button>
                         ))}
                       </PopoverContent>
@@ -524,7 +524,7 @@ function QueueBody() {
                   </td>
                   <td className="tabular px-4 py-3 text-right text-sm">
                     {m.pending_docs > 0 ? (
-                      <span className="rounded bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-gold">
+                      <span className="rounded bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-brand-gold-ink dark:text-brand-gold">
                         {m.pending_docs} pending
                       </span>
                     ) : (
@@ -534,7 +534,7 @@ function QueueBody() {
                   <td className="px-4 py-3 text-right">
                     <SlaCell pendingSince={m.pending_since} kyc={m.kyc} nowTick={nowTick} />
                   </td>
-                  <td className="px-4 py-3 text-right text-[11px] text-emerald-deep/50">
+                  <td className="px-4 py-3 text-right text-[11px] text-muted-foreground">
                     {m.last_document_at ? new Date(m.last_document_at).toLocaleDateString() : "—"}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -577,7 +577,7 @@ function QueueBody() {
           </tbody>
         </table>
 
-        <div className="flex items-center justify-between border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-emerald-deep/60">
+        <div className="flex items-center justify-between border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-muted-foreground">
           <span>
             Page {s.page} of {totalPages} · {data.total} total
           </span>
@@ -610,7 +610,7 @@ function QueueBody() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm">
-            <p className="text-emerald-deep/70">
+            <p className="text-muted-foreground">
               Nothing is destroyed: each member's verification status, reviewer decision and uploaded
               documents are snapshotted into the account vault for 30 days and their live review is
               reset to pending. Every member gets their own audit entry, and any member that cannot be
@@ -652,7 +652,7 @@ function QueueBody() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm">
-            <p className="text-emerald-deep/70">
+            <p className="text-muted-foreground">
               A reviewer note of at least 5 characters is required and stored on each member's audit
               log. Incomplete submissions are skipped and reported back instead of being approved.
             </p>
@@ -668,19 +668,19 @@ function QueueBody() {
               className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
             />
 
-            <p className="rounded border border-gold/40 bg-gold/10 px-3 py-2 text-[11px] text-emerald-deep/80">
+            <p className="rounded border border-gold/40 bg-gold/10 px-3 py-2 text-[11px] text-muted-foreground">
               Minor (under 18) accounts are skipped in bulk decisions — open each one to complete
               guardian verification and re-authentication.
             </p>
 
             {bulkDialog === "rejected" ? (
               <fieldset className="rounded border border-emerald-deep/15 p-3">
-                <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+                <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Items every selected member must revise
                 </legend>
                 <div className="grid gap-1.5 sm:grid-cols-2">
                   {ALL_REMEDIATION_ITEMS.map((item) => (
-                    <label key={item.key} className="flex items-center gap-2 text-xs text-emerald-deep/80">
+                    <label key={item.key} className="flex items-center gap-2 text-xs text-muted-foreground">
                       <input
                         type="checkbox"
                         checked={bulkItems.includes(item.key)}
@@ -697,7 +697,7 @@ function QueueBody() {
                     </label>
                   ))}
                 </div>
-                <p className="mt-2 text-[11px] text-emerald-deep/50">
+                <p className="mt-2 text-[11px] text-muted-foreground">
                   Leave empty to ask for all documents to be re-uploaded.
                 </p>
               </fieldset>
@@ -844,7 +844,7 @@ function SelectionToolbar({
               className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream"
             >
               {r.name}
-              <span className="ml-2 text-[10px] text-emerald-deep/40">{r.role}</span>
+              <span className="ml-2 text-[10px] text-muted-foreground">{r.role}</span>
             </button>
           ))}
         </PopoverContent>
@@ -868,7 +868,7 @@ function SelectionToolbar({
         Archive to vault
       </button>
 
-      <button onClick={onClear} className="ml-auto text-[11px] text-emerald-deep/60 underline">
+      <button onClick={onClear} className="ml-auto text-[11px] text-muted-foreground underline">
         Clear selection
       </button>
     </div>
@@ -885,7 +885,7 @@ function SlaCell({
   nowTick: number;
 }) {
   if (kyc !== "pending" || !pendingSince) {
-    return <span className="text-[11px] text-emerald-deep/40">—</span>;
+    return <span className="text-[11px] text-muted-foreground">—</span>;
   }
   const hours = hoursSince(pendingSince, nowTick);
   const bucket = bucketFor(hours);

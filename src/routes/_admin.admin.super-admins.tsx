@@ -143,7 +143,7 @@ function Directory({ currentUserId }: { currentUserId: string }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Member</th>
                   <th className="px-6 py-3 font-medium">Email</th>
                   <th className="px-6 py-3 font-medium">Granted</th>
@@ -159,7 +159,7 @@ function Directory({ currentUserId }: { currentUserId: string }) {
                     <tr key={r.user_id} className="border-b border-emerald-deep/5">
                       <td className="px-6 py-3">
                         <div className="font-medium">{r.full_name ?? "—"}</div>
-                        <div className="text-xs text-emerald-deep/50">{r.member_no ?? "—"}</div>
+                        <div className="text-xs text-muted-foreground">{r.member_no ?? "—"}</div>
                       </td>
                       <td className="px-6 py-3 tabular">{r.email}</td>
                       <td className="px-6 py-3 tabular">{fmtDate(r.granted_at)}</td>
@@ -211,7 +211,7 @@ function Directory({ currentUserId }: { currentUserId: string }) {
 function SeedList({ seed }: { seed: SeedEmailRow[] }) {
   return (
     <SectionCard title={`Seeded emails (${seed.length})`}>
-      <div className="border-b border-emerald-deep/5 px-6 py-3 text-xs text-emerald-deep/60">
+      <div className="border-b border-emerald-deep/5 px-6 py-3 text-xs text-muted-foreground">
         Emails on this allow-list may self-provision Super Admin on first confirmed sign-in. Managed automatically when granting or revoking.
       </div>
       {seed.length === 0 ? (
@@ -223,10 +223,10 @@ function SeedList({ seed }: { seed: SeedEmailRow[] }) {
               <div>
                 <div className="tabular">{s.email}</div>
                 {s.note ? (
-                  <div className="text-xs text-emerald-deep/50">{s.note}</div>
+                  <div className="text-xs text-muted-foreground">{s.note}</div>
                 ) : null}
               </div>
-              <div className="text-xs text-emerald-deep/50 tabular">{fmtDate(s.created_at)}</div>
+              <div className="text-xs text-muted-foreground tabular">{fmtDate(s.created_at)}</div>
             </li>
           ))}
         </ul>
@@ -258,7 +258,7 @@ function GrantDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-2">
-          <label className="block text-xs uppercase tracking-widest text-emerald-deep/60">Email</label>
+          <label className="block text-xs uppercase tracking-widest text-muted-foreground">Email</label>
           <input
             type="email"
             value={email}
@@ -266,7 +266,7 @@ function GrantDialog({
             placeholder="name@example.com"
             className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm"
           />
-          <label className="block text-xs uppercase tracking-widest text-emerald-deep/60">Note (optional)</label>
+          <label className="block text-xs uppercase tracking-widest text-muted-foreground">Note (optional)</label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}

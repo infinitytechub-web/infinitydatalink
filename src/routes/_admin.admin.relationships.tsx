@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_admin/admin/relationships")({
 const inputCls =
   "min-h-[44px] rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm";
 const labelCls =
-  "flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60";
+  "flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground";
 
 function RelationshipTypesPage() {
   const qc = useQueryClient();
@@ -94,7 +94,7 @@ function RelationshipTypesPage() {
               <Skeleton className="h-48 w-full" />
             </div>
           ) : rows.length === 0 ? (
-            <p className="p-6 text-sm text-emerald-deep/60">No relationship types configured yet.</p>
+            <p className="p-6 text-sm text-muted-foreground">No relationship types configured yet.</p>
           ) : (
             <ul className="divide-y divide-emerald-deep/5">
               {rows.map((r) => (
@@ -103,7 +103,7 @@ function RelationshipTypesPage() {
                     <p className="truncate text-sm font-semibold">
                       {r.label}
                       {!r.is_active ? (
-                        <span className="ml-2 rounded bg-emerald-deep/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-emerald-deep/60">
+                        <span className="ml-2 rounded bg-emerald-deep/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
                           Inactive
                         </span>
                       ) : null}
@@ -165,7 +165,7 @@ function RelationshipTypesPage() {
                 placeholder="guardian"
                 className={`${inputCls} font-normal normal-case tracking-normal`}
               />
-              <span className="font-normal normal-case tracking-normal text-emerald-deep/50">
+              <span className="font-normal normal-case tracking-normal text-muted-foreground">
                 Lowercase letters, digits and underscores only.
               </span>
             </label>

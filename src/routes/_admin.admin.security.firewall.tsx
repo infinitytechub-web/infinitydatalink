@@ -101,7 +101,7 @@ function PolicyCard({ view, onSaved }: { view: FirewallView; onSaved: () => void
     >
       <div className="space-y-4 p-6">
         {disabled ? (
-          <p className="rounded border border-gold/30 bg-gold/10 px-3 py-2 text-xs text-gold">
+          <p className="rounded border border-gold/30 bg-gold/10 px-3 py-2 text-xs text-brand-gold-ink dark:text-brand-gold">
             Read-only — the security management permission is required to change these controls.
           </p>
         ) : null}
@@ -126,7 +126,7 @@ function PolicyCard({ view, onSaved }: { view: FirewallView; onSaved: () => void
           ))}
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Maximum upload size (MB)
             <input
               type="number"
@@ -138,7 +138,7 @@ function PolicyCard({ view, onSaved }: { view: FirewallView; onSaved: () => void
               onChange={(e) => setForm({ ...form, max_upload_mb: Number(e.target.value) || 1 })}
             />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Allowed MIME types (comma separated)
             <input
               className={field}
@@ -216,7 +216,7 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
     >
       {!disabled ? (
         <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 px-6 py-4">
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Address or CIDR
             <input
               className={field}
@@ -225,14 +225,14 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
               onChange={(e) => setCidr(e.target.value)}
             />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Mode
             <select className={field} value={mode} onChange={(e) => setMode(e.target.value as "allow" | "deny")}>
               <option value="deny">Deny</option>
               <option value="allow">Allow</option>
             </select>
           </label>
-          <label className="flex flex-1 flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-1 flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Note
             <input className={field} placeholder="Reason for this rule" value={note} onChange={(e) => setNote(e.target.value)} />
           </label>
@@ -248,7 +248,7 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
       ) : (
         <table className="w-full">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-6 py-3 font-medium">Address</th>
               <th className="px-6 py-3 font-medium">Mode</th>
               <th className="px-6 py-3 font-medium">Note</th>
@@ -269,8 +269,8 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
                     {r.mode}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-emerald-deep/60">{r.note ?? "—"}</td>
-                <td className="px-6 py-4 text-xs text-emerald-deep/50">{new Date(r.created_at).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-sm text-muted-foreground">{r.note ?? "—"}</td>
+                <td className="px-6 py-4 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-3">
                     <input
@@ -357,7 +357,7 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
     >
       {!disabled ? (
         <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 px-6 py-4">
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Scope key
             <input
               className={field}
@@ -366,7 +366,7 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
               onChange={(e) => setDraft({ ...draft, scope: e.target.value })}
             />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Window (seconds)
             <input
               type="number"
@@ -376,7 +376,7 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
               onChange={(e) => setDraft({ ...draft, window_seconds: Number(e.target.value) || 1 })}
             />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Max requests
             <input
               type="number"
@@ -386,7 +386,7 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
               onChange={(e) => setDraft({ ...draft, max_requests: Number(e.target.value) || 1 })}
             />
           </label>
-          <label className="flex flex-1 flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-1 flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Note
             <input className={field} value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} />
           </label>
@@ -402,7 +402,7 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
       ) : (
         <table className="w-full">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-6 py-3 font-medium">Scope</th>
               <th className="px-6 py-3 font-medium">Window</th>
               <th className="px-6 py-3 font-medium">Max requests</th>
@@ -440,7 +440,7 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
                     }}
                   />
                 </td>
-                <td className="px-6 py-4 text-sm text-emerald-deep/60">{r.note ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-muted-foreground">{r.note ?? "—"}</td>
                 <td className="px-6 py-4 text-right">
                   <input
                     type="checkbox"

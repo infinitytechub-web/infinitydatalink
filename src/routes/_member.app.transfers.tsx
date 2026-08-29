@@ -381,7 +381,7 @@ function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listM
       <div className="space-y-4 p-6">
         {own.length >= 2 ? (
           <div className="rounded-md border border-border bg-muted/20 p-4">
-            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-deep/60">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               <Zap className="h-3.5 w-3.5" /> Quick own-account transfer (auto-clears)
             </div>
             <div className="grid gap-2 md:grid-cols-4">

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_member/app/savings/enroll")({
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">Failed to load plans: {error.message}</div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
+  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
 
 function EnrollPage() {
@@ -48,7 +48,7 @@ function Body() {
   if (plans.length === 0) {
     return (
       <SectionCard title="You're already enrolled">
-        <div className="p-6 text-sm text-emerald-deep/70">
+        <div className="p-6 text-sm text-muted-foreground">
           You're enrolled in every available plan. Manage them from{" "}
           <Link to="/app/savings" className="text-emerald-mid underline">My Savings</Link>.
         </div>
@@ -67,7 +67,7 @@ function Body() {
           {selected ? (
             <EnrollForm plan={selected} />
           ) : (
-            <div className="p-6 text-sm text-emerald-deep/60">
+            <div className="p-6 text-sm text-muted-foreground">
               Select a plan on the left to see enrollment options.
             </div>
           )}
@@ -90,17 +90,17 @@ function PlanCard({ p, active, onSelect }: { p: SavingsPlan; active: boolean; on
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/40">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             {p.schedule} · {p.interest_rate}% p.a.
           </div>
           <div className="mt-1 text-base font-semibold text-emerald-deep">{p.name}</div>
           {p.description ? (
-            <p className="mt-1 text-sm text-emerald-deep/60">{p.description}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{p.description}</p>
           ) : null}
         </div>
         {active ? <Check className="h-5 w-5 text-emerald-mid" /> : null}
       </div>
-      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[11px] text-emerald-deep/60">
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[11px] text-muted-foreground">
         <span>Min contribution: <span className="tabular font-semibold">{formatMoney(p.min_contribution)}</span></span>
         <span>Suggested: <span className="tabular font-semibold">{formatMoney(p.contribution_amount)}</span></span>
         <span>Lock: <span className="tabular font-semibold">{p.lock_days}d</span></span>
@@ -152,7 +152,7 @@ function EnrollForm({ plan }: { plan: SavingsPlan }) {
     >
       <div className="rounded border border-emerald-deep/10 bg-cream/40 p-3 text-sm">
         <div className="font-semibold text-emerald-deep">{plan.name}</div>
-        <div className="text-[11px] text-emerald-deep/60">
+        <div className="text-[11px] text-muted-foreground">
           {plan.schedule} · {plan.interest_rate}% p.a. · min {formatMoney(plan.min_contribution)}
         </div>
       </div>

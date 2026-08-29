@@ -230,7 +230,7 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
       ) : (
         <table className="w-full">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-6 py-3 font-medium">Ref</th>
               <th className="px-6 py-3 font-medium">Member</th>
               <th className="px-6 py-3 font-medium">Product</th>
@@ -245,9 +245,9 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
                 <td className="tabular px-6 py-4 text-sm font-semibold">{a.ref}</td>
                 <td className="px-6 py-4 text-sm">
                   <div>{a.member_name ?? "—"}</div>
-                  <div className="tabular text-[11px] text-emerald-deep/50">{a.member_no ?? ""}</div>
+                  <div className="tabular text-[11px] text-muted-foreground">{a.member_no ?? ""}</div>
                 </td>
-                <td className="px-6 py-4 text-sm text-emerald-deep/60">{a.product}</td>
+                <td className="px-6 py-4 text-sm text-muted-foreground">{a.product}</td>
                 <td className="px-6 py-4 text-right"><Money amount={a.amount} /></td>
                 <td className="px-6 py-4 text-right"><StatusPill status="pending" /></td>
                 <td className="px-6 py-4 text-right">
@@ -290,8 +290,8 @@ function LiveActivity({ items }: { items: ActivityEntry[] }) {
           {items.map((l) => (
             <li key={l.id} className="p-4">
               <p className="text-sm font-semibold">{l.actor_email ?? "System"}</p>
-              <p className="text-xs text-emerald-deep/60">{l.action}</p>
-              <p className="mt-1 text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <p className="text-xs text-muted-foreground">{l.action}</p>
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
                 {l.actor_role ?? "—"} · {relativeTime(l.created_at)}
               </p>
             </li>
@@ -313,14 +313,14 @@ function AiBusinessIntelligencePanel() {
       action={
         <div className="flex items-center gap-3">
           {dataUpdatedAt ? (
-            <span className="hidden text-[10px] uppercase tracking-widest text-emerald-deep/40 md:inline">
+            <span className="hidden text-[10px] uppercase tracking-widest text-muted-foreground md:inline">
               Updated {relativeTime(new Date(dataUpdatedAt).toISOString())}
             </span>
           ) : null}
           <button
             onClick={refresh}
             disabled={isFetching}
-            className="inline-flex items-center gap-1.5 rounded border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gold hover:bg-gold/20 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded border border-gold/30 bg-gold/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold hover:bg-gold/20 disabled:opacity-50"
           >
             <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
             {isFetching ? "Analyzing…" : "Refresh insights"}
@@ -358,15 +358,15 @@ function AiBusinessIntelligencePanel() {
           <div className="grid gap-6 p-6 md:grid-cols-3">
             {data.insights.map((i) => (
               <div key={i.title} className="rounded border border-gold/20 bg-gold/5 p-5">
-                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gold">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold">
                   <Sparkles className="h-3 w-3" /> {i.title}
                 </p>
                 <p className="mt-1 font-serif text-lg text-emerald-deep">{i.value}</p>
-                <p className="mt-1 text-xs text-emerald-deep/60">{i.hint}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{i.hint}</p>
               </div>
             ))}
           </div>
-          <p className="border-t border-emerald-deep/5 px-6 py-3 text-[10px] uppercase tracking-widest text-emerald-deep/40">
+          <p className="border-t border-emerald-deep/5 px-6 py-3 text-[10px] uppercase tracking-widest text-muted-foreground">
             Generated {new Date(data.generatedAt).toLocaleString()} · {data.model}
             {isFetching ? " · refreshing…" : ""}
           </p>

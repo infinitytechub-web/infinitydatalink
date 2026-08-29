@@ -253,7 +253,7 @@ function Content() {
                 },
               })
             }
-            className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+            className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
           >
             Reset
           </button>
@@ -272,7 +272,7 @@ function Content() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Started</th>
                   <th className="px-6 py-3 font-medium">Job</th>
                   <th className="px-6 py-3 font-medium">Run key</th>
@@ -285,7 +285,7 @@ function Content() {
               <tbody className="divide-y divide-emerald-deep/5">
                 {data.rows.map((r) => (
                   <tr key={r.id} className="align-top">
-                    <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
+                    <td className="tabular px-6 py-4 text-xs text-muted-foreground">
                       {new Date(r.started_at).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">{r.job}</td>
@@ -305,7 +305,7 @@ function Content() {
                     <td className="tabular px-6 py-4 text-right text-xs">
                       {r.duration_ms != null ? `${r.duration_ms} ms` : "—"}
                     </td>
-                    <td className="max-w-md px-6 py-4 text-xs text-emerald-deep/80">
+                    <td className="max-w-md px-6 py-4 text-xs text-muted-foreground">
                       {r.error ? (
                         <span className="text-destructive">{r.error}</span>
                       ) : (
@@ -314,7 +314,7 @@ function Content() {
                         </code>
                       )}
                       {r.caller && (
-                        <div className="mt-1 text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                        <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
                           {r.caller}
                         </div>
                       )}
@@ -340,7 +340,7 @@ function Content() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       {children}

@@ -191,7 +191,7 @@ function AuditContent() {
                   },
                 })
               }
-              className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+              className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
             >
               Reset
             </button>
@@ -209,7 +209,7 @@ function AuditContent() {
           <>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Timestamp</th>
                   <th className="px-6 py-3 font-medium">Action</th>
                   <th className="px-6 py-3 font-medium">Transfer</th>
@@ -226,18 +226,18 @@ function AuditContent() {
                     onClick={() => selectEntry(e.id)}
                     className="align-top cursor-pointer hover:bg-cream/40"
                   >
-                    <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
+                    <td className="tabular px-6 py-4 text-xs text-muted-foreground">
                       {new Date(e.created_at).toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
                       <StatusPill status={actionStatus(e.action)} />
-                      <div className="mt-1 text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                      <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
                         {actionLabel(e.action)}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <div className="tabular font-semibold">{e.transfer_ref ?? "—"}</div>
-                      <div className="truncate max-w-[10rem] text-[11px] text-emerald-deep/50">
+                      <div className="truncate max-w-[10rem] text-[11px] text-muted-foreground">
                         {e.transfer_id ?? ""}
                       </div>
                     </td>
@@ -245,7 +245,7 @@ function AuditContent() {
                       <div className="font-medium">
                         {e.from_member_name ?? e.from_account_id?.slice(0, 8) ?? "—"}
                       </div>
-                      <div className="text-emerald-deep/50">
+                      <div className="text-muted-foreground">
                         → {e.to_member_name ?? e.to_account_id?.slice(0, 8) ?? "—"}
                       </div>
                     </td>
@@ -254,13 +254,13 @@ function AuditContent() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <div className="font-medium">{e.actor_email ?? "—"}</div>
-                      <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
                         {e.actor_role ?? "—"}
                       </div>
                     </td>
-                    <td className="px-6 py-4 max-w-md whitespace-pre-wrap text-xs text-emerald-deep/80">
+                    <td className="px-6 py-4 max-w-md whitespace-pre-wrap text-xs text-muted-foreground">
                       <div className="line-clamp-2">
-                        {e.reason ?? <span className="text-emerald-deep/40">—</span>}
+                        {e.reason ?? <span className="text-muted-foreground">—</span>}
                       </div>
                       <button
                         type="button"
@@ -324,21 +324,21 @@ function DetailsDialog({
           <div className="space-y-5 text-sm">
             <div className="flex items-center justify-between rounded border border-emerald-deep/10 bg-cream/30 px-4 py-3">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Action
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   <StatusPill status={actionStatus(entry.action)} />
-                  <span className="text-[10px] uppercase tracking-widest text-emerald-deep/50">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                     {actionLabel(entry.action)}
                   </span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Timestamp
                 </div>
-                <div className="tabular mt-1 text-xs text-emerald-deep/80">
+                <div className="tabular mt-1 text-xs text-muted-foreground">
                   {new Date(entry.created_at).toLocaleString()}
                 </div>
               </div>
@@ -398,7 +398,7 @@ function DetailsDialog({
 
             {entry.reason && (
               <Section title="Reason / note">
-                <div className="whitespace-pre-wrap rounded border border-emerald-deep/10 bg-cream/30 px-3 py-2 text-xs text-emerald-deep/80">
+                <div className="whitespace-pre-wrap rounded border border-emerald-deep/10 bg-cream/30 px-3 py-2 text-xs text-muted-foreground">
                   {entry.reason}
                 </div>
               </Section>
@@ -408,7 +408,7 @@ function DetailsDialog({
               <button
                 type="button"
                 onClick={() => copy(JSON.stringify(entry.meta, null, 2), "Full metadata")}
-                className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+                className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
               >
                 Copy full metadata JSON
               </button>
@@ -423,7 +423,7 @@ function DetailsDialog({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       {children}
@@ -434,7 +434,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+      <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {title}
       </div>
       <div className="space-y-1">{children}</div>
@@ -455,7 +455,7 @@ function Row({
 }) {
   return (
     <div className="flex items-start justify-between gap-3 rounded px-3 py-1.5 hover:bg-cream/30">
-      <div className="text-[11px] uppercase tracking-widest text-emerald-deep/40">{label}</div>
+      <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</div>
       <div className="flex items-center gap-2">
         <div className={mono ? "tabular text-right text-xs text-emerald-deep/90" : "text-right text-xs text-emerald-deep/90"}>
           {value}

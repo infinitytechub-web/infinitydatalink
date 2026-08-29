@@ -86,7 +86,7 @@ export function RecurringContributionsSection({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Account</th>
                 <th className="px-6 py-3 font-medium">Schedule</th>
                 <th className="px-6 py-3 text-right font-medium">Amount</th>
@@ -149,19 +149,19 @@ function ScheduleRow({ s, onEdit }: { s: RecurringSchedule; onEdit: () => void }
     <tr>
       <td className="px-6 py-3">
         <div className="font-medium text-emerald-deep">{s.account_label}</div>
-        <div className="text-[11px] text-emerald-deep/50">{s.channel.replace(/_/g, " ")}</div>
+        <div className="text-[11px] text-muted-foreground">{s.channel.replace(/_/g, " ")}</div>
       </td>
-      <td className="px-6 py-3 text-emerald-deep/70">
+      <td className="px-6 py-3 text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <CalendarClock className="h-3.5 w-3.5 text-emerald-mid" />
           {describeSchedule(s)}
         </div>
       </td>
       <td className="px-6 py-3 text-right tabular"><Money amount={s.amount} /></td>
-      <td className="px-6 py-3 text-[11px] text-emerald-deep/70">
+      <td className="px-6 py-3 text-[11px] text-muted-foreground">
         {new Date(s.next_run_at).toLocaleString()}
       </td>
-      <td className="px-6 py-3 text-[11px] text-emerald-deep/60">
+      <td className="px-6 py-3 text-[11px] text-muted-foreground">
         {s.last_run_at ? (
           <>
             {new Date(s.last_run_at).toLocaleString()}
@@ -172,7 +172,7 @@ function ScheduleRow({ s, onEdit }: { s: RecurringSchedule; onEdit: () => void }
             ) : null}
           </>
         ) : (
-          <span className="text-emerald-deep/40">Not yet run</span>
+          <span className="text-muted-foreground">Not yet run</span>
         )}
       </td>
       <td className="px-6 py-3 text-right">
@@ -181,7 +181,7 @@ function ScheduleRow({ s, onEdit }: { s: RecurringSchedule; onEdit: () => void }
             "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest " +
             (s.status === "active"
               ? "bg-emerald-mid/15 text-emerald-mid"
-              : "bg-emerald-deep/10 text-emerald-deep/60")
+              : "bg-emerald-deep/10 text-muted-foreground")
           }
         >
           {s.status}

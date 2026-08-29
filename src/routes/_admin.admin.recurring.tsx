@@ -67,7 +67,7 @@ export const Route = createFileRoute("/_admin/admin/recurring")({
       <ErrorState title="Failed to load recurring schedules" message={error.message} />
     </div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
+  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
 
 function AdminRecurringPage() {
@@ -140,11 +140,11 @@ function Body() {
         }
       >
         {data.rows.length === 0 ? (
-          <div className="p-6 text-sm text-emerald-deep/60">No schedules match these filters.</div>
+          <div className="p-6 text-sm text-muted-foreground">No schedules match these filters.</div>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Member</th>
                 <th className="px-6 py-3 font-medium">Account</th>
                 <th className="px-6 py-3 font-medium">Schedule</th>
@@ -161,7 +161,7 @@ function Body() {
             </tbody>
           </table>
         )}
-        <div className="flex items-center justify-between border-t border-emerald-deep/5 px-6 py-3 text-xs text-emerald-deep/60">
+        <div className="flex items-center justify-between border-t border-emerald-deep/5 px-6 py-3 text-xs text-muted-foreground">
           <span>
             Page {search.page} of {totalPages} · {data.total} total
           </span>
@@ -212,9 +212,9 @@ function Row({ r }: { r: AdminRecurringRow }) {
     <tr className="align-top">
       <td className="px-6 py-3 text-sm">
         <div className="font-semibold">{r.member_name ?? "Member"}</div>
-        <div className="text-[11px] text-emerald-deep/50">{r.member_email ?? r.member_no ?? r.user_id.slice(0, 8)}</div>
+        <div className="text-[11px] text-muted-foreground">{r.member_email ?? r.member_no ?? r.user_id.slice(0, 8)}</div>
       </td>
-      <td className="px-6 py-3 text-sm text-emerald-deep/80">{r.account_label}</td>
+      <td className="px-6 py-3 text-sm text-muted-foreground">{r.account_label}</td>
       <td className="px-6 py-3 text-sm">
         <div>{scheduleLabel(r)}</div>
         <div className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
@@ -223,8 +223,8 @@ function Row({ r }: { r: AdminRecurringRow }) {
         </div>
       </td>
       <td className="px-6 py-3 text-right"><Money amount={r.amount} /></td>
-      <td className="px-6 py-3 text-[11px] text-emerald-deep/60">{new Date(r.next_run_at).toLocaleString()}</td>
-      <td className="px-6 py-3 text-[11px] text-emerald-deep/60">
+      <td className="px-6 py-3 text-[11px] text-muted-foreground">{new Date(r.next_run_at).toLocaleString()}</td>
+      <td className="px-6 py-3 text-[11px] text-muted-foreground">
         {r.last_run_at ? new Date(r.last_run_at).toLocaleString() : "—"}
         {r.last_run_error ? (
           <div className="mt-1 max-w-xs truncate text-destructive" title={r.last_run_error}>
@@ -282,7 +282,7 @@ function CancelDialog({ r }: { r: AdminRecurringRow }) {
             mut.mutate();
           }}
         >
-          <p className="text-sm text-emerald-deep/70">
+          <p className="text-sm text-muted-foreground">
             This permanently removes the schedule for <span className="font-semibold">{r.member_name ?? "the member"}</span> on{" "}
             <span className="font-semibold">{r.account_label}</span>. The member can create a new one later.
           </p>

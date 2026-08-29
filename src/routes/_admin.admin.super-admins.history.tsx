@@ -252,7 +252,7 @@ function HistoryBody() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 border-b border-emerald-deep/5 px-6 py-3 text-xs">
-          <label className="flex items-center gap-2 text-emerald-deep/60">
+          <label className="flex items-center gap-2 text-muted-foreground">
             Rows per page
             <select
               value={search.pageSize}
@@ -286,7 +286,7 @@ function HistoryBody() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <SortableTh
                     label="When"
                     active={search.sortBy === "occurred_at"}
@@ -325,13 +325,13 @@ function HistoryBody() {
                     </td>
                     <td className="px-6 py-3">
                       <div className="tabular">{r.target_email ?? "—"}</div>
-                      <div className="text-xs text-emerald-deep/40">{r.target_user_id.slice(0, 8)}…</div>
+                      <div className="text-xs text-muted-foreground">{r.target_user_id.slice(0, 8)}…</div>
                     </td>
                     <td className="px-6 py-3">
                       <div className="tabular">{r.actor_email ?? "system"}</div>
-                      <div className="text-xs text-emerald-deep/40">{r.actor_role ?? "—"}</div>
+                      <div className="text-xs text-muted-foreground">{r.actor_role ?? "—"}</div>
                     </td>
-                    <td className="px-6 py-3 text-emerald-deep/70">
+                    <td className="px-6 py-3 text-muted-foreground">
                       {r.note ?? r.reason ?? "—"}
                     </td>
                     <td className="px-6 py-3">
@@ -347,7 +347,7 @@ function HistoryBody() {
         )}
 
         <div className="flex items-center justify-between border-t border-emerald-deep/5 px-6 py-3 text-xs">
-          <span className="text-emerald-deep/50">
+          <span className="text-muted-foreground">
             Page {search.page} of {totalPages}
           </span>
           <div className="flex gap-2">
@@ -411,7 +411,7 @@ function SortableTh({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block text-xs">
-      <span className="mb-1 block text-[10px] font-medium uppercase tracking-widest text-emerald-deep/50">
+      <span className="mb-1 block text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       {children}
@@ -444,7 +444,7 @@ function DetailsDialog({ entry, onClose }: { entry: RoleHistoryRow | null; onClo
               value={entry.currently_super_admin ? "Yes — still active" : "No — revoked"}
             />
             <div>
-              <div className="mb-1 text-[10px] font-medium uppercase tracking-widest text-emerald-deep/50">
+              <div className="mb-1 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                 Raw metadata
               </div>
               <pre className="max-h-48 overflow-auto rounded bg-emerald-deep/5 p-3 text-xs">
@@ -480,7 +480,7 @@ function DetailsDialog({ entry, onClose }: { entry: RoleHistoryRow | null; onClo
 function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="grid grid-cols-[160px_1fr] gap-3">
-      <div className="text-[10px] font-medium uppercase tracking-widest text-emerald-deep/50">
+      <div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
         {label}
       </div>
       <div className={mono ? "tabular text-emerald-deep" : "text-emerald-deep"}>{value}</div>

@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_member/app/savings/$accountId")({
     <div className="p-6 text-sm text-destructive">Failed to load account: {error.message}</div>
   ),
   notFoundComponent: () => (
-    <div className="p-6 text-sm text-emerald-deep/70">
+    <div className="p-6 text-sm text-muted-foreground">
       Account not found.{" "}
       <Link to="/app/savings" className="underline">Back to savings</Link>
     </div>
@@ -71,7 +71,7 @@ function Body({ accountId }: { accountId: string }) {
         <SectionCard title="Overview">
           <div className="grid gap-6 p-6 md:grid-cols-3">
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Current balance</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Current balance</div>
               <div className="mt-1 text-3xl font-semibold tabular text-emerald-deep">
                 <Money amount={a.balance} />
               </div>
@@ -80,7 +80,7 @@ function Body({ accountId }: { accountId: string }) {
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Goal</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Goal</div>
               {a.goal_amount ? (
                 <>
                   <div className="mt-1 text-lg font-semibold text-emerald-deep tabular">
@@ -89,19 +89,19 @@ function Body({ accountId }: { accountId: string }) {
                   <div className="mt-2 h-2 rounded-full bg-emerald-deep/10">
                     <div className="h-2 rounded-full bg-emerald-mid" style={{ width: `${a.progress_pct ?? 0}%` }} />
                   </div>
-                  <div className="mt-1 text-[11px] text-emerald-deep/50">
+                  <div className="mt-1 text-[11px] text-muted-foreground">
                     {a.progress_pct ?? 0}% funded
                     {a.goal_target_date ? ` · target ${new Date(a.goal_target_date).toLocaleDateString()}` : ""}
                   </div>
                 </>
               ) : (
-                <div className="mt-1 text-sm text-emerald-deep/60">No goal set.</div>
+                <div className="mt-1 text-sm text-muted-foreground">No goal set.</div>
               )}
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Opened</div>
-              <div className="mt-1 text-sm text-emerald-deep/80">{new Date(a.created_at).toLocaleDateString()}</div>
-              <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-deep/60">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Opened</div>
+              <div className="mt-1 text-sm text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</div>
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
                 <PiggyBank className="h-3.5 w-3.5" /> {a.plan_schedule} contributions
               </div>
             </div>
@@ -121,11 +121,11 @@ function Body({ accountId }: { accountId: string }) {
           }
         >
           {data.transactions.length === 0 ? (
-            <div className="p-6 text-sm text-emerald-deep/60">No transactions yet — add your first contribution to get going.</div>
+            <div className="p-6 text-sm text-muted-foreground">No transactions yet — add your first contribution to get going.</div>
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Ref</th>
                   <th className="px-6 py-3 font-medium">Type</th>
                   <th className="px-6 py-3 font-medium">Channel</th>
@@ -152,17 +152,17 @@ function TxnRow({ t }: { t: SavingsTxn }) {
   const Icon = isDeposit ? ArrowDownRight : ArrowUpRight;
   return (
     <tr>
-      <td className="px-6 py-3 font-mono text-[11px] text-emerald-deep/70">{t.ref}</td>
+      <td className="px-6 py-3 font-mono text-[11px] text-muted-foreground">{t.ref}</td>
       <td className="px-6 py-3">
         <div className="flex items-center gap-2 text-sm capitalize">
-          <Icon className={`h-3.5 w-3.5 ${isDeposit ? "text-emerald-mid" : "text-gold"}`} />
+          <Icon className={`h-3.5 w-3.5 ${isDeposit ? "text-emerald-mid" : "text-brand-gold-ink dark:text-brand-gold"}`} />
           {t.kind}
         </div>
       </td>
-      <td className="px-6 py-3 text-sm text-emerald-deep/60">{t.channel ?? "—"}</td>
+      <td className="px-6 py-3 text-sm text-muted-foreground">{t.channel ?? "—"}</td>
       <td className="px-6 py-3 text-right"><Money amount={t.amount} signed={!isDeposit} /></td>
       <td className="px-6 py-3 text-right"><StatusPill status={t.status} /></td>
-      <td className="px-6 py-3 text-right text-[11px] text-emerald-deep/50">
+      <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">
         {new Date(t.created_at).toLocaleString()}
       </td>
     </tr>
@@ -273,7 +273,7 @@ function WithdrawalDialog({ accountId, balance }: { accountId: string; balance: 
             mut.mutate();
           }}
         >
-          <div className="rounded border border-emerald-deep/10 bg-cream/40 p-3 text-[11px] text-emerald-deep/70">
+          <div className="rounded border border-emerald-deep/10 bg-cream/40 p-3 text-[11px] text-muted-foreground">
             Available balance: <span className="font-semibold tabular"><Money amount={balance} /></span>
           </div>
           <div>

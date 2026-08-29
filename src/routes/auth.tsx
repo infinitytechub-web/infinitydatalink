@@ -77,7 +77,7 @@ function AuthPage() {
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <AuthBrandMark />
         <div className="flex items-center gap-3">
-          <span className="hidden text-[11px] uppercase tracking-widest text-emerald-deep/50 sm:inline">
+          <span className="hidden text-[11px] uppercase tracking-widest text-muted-foreground sm:inline">
             Secure session · TLS 1.3
           </span>
           <ThemeToggle />
@@ -85,7 +85,7 @@ function AuthPage() {
       </header>
 
       {branding.login_tagline ? (
-        <p className="mx-auto max-w-2xl px-6 pb-4 text-center text-sm text-emerald-deep/70">
+        <p className="mx-auto max-w-2xl px-6 pb-4 text-center text-sm text-muted-foreground">
           {branding.login_tagline}
         </p>
       ) : null}
@@ -102,7 +102,7 @@ function AuthPage() {
                 ? k === "admin"
                   ? "bg-emerald-deep text-cream shadow-sm"
                   : "bg-teal-500 text-white shadow-sm"
-                : "text-emerald-deep/60",
+                : "text-muted-foreground",
             )}
           >
             {k === "user" ? "User" : "Administrator"}
@@ -119,10 +119,10 @@ function AuthPage() {
         </div>
       </main>
 
-      <footer className="mx-auto max-w-7xl px-6 pb-8 text-center text-[11px] uppercase tracking-widest text-emerald-deep/40">
+      <footer className="mx-auto max-w-7xl px-6 pb-8 text-center text-[11px] uppercase tracking-widest text-muted-foreground">
         {branding.footer_html ? (
           <div
-            className="mb-2 normal-case tracking-normal text-emerald-deep/60"
+            className="mb-2 normal-case tracking-normal text-muted-foreground"
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(branding.footer_html, {
@@ -216,7 +216,7 @@ function LoginPanel({ kind }: { kind: PanelKind }) {
             <button
               type="button"
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="text-[11px] font-bold uppercase tracking-widest text-teal-600 hover:underline"
+              className="text-[11px] font-bold uppercase tracking-widest text-primary hover:underline"
             >
               {mode === "signin" ? "Create account" : "Have an account? Sign in"}
             </button>
@@ -225,21 +225,21 @@ function LoginPanel({ kind }: { kind: PanelKind }) {
 
         <AuthForm mode={isAdmin ? "signin" : mode} kind={kind} />
 
-        <div className="my-6 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">
+        <div className="my-6 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           <div className="h-px flex-1 bg-emerald-deep/10" />
           or
           <div className="h-px flex-1 bg-emerald-deep/10" />
         </div>
 
         <BiometricButton kind={kind} />
-        <div className="my-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">
+        <div className="my-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           <div className="h-px flex-1 bg-emerald-deep/10" />
           or
           <div className="h-px flex-1 bg-emerald-deep/10" />
         </div>
         <GoogleButton />
 
-        <p className="mt-6 text-[11px] leading-relaxed text-emerald-deep/50">
+        <p className="mt-6 text-[11px] leading-relaxed text-muted-foreground">
           {isAdmin
             ? "Administrator roles are assigned by an existing Super Admin. Access is logged for audit review."
             : "New accounts start with Member permissions and require identity verification (KYC) before full access."}
@@ -288,7 +288,7 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const strength = useMemo(() => passwordStrength(password), [password]);
   const accent = isAdmin
     ? "bg-emerald-deep hover:bg-emerald-mid text-cream"
-    : "bg-teal-600 hover:bg-teal-700 text-white";
+    : "bg-primary hover:bg-teal-700 text-white";
   const focusRing = isAdmin ? "focus:border-emerald-mid" : "focus:border-teal-500";
 
   useEffect(() => {
@@ -441,9 +441,9 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
             />
           </Field>
 
-          <Field label="Ghana Card number" hint={<span className="text-[11px] text-emerald-deep/50">10 digits</span>}>
+          <Field label="Ghana Card number" hint={<span className="text-[11px] text-muted-foreground">10 digits</span>}>
             <div className="flex items-stretch gap-0">
-              <span className="flex items-center rounded-l-lg border border-r-0 border-emerald-deep/15 bg-emerald-deep/5 px-3 text-sm font-semibold text-emerald-deep/70">
+              <span className="flex items-center rounded-l-lg border border-r-0 border-emerald-deep/15 bg-emerald-deep/5 px-3 text-sm font-semibold text-muted-foreground">
                 GHA-
               </span>
               <input
@@ -458,7 +458,7 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               />
             </div>
             {cardDigits && cardDigits.length !== GHANA_CARD_DIGITS ? (
-              <p className="mt-1 text-[10px] uppercase tracking-widest text-gold">
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold">
                 {GHANA_CARD_DIGITS - cardDigits.length} digit(s) remaining
               </p>
             ) : null}
@@ -478,7 +478,7 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
             label="Date of birth"
             hint={
               dob ? (
-                <span className="text-[11px] text-emerald-deep/50">
+                <span className="text-[11px] text-muted-foreground">
                   Age {calculateAge(dob) ?? "—"}
                   {isMinor(dob) ? " · under 18 (minor saver)" : ""}
                 </span>
@@ -569,7 +569,7 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               to="/auth/forgot"
               className={cn(
                 "text-[11px] font-medium hover:underline",
-                isAdmin ? "text-emerald-mid" : "text-teal-600",
+                isAdmin ? "text-emerald-mid" : "text-primary",
               )}
             >
               Forgot password?
@@ -595,13 +595,13 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
             }}
             aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
-            className="absolute inset-y-0 right-1 my-auto flex h-8 w-8 items-center justify-center rounded text-emerald-deep/60 hover:bg-emerald-deep/5 hover:text-emerald-deep"
+            className="absolute inset-y-0 right-1 my-auto flex h-8 w-8 items-center justify-center rounded text-muted-foreground hover:bg-emerald-deep/5 hover:text-emerald-deep"
           >
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
         </div>
         {capsOn ? (
-          <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-widest text-gold">
+          <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold">
             Caps Lock is on
           </p>
         ) : null}
@@ -622,7 +622,7 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
                 style={{ width: `${(strength.score / 4) * 100}%` }}
               />
             </div>
-            <p className="mt-1 text-[10px] uppercase tracking-widest text-emerald-deep/50">
+            <p className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
               Strength: {strength.label}
             </p>
           </div>
@@ -751,7 +751,7 @@ function BiometricButton({ kind }: { kind: PanelKind }) {
         <p
           className={cn(
             "mt-2 text-[11px] leading-relaxed",
-            msg.tone === "error" ? "text-destructive" : "text-emerald-deep/60",
+            msg.tone === "error" ? "text-destructive" : "text-muted-foreground",
           )}
         >
           {msg.text}
@@ -820,7 +820,7 @@ function Field({
   return (
     <label className="block">
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/60">
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
           {label}
         </span>
         {hint}
@@ -832,7 +832,7 @@ function Field({
 
 function inputClass(focus = "focus:border-primary") {
   return cn(
-    "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70",
+    "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground",
     focus,
   );
 }

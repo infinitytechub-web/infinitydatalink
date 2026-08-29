@@ -69,7 +69,7 @@ function RestoreRow({ item }: { item: RestoreAcknowledgment }) {
     <li className="space-y-3 px-6 py-5">
       <div className="flex items-start gap-3">
         <ArchiveRestore className="mt-0.5 h-4 w-4 text-emerald-mid" />
-        <div className="flex-1 space-y-1 text-sm text-emerald-deep/80">
+        <div className="flex-1 space-y-1 text-sm text-muted-foreground">
           <p className="font-semibold text-emerald-deep">
             Your KYC record was restored from the account vault
           </p>
@@ -94,7 +94,7 @@ function RestoreRow({ item }: { item: RestoreAcknowledgment }) {
         </div>
       ) : (
         <div className="space-y-3 rounded border border-emerald-deep/10 bg-cream/30 p-3">
-          <label className="flex items-start gap-2 text-[12px] text-emerald-deep/80">
+          <label className="flex items-start gap-2 text-[12px] text-muted-foreground">
             <input
               type="checkbox"
               className="mt-0.5"

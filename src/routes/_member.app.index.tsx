@@ -43,7 +43,7 @@ function BiodataStrip() {
     <section className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-emerald-deep/10 bg-card px-4 py-3 sm:flex sm:justify-between">
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold">{p.full_name ?? "Member"}</p>
-        <p className="truncate text-xs text-emerald-deep/60">
+        <p className="truncate text-xs text-muted-foreground">
           {p.member_no ? `Member no. ${p.member_no}` : "Membership pending"}
           {p.region ? ` · ${p.district ? `${p.district}, ` : ""}${p.region}` : ""}
         </p>
@@ -99,7 +99,7 @@ function Dashboard() {
           value={
             <>
               72%{" "}
-              <span className="font-sans text-xs text-emerald-deep/50">Complete</span>
+              <span className="font-sans text-xs text-muted-foreground">Complete</span>
             </>
           }
           hint={
@@ -133,7 +133,7 @@ function Dashboard() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold">{t.label}</p>
-                      <p className="tabular text-[11px] text-emerald-deep/50">
+                      <p className="tabular text-[11px] text-muted-foreground">
                         {t.ref} • {t.date}
                       </p>
                     </div>
@@ -142,7 +142,7 @@ function Dashboard() {
                     <p className={`tabular text-sm font-bold ${t.amount < 0 ? "text-destructive" : "text-emerald-mid"}`}>
                       <Money amount={t.amount} signed />
                     </p>
-                    <p className="text-[10px] text-emerald-deep/40">{t.kind}</p>
+                    <p className="text-[10px] text-muted-foreground">{t.kind}</p>
                   </div>
                 </div>
               ))}
@@ -167,12 +167,12 @@ function Dashboard() {
             <div className="pointer-events-none absolute right-0 top-0 p-8 opacity-10">
               <div className="font-serif text-8xl">AI</div>
             </div>
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-gold-ink dark:text-brand-gold">
               Wealth Insight
             </p>
             <p className="mb-6 font-serif text-lg leading-relaxed">
               "Your current savings trajectory suggests you will meet your Real Estate goal{" "}
-              <span className="text-gold">4 months earlier</span> than projected."
+              <span className="text-brand-gold-ink dark:text-brand-gold">4 months earlier</span> than projected."
             </p>
             <div className="rounded bg-white/10 p-4 text-xs text-white/80">
               <p className="mb-2 font-medium">Recommendation</p>
@@ -185,7 +185,7 @@ function Dashboard() {
 
           {/* Security */}
           <div className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/40">
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Account Security
             </p>
             <div className="flex items-center gap-4">
@@ -194,10 +194,10 @@ function Dashboard() {
               </div>
               <div>
                 <p className="text-sm font-semibold">Identity Verified</p>
-                <p className="text-[11px] text-emerald-deep/50">Level 3 verification complete</p>
+                <p className="text-[11px] text-muted-foreground">Level 3 verification complete</p>
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-emerald-deep/5 pt-3 text-[11px] text-emerald-deep/60">
+            <div className="mt-4 flex items-center justify-between border-t border-emerald-deep/5 pt-3 text-[11px] text-muted-foreground">
               <span>2FA</span>
               <StatusPill status="active" />
             </div>
@@ -205,13 +205,13 @@ function Dashboard() {
 
           {/* Upcoming repayment */}
           <div className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-            <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/40">
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Upcoming Repayment
             </p>
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-sm font-semibold">Oct 15, 2025</p>
-                <p className="text-[11px] text-emerald-deep/60">Business Expansion II</p>
+                <p className="text-[11px] text-muted-foreground">Business Expansion II</p>
               </div>
               <p className="tabular font-serif text-xl text-emerald-deep">GH₵ 1,200</p>
             </div>

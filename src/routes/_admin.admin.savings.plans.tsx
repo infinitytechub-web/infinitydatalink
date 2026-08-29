@@ -71,7 +71,7 @@ function Body() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Plan</th>
                 <th className="px-6 py-3 font-medium">Schedule</th>
                 <th className="px-6 py-3 text-right font-medium">Rate</th>
@@ -100,9 +100,9 @@ function PlanRow({ p }: { p: AdminPlan }) {
     <tr>
       <td className="px-6 py-3">
         <div className="font-semibold">{p.name}</div>
-        {p.description ? <div className="text-[11px] text-emerald-deep/60">{p.description}</div> : null}
+        {p.description ? <div className="text-[11px] text-muted-foreground">{p.description}</div> : null}
       </td>
-      <td className="px-6 py-3 text-emerald-deep/70">{p.schedule}</td>
+      <td className="px-6 py-3 text-muted-foreground">{p.schedule}</td>
       <td className="tabular px-6 py-3 text-right">{p.interest_rate}%</td>
       <td className="px-6 py-3 text-right"><Money amount={p.min_contribution} /></td>
       <td className="px-6 py-3 text-right"><Money amount={p.contribution_amount} /></td>

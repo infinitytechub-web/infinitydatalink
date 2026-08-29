@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_admin/admin/health")({
       <ErrorState title="Failed to load health check" message={error.message} />
     </div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
+  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
 
 function Page() {
@@ -74,7 +74,7 @@ function Body() {
 
       {(["relationship", "table", "rpc"] as const).map((cat) => (
         <SectionCard key={cat} title={LABELS[cat]}>
-          <p className="mb-3 text-xs text-emerald-deep/60">{DESCRIPTIONS[cat]}</p>
+          <p className="mb-3 text-xs text-muted-foreground">{DESCRIPTIONS[cat]}</p>
           <ProbeTable results={groups[cat] ?? []} />
         </SectionCard>
       ))}
@@ -101,11 +101,11 @@ function groupByCategory(rows: ProbeResult[]): Record<ProbeResult["category"], P
 }
 
 function ProbeTable({ results }: { results: ProbeResult[] }) {
-  if (results.length === 0) return <p className="text-sm text-emerald-deep/60">No probes.</p>;
+  if (results.length === 0) return <p className="text-sm text-muted-foreground">No probes.</p>;
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
-        <thead className="text-left text-xs uppercase tracking-wide text-emerald-deep/60">
+        <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="py-2 pr-4">Status</th>
             <th className="py-2 pr-4">Probe</th>
@@ -131,8 +131,8 @@ function ProbeTable({ results }: { results: ProbeResult[] }) {
                 )}
               </td>
               <td className="py-2 pr-4 font-medium">{r.name}</td>
-              <td className="py-2 pr-4 text-emerald-deep/70">{r.detail}</td>
-              <td className="py-2 pr-4 text-emerald-deep/60 tabular-nums">{r.duration_ms} ms</td>
+              <td className="py-2 pr-4 text-muted-foreground">{r.detail}</td>
+              <td className="py-2 pr-4 text-muted-foreground tabular-nums">{r.duration_ms} ms</td>
               <td className="py-2 text-destructive font-mono text-xs break-all">{r.error ?? ""}</td>
 
             </tr>

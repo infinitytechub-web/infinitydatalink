@@ -263,7 +263,7 @@ function InboxContent() {
                     {n.body ? (
                       <p className="text-xs leading-relaxed text-muted-foreground">{n.body}</p>
                     ) : null}
-                    <p className="text-[11px] text-muted-foreground/80">
+                    <p className="text-[11px] text-muted-foreground">
                       {CATEGORY_LABELS.get(n.category as CategoryKey) ?? n.category} ·{" "}
                       {new Date(n.created_at).toLocaleString()}
                     </p>

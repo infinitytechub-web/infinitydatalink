@@ -51,7 +51,7 @@ const eventsQuery = (s: SearchInput) =>
 
 const SEVERITY_STYLE: Record<SecurityEvent["severity"], string> = {
   info: "bg-emerald-mid/10 text-emerald-mid",
-  warning: "bg-gold/15 text-gold",
+  warning: "bg-gold/15 text-brand-gold-ink dark:text-brand-gold",
   critical: "bg-destructive/10 text-destructive",
 };
 
@@ -105,7 +105,7 @@ function Content() {
         action={
           <div className="flex items-center gap-2">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-cream px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60"
+              className="inline-flex items-center gap-1.5 rounded-full bg-cream px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
               title={
                 data.unmasked
                   ? "You hold security.manage — full network addresses are shown and the access is audited."
@@ -127,7 +127,7 @@ function Content() {
         }
       >
         <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 px-6 py-4">
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Category
             <select
               className={field}
@@ -142,7 +142,7 @@ function Content() {
               <option value="documents">Documents</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Severity
             <select
               className={field}
@@ -155,15 +155,15 @@ function Content() {
               <option value="info">Info</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             From
             <input type="date" className={field} value={s.from} onChange={(e) => setSearch({ from: e.target.value })} />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             To
             <input type="date" className={field} value={s.to} onChange={(e) => setSearch({ to: e.target.value })} />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Search
             <input
               className={field}
@@ -180,7 +180,7 @@ function Content() {
           <>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">When</th>
                   <th className="px-6 py-3 font-medium">Severity</th>
                   <th className="px-6 py-3 font-medium">Action</th>
@@ -192,7 +192,7 @@ function Content() {
               <tbody className="divide-y divide-emerald-deep/5">
                 {data.rows.map((e) => (
                   <tr key={e.id}>
-                    <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
+                    <td className="tabular px-6 py-4 text-xs text-muted-foreground">
                       {new Date(e.created_at).toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
@@ -206,12 +206,12 @@ function Content() {
                     <td className="px-6 py-4 text-sm">
                       {e.actor}
                       {e.actor_role ? (
-                        <span className="ml-2 text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                        <span className="ml-2 text-[10px] uppercase tracking-widest text-muted-foreground">
                           {e.actor_role}
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-6 py-4 text-sm text-emerald-deep/60">{e.target ?? "—"}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{e.target ?? "—"}</td>
                     <td className="tabular px-6 py-4 text-right text-xs">{e.ip ?? "—"}</td>
                   </tr>
                 ))}

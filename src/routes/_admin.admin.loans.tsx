@@ -120,7 +120,7 @@ function AdminLoansContent() {
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Ref</th>
                 <th className="px-6 py-3 font-medium">Member</th>
                 <th className="px-6 py-3 font-medium">Product</th>
@@ -187,9 +187,9 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
         <td className="tabular px-6 py-4 text-sm font-semibold">{loan.ref}</td>
         <td className="px-6 py-4 text-sm">
           <div className="font-medium">{loan.member_name ?? "—"}</div>
-          <div className="tabular text-[11px] text-emerald-deep/50">{loan.member_no ?? loan.user_id.slice(0, 8)}</div>
+          <div className="tabular text-[11px] text-muted-foreground">{loan.member_no ?? loan.user_id.slice(0, 8)}</div>
         </td>
-        <td className="px-6 py-4 text-sm text-emerald-deep/60">{loan.product}</td>
+        <td className="px-6 py-4 text-sm text-muted-foreground">{loan.product}</td>
         <td className="px-6 py-4 text-right"><Money amount={loan.amount} /></td>
         <td className="tabular px-6 py-4 text-right text-sm">{loan.term_months} mo</td>
         <td className="px-6 py-4 text-right"><StatusPill status={loan.status} /></td>
@@ -197,7 +197,7 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
           <Link
             to="/admin/loans/$loanId"
             params={{ loanId: loan.id }}
-            className="mr-2 rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+            className="mr-2 rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
           >
             View
           </Link>
@@ -205,7 +205,7 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowPanel((v) => !v)}
-                className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+                className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
               >
                 {showPanel ? "Hide" : "Note"}
               </button>
@@ -225,7 +225,7 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
               </button>
             </div>
           ) : (
-            <span className="text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
               {loan.decided_at ? new Date(loan.decided_at).toLocaleDateString() : "—"}
             </span>
           )}
@@ -235,7 +235,7 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
         <tr>
           <td colSpan={7} className="bg-cream/30 px-6 py-3">
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Decision note <span className="text-destructive">*required, written to audit log</span>
               </label>
               <textarea
@@ -245,7 +245,7 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
                 placeholder="Explain the approval or rejection (min. 5 characters)…"
                 className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-xs outline-none focus:border-emerald-mid"
               />
-              <div className={`text-[10px] ${noteValid ? "text-emerald-deep/50" : "text-destructive"}`}>
+              <div className={`text-[10px] ${noteValid ? "text-muted-foreground" : "text-destructive"}`}>
                 {note.trim().length}/1000 — {noteValid ? "OK" : "at least 5 characters"}
               </div>
             </div>

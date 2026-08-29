@@ -95,7 +95,7 @@ export const Route = createFileRoute("/_admin/admin/logs")({
   errorComponent: ({ error }) => (
     <div className="p-6"><ErrorState title="Failed to load logs" message={error.message} /></div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
+  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
 
 function Page() {
@@ -211,7 +211,7 @@ function Body() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex items-center justify-end gap-2 text-xs text-emerald-deep/60">
+          <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
             Page {search.page} / {totalPages} · {list.total} total
             <Button size="sm" variant="ghost" disabled={search.page <= 1} onClick={() => update({ page: search.page - 1 })}>Prev</Button>
             <Button size="sm" variant="ghost" disabled={search.page >= totalPages} onClick={() => update({ page: search.page + 1 })}>Next</Button>
@@ -220,7 +220,7 @@ function Body() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
-            <thead className="bg-cream/40 text-[10px] uppercase tracking-wider text-emerald-deep/60">
+            <thead className="bg-cream/40 text-[10px] uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="p-3 text-left">
                   <input
@@ -240,7 +240,7 @@ function Body() {
             </thead>
             <tbody>
               {list.rows.length === 0 ? (
-                <tr><td colSpan={7} className="p-6 text-center text-emerald-deep/50">No events match the filters.</td></tr>
+                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No events match the filters.</td></tr>
               ) : (
                 list.rows.map((row) => (
                   <tr
@@ -264,8 +264,8 @@ function Body() {
                     <td className="p-3 font-mono text-[11px]">{new Date(row.occurred_at).toLocaleString()}</td>
                     <td className="p-3"><Badge tone={kindTone(row.kind)}>{row.kind}</Badge></td>
                     <td className="p-3"><Badge tone={severityTone(row.severity)}>{row.severity}</Badge></td>
-                    <td className="p-3 font-mono text-[11px] text-emerald-deep/70">{row.route ?? "—"}</td>
-                    <td className="p-3">{row.user_email ?? <span className="text-emerald-deep/40">anonymous</span>}</td>
+                    <td className="p-3 font-mono text-[11px] text-muted-foreground">{row.route ?? "—"}</td>
+                    <td className="p-3">{row.user_email ?? <span className="text-muted-foreground">anonymous</span>}</td>
                     <td className="p-3 max-w-[420px] truncate">{row.message}</td>
                   </tr>
                 ))
@@ -317,7 +317,7 @@ function DetailsPanel({ row, onClose }: { row: LogRow; onClose: () => void }) {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="font-serif text-lg text-emerald-deep">{row.kind} · {row.severity}</h2>
-            <p className="mt-1 text-[11px] font-mono text-emerald-deep/60">{new Date(row.occurred_at).toISOString()}</p>
+            <p className="mt-1 text-[11px] font-mono text-muted-foreground">{new Date(row.occurred_at).toISOString()}</p>
           </div>
           <Button size="sm" variant="ghost" onClick={onClose}>Close</Button>
         </div>
@@ -328,17 +328,17 @@ function DetailsPanel({ row, onClose }: { row: LogRow; onClose: () => void }) {
           <Field label="User agent" value={row.user_agent} mono />
         </dl>
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/50">Message</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Message</p>
           <pre className="mt-1 whitespace-pre-wrap rounded bg-cream/40 p-3 text-xs">{row.message}</pre>
         </div>
         {row.stack && (
           <div className="mt-4">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/50">Stack</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stack</p>
             <pre className="mt-1 max-h-[240px] overflow-auto whitespace-pre-wrap rounded bg-cream/40 p-3 text-[11px] font-mono">{row.stack}</pre>
           </div>
         )}
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/50">Meta</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Meta</p>
           <pre className="mt-1 max-h-[200px] overflow-auto whitespace-pre-wrap rounded bg-cream/40 p-3 text-[11px] font-mono">{metaJson}</pre>
         </div>
         <div className="mt-4 flex justify-end">
@@ -358,7 +358,7 @@ function DetailsPanel({ row, onClose }: { row: LogRow; onClose: () => void }) {
 function Field({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <div className="flex items-baseline gap-2">
-      <dt className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/50">{label}</dt>
+      <dt className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</dt>
       <dd className={`min-w-0 flex-1 break-words ${mono ? "font-mono text-[11px]" : ""}`}>{value ?? "—"}</dd>
     </div>
   );

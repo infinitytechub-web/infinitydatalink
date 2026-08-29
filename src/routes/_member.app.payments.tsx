@@ -36,9 +36,9 @@ function PaymentsPage() {
           { title: "Cards", desc: "Visa · Mastercard · Verve" },
         ].map((r) => (
           <div key={r.title} className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">{r.title}</p>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{r.title}</p>
             <p className="font-serif text-lg text-emerald-deep">{r.desc}</p>
-            <p className="mt-3 text-[11px] text-emerald-deep/50">
+            <p className="mt-3 text-[11px] text-muted-foreground">
               Manual credit for now. Pick a target below to record the payment.
             </p>
           </div>
@@ -69,7 +69,7 @@ function ActiveLoansPanel() {
             <div key={l.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
               <div>
                 <div className="text-sm font-semibold">{l.ref} · {l.product}</div>
-                <div className="text-[11px] text-emerald-deep/50">
+                <div className="text-[11px] text-muted-foreground">
                   Outstanding <Money amount={l.outstanding_principal} /> · Monthly {l.monthly_payment != null ? <Money amount={l.monthly_payment} /> : "—"}
                 </div>
               </div>
@@ -98,7 +98,7 @@ function RecentTransactionsPanel() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Ref</th>
                 <th className="px-6 py-3 font-medium">Kind</th>
                 <th className="px-6 py-3 font-medium">Channel</th>
@@ -110,12 +110,12 @@ function RecentTransactionsPanel() {
             <tbody className="divide-y divide-emerald-deep/5">
               {data.rows.map((t) => (
                 <tr key={t.id}>
-                  <td className="px-6 py-3 font-mono text-[11px] text-emerald-deep/70">{t.ref}</td>
+                  <td className="px-6 py-3 font-mono text-[11px] text-muted-foreground">{t.ref}</td>
                   <td className="px-6 py-3 text-sm capitalize">{t.kind.replace("_", " ")}</td>
-                  <td className="px-6 py-3 text-[11px] text-emerald-deep/60">{t.channel ?? "—"}</td>
+                  <td className="px-6 py-3 text-[11px] text-muted-foreground">{t.channel ?? "—"}</td>
                   <td className="px-6 py-3 text-right"><Money amount={t.amount} /></td>
                   <td className="px-6 py-3 text-right"><StatusPill status={t.status as any} /></td>
-                  <td className="px-6 py-3 text-right text-[11px] text-emerald-deep/50">{new Date(t.created_at).toLocaleString()}</td>
+                  <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">{new Date(t.created_at).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

@@ -81,7 +81,7 @@ function Body() {
                   "rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition " +
                   (kind === k
                     ? "bg-emerald-deep text-cream"
-                    : "border border-emerald-deep/10 text-emerald-deep/60 hover:bg-emerald-deep/5")
+                    : "border border-emerald-deep/10 text-muted-foreground hover:bg-emerald-deep/5")
                 }
               >
                 {k === "all" ? "All" : k === "loan_repayment" ? "Loan repay" : k}
@@ -127,7 +127,7 @@ function Queue({ kind }: { kind: KindFilter }) {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-6 py-3 font-medium">Ref</th>
               <th className="px-6 py-3 font-medium">Kind</th>
               <th className="px-6 py-3 font-medium">Member</th>
@@ -171,16 +171,16 @@ function PendingRow({ row }: { row: AdminPendingPayment }) {
 
   return (
     <tr>
-      <td className="px-6 py-3 font-mono text-[11px] text-emerald-deep/70">{row.ref}</td>
+      <td className="px-6 py-3 font-mono text-[11px] text-muted-foreground">{row.ref}</td>
       <td className="px-6 py-3 text-sm capitalize">{row.kind.replace("_", " ")}</td>
       <td className="px-6 py-3 text-sm">
         <div className="font-semibold">{row.member_name ?? "Member"}</div>
-        <div className="text-[11px] text-emerald-deep/50">{row.member_no ?? row.user_id.slice(0, 8)}</div>
+        <div className="text-[11px] text-muted-foreground">{row.member_no ?? row.user_id.slice(0, 8)}</div>
       </td>
-      <td className="px-6 py-3 text-sm text-emerald-deep/70">{target}</td>
-      <td className="px-6 py-3 text-sm text-emerald-deep/60">{row.channel ?? "—"}</td>
+      <td className="px-6 py-3 text-sm text-muted-foreground">{target}</td>
+      <td className="px-6 py-3 text-sm text-muted-foreground">{row.channel ?? "—"}</td>
       <td className="px-6 py-3 text-right"><Money amount={row.amount} /></td>
-      <td className="px-6 py-3 text-right text-[11px] text-emerald-deep/50">{new Date(row.created_at).toLocaleString()}</td>
+      <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">{new Date(row.created_at).toLocaleString()}</td>
       <td className="px-6 py-3 text-right">
         <div className="flex justify-end gap-2">
           <Button
@@ -232,7 +232,7 @@ function RejectDialog({ row, disabled }: { row: AdminPendingPayment; disabled?: 
             mut.mutate();
           }}
         >
-          <p className="text-sm text-emerald-deep/70">
+          <p className="text-sm text-muted-foreground">
             Marking this payment as failed will not move any balance. The member will see the reason on their transactions page.
           </p>
           <Textarea rows={3} placeholder="Reason for rejection" value={note} onChange={(e) => setNote(e.target.value)} required />

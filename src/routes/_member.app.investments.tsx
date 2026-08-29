@@ -156,7 +156,7 @@ function InvestmentsPage() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">
       <header>
         <h1 className="font-serif text-2xl text-emerald-deep dark:text-emerald-100">Investments & Shares</h1>
-        <p className="mt-1 text-sm text-emerald-deep/60 dark:text-emerald-200/60">
+        <p className="mt-1 text-sm text-muted-foreground dark:text-emerald-200/60">
           Buy cooperative share units and track dividends paid into your savings.
         </p>
       </header>
@@ -201,13 +201,13 @@ function InvestmentsPage() {
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
         <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Your holdings</h2>
         {data.holdings.length === 0 ? (
-          <p className="mt-3 text-sm text-emerald-deep/60 dark:text-emerald-200/60">
+          <p className="mt-3 text-sm text-muted-foreground dark:text-emerald-200/60">
             You don't hold any shares yet. Buy from a product below to get started.
           </p>
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+              <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
                 <tr>
                   <th className="py-2">Product</th>
                   <th>Units</th>
@@ -224,7 +224,7 @@ function InvestmentsPage() {
                     <tr key={h.id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
                       <td className="py-2">
                         <div className="font-medium text-emerald-deep dark:text-emerald-100">{h.product_name}</div>
-                        <div className="text-xs text-emerald-deep/50">{h.product_code}</div>
+                        <div className="text-xs text-muted-foreground">{h.product_code}</div>
                       </td>
                       <td>{h.units.toLocaleString()}</td>
                       <td>{money(h.cost_basis)}</td>
@@ -235,7 +235,7 @@ function InvestmentsPage() {
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => setBreakdownState({ holding: h, product })}
-                              className="rounded border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold hover:bg-gold/20 dark:bg-gold/20 dark:text-cream"
+                              className="rounded border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold hover:bg-gold/20 dark:bg-gold/20 dark:text-cream"
                             >
                               Details
                             </button>
@@ -267,7 +267,7 @@ function InvestmentsPage() {
       <section>
         <h2 className="mb-3 font-serif text-lg text-emerald-deep dark:text-emerald-100">Available products</h2>
         {data.products.length === 0 ? (
-          <p className="text-sm text-emerald-deep/60 dark:text-emerald-200/60">No active share products yet.</p>
+          <p className="text-sm text-muted-foreground dark:text-emerald-200/60">No active share products yet.</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.products.map((p) => (
@@ -282,16 +282,16 @@ function InvestmentsPage() {
                   </span>
                 </div>
                 {p.description && (
-                  <p className="mt-2 text-xs text-emerald-deep/60 dark:text-emerald-200/60">{p.description}</p>
+                  <p className="mt-2 text-xs text-muted-foreground dark:text-emerald-200/60">{p.description}</p>
                 )}
                 <dl className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                  <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Unit price</dt>
+                  <dt className="text-muted-foreground dark:text-emerald-200/60">Unit price</dt>
                   <dd className="text-right font-semibold text-emerald-deep dark:text-emerald-100">
                     {money(p.unit_price, p.currency)}
                   </dd>
-                  <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Dividend rate</dt>
+                  <dt className="text-muted-foreground dark:text-emerald-200/60">Dividend rate</dt>
                   <dd className="text-right">{(p.dividend_rate_annual * 100).toFixed(2)}% / yr</dd>
-                  <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Min units</dt>
+                  <dt className="text-muted-foreground dark:text-emerald-200/60">Min units</dt>
                   <dd className="text-right">{p.min_units}</dd>
                 </dl>
                 <button
@@ -310,16 +310,16 @@ function InvestmentsPage() {
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Investment activity</h2>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/60">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
             Immutable audit log
           </span>
         </div>
         {data.recent.length === 0 ? (
-          <p className="mt-3 text-sm text-emerald-deep/60 dark:text-emerald-200/60">No share transactions yet.</p>
+          <p className="mt-3 text-sm text-muted-foreground dark:text-emerald-200/60">No share transactions yet.</p>
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+              <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
                 <tr>
                   <th className="py-2">Ref</th>
                   <th>Date</th>
@@ -344,7 +344,7 @@ function InvestmentsPage() {
                       <td className="py-2 font-mono text-xs">{t.ref}</td>
                       <td className="tabular whitespace-nowrap">{new Date(t.created_at).toLocaleString()}</td>
                       <td>
-                        <span className="rounded-full border border-emerald-deep/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 dark:border-emerald-100/20 dark:text-emerald-100/80">
+                        <span className="rounded-full border border-emerald-deep/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:border-emerald-100/20 dark:text-emerald-100/80">
                           {label}
                         </span>
                       </td>
@@ -354,7 +354,7 @@ function InvestmentsPage() {
                         {sign}
                         {money(t.amount)}
                       </td>
-                      <td className="max-w-xs truncate text-xs text-emerald-deep/70 dark:text-emerald-200/70" title={t.note ?? ""}>
+                      <td className="max-w-xs truncate text-xs text-muted-foreground dark:text-emerald-200/70" title={t.note ?? ""}>
                         {t.note || "—"}
                       </td>
                     </tr>
@@ -475,7 +475,7 @@ function TradeDialog({
         <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
           {state.mode === "buy" ? "Buy" : "Sell"} — {state.product.name}
         </h3>
-        <p className="mt-1 text-xs uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/50">
+        <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/50">
           {step === "edit"
             ? "Step 1 of 2 · Details"
             : step === "review"
@@ -486,7 +486,7 @@ function TradeDialog({
         {step === "edit" ? (
           <div className="mt-4 space-y-3">
             <label className="block text-sm">
-              <span className="text-emerald-deep/70 dark:text-emerald-200/70">Savings account</span>
+              <span className="text-muted-foreground dark:text-emerald-200/70">Savings account</span>
               <select
                 value={accountId}
                 onChange={(e) => setAccountId(e.target.value)}
@@ -500,7 +500,7 @@ function TradeDialog({
               </select>
             </label>
             <label className="block text-sm">
-              <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+              <span className="text-muted-foreground dark:text-emerald-200/70">
                 Units {maxUnits != null && `(max ${maxUnits})`}
               </span>
               <input
@@ -513,7 +513,7 @@ function TradeDialog({
               />
             </label>
             <label className="block text-sm">
-              <span className="text-emerald-deep/70 dark:text-emerald-200/70">Note (optional)</span>
+              <span className="text-muted-foreground dark:text-emerald-200/70">Note (optional)</span>
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -535,17 +535,17 @@ function TradeDialog({
           <div className="mt-4 space-y-3 text-sm">
             <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
               <div className="flex justify-between">
-                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Action</span>
+                <span className="text-muted-foreground dark:text-emerald-200/70">Action</span>
                 <span className="font-semibold">
                   {state.mode === "buy" ? "Purchase" : "Sale"} · {units.toLocaleString()} units
                 </span>
               </div>
               <div className="mt-1 flex justify-between">
-                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Unit price</span>
+                <span className="text-muted-foreground dark:text-emerald-200/70">Unit price</span>
                 <span className="font-semibold">{money(price, ccy)}</span>
               </div>
               <div className="mt-1 flex justify-between">
-                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Savings account</span>
+                <span className="text-muted-foreground dark:text-emerald-200/70">Savings account</span>
                 <span className="font-semibold">
                   {account?.nickname ?? account?.plan_name ?? "—"}
                 </span>
@@ -556,7 +556,7 @@ function TradeDialog({
                 <span>Gross amount</span>
                 <span className="font-semibold">{money(quote.gross, ccy)}</span>
               </div>
-              <div className="mt-1 flex justify-between text-emerald-deep/80 dark:text-emerald-200/80">
+              <div className="mt-1 flex justify-between text-muted-foreground dark:text-emerald-200/80">
                 <span>Transaction fee ({(quote.feeRate * 100).toFixed(2)}%)</span>
                 <span>
                   {state.mode === "buy" ? "+" : "−"} {money(quote.fee, ccy)}
@@ -579,7 +579,7 @@ function TradeDialog({
                 Selected savings account balance is below the total to debit.
               </p>
             )}
-            <p className="text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+            <p className="text-xs text-muted-foreground dark:text-emerald-200/60">
               Fees are estimates and applied by the system at settlement. Final posted amount may
               vary slightly if the unit price changes before confirmation.
             </p>
@@ -594,19 +594,19 @@ function TradeDialog({
             </div>
             <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
               <div className="flex justify-between text-xs">
-                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Reference</span>
+                <span className="text-muted-foreground dark:text-emerald-200/60">Reference</span>
                 <span className="font-mono">{receipt?.ref}</span>
               </div>
               <div className="mt-1 flex justify-between text-xs">
-                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Timestamp</span>
+                <span className="text-muted-foreground dark:text-emerald-200/60">Timestamp</span>
                 <span className="tabular">{receipt ? new Date(receipt.timestamp).toLocaleString() : ""}</span>
               </div>
               <div className="mt-1 flex justify-between text-xs">
-                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Product</span>
+                <span className="text-muted-foreground dark:text-emerald-200/60">Product</span>
                 <span>{state.product.name}</span>
               </div>
               <div className="mt-1 flex justify-between text-xs">
-                <span className="text-emerald-deep/60 dark:text-emerald-200/60">Units</span>
+                <span className="text-muted-foreground dark:text-emerald-200/60">Units</span>
                 <span className="tabular">{units.toLocaleString()}</span>
               </div>
             </div>
@@ -615,7 +615,7 @@ function TradeDialog({
                 <span>Gross amount</span>
                 <span className="tabular font-semibold">{money(quote.gross, ccy)}</span>
               </div>
-              <div className="mt-1 flex justify-between text-emerald-deep/80 dark:text-emerald-200/80">
+              <div className="mt-1 flex justify-between text-muted-foreground dark:text-emerald-200/80">
                 <span>Transaction fee ({(quote.feeRate * 100).toFixed(2)}%)</span>
                 <span className="tabular">
                   {state.mode === "buy" ? "+" : "−"} {money(quote.fee, ccy)}
@@ -628,7 +628,7 @@ function TradeDialog({
                 <span className="tabular font-serif text-base">{money(quote.net, ccy)}</span>
               </div>
             </div>
-            <p className="text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+            <p className="text-xs text-muted-foreground dark:text-emerald-200/60">
               This receipt is your permanent record of the trade. A matching entry is filed in the immutable audit log.
             </p>
           </div>
@@ -769,14 +769,14 @@ function TransferDialog({
         <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
           Transfer — {state.product.name}
         </h3>
-        <p className="mt-1 text-xs uppercase tracking-widest text-emerald-deep/50 dark:text-emerald-200/50">
+        <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/50">
           Step {step === "edit" ? "1 of 2 · Recipient & units" : "2 of 2 · Review & confirm"}
         </p>
 
         {step === "edit" ? (
           <div className="mt-4 space-y-3">
             <label className="block text-sm">
-              <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+              <span className="text-muted-foreground dark:text-emerald-200/70">
                 Recipient member number
               </span>
               <input
@@ -787,7 +787,7 @@ function TransferDialog({
               />
             </label>
             <label className="block text-sm">
-              <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+              <span className="text-muted-foreground dark:text-emerald-200/70">
                 Units (max {maxUnits.toLocaleString()})
               </span>
               <input
@@ -802,7 +802,7 @@ function TransferDialog({
               />
             </label>
             <label className="block text-sm">
-              <span className="text-emerald-deep/70 dark:text-emerald-200/70">Note (optional)</span>
+              <span className="text-muted-foreground dark:text-emerald-200/70">Note (optional)</span>
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -822,7 +822,7 @@ function TransferDialog({
                   {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(value)}
                 </span>
               </div>
-              <p className="mt-2 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+              <p className="mt-2 text-xs text-muted-foreground dark:text-emerald-200/60">
                 No cash moves between savings accounts. A proportional share of your cost basis moves
                 with the units.
               </p>
@@ -832,15 +832,15 @@ function TransferDialog({
           <div className="mt-4 space-y-3 text-sm">
             <div className="rounded-md border border-emerald-deep/10 p-3 dark:border-emerald-100/10">
               <div className="flex justify-between">
-                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Recipient</span>
+                <span className="text-muted-foreground dark:text-emerald-200/70">Recipient</span>
                 <span className="font-mono font-semibold">{memberNo.trim()}</span>
               </div>
               <div className="mt-1 flex justify-between">
-                <span className="text-emerald-deep/70 dark:text-emerald-200/70">Units</span>
+                <span className="text-muted-foreground dark:text-emerald-200/70">Units</span>
                 <span className="font-semibold">{units.toLocaleString()}</span>
               </div>
               <div className="mt-1 flex justify-between">
-                <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+                <span className="text-muted-foreground dark:text-emerald-200/70">
                   Reference value
                 </span>
                 <span className="font-semibold">
@@ -848,7 +848,7 @@ function TransferDialog({
                 </span>
               </div>
               <div className="mt-1 flex justify-between">
-                <span className="text-emerald-deep/70 dark:text-emerald-200/70">
+                <span className="text-muted-foreground dark:text-emerald-200/70">
                   Your remaining units
                 </span>
                 <span className="font-semibold">{(maxUnits - units).toLocaleString()}</span>
@@ -859,7 +859,7 @@ function TransferDialog({
                 Note: {note}
               </p>
             )}
-            <p className="text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+            <p className="text-xs text-muted-foreground dark:text-emerald-200/60">
               This transfer is final. Please confirm the recipient's member number matches the
               person you intend to send units to.
             </p>
@@ -924,7 +924,7 @@ function BreakdownDialog({
       ? "text-emerald-600 dark:text-emerald-400"
       : n < 0
         ? "text-rose-600 dark:text-rose-400"
-        : "text-emerald-deep/70 dark:text-emerald-100/70";
+        : "text-muted-foreground dark:text-emerald-100/70";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -934,20 +934,20 @@ function BreakdownDialog({
             <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
               Cost basis — {state.product.name}
             </h3>
-            <p className="text-xs font-mono text-emerald-deep/50 dark:text-emerald-200/50">
+            <p className="text-xs font-mono text-muted-foreground dark:text-emerald-200/50">
               {state.product.code}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded px-3 py-1 text-xs uppercase tracking-widest text-emerald-deep/60 hover:bg-emerald-deep/5 dark:text-emerald-200/60"
+            className="rounded px-3 py-1 text-xs uppercase tracking-widest text-muted-foreground hover:bg-emerald-deep/5 dark:text-emerald-200/60"
           >
             Close
           </button>
         </div>
 
         {isLoading && (
-          <p className="mt-6 text-sm text-emerald-deep/60 dark:text-emerald-200/60">
+          <p className="mt-6 text-sm text-muted-foreground dark:text-emerald-200/60">
             Loading breakdown…
           </p>
         )}
@@ -988,17 +988,17 @@ function BreakdownDialog({
               />
             </div>
 
-            <h4 className="mt-6 font-serif text-sm uppercase tracking-widest text-emerald-deep/70 dark:text-emerald-200/70">
+            <h4 className="mt-6 font-serif text-sm uppercase tracking-widest text-muted-foreground dark:text-emerald-200/70">
               Transaction history
             </h4>
             {data.lots.length === 0 ? (
-              <p className="mt-2 text-sm text-emerald-deep/60 dark:text-emerald-200/60">
+              <p className="mt-2 text-sm text-muted-foreground dark:text-emerald-200/60">
                 No transactions recorded for this product.
               </p>
             ) : (
               <div className="mt-2 overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="text-left text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+                  <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
                     <tr>
                       <th className="py-2">Date</th>
                       <th>Ref</th>
@@ -1041,7 +1041,7 @@ function BreakdownDialog({
                             {fmt(lot.amount)}
                           </td>
                           <td className="text-right">{fmt(lot.running_avg_cost)}</td>
-                          <td className={`text-right ${lot.realized_gain != null ? gainClass(lot.realized_gain) : "text-emerald-deep/40"}`}>
+                          <td className={`text-right ${lot.realized_gain != null ? gainClass(lot.realized_gain) : "text-muted-foreground"}`}>
                             {lot.realized_gain != null ? fmt(lot.realized_gain) : "—"}
                           </td>
                         </tr>
@@ -1051,7 +1051,7 @@ function BreakdownDialog({
                 </table>
               </div>
             )}
-            <p className="mt-4 text-xs text-emerald-deep/50 dark:text-emerald-200/50">
+            <p className="mt-4 text-xs text-muted-foreground dark:text-emerald-200/50">
               Realized P/L uses the weighted-average cost method. Transfers between members
               move cost basis but are not recorded as realized gains or losses.
             </p>
@@ -1065,7 +1065,7 @@ function BreakdownDialog({
 function StatTile({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-xl border border-emerald-deep/10 bg-emerald-deep/[0.02] p-3 dark:border-emerald-100/10 dark:bg-emerald-100/[0.03]">
-      <div className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+      <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
         {label}
       </div>
       <div className="mt-1 font-semibold text-emerald-deep dark:text-emerald-100">{value}</div>

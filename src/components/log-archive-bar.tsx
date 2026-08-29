@@ -108,11 +108,11 @@ export function LogArchiveBar({
             <div className="space-y-3 text-sm">
               <div className="rounded-lg border border-emerald-deep/10 bg-cream/40 p-3">
                 <p className="text-2xl font-semibold tabular-nums">{count}</p>
-                <p className="text-xs text-emerald-deep/70">
+                <p className="text-xs text-muted-foreground">
                   selected {label} will be moved to the recycle bin
                 </p>
               </div>
-              <p className="flex items-start gap-2 rounded-lg border border-emerald-deep/10 p-3 text-xs text-emerald-deep/80">
+              <p className="flex items-start gap-2 rounded-lg border border-emerald-deep/10 p-3 text-xs text-muted-foreground">
                 <Undo2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
                   <strong>Undo window:</strong> a full snapshot of each row is kept for 2 years
@@ -123,14 +123,14 @@ export function LogArchiveBar({
                   . After that it is deleted automatically by retention policy.
                 </span>
               </p>
-              <p className="flex items-start gap-2 text-xs text-emerald-deep/70">
+              <p className="flex items-start gap-2 text-xs text-muted-foreground">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>This purge is itself recorded in the audit log with your name.</span>
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs text-emerald-deep/70">
+              <p className="text-xs text-muted-foreground">
                 Type <span className="font-mono font-semibold">{CONFIRM_WORD}</span> to confirm.
                 Snapshots stay restorable for 2 years.
               </p>

@@ -54,7 +54,7 @@ function SupportPage() {
         ].map(([t, d]) => (
           <div key={t} className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
             <p className="font-serif text-xl text-emerald-deep">{t}</p>
-            <p className="mt-1 text-xs text-emerald-deep/60">{d}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{d}</p>
           </div>
         ))}
       </div>
@@ -64,10 +64,10 @@ function SupportPage() {
           {FAQS.map(([q, a]) => (
             <details key={q} className="group p-4">
               <summary className="cursor-pointer list-none text-sm font-semibold marker:hidden">
-                <span className="mr-2 text-gold">＋</span>
+                <span className="mr-2 text-brand-gold-ink dark:text-brand-gold">＋</span>
                 {q}
               </summary>
-              <p className="mt-2 pl-6 text-sm text-emerald-deep/60">{a}</p>
+              <p className="mt-2 pl-6 text-sm text-muted-foreground">{a}</p>
             </details>
           ))}
         </div>

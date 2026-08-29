@@ -33,7 +33,7 @@ export function UniversalClock() {
     >
       <Globe className="size-3.5" />
       <span aria-live="off">{now ? formatUtc(now) : "--:--:--"}</span>
-      <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70">UTC</span>
+      <span className="text-[10px] uppercase tracking-widest text-muted-foreground">UTC</span>
     </div>
   );
 }
