@@ -171,28 +171,29 @@
 
 
 .dark {
+  /* Dark mode keeps the same ramp; only which rung each role uses changes. */
   --emerald-deep: #e3efec;      /* invert: bright body text */
-  --emerald-mid: #2dd4bf;
-  --gold: #f5c451;
-  --cream: #04140f;
+  --emerald-mid: var(--brand-teal-glow);
+  --gold: var(--brand-gold);
+  --cream: var(--brand-forest-deep);
   --success: #10b981;
   --warning: #f59e0b;
   --info: #38bdf8;
 
-  --background: #04140f;
+  --background: var(--brand-forest-deep);
   --foreground: #e3efec;
-  --card: #0a251f;
+  --card: var(--brand-forest-soft);
   --card-foreground: #e3efec;
-  --popover: #0a251f;
+  --popover: var(--brand-forest-soft);
   --popover-foreground: #e3efec;
   --primary: #14b8a6;
-  --primary-foreground: #04140f;
+  --primary-foreground: var(--brand-forest-deep);
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #e2e8f0;
   --muted: rgba(255, 255, 255, 0.05);
   --muted-foreground: rgba(226, 232, 240, 0.78);
-  --accent: #2dd4bf;
-  --accent-foreground: #071120;
+  --accent: var(--brand-teal-glow);
+  --accent-foreground: var(--brand-forest-deep);
   --destructive: #f87171;
   --destructive-foreground: #0b1220;
   --border: rgba(148, 163, 184, 0.16);
@@ -202,8 +203,8 @@
   /* Dark-mode chart palette — brighter, higher-chroma variants that clear
      WCAG contrast on the dark card surface. */
   --chart-1: #5eead4;   /* teal → aqua */
-  --chart-2: #2dd4bf;   /* teal */
-  --chart-3: #f5c451;   /* gold */
+  --chart-2: var(--brand-teal-glow);
+  --chart-3: var(--brand-gold);
   --chart-4: #38bdf8;   /* sky */
   --chart-5: #c084fc;   /* violet */
   --chart-6: #fb7185;   /* rose */
@@ -213,13 +214,14 @@
 
   --sidebar: #03110d;
   --sidebar-foreground: #e3efec;
-  --sidebar-primary: #f5c451;
+  --sidebar-primary: var(--brand-gold);
   --sidebar-primary-foreground: #03110d;
   --sidebar-accent: rgba(255, 255, 255, 0.06);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #2dd4bf;
+  --sidebar-ring: var(--brand-teal-glow);
 }
+
 
 @layer base {
   * {
