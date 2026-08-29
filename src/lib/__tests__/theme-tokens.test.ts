@@ -125,6 +125,7 @@ describe("brand palette parity (CSS ↔ TypeScript)", () => {
     ["goldDeep", "--brand-gold-deep"],
     ["gold", "--brand-gold"],
     ["goldLight", "--brand-gold-light"],
+    ["goldInk", "--brand-gold-ink"],
   ];
 
   it.each(pairs)("BRAND.%s matches %s", (key, token) => {
