@@ -14,13 +14,11 @@ import type { VaultRetentionPolicy, VaultPurgeResult } from "@/lib/kyc-vault-pur
 export type { VaultRetentionPolicy, VaultPurgeResult };
 
 async function superAdminCtx(context: any) {
-  const sb = context.supabase;
-  const { data: isSuper, error } = await sb.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "super_admin",
-  });
-  if (error) throw new Error(error.message);
-  if (!isSuper) throw new Error("Forbidden: super_admin role required");
+  // `public.has_role` was removed when the security-definer helpers moved to the
+  // private schema, so verify the role directly through the authenticated client
+  // (RLS lets a user read their own role rows).
+  const roles = await loadRoleSet(context.supabase, context.userId as string);
+  if (!roles.has("super_admin")) throw new Error("Forbidden: super_admin role required");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return {
     admin: supabaseAdmin as any,
