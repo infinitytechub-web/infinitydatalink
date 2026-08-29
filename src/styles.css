@@ -141,18 +141,21 @@
   --secondary-foreground: var(--brand-forest);
   --muted: #e9f0ee;
   --muted-foreground: #4b6560;
-  --accent: var(--brand-teal-bright);
+  /* Accent fills carry white labels, so the light-mode accent uses the darker
+     teal rung (5.5:1) instead of the bright rung (3.7:1). */
+  --accent: var(--brand-teal);
   --accent-foreground: #ffffff;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
   --border: #dbe6e2;
-  --input: #c2d3ce;
-  --ring: rgba(13, 148, 136, 0.45);
+  /* Input borders are non-text UI boundaries: ≥3:1 against the card. */
+  --input: #6f8e87;
+  --ring: rgba(15, 118, 110, 0.9);
 
   /* Chart series — dark-mode-safe palette lives in `.dark` below. */
   --chart-1: var(--brand-teal);
   --chart-2: var(--brand-teal-bright);
-  --chart-3: var(--brand-gold);
+  --chart-3: var(--brand-gold-ink);
   --chart-4: #0284c7;   /* sky */
   --chart-5: #7c3aed;   /* violet */
   --chart-6: #dc2626;   /* crimson */
