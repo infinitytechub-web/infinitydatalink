@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_admin/admin/savings/reconciliation")({
   errorComponent: ({ error }) => (
     <div className="p-6"><ErrorState title="Failed to load reconciliation" message={error.message} /></div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
+  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
 
 function ReconciliationPage() {
@@ -114,14 +114,14 @@ function Body({ onlyDiscrepancies, onToggle }: { onlyDiscrepancies: boolean; onT
         }
       >
         {data.rows.length === 0 ? (
-          <div className="flex items-center gap-2 p-6 text-sm text-emerald-deep/70">
+          <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
             <CheckCircle2 className="h-4 w-4 text-emerald-mid" />
             Every savings balance matches its cleared ledger movements.
           </div>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Member</th>
                 <th className="px-6 py-3 font-medium">Account</th>
                 <th className="px-6 py-3 text-right font-medium">Recorded</th>
@@ -137,11 +137,11 @@ function Body({ onlyDiscrepancies, onToggle }: { onlyDiscrepancies: boolean; onT
                 <tr key={r.account_id}>
                   <td className="px-6 py-3 text-sm">
                     <div className="font-semibold">{r.member_name ?? "Member"}</div>
-                    <div className="text-[11px] text-emerald-deep/50">{r.member_no ?? r.account_id.slice(0, 8)}</div>
+                    <div className="text-[11px] text-muted-foreground">{r.member_no ?? r.account_id.slice(0, 8)}</div>
                   </td>
-                  <td className="px-6 py-3 text-sm text-emerald-deep/70">
+                  <td className="px-6 py-3 text-sm text-muted-foreground">
                     <div>{r.nickname ?? r.plan_name ?? "Savings"}</div>
-                    <div className="text-[11px] capitalize text-emerald-deep/50">{r.status}</div>
+                    <div className="text-[11px] capitalize text-muted-foreground">{r.status}</div>
                   </td>
                   <td className="px-6 py-3 text-right"><Money amount={r.recorded_balance} /></td>
                   <td className="px-6 py-3 text-right"><Money amount={r.computed_balance} /></td>
@@ -151,14 +151,14 @@ function Body({ onlyDiscrepancies, onToggle }: { onlyDiscrepancies: boolean; onT
                         <AlertTriangle className="h-3 w-3" /> {formatMoney(r.delta)}
                       </span>
                     ) : (
-                      <span className="tabular text-[11px] text-emerald-deep/50">{formatMoney(r.delta)}</span>
+                      <span className="tabular text-[11px] text-muted-foreground">{formatMoney(r.delta)}</span>
                     )}
                   </td>
                   <td className="tabular px-6 py-3 text-right text-sm">{r.movements}</td>
-                  <td className="px-6 py-3 text-right text-[11px] text-emerald-deep/60">
+                  <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">
                     {r.pending_count > 0 ? `${r.pending_count} · ${formatMoney(r.pending_amount)}` : "—"}
                   </td>
-                  <td className="px-6 py-3 text-right text-[11px] text-emerald-deep/50">
+                  <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">
                     {r.last_movement_at ? new Date(r.last_movement_at).toLocaleDateString() : "—"}
                   </td>
                 </tr>

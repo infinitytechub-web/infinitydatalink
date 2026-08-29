@@ -115,7 +115,7 @@ export function KycResubmissionPanel({
   return (
     <SectionCard title="Requested revisions">
       <div className="space-y-6 p-6">
-        <p className="text-sm text-emerald-deep/80">
+        <p className="text-sm text-muted-foreground">
           Your verification was returned. Update only the {items.length} item
           {items.length === 1 ? "" : "s"} below, then resubmit — everything else stays as reviewed.
         </p>
@@ -124,7 +124,7 @@ export function KycResubmissionPanel({
             "rounded border px-3 py-2 text-sm " +
             (resubWindow.blocked_reason
               ? "border-destructive/30 bg-destructive/5 text-destructive"
-              : "border-emerald-deep/10 bg-cream/40 text-emerald-deep/80")
+              : "border-emerald-deep/10 bg-cream/40 text-muted-foreground")
           }
           role={resubWindow.blocked_reason ? "alert" : undefined}
         >
@@ -153,7 +153,7 @@ export function KycResubmissionPanel({
         </div>
 
         {reviewerNotes ? (
-          <div className="rounded border border-emerald-deep/10 bg-cream/40 px-3 py-2 text-sm text-emerald-deep/80">
+          <div className="rounded border border-emerald-deep/10 bg-cream/40 px-3 py-2 text-sm text-muted-foreground">
             <span className="font-semibold">Reviewer note:</span> {reviewerNotes}
           </div>
         ) : null}
@@ -164,9 +164,9 @@ export function KycResubmissionPanel({
               {item.resolved ? (
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
               ) : (
-                <CircleDashed className="h-4 w-4 shrink-0 text-emerald-deep/40" />
+                <CircleDashed className="h-4 w-4 shrink-0 text-muted-foreground" />
               )}
-              <span className={item.resolved ? "text-emerald-deep/60 line-through" : ""}>
+              <span className={item.resolved ? "text-muted-foreground line-through" : ""}>
                 {item.label}
               </span>
             </li>
@@ -230,7 +230,7 @@ export function KycResubmissionPanel({
               Resubmit for review
             </Button>
             {!canResubmit ? (
-              <span className="text-[11px] text-emerald-deep/60">
+              <span className="text-[11px] text-muted-foreground">
                 {resubWindow.blocked_reason === "deadline"
                   ? "The resubmission deadline has passed."
                   : resubWindow.blocked_reason === "attempts"
@@ -296,7 +296,7 @@ function DocReupload({
         {resolved ? (
           <CheckCircle2 className="h-4 w-4 text-success" />
         ) : (
-          <CircleDashed className="h-4 w-4 text-emerald-deep/40" />
+          <CircleDashed className="h-4 w-4 text-muted-foreground" />
         )}
         {label}
       </div>

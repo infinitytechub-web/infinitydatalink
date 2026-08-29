@@ -65,10 +65,10 @@ function UnsubscribePage() {
     <main className="min-h-screen bg-cream flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-md rounded-lg border border-emerald-deep/10 bg-card p-8 shadow-sm">
         <h1 className="font-serif text-2xl text-emerald-deep">Email preferences</h1>
-        <p className="mt-2 text-sm text-emerald-deep/60">
+        <p className="mt-2 text-sm text-muted-foreground">
           Manage your IT-360 CashApp email subscription.
         </p>
-        <div className="mt-6 text-sm text-emerald-deep/80">
+        <div className="mt-6 text-sm text-muted-foreground">
           {state === "loading" && "Validating your link…"}
           {state === "invalid" && (
             <p className="text-destructive">This unsubscribe link is invalid or has expired.</p>

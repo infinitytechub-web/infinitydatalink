@@ -235,7 +235,7 @@ function BinTable() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <p className="text-xs text-emerald-deep/70">
+            <p className="text-xs text-muted-foreground">
               Type <span className="font-mono font-semibold">DELETE</span> to confirm.
             </p>
             <Input
@@ -302,7 +302,7 @@ function BinTable() {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
-            <thead className="bg-cream/40 text-[10px] uppercase tracking-wider text-emerald-deep/60">
+            <thead className="bg-cream/40 text-[10px] uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="p-3 text-left">
                   <input
@@ -344,7 +344,7 @@ function BinTable() {
                   <td className="p-3 font-mono text-[11px]">
                     {new Date(row.deleted_at).toLocaleString()}
                   </td>
-                  <td className="p-3 font-mono text-[11px] text-emerald-deep/60">
+                  <td className="p-3 font-mono text-[11px] text-muted-foreground">
                     {new Date(row.purge_after).toLocaleDateString()}
                   </td>
                 </tr>

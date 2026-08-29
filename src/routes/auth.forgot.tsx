@@ -19,12 +19,12 @@ function Forgot() {
     <div className="flex min-h-screen items-center justify-center bg-cream px-6 font-sans">
       <div className="w-full max-w-md rounded-sm border border-emerald-deep/5 bg-card p-8 shadow-sm">
         <AuthBrandMark className="mb-6" />
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
           Password reset
         </p>
         <h1 className="mt-1 font-serif text-2xl text-emerald-deep">Recover your account</h1>
         {sent ? (
-          <p className="mt-6 text-sm text-emerald-deep/70">
+          <p className="mt-6 text-sm text-muted-foreground">
             If <span className="font-mono">{email}</span> is registered, we've sent a reset link.
             Please check your inbox.
           </p>

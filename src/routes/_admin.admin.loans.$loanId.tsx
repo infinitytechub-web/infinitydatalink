@@ -26,7 +26,7 @@ function AdminLoanDetail() {
   const { loanId } = Route.useParams();
   return (
     <>
-      <div className="mb-2 text-[10px] uppercase tracking-widest text-emerald-deep/60">
+      <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
         <Link to="/admin/loans" className="hover:underline">← Loans pipeline</Link>
       </div>
       <PageHeader
@@ -60,27 +60,27 @@ function DetailBody({ loanId }: { loanId: string }) {
       >
         <div className="grid gap-6 p-6 md:grid-cols-2 text-sm">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Member</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Member</div>
             <div className="font-medium">{loan.member_name ?? "—"}</div>
-            <div className="tabular text-[11px] text-emerald-deep/50">{loan.member_no ?? loan.user_id.slice(0, 8)}</div>
+            <div className="tabular text-[11px] text-muted-foreground">{loan.member_no ?? loan.user_id.slice(0, 8)}</div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Terms</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Terms</div>
             <div>{loan.term_months} months · {loan.interest_rate}% p.a.</div>
-            <div className="text-[11px] text-emerald-deep/50">
+            <div className="text-[11px] text-muted-foreground">
               First due {loan.first_payment_at ?? "—"} · Matures {loan.maturity_at ?? "—"}
             </div>
           </div>
           {loan.purpose && (
             <div className="md:col-span-2">
-              <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Purpose</div>
-              <div className="text-emerald-deep/80">{loan.purpose}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Purpose</div>
+              <div className="text-muted-foreground">{loan.purpose}</div>
             </div>
           )}
           {loan.decision_note && (
             <div className="md:col-span-2">
-              <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Decision note</div>
-              <div className="text-emerald-deep/80">{loan.decision_note}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Decision note</div>
+              <div className="text-muted-foreground">{loan.decision_note}</div>
             </div>
           )}
         </div>
@@ -95,7 +95,7 @@ function DetailBody({ loanId }: { loanId: string }) {
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">#</th>
                 <th className="px-6 py-3 font-medium">Due date</th>
                 <th className="px-6 py-3 text-right font-medium">Principal</th>
@@ -143,7 +143,7 @@ function DisburseCard({ loanId, loanRef }: { loanId: string; loanRef: string }) 
     <SectionCard title="Disburse">
       <div className="grid gap-3 p-6 md:grid-cols-[220px_1fr_auto] md:items-end">
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Channel</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Channel</span>
           <select
             value={channel}
             onChange={(e) => setChannel(e.target.value)}
@@ -156,7 +156,7 @@ function DisburseCard({ loanId, loanRef }: { loanId: string; loanRef: string }) 
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Note (optional)</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Note (optional)</span>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -197,10 +197,10 @@ function RepaymentCard({ loanId, outstanding, monthly }: { loanId: string; outst
   });
 
   return (
-    <SectionCard title="Record repayment" action={<span className="text-[11px] text-emerald-deep/50">Outstanding <Money amount={outstanding} /></span>}>
+    <SectionCard title="Record repayment" action={<span className="text-[11px] text-muted-foreground">Outstanding <Money amount={outstanding} /></span>}>
       <div className="grid gap-3 p-6 md:grid-cols-[160px_180px_1fr_auto] md:items-end">
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Amount (GH₵)</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Amount (GH₵)</span>
           <input
             inputMode="decimal"
             value={amount}
@@ -209,7 +209,7 @@ function RepaymentCard({ loanId, outstanding, monthly }: { loanId: string; outst
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Channel</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Channel</span>
           <select
             value={channel}
             onChange={(e) => setChannel(e.target.value)}
@@ -222,7 +222,7 @@ function RepaymentCard({ loanId, outstanding, monthly }: { loanId: string; outst
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Note (optional)</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Note (optional)</span>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}

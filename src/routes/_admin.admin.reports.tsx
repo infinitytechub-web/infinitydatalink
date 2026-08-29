@@ -63,8 +63,8 @@ function ReportsPage() {
           description="Restricted analytics workspace."
         />
         <SectionCard title="Access denied">
-          <div className="flex items-center gap-3 p-6 text-sm text-emerald-deep/80">
-            <Lock className="h-4 w-4 text-gold" />
+          <div className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
+            <Lock className="h-4 w-4 text-brand-gold-ink dark:text-brand-gold" />
             {user
               ? "Your role does not include reporting privileges. Contact a Super Admin to be granted an admin role with export permissions."
               : "Sign in with an authorised admin account to view reports."}
@@ -131,7 +131,7 @@ function ReportsBody() {
                   className={`rounded px-3 py-1 font-bold ${
                     s.granularity === g
                       ? "bg-emerald-deep text-cream"
-                      : "text-emerald-deep/70 hover:bg-cream/50"
+                      : "text-muted-foreground hover:bg-cream/50"
                   }`}
                 >
                   {g}
@@ -145,7 +145,7 @@ function ReportsBody() {
                 search: { from: iso(DEFAULT_FROM), to: iso(DEFAULT_TO), granularity: "day" },
               })
             }
-            className="ml-auto rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+            className="ml-auto rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
           >
             Reset
           </button>
@@ -260,7 +260,7 @@ function TopProducts({ data, s }: { data: AdminReport; s: SearchInput }) {
       ) : (
         <table className="w-full">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-6 py-3 font-medium">Product</th>
               <th className="px-6 py-3 text-right font-medium">Loans</th>
               <th className="px-6 py-3 text-right font-medium">Total</th>
@@ -283,7 +283,7 @@ function TopProducts({ data, s }: { data: AdminReport; s: SearchInput }) {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+    <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
       {label}
       {children}
     </label>

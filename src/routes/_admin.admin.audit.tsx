@@ -163,7 +163,7 @@ function AuditContent() {
             onClick={() =>
               navigate({ search: { decision: "all", member: "", from: "", to: "", page: 1, pageSize: s.pageSize, selected: "" } })
             }
-            className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+            className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
           >
             Reset
           </button>
@@ -178,7 +178,7 @@ function AuditContent() {
         <>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-4 py-3 font-medium">
                   <input
                     type="checkbox"
@@ -216,7 +216,7 @@ function AuditContent() {
                     />
                   </td>
 
-                  <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
+                  <td className="tabular px-6 py-4 text-xs text-muted-foreground">
                     {new Date(e.created_at).toLocaleString()}
                   </td>
                   <td className="px-6 py-4">
@@ -224,26 +224,26 @@ function AuditContent() {
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="tabular font-semibold">{e.loan_ref ?? "—"}</div>
-                    <div className="text-[11px] text-emerald-deep/50 truncate max-w-[10rem]">
+                    <div className="text-[11px] text-muted-foreground truncate max-w-[10rem]">
                       {e.target ?? ""}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="font-medium">{e.member_name ?? "—"}</div>
-                    <div className="tabular text-[11px] text-emerald-deep/50">{e.member_no ?? ""}</div>
+                    <div className="tabular text-[11px] text-muted-foreground">{e.member_no ?? ""}</div>
                   </td>
                   <td className="tabular px-6 py-4 text-right text-sm">
                     {e.amount != null ? formatMoney(e.amount) : "—"}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="font-medium">{e.actor_email ?? "—"}</div>
-                    <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
                       {e.actor_role ?? "—"}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-emerald-deep/80 max-w-md whitespace-pre-wrap">
+                  <td className="px-6 py-4 text-xs text-muted-foreground max-w-md whitespace-pre-wrap">
                     <div className="line-clamp-2">
-                      {e.note ?? <span className="text-emerald-deep/40">— no note —</span>}
+                      {e.note ?? <span className="text-muted-foreground">— no note —</span>}
                     </div>
                     <button
                       type="button"
@@ -307,7 +307,7 @@ function AuditDetailsDialog({
           <div className="space-y-5 text-sm">
             <div className="flex items-center justify-between rounded border border-emerald-deep/10 bg-cream/30 px-4 py-3">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Decision
                 </div>
                 <div className="mt-1">
@@ -315,10 +315,10 @@ function AuditDetailsDialog({
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Timestamp
                 </div>
-                <div className="tabular mt-1 text-xs text-emerald-deep/80">
+                <div className="tabular mt-1 text-xs text-muted-foreground">
                   {new Date(entry.created_at).toLocaleString()}
                 </div>
               </div>
@@ -354,8 +354,8 @@ function AuditDetailsDialog({
             </Section>
 
             <Section title="Justification">
-              <div className="whitespace-pre-wrap rounded border border-emerald-deep/10 bg-card px-4 py-3 text-xs text-emerald-deep/80">
-                {entry.note ?? <span className="text-emerald-deep/40">— no note recorded —</span>}
+              <div className="whitespace-pre-wrap rounded border border-emerald-deep/10 bg-card px-4 py-3 text-xs text-muted-foreground">
+                {entry.note ?? <span className="text-muted-foreground">— no note recorded —</span>}
               </div>
             </Section>
 
@@ -375,14 +375,14 @@ function AuditDetailsDialog({
             <Link
               to="/admin/members"
               onClick={onClose}
-              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 hover:bg-cream/50"
+              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
             >
               View member →
             </Link>
             <Link
               to="/admin/loans"
               onClick={onClose}
-              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 hover:bg-cream/50"
+              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
             >
               View loan →
             </Link>
@@ -421,14 +421,14 @@ function AuditDetailsDialog({
                 };
                 copy(JSON.stringify(payload, null, 2), "Full metadata");
               }}
-              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/80 hover:bg-cream/50"
+              className="rounded border border-emerald-deep/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
             >
               Copy full metadata
             </button>
           </div>
           <button
             onClick={onClose}
-            className="rounded border border-emerald-deep/15 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+            className="rounded border border-emerald-deep/15 px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
           >
             Close
           </button>
@@ -441,7 +441,7 @@ function AuditDetailsDialog({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {title}
       </div>
       <div className="divide-y divide-emerald-deep/5 rounded border border-emerald-deep/10 bg-card">
@@ -466,7 +466,7 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-2.5 text-xs">
-      <div className="text-emerald-deep/50">{label}</div>
+      <div className="text-muted-foreground">{label}</div>
       <div className="flex items-center gap-2">
         <div
           className={[
@@ -480,7 +480,7 @@ function Row({
         {onCopy && (
           <button
             onClick={onCopy}
-            className="rounded border border-emerald-deep/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-emerald-deep/60 hover:bg-cream/50"
+            className="rounded border border-emerald-deep/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
           >
             Copy
           </button>
@@ -493,7 +493,7 @@ function Row({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
       {children}
     </label>
   );

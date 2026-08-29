@@ -17,7 +17,7 @@ function SettingsPage() {
       <SectionCard title="Region preset">
         <div className="grid gap-4 p-6 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/50">
+            <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               Country / region
             </label>
             <select
@@ -59,7 +59,7 @@ function SettingsPage() {
 function TextInput({ label, value }: { label: string; value: string }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/50">
+      <span className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       <input

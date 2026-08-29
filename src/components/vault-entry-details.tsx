@@ -83,7 +83,7 @@ export function VaultEntryDetailsDialog({
             </span>
           </div>
         ) : data?.restorable ? (
-          <div className="flex items-center gap-2 rounded border border-emerald-mid/40 bg-emerald-mid/10 px-3 py-2 text-xs text-emerald-deep/80">
+          <div className="flex items-center gap-2 rounded border border-emerald-mid/40 bg-emerald-mid/10 px-3 py-2 text-xs text-muted-foreground">
             <ShieldCheck className="size-4 shrink-0" /> Validated — this record can be restored to “
             {review?.previous_kyc ?? "—"}”.
           </div>

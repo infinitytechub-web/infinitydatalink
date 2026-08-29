@@ -18,6 +18,8 @@ export const BRAND = {
   goldDeep: "#d4a72c",
   gold: "#f5c451",
   goldLight: "#ffdc8a",
+  /** Gold dark enough for AA text/graphics on white surfaces. */
+  goldInk: "#8f6a08",
 } as const;
 
 /** Default admin-configurable branding colors, derived from the ramp. */

@@ -77,6 +77,19 @@ function readableOn(bg: Rgb): string {
   return contrast(bg, light) >= contrast(bg, dark) ? toHex(light) : toHex(dark);
 }
 
+/**
+ * Nudge `color` toward `target` until it clears `min` contrast against
+ * `against`. Keeps admin-chosen brand colors usable as both fills (white/near
+ * black label on top) and as text on the page surface.
+ */
+export function ensureContrast(color: Rgb, against: Rgb, min: number, target: Rgb): Rgb {
+  let out = color;
+  for (let step = 0; step < 20 && contrast(out, against) < min; step += 1) {
+    out = mix(out, target, 0.08);
+  }
+  return out;
+}
+
 function rgbTriplet({ r, g, b }: Rgb): string {
   return `${Math.round(r)} ${Math.round(g)} ${Math.round(b)}`;
 }
@@ -111,14 +124,15 @@ export function buildBrandPaletteCss(input: BrandPaletteInput): string {
     brandVars.push(["--brand-accent", toHex(accent)], ["--brand-accent-rgb", rgbTriplet(accent)]);
   }
 
-  // Light mode: primary as-is; secondary surfaces are a soft tint of the
-  // secondary brand color so secondary buttons stay legible.
+  // Light mode: darken the chosen primary just enough that it reads as AA text
+  // on white cards (links, ghost buttons) while still working as a fill.
   const lightSecondarySurface = secondary ? lighten(secondary, 0.88) : null;
+  const lightPrimary = ensureContrast(primary, WHITE, 4.5, BLACK);
   const light: Array<[string, string]> = [
     ...brandVars,
-    ["--primary", toHex(primary)],
-    ["--primary-foreground", readableOn(primary)],
-    ["--ring", rgba(primary, 0.45)],
+    ["--primary", toHex(lightPrimary)],
+    ["--primary-foreground", readableOn(lightPrimary)],
+    ["--ring", rgba(darken(primary, 0.15), 0.9)],
     ["--sidebar-ring", toHex(primary)],
   ];
   if (lightSecondarySurface) {
@@ -134,9 +148,15 @@ export function buildBrandPaletteCss(input: BrandPaletteInput): string {
     );
   }
 
-  // Dark mode: lift the primary so it keeps contrast against dark surfaces,
-  // and keep secondary surfaces as a translucent wash of the brand color.
-  const darkPrimary = luminance(primary) < 0.25 ? lighten(primary, 0.28) : primary;
+  // Dark mode: lift the primary until it clears AA text contrast on the dark
+  // card surface, and keep secondary surfaces a translucent brand wash.
+  const DARK_SURFACE: Rgb = { r: 10, g: 37, b: 31 }; // --card in .dark
+  const darkPrimary = ensureContrast(
+    luminance(primary) < 0.25 ? lighten(primary, 0.28) : primary,
+    DARK_SURFACE,
+    4.5,
+    WHITE,
+  );
   const dark: Array<[string, string]> = [
     ...brandVars,
     ["--primary", toHex(darkPrimary)],

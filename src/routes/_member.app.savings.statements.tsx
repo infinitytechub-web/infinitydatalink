@@ -77,7 +77,7 @@ function Body() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-6 py-3 font-medium">Period</th>
               <th className="px-6 py-3 font-medium">Account</th>
               <th className="px-6 py-3 text-right font-medium">Opening</th>
@@ -105,13 +105,13 @@ function Row({ s }: { s: Statement }) {
     <tr>
       <td className="px-6 py-3 text-sm">
         {new Date(s.period_start).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
-        <div className="text-[11px] text-emerald-deep/50">
+        <div className="text-[11px] text-muted-foreground">
           {s.period_start} – {s.period_end}
         </div>
       </td>
       <td className="px-6 py-3 text-sm">
         <div className="font-semibold">{s.account_label}</div>
-        <div className="text-[11px] text-emerald-deep/50">{s.plan_name}</div>
+        <div className="text-[11px] text-muted-foreground">{s.plan_name}</div>
       </td>
       <td className="px-6 py-3 text-right"><Money amount={s.opening_balance} /></td>
       <td className="px-6 py-3 text-right"><Money amount={s.deposits_total} /></td>

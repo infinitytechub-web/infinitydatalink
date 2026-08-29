@@ -57,7 +57,7 @@ function MemberDetailPage() {
         <Link
           to="/admin/members"
           search={{ status: "pending", q: "", page: 1 }}
-          className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-emerald-deep/60 hover:text-emerald-deep"
+          className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-emerald-deep"
         >
           <ArrowLeft className="h-3 w-3" /> Back to directory
         </Link>
@@ -135,7 +135,7 @@ function MemberDetailBody() {
               <Field label="National ID" value={profile.national_id} />
               <Field label="Date of birth" value={profile.date_of_birth} />
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">Age</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Age</p>
                 <div className="mt-1 text-sm">
                   <AgeBadge dateOfBirth={profile.date_of_birth} storedIsMinor={profile.is_minor} />
                 </div>
@@ -165,7 +165,7 @@ function MemberDetailBody() {
               />
               {profile.kyc_notes ? (
                 <div className="sm:col-span-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Reviewer notes
                   </p>
                   <p className="mt-1 rounded bg-cream/60 p-3 text-sm">{profile.kyc_notes}</p>
@@ -189,7 +189,7 @@ function MemberDetailBody() {
             <div
               role="note"
               aria-label="Data handling notice"
-              className="mx-6 mt-4 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-emerald-deep/80"
+              className="mx-6 mt-4 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground"
             >
               <span className="font-bold uppercase tracking-widest">Note · Confidential</span>
               <br />
@@ -198,23 +198,23 @@ function MemberDetailBody() {
               it outside a review.
             </div>
             {next_of_kin.length === 0 ? (
-              <div className="p-6 text-sm text-emerald-deep/60">None recorded.</div>
+              <div className="p-6 text-sm text-muted-foreground">None recorded.</div>
             ) : (
               <ul className="divide-y divide-emerald-deep/5">
                 {next_of_kin.map((n) => (
                   <li key={n.id} className="px-6 py-4">
                     <p className="text-sm font-semibold">{n.full_name}</p>
-                    <p className="text-xs text-emerald-deep/60">
+                    <p className="text-xs text-muted-foreground">
                       {n.relationship}
                       {n.phone ? ` · ${n.phone}` : ""}
                       {n.email ? ` · ${n.email}` : ""}
                     </p>
                     {n.national_id_masked ? (
-                      <p className="text-[11px] text-emerald-deep/50">
+                      <p className="text-[11px] text-muted-foreground">
                         ID {n.national_id_masked} (masked)
                       </p>
                     ) : null}
-                    {n.address ? <p className="text-[11px] text-emerald-deep/50">{n.address}</p> : null}
+                    {n.address ? <p className="text-[11px] text-muted-foreground">{n.address}</p> : null}
                   </li>
                 ))}
               </ul>
@@ -318,20 +318,20 @@ function DecisionPanel({
   return (
     <SectionCard title="Compliance decision">
       <div className="space-y-4 p-6">
-        <p className="text-xs text-emerald-deep/60">
+        <p className="text-xs text-muted-foreground">
           Approving marks the member as verified and unlocks full portal access. Every decision needs a
           reviewer note of at least 5 characters, and approval is only possible once all required details
           and documents have been submitted.
         </p>
         {isMinor ? (
-          <div className="rounded border border-gold/40 bg-gold/10 p-3 text-[11px] text-emerald-deep/80">
+          <div className="rounded border border-gold/40 bg-gold/10 p-3 text-[11px] text-muted-foreground">
             <strong className="uppercase tracking-widest">Minor account</strong> — this member is under
             18. Every decision needs a verified guardian, a consent reference, a note of at least{" "}
             {MINOR_DECISION_NOTE_MIN} characters, and fresh re-authentication. Minors are excluded from
             bulk decisions, and each decision is broadcast to compliance leadership for secondary review.
           </div>
         ) : null}
-        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Reviewer notes (required)
           <textarea
             value={notes}
@@ -348,10 +348,10 @@ function DecisionPanel({
 
         {isMinor ? (
           <fieldset className="space-y-3 rounded border border-gold/40 p-3">
-            <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+            <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Guardian verification (minor)
             </legend>
-            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Verified guardian
               <select
                 value={guardianId}
@@ -372,7 +372,7 @@ function DecisionPanel({
                 phone number before deciding.
               </p>
             ) : null}
-            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+            <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Guardian consent reference
               <input
                 value={consentRef}
@@ -381,7 +381,7 @@ function DecisionPanel({
                 className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal outline-none focus:border-emerald-mid"
               />
             </label>
-            <label className="flex items-center gap-2 text-xs text-emerald-deep/80">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
               <input
                 type="checkbox"
                 checked={guardianIdVerified}
@@ -390,7 +390,7 @@ function DecisionPanel({
               />
               Guardian identity document sighted and matches the consent
             </label>
-            <label className="flex items-center gap-2 text-xs text-emerald-deep/80">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
               <input
                 type="checkbox"
                 checked={safeguardingAck}
@@ -402,12 +402,12 @@ function DecisionPanel({
           </fieldset>
         ) : null}
         <fieldset className="rounded border border-emerald-deep/15 p-3">
-          <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Items the member must revise (rejection only)
           </legend>
           <div className="grid gap-1.5 sm:grid-cols-2">
             {ALL_REMEDIATION_ITEMS.map((item) => (
-              <label key={item.key} className="flex items-center gap-2 text-xs text-emerald-deep/80">
+              <label key={item.key} className="flex items-center gap-2 text-xs text-muted-foreground">
                 <input
                   type="checkbox"
                   checked={items.includes(item.key)}
@@ -418,7 +418,7 @@ function DecisionPanel({
               </label>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-emerald-deep/50">
+          <p className="mt-2 text-[11px] text-muted-foreground">
             Only these items will be editable for the member when they resubmit.
           </p>
         </fieldset>
@@ -470,7 +470,7 @@ function DecisionPanel({
           </button>
         </div>
         {!canDecide ? (
-          <p className="text-[11px] text-emerald-deep/50">
+          <p className="text-[11px] text-muted-foreground">
             This member is already verified. Upload a new document to reopen review.
           </p>
         ) : null}
@@ -484,7 +484,7 @@ function DecisionPanel({
 function Field({ label, value, className }: { label: string; value: string | null | undefined; className?: string }) {
   return (
     <div className={className}>
-      <dt className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">{label}</dt>
+      <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</dt>
       <dd className="mt-1 text-sm">{value ?? "—"}</dd>
     </div>
   );
@@ -509,7 +509,7 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
   if (!data.has_snapshot) {
     return (
       <SectionCard title="Resubmission changes">
-        <p className="px-6 py-4 text-sm text-emerald-deep/60">
+        <p className="px-6 py-4 text-sm text-muted-foreground">
           No rejected baseline is on file for this member, so there is nothing to compare yet. A
           baseline is captured automatically the next time a submission is declined.
         </p>
@@ -526,14 +526,14 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
         <button
           type="button"
           onClick={() => setShowAll((v) => !v)}
-          className="text-[11px] font-bold uppercase tracking-widest text-emerald-deep/60 hover:text-emerald-deep"
+          className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-emerald-deep"
         >
           {showAll ? "Show changes only" : "Show all fields"}
         </button>
       }
     >
       <div className="space-y-3 px-6 py-4">
-        <p className="text-xs text-emerald-deep/70">
+        <p className="text-xs text-muted-foreground">
           Declined {data.reviewed_at ? new Date(data.reviewed_at).toLocaleString() : "—"} · Resubmitted{" "}
           {data.resubmitted_at ? new Date(data.resubmitted_at).toLocaleString() : "not yet"} · Attempt{" "}
           {data.attempts_used}
@@ -547,7 +547,7 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
               "rounded px-2 py-1 " +
               (data.unchanged_requested_count > 0
                 ? "bg-destructive/10 text-destructive"
-                : "bg-emerald-deep/5 text-emerald-deep/60")
+                : "bg-emerald-deep/5 text-muted-foreground")
             }
           >
             {data.unchanged_requested_count} requested but unchanged
@@ -566,7 +566,7 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
             }
           >
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
-              <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-widest text-emerald-deep/70">
+              <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 Risk patterns · {RISK_SEVERITY_LABEL[data.risk.level as "low" | "medium" | "high"]} risk
               </p>
               <span
@@ -574,7 +574,7 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
                   "shrink-0 rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest " +
                   (data.flagged_at
                     ? "bg-destructive/10 text-destructive"
-                    : "bg-emerald-deep/10 text-emerald-deep/60")
+                    : "bg-emerald-deep/10 text-muted-foreground")
                 }
               >
                 {data.flagged_at
@@ -584,7 +584,7 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
                     : "Auto-flagging off"}
               </span>
             </div>
-            <ul className="mt-2 space-y-1 text-xs text-emerald-deep/80">
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
               {data.risk.flags.map((f) => (
                 <li key={f.code} className="flex gap-2">
                   <span className="mt-[3px] h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-50" />
@@ -597,7 +597,7 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
 
 
         {visible.length === 0 ? (
-          <p className="text-sm text-emerald-deep/60">Nothing changed since the rejection.</p>
+          <p className="text-sm text-muted-foreground">Nothing changed since the rejection.</p>
         ) : (
           <ul className="divide-y divide-emerald-deep/10">
             {visible.map((row) => (
@@ -616,14 +616,14 @@ function DiffRow({ row }: { row: KycDiffRow }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold text-emerald-deep">{row.label}</span>
         {row.requested ? (
-          <span className="rounded bg-emerald-deep/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70">
+          <span className="rounded bg-emerald-deep/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Requested
           </span>
         ) : null}
         <span
           className={
             "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest " +
-            (row.changed ? "bg-success/10 text-success" : "bg-emerald-deep/5 text-emerald-deep/50")
+            (row.changed ? "bg-success/10 text-success" : "bg-emerald-deep/5 text-muted-foreground")
           }
         >
           {row.changed ? "Changed" : "Unchanged"}
@@ -670,12 +670,12 @@ function DiffSide({
         : "border-emerald-deep/10 bg-cream/30";
   return (
     <div className={`rounded border px-3 py-2 ${toneClass}`}>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">{heading}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{heading}</p>
       <p className={`mt-1 break-words text-sm ${tone === "old" ? "line-through opacity-70" : ""}`}>
         {value ?? "—"}
       </p>
       {at ? (
-        <p className="mt-1 text-[10px] text-emerald-deep/50">{new Date(at).toLocaleString()}</p>
+        <p className="mt-1 text-[10px] text-muted-foreground">{new Date(at).toLocaleString()}</p>
       ) : null}
       {url ? (
         <a
@@ -710,7 +710,7 @@ function MinorHistoryCard({ memberId }: { memberId: string }) {
       {isLoading ? (
         <div className="p-6"><Skeleton className="h-16 w-full" /></div>
       ) : changes.length === 0 ? (
-        <div className="p-6 text-sm text-emerald-deep/60">
+        <div className="p-6 text-sm text-muted-foreground">
           No automatic under-18 status changes recorded for this member.
         </div>
       ) : (
@@ -721,20 +721,20 @@ function MinorHistoryCard({ memberId }: { memberId: string }) {
                 className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-widest ${
                   c.is_minor
                     ? "bg-amber-500/15 text-amber-700"
-                    : "bg-emerald-deep/10 text-emerald-deep/80"
+                    : "bg-emerald-deep/10 text-muted-foreground"
                 }`}
               >
                 {c.was_minor === null
                   ? c.is_minor ? "Set to under 18" : "Set to adult"
                   : c.is_minor ? "Adult → under 18" : "Under 18 → adult"}
               </span>
-              <span className="text-emerald-deep/70">
+              <span className="text-muted-foreground">
                 Source date of birth: <strong>{c.source_date_of_birth ?? "not set"}</strong>
                 {c.previous_date_of_birth && c.previous_date_of_birth !== c.source_date_of_birth
                   ? ` (was ${c.previous_date_of_birth})`
                   : ""}
               </span>
-              <span className="ml-auto text-xs uppercase tracking-widest text-emerald-deep/50">
+              <span className="ml-auto text-xs uppercase tracking-widest text-muted-foreground">
                 {new Date(c.changed_at).toLocaleString()} · {c.change_kind}
               </span>
             </li>

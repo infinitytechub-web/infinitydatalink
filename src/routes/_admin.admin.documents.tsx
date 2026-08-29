@@ -48,7 +48,7 @@ function DocumentsPage() {
       />
       {!isSuperAdmin ? (
         <SectionCard title="Restricted area">
-          <div className="flex items-start gap-3 p-6 text-sm text-emerald-deep/70">
+          <div className="flex items-start gap-3 p-6 text-sm text-muted-foreground">
             <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-destructive" aria-hidden />
             <p>
               Document download, print and export are limited to the <strong>Super Admin</strong> role.
@@ -198,7 +198,7 @@ function DocumentsBody() {
     <div className="space-y-6">
       <SectionCard title="Document register">
         <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Search
             <input
               value={search}
@@ -210,7 +210,7 @@ function DocumentsBody() {
               className="min-h-[44px] rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal"
             />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Source
             <select
               value={source}
@@ -225,7 +225,7 @@ function DocumentsBody() {
               <option value="entity">Entity documents</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Format
             <select
               value={format}
@@ -242,7 +242,7 @@ function DocumentsBody() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Sort
             <select
               value={`${sort}:${dir}`}
@@ -262,7 +262,7 @@ function DocumentsBody() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-emerald-deep/10 px-4 py-3">
-          <p className="text-[11px] uppercase tracking-widest text-emerald-deep/50">
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
             {total} document{total === 1 ? "" : "s"}
             {exportRun.isPending ? " · preparing export…" : ""}
           </p>
@@ -282,14 +282,14 @@ function DocumentsBody() {
             <Skeleton className="h-40 w-full" />
           </div>
         ) : rows.length === 0 ? (
-          <p className="p-6 text-sm text-emerald-deep/60">No documents match these filters.</p>
+          <p className="p-6 text-sm text-muted-foreground">No documents match these filters.</p>
         ) : (
           <ul className="divide-y divide-emerald-deep/5">
             {rows.map((r) => (
               <li key={`${r.source}-${r.id}`} className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{r.owner_label}</p>
-                  <p className="truncate text-xs text-emerald-deep/60">
+                  <p className="truncate text-xs text-muted-foreground">
                     {r.doc_type.replace(/_/g, " ")} · {formatLabel(r.mime_type)} ·{" "}
                     {Math.max(1, Math.round(r.size_bytes / 1024))} KB
                     {r.status ? ` · ${r.status}` : ""}
@@ -334,7 +334,7 @@ function DocumentsBody() {
           </ul>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-emerald-deep/10 px-4 py-3 text-[11px] uppercase tracking-widest text-emerald-deep/60">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-emerald-deep/10 px-4 py-3 text-[11px] uppercase tracking-widest text-muted-foreground">
           <label className="flex items-center gap-2">
             Rows
             <select
@@ -439,8 +439,8 @@ function EditDialog({ row, onClose }: { row: ManagedDocument; onClose: () => voi
             save.mutate();
           }}
         >
-          <p className="truncate text-xs text-emerald-deep/60">{row.filename}</p>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <p className="truncate text-xs text-muted-foreground">{row.filename}</p>
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Document type
             <input
               value={docType}
@@ -450,7 +450,7 @@ function EditDialog({ row, onClose }: { row: ManagedDocument; onClose: () => voi
           </label>
           {row.source === "kyc" ? (
             <>
-              <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Status
                 <select
                   value={status}
@@ -462,7 +462,7 @@ function EditDialog({ row, onClose }: { row: ManagedDocument; onClose: () => voi
                   <option value="rejected">rejected</option>
                 </select>
               </label>
-              <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+              <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Review notes
                 <textarea
                   value={notes}

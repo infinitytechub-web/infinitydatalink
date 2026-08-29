@@ -35,7 +35,7 @@ function Reset() {
         className="w-full max-w-md space-y-4 rounded-sm border border-emerald-deep/5 bg-card p-8 shadow-sm"
       >
         <AuthBrandMark className="mb-2" />
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
           Set new password
         </p>
         <h1 className="font-serif text-2xl text-emerald-deep">Choose a strong password</h1>

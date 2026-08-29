@@ -44,7 +44,7 @@ const scansQuery = (s: SearchInput) =>
 const VERDICT_STYLE: Record<string, string> = {
   clean: "bg-emerald-mid/10 text-emerald-mid",
   blocked: "bg-destructive/10 text-destructive",
-  quarantined: "bg-gold/15 text-gold",
+  quarantined: "bg-gold/15 text-brand-gold-ink dark:text-brand-gold",
 };
 
 const columns: ExportColumn<UploadScan>[] = [
@@ -119,7 +119,7 @@ function Content() {
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">Accepted types</p>
-            <p className="text-xs text-emerald-deep/70">
+            <p className="text-xs text-muted-foreground">
               {data.policy.allowed_upload_mime.length ? data.policy.allowed_upload_mime.join(", ") : "Any"}
             </p>
           </div>
@@ -140,7 +140,7 @@ function Content() {
         }
       >
         <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 px-6 py-4">
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Verdict
             <select
               className={field}
@@ -153,15 +153,15 @@ function Content() {
               <option value="quarantined">Quarantined</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             From
             <input type="date" className={field} value={s.from} onChange={(e) => setSearch({ from: e.target.value })} />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             To
             <input type="date" className={field} value={s.to} onChange={(e) => setSearch({ to: e.target.value })} />
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Filename
             <input className={field} value={s.q} onChange={(e) => setSearch({ q: e.target.value })} placeholder="search" />
           </label>
@@ -173,7 +173,7 @@ function Content() {
           <>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Scanned</th>
                   <th className="px-6 py-3 font-medium">File</th>
                   <th className="px-6 py-3 font-medium">Uploader</th>
@@ -186,25 +186,25 @@ function Content() {
               <tbody className="divide-y divide-emerald-deep/5">
                 {data.rows.map((r) => (
                   <tr key={r.id}>
-                    <td className="tabular px-6 py-4 text-xs text-emerald-deep/70">
+                    <td className="tabular px-6 py-4 text-xs text-muted-foreground">
                       {new Date(r.created_at).toLocaleString()}
                     </td>
                     <td className="max-w-[16rem] truncate px-6 py-4 text-sm font-semibold" title={r.filename}>
                       {r.filename}
                     </td>
                     <td className="px-6 py-4 text-sm">{r.uploader}</td>
-                    <td className="px-6 py-4 text-xs text-emerald-deep/60">{r.mime_type ?? "—"}</td>
+                    <td className="px-6 py-4 text-xs text-muted-foreground">{r.mime_type ?? "—"}</td>
                     <td className="tabular px-6 py-4 text-right text-xs">{sizeLabel(r.size_bytes)}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                          VERDICT_STYLE[r.verdict] ?? "bg-cream text-emerald-deep/70"
+                          VERDICT_STYLE[r.verdict] ?? "bg-cream text-muted-foreground"
                         }`}
                       >
                         {r.verdict}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-emerald-deep/60">
+                    <td className="px-6 py-4 text-xs text-muted-foreground">
                       {r.reasons.length ? r.reasons.join(", ") : "—"}
                     </td>
                   </tr>

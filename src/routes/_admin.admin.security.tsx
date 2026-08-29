@@ -52,7 +52,7 @@ function SecurityLayout() {
             key={t.to}
             to={t.to}
             activeOptions={{ exact: "exact" in t ? t.exact : false }}
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-deep/15 bg-card px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-emerald-deep/70 transition-colors hover:bg-cream"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-deep/15 bg-card px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-cream"
             activeProps={{
               className:
                 "inline-flex items-center gap-2 rounded-full border border-emerald-mid/40 bg-emerald-mid/10 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-emerald-mid",

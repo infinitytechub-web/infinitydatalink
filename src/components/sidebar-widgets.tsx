@@ -188,7 +188,7 @@ export function SidebarWidgetEmpty({
   if (collapsed) {
     return (
       <div
-        className="mx-auto grid size-9 place-items-center rounded-lg bg-white/[0.04] text-white/40 ring-1 ring-inset ring-white/10 lg:size-8"
+        className="mx-auto grid size-9 place-items-center rounded-lg bg-white/[0.04] text-white/75 ring-1 ring-inset ring-white/10 lg:size-8"
         title={message}
         aria-label={message}
       >
@@ -199,7 +199,7 @@ export function SidebarWidgetEmpty({
   return (
     <SidebarWidget>
       {label ? <SidebarWidgetHeader label={label} accent="from-white/20 to-white/5" /> : null}
-      <div className="flex items-center gap-2 rounded-xl px-2.5 py-3 text-xs text-white/55">
+      <div className="flex items-center gap-2 rounded-xl px-2.5 py-3 text-xs text-white/75">
         <Inbox className="size-3.5" aria-hidden="true" />
         <span className="truncate">{message}</span>
       </div>

@@ -88,7 +88,7 @@ export function PasskeyEnrollmentCard() {
 
   return (
     <SectionCard title="Biometric passkeys">
-      <p className="mb-3 text-xs text-emerald-deep/60">
+      <p className="mb-3 text-xs text-muted-foreground">
         Register Face ID, fingerprint, Windows Hello, or a hardware key so you can sign in without
         typing your password.
       </p>
@@ -101,7 +101,7 @@ export function PasskeyEnrollmentCard() {
 
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="flex-1 text-xs">
-          <span className="mb-1 block text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/60">
+          <span className="mb-1 block text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             Device label (optional)
           </span>
           <input
@@ -116,7 +116,7 @@ export function PasskeyEnrollmentCard() {
           type="button"
           onClick={() => enroll.mutate()}
           disabled={enroll.isPending || supported === false || supported === null}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm transition-colors hover:bg-teal-700 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm transition-colors hover:bg-teal-700 disabled:opacity-60"
         >
           {enroll.isPending ? (
             <Loader2 className="size-4 animate-spin" />
@@ -128,14 +128,14 @@ export function PasskeyEnrollmentCard() {
       </div>
 
       <div className="mt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-widest text-emerald-deep/60">
+        <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           Registered passkeys
         </h4>
         <div className="mt-2 space-y-2">
           {passkeys.isLoading ? (
-            <p className="text-xs text-emerald-deep/50">Loading…</p>
+            <p className="text-xs text-muted-foreground">Loading…</p>
           ) : (passkeys.data ?? []).length === 0 ? (
-            <p className="text-xs text-emerald-deep/50">
+            <p className="text-xs text-muted-foreground">
               No passkeys registered yet. Once you register one, you can use the biometric button on
               the sign-in screen.
             </p>
@@ -146,12 +146,12 @@ export function PasskeyEnrollmentCard() {
                 className="flex items-center justify-between rounded border border-emerald-deep/10 bg-background px-3 py-2 text-sm"
               >
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="size-4 text-teal-600" />
+                  <ShieldCheck className="size-4 text-primary" />
                   <div>
                     <p className="font-medium text-emerald-deep">
                       {p.device_label ?? "Unnamed passkey"}
                     </p>
-                    <p className="text-[11px] text-emerald-deep/50">
+                    <p className="text-[11px] text-muted-foreground">
                       Added {new Date(p.created_at).toLocaleDateString()}
                       {p.backed_up ? " · Synced" : " · Device-bound"}
                       {p.last_used_at
@@ -167,7 +167,7 @@ export function PasskeyEnrollmentCard() {
                       remove.mutate(p.id);
                     }
                   }}
-                  className="rounded p-1.5 text-emerald-deep/50 hover:bg-destructive/10 hover:text-destructive"
+                  className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   aria-label="Remove passkey"
                 >
                   <Trash2 className="size-4" />

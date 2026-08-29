@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_admin/admin/savings")({
   errorComponent: ({ error }) => (
     <div className="p-6"><ErrorState title="Failed to load savings" message={error.message} /></div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
+  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
 
 function AdminSavings() {
@@ -136,7 +136,7 @@ function Body() {
       >
         <table className="w-full">
           <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
               <th className="px-6 py-3 font-medium">Plan</th>
               <th className="px-6 py-3 font-medium">Schedule</th>
               <th className="px-6 py-3 text-right font-medium">Rate</th>
@@ -148,7 +148,7 @@ function Body() {
             {s.plans.map((p) => (
               <tr key={p.id}>
                 <td className="px-6 py-3 text-sm font-semibold">{p.name}</td>
-                <td className="px-6 py-3 text-sm text-emerald-deep/60">{p.schedule}</td>
+                <td className="px-6 py-3 text-sm text-muted-foreground">{p.schedule}</td>
                 <td className="tabular px-6 py-3 text-right text-sm">{p.interest_rate}%</td>
                 <td className="tabular px-6 py-3 text-right text-sm">{p.members}</td>
                 <td className="px-6 py-3 text-right"><Money amount={p.balance} /></td>
@@ -168,15 +168,15 @@ function PendingQueue() {
   if (rows.length === 0) {
     return (
       <SectionCard title="Pending settlements">
-        <div className="p-6 text-sm text-emerald-deep/60">No pending transactions — you're all caught up.</div>
+        <div className="p-6 text-sm text-muted-foreground">No pending transactions — you're all caught up.</div>
       </SectionCard>
     );
   }
   return (
-    <SectionCard title="Pending settlements" action={<span className="text-[11px] text-emerald-deep/50">Oldest first · top 25</span>}>
+    <SectionCard title="Pending settlements" action={<span className="text-[11px] text-muted-foreground">Oldest first · top 25</span>}>
       <table className="w-full">
         <thead>
-          <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+          <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
             <th className="px-6 py-3 font-medium">Ref</th>
             <th className="px-6 py-3 font-medium">Member</th>
             <th className="px-6 py-3 font-medium">Plan</th>
@@ -210,16 +210,16 @@ function PendingRow({ t }: { t: AdminPendingTxn }) {
   });
   return (
     <tr>
-      <td className="px-6 py-3 font-mono text-[11px] text-emerald-deep/70">{t.ref}</td>
+      <td className="px-6 py-3 font-mono text-[11px] text-muted-foreground">{t.ref}</td>
       <td className="px-6 py-3 text-sm">
         <div className="font-semibold">{t.member_name ?? "Member"}</div>
-        <div className="text-[11px] text-emerald-deep/50">{t.member_no ?? t.user_id.slice(0, 8)}</div>
+        <div className="text-[11px] text-muted-foreground">{t.member_no ?? t.user_id.slice(0, 8)}</div>
       </td>
-      <td className="px-6 py-3 text-sm text-emerald-deep/70">{t.plan_name ?? "—"}</td>
+      <td className="px-6 py-3 text-sm text-muted-foreground">{t.plan_name ?? "—"}</td>
       <td className="px-6 py-3 text-sm capitalize">{t.kind}</td>
-      <td className="px-6 py-3 text-sm text-emerald-deep/60">{t.channel ?? "—"}</td>
+      <td className="px-6 py-3 text-sm text-muted-foreground">{t.channel ?? "—"}</td>
       <td className="px-6 py-3 text-right"><Money amount={t.amount} /></td>
-      <td className="px-6 py-3 text-right text-[11px] text-emerald-deep/50">{new Date(t.created_at).toLocaleString()}</td>
+      <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">{new Date(t.created_at).toLocaleString()}</td>
       <td className="px-6 py-3 text-right">
         <div className="flex justify-end gap-2">
           <Button
@@ -270,7 +270,7 @@ function RejectDialog({ txn }: { txn: AdminPendingTxn }) {
             mut.mutate();
           }}
         >
-          <p className="text-sm text-emerald-deep/70">
+          <p className="text-sm text-muted-foreground">
             Marking as failed will not move any balance. The member will see the rejection reason on their savings page.
           </p>
           <Textarea rows={3} placeholder="Reason for rejection" value={note} onChange={(e) => setNote(e.target.value)} required />

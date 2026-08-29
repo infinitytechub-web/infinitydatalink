@@ -96,7 +96,7 @@ function Content() {
                 <span className="flex items-center gap-3">
                   <LiveDot />
                   <span className="text-sm font-semibold text-emerald-deep">{u.name}</span>
-                  <span className="text-[10px] uppercase tracking-widest text-emerald-deep/40">{u.role}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{u.role}</span>
                 </span>
                 <span className="tabular text-xs text-emerald-deep/55">online {duration(u.online_at)}</span>
               </li>
@@ -109,7 +109,7 @@ function Content() {
         title="Session details"
         action={
           <span
-            className="inline-flex items-center gap-1.5 rounded-full bg-cream px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60"
+            className="inline-flex items-center gap-1.5 rounded-full bg-cream px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
             title={
               data.unmasked
                 ? "You hold security.manage — full addresses are shown and each unmasked read is audited."
@@ -126,7 +126,7 @@ function Content() {
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-3 font-medium">User</th>
                 <th className="px-6 py-3 font-medium">State</th>
                 <th className="px-6 py-3 font-medium">IP</th>
@@ -142,7 +142,7 @@ function Content() {
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                        r.active ? "bg-emerald-mid/10 text-emerald-mid" : "bg-cream text-emerald-deep/50"
+                        r.active ? "bg-emerald-mid/10 text-emerald-mid" : "bg-cream text-muted-foreground"
                       }`}
                     >
                       {r.active ? <LiveDot /> : null}
@@ -150,18 +150,18 @@ function Content() {
                     </span>
                   </td>
                   <td className="tabular px-6 py-4 text-xs">{r.ip}</td>
-                  <td className="px-6 py-4 text-xs text-emerald-deep/70">{r.device}</td>
-                  <td className="px-6 py-4 text-xs text-emerald-deep/70">{r.browser}</td>
+                  <td className="px-6 py-4 text-xs text-muted-foreground">{r.device}</td>
+                  <td className="px-6 py-4 text-xs text-muted-foreground">{r.browser}</td>
                   <td className="tabular px-6 py-4 text-right text-xs">
                     {duration(r.started_at)}
-                    <span className="ml-2 text-emerald-deep/40">last seen {duration(r.last_seen_at)} ago</span>
+                    <span className="ml-2 text-muted-foreground">last seen {duration(r.last_seen_at)} ago</span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-        <p className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-emerald-deep/50">
+        <p className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-muted-foreground">
           Privacy note: session records are retained for security monitoring only. Redacted addresses hide the host
           portion, and user agents are reduced to device and browser families so individuals cannot be fingerprinted.
         </p>

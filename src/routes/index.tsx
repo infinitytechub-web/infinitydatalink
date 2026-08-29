@@ -87,7 +87,7 @@ function Landing() {
 
       <section className="mx-auto grid max-w-7xl gap-12 px-6 pb-24 pt-16 lg:grid-cols-2 lg:pt-24">
         <div>
-          <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-gold">
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold">
             Enterprise financial platform
           </p>
           <h1 className="font-serif text-5xl leading-tight text-emerald-deep">
@@ -95,7 +95,7 @@ function Landing() {
             <br />
             <span className="italic">managed with care.</span>
           </h1>
-          <p className="mt-6 max-w-lg text-base text-emerald-deep/70">
+          <p className="mt-6 max-w-lg text-base text-muted-foreground">
             IT-360 CashApp is a secure, membership-first platform for cooperatives, SACCOs,
             savings & loans companies, and investment groups. Two portals, one source of truth.
           </p>
@@ -116,24 +116,24 @@ function Landing() {
         </div>
 
         <div className="rounded-sm border border-emerald-deep/5 bg-card p-8 shadow-sm">
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/50">
+          <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Institutional summary · Sample
           </p>
           <div className="space-y-4">
             <div className="flex items-end justify-between border-b border-emerald-deep/5 pb-3">
-              <span className="text-xs text-emerald-deep/60">Total members</span>
+              <span className="text-xs text-muted-foreground">Total members</span>
               <span className="font-serif text-xl">4,218</span>
             </div>
             <div className="flex items-end justify-between border-b border-emerald-deep/5 pb-3">
-              <span className="text-xs text-emerald-deep/60">Assets under management</span>
+              <span className="text-xs text-muted-foreground">Assets under management</span>
               <span className="font-serif text-xl">GH₵ 12.4M</span>
             </div>
             <div className="flex items-end justify-between border-b border-emerald-deep/5 pb-3">
-              <span className="text-xs text-emerald-deep/60">Active loans</span>
+              <span className="text-xs text-muted-foreground">Active loans</span>
               <span className="font-serif text-xl">GH₵ 3.1M</span>
             </div>
             <div className="flex items-end justify-between">
-              <span className="text-xs text-emerald-deep/60">Repayment rate</span>
+              <span className="text-xs text-muted-foreground">Repayment rate</span>
               <span className="font-serif text-xl text-emerald-mid">98.2%</span>
             </div>
           </div>
@@ -142,7 +142,7 @@ function Landing() {
 
       <section id="modules" className="border-t border-emerald-deep/10 bg-card">
         <div className="mx-auto max-w-7xl px-6 py-16">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-gold">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-gold-ink dark:text-brand-gold">
             Everything a financial institution needs
           </p>
           <h2 className="mt-2 max-w-2xl font-serif text-3xl">
@@ -161,7 +161,7 @@ function Landing() {
             ].map(([title, desc]) => (
               <div key={title} className="border-l-2 border-gold/40 pl-4">
                 <p className="font-serif text-lg text-emerald-deep">{title}</p>
-                <p className="mt-1 text-xs text-emerald-deep/60">{desc}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
               </div>
             ))}
           </div>
@@ -169,7 +169,7 @@ function Landing() {
       </section>
 
       <footer className="border-t border-emerald-deep/10 bg-cream">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-[11px] text-emerald-deep/50">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-[11px] text-muted-foreground">
           <span>© {new Date().getFullYear()} IT-360 CashApp</span>
           <span>Institutional-grade · Confidential</span>
         </div>

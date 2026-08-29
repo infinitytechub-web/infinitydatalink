@@ -88,7 +88,7 @@ function TxContent() {
         <>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                 <SortHeader label="Reference" field="ref" sort={sort} onSort={setSort} />
                 <th className="px-6 py-3 font-medium">Description</th>
                 <th className="px-6 py-3 font-medium">Channel</th>
@@ -102,7 +102,7 @@ function TxContent() {
                 <tr key={r.id} className="hover:bg-cream/30">
                   <td className="tabular px-6 py-4 text-sm font-semibold">{r.ref}</td>
                   <td className="px-6 py-4 text-sm">{r.note ?? r.kind}</td>
-                  <td className="px-6 py-4 text-sm text-emerald-deep/60">{r.channel ?? "—"}</td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{r.channel ?? "—"}</td>
                   <td className="tabular px-6 py-4 text-sm">{new Date(r.created_at).toLocaleDateString()}</td>
                   <td className={`px-6 py-4 text-right font-bold ${r.amount < 0 ? "text-destructive" : "text-emerald-mid"}`}>
                     <Money amount={r.amount} signed />

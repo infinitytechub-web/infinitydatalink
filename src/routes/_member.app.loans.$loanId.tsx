@@ -27,7 +27,7 @@ function MemberLoanDetail() {
   const { loanId } = Route.useParams();
   return (
     <>
-      <div className="mb-2 text-[10px] uppercase tracking-widest text-emerald-deep/60">
+      <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
         <Link to="/app/loans" className="hover:underline">← Back to my loans</Link>
       </div>
       <PageHeader
@@ -59,15 +59,15 @@ function Body({ loanId }: { loanId: string }) {
       <SectionCard title={`${loan.ref} · ${loan.product}`} action={<StatusPill status={loan.status} />}>
         <div className="grid gap-6 p-6 md:grid-cols-2 text-sm">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Terms</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Terms</div>
             <div>{loan.term_months} months · {loan.interest_rate}% p.a.</div>
-            <div className="text-[11px] text-emerald-deep/50">
+            <div className="text-[11px] text-muted-foreground">
               First due {loan.first_payment_at ?? "—"} · Matures {loan.maturity_at ?? "—"}
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Timeline</div>
-            <div className="text-[11px] text-emerald-deep/70">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Timeline</div>
+            <div className="text-[11px] text-muted-foreground">
               Applied {new Date(loan.created_at).toLocaleDateString()}
               {loan.decided_at ? ` · Decided ${new Date(loan.decided_at).toLocaleDateString()}` : ""}
               {loan.disbursed_at ? ` · Disbursed ${new Date(loan.disbursed_at).toLocaleDateString()}` : ""}
@@ -75,14 +75,14 @@ function Body({ loanId }: { loanId: string }) {
           </div>
           {loan.purpose && (
             <div className="md:col-span-2">
-              <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Purpose</div>
-              <div className="text-emerald-deep/80">{loan.purpose}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Purpose</div>
+              <div className="text-muted-foreground">{loan.purpose}</div>
             </div>
           )}
           {loan.decision_note && (
             <div className="md:col-span-2">
-              <div className="text-[10px] uppercase tracking-widest text-emerald-deep/40">Officer note</div>
-              <div className="text-emerald-deep/80">{loan.decision_note}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Officer note</div>
+              <div className="text-muted-foreground">{loan.decision_note}</div>
             </div>
           )}
         </div>
@@ -99,28 +99,28 @@ function Body({ loanId }: { loanId: string }) {
       {loan.status === "active" && <PayoffCard loanId={loan.id} />}
       {loan.status === "approved" && (
         <SectionCard title="Awaiting disbursement">
-          <div className="p-6 text-sm text-emerald-deep/70">
+          <div className="p-6 text-sm text-muted-foreground">
             Your loan has been approved. Repayment options unlock once finance disburses the funds.
           </div>
         </SectionCard>
       )}
       {loan.status === "pending" && (
         <SectionCard title="Application under review">
-          <div className="p-6 text-sm text-emerald-deep/70">
+          <div className="p-6 text-sm text-muted-foreground">
             A loan officer is reviewing your application. You will be notified of the decision.
           </div>
         </SectionCard>
       )}
       {loan.status === "rejected" && (
         <SectionCard title="Application declined">
-          <div className="p-6 text-sm text-emerald-deep/70">
+          <div className="p-6 text-sm text-muted-foreground">
             This application was declined{loan.decision_note ? `: ${loan.decision_note}` : "."}
           </div>
         </SectionCard>
       )}
       {loan.status === "closed" && (
         <SectionCard title="Loan closed">
-          <div className="p-6 text-sm text-emerald-deep/70">This loan has been fully repaid. Thank you.</div>
+          <div className="p-6 text-sm text-muted-foreground">This loan has been fully repaid. Thank you.</div>
         </SectionCard>
       )}
 
@@ -131,7 +131,7 @@ function Body({ loanId }: { loanId: string }) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">#</th>
                   <th className="px-6 py-3 font-medium">Due date</th>
                   <th className="px-6 py-3 text-right font-medium">Principal</th>
@@ -212,7 +212,7 @@ function PayoffCard({ loanId }: { loanId: string }) {
     <SectionCard
       title="Early settlement quote"
       action={
-        <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+        <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Settle on
           <input
             type="date"
@@ -227,7 +227,7 @@ function PayoffCard({ loanId }: { loanId: string }) {
       {quote.isPending ? (
         <div className="p-6"><Skeleton className="h-32 w-full" /></div>
       ) : quote.isError ? (
-        <div className="p-6 text-sm text-emerald-deep/70">
+        <div className="p-6 text-sm text-muted-foreground">
           Settlement quote unavailable: {(quote.error as Error).message}
         </div>
       ) : quote.data ? (
@@ -236,7 +236,7 @@ function PayoffCard({ loanId }: { loanId: string }) {
             {quote.data.lines.map((line) => (
               <div key={line.label} className="flex items-start justify-between gap-4 border-b border-emerald-deep/5 pb-2">
                 <div>
-                  <div className="text-emerald-deep/80">{line.label}</div>
+                  <div className="text-muted-foreground">{line.label}</div>
                   {line.note && <div className="text-[11px] text-emerald-deep/45">{line.note}</div>}
                 </div>
                 <Money amount={line.amount} signed={line.amount < 0} />
@@ -249,11 +249,11 @@ function PayoffCard({ loanId }: { loanId: string }) {
           </div>
           <div className="space-y-3 rounded-lg bg-cream/60 p-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-emerald-deep/60">Savings balance</span>
+              <span className="text-muted-foreground">Savings balance</span>
               <Money amount={quote.data.savings_balance} />
             </div>
             <div className="flex justify-between">
-              <span className="text-emerald-deep/60">
+              <span className="text-muted-foreground">
                 {quote.data.savings_covers_payoff ? "Surplus after settlement" : "Shortfall to fund"}
               </span>
               <Money
@@ -265,14 +265,14 @@ function PayoffCard({ loanId }: { loanId: string }) {
               />
             </div>
             <div className="flex justify-between">
-              <span className="text-emerald-deep/60">Installments remaining</span>
+              <span className="text-muted-foreground">Installments remaining</span>
               <span>{quote.data.installments_remaining}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-emerald-deep/60">Interest saved by settling</span>
+              <span className="text-muted-foreground">Interest saved by settling</span>
               <Money amount={quote.data.interest_rebate} />
             </div>
-            <p className="text-[11px] leading-relaxed text-emerald-deep/50">{quote.data.disclaimer}</p>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">{quote.data.disclaimer}</p>
           </div>
         </div>
       ) : null}
@@ -283,7 +283,7 @@ function PayoffCard({ loanId }: { loanId: string }) {
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-cream/60 p-4 text-sm">
               <div>
                 <div className="font-semibold text-emerald-deep">Settlement request awaiting approval</div>
-                <div className="text-[11px] text-emerald-deep/60">
+                <div className="text-[11px] text-muted-foreground">
                   <Money amount={pendingRequest.quoted_total} /> to settle on {pendingRequest.settle_on} · submitted{" "}
                   {new Date(pendingRequest.requested_at).toLocaleDateString()}
                 </div>
@@ -299,7 +299,7 @@ function PayoffCard({ loanId }: { loanId: string }) {
           ) : (
             <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
               <label className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Request early settlement — note to finance (optional)
                 </span>
                 <input
@@ -316,7 +316,7 @@ function PayoffCard({ loanId }: { loanId: string }) {
               >
                 {request.isPending ? "Submitting…" : "Request settlement"}
               </button>
-              <p className="text-[11px] text-emerald-deep/50 md:col-span-2">
+              <p className="text-[11px] text-muted-foreground md:col-span-2">
                 Submitting sends the quoted figure for {settleOn} to the finance office for approval. You will be
                 notified once it is approved or declined.
               </p>
@@ -325,20 +325,20 @@ function PayoffCard({ loanId }: { loanId: string }) {
 
           {(requests.data ?? []).filter((r) => r.status !== "pending").length > 0 && (
             <div className="mt-5 space-y-2">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Previous settlement requests
               </div>
               {(requests.data ?? [])
                 .filter((r) => r.status !== "pending")
                 .map((r) => (
-                  <div key={r.id} className="flex flex-wrap items-center gap-3 text-xs text-emerald-deep/70">
+                  <div key={r.id} className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <StatusPill status={r.status === "approved" ? "approved" : "rejected"} />
                     <span>{r.status}</span>
                     <span>·</span>
                     <span>
                       <Money amount={r.quoted_total} /> for {r.settle_on}
                     </span>
-                    {r.decision_note && <span className="text-emerald-deep/50">“{r.decision_note}”</span>}
+                    {r.decision_note && <span className="text-muted-foreground">“{r.decision_note}”</span>}
                   </div>
                 ))}
             </div>
@@ -374,11 +374,11 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
   return (
     <SectionCard
       title="Make a repayment"
-      action={<span className="text-[11px] text-emerald-deep/50">Outstanding <Money amount={outstanding} /></span>}
+      action={<span className="text-[11px] text-muted-foreground">Outstanding <Money amount={outstanding} /></span>}
     >
       <div className="grid gap-3 p-6 md:grid-cols-[160px_200px_1fr_auto] md:items-end">
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Amount (GH₵)</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Amount (GH₵)</span>
           <input
             inputMode="decimal"
             value={amount}
@@ -387,7 +387,7 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Payment channel</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Payment channel</span>
           <select
             value={channel}
             onChange={(e) => setChannel(e.target.value)}
@@ -400,7 +400,7 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">Reference / note (optional)</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Reference / note (optional)</span>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -416,7 +416,7 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
           {mutation.isPending ? "Submitting…" : "Submit payment"}
         </button>
       </div>
-      <p className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-emerald-deep/50">
+      <p className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-muted-foreground">
         Payments show as pending until a finance officer reconciles the transfer. Your outstanding balance updates once cleared.
       </p>
     </SectionCard>

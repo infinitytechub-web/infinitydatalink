@@ -94,14 +94,14 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
   return (
     <SectionCard title="Guardian consent & safeguarding attestations">
       <div className="space-y-4 p-6">
-        <p className="text-xs text-emerald-deep/60">
+        <p className="text-xs text-muted-foreground">
           Attach the signed guardian consent and the completed safeguarding attestation supporting this
           minor decision. Files are stored with the member's verification documents and appear in the Super
           Admin documents register for later audit. PDF, JPEG, PNG or DOCX up to 8&nbsp;MB.
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Attestation type
             <select
               value={docType}
@@ -115,7 +115,7 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             File
             <input
               ref={fileInput}
@@ -127,7 +127,7 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
           </label>
         </div>
 
-        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+        <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Reference / context
           <input
             value={note}
@@ -151,46 +151,46 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
           type="button"
           disabled={reminders.isPending}
           onClick={() => reminders.mutate()}
-          className="inline-flex items-center gap-2 rounded border border-emerald-deep/20 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-deep/70 hover:border-emerald-mid disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded border border-emerald-deep/20 px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:border-emerald-mid disabled:opacity-40"
         >
           <BellRing className="h-3.5 w-3.5" />
           {reminders.isPending ? "Sending…" : "Send consent reminders"}
         </button>
         </div>
-        <p className="text-[11px] text-emerald-deep/50">
+        <p className="text-[11px] text-muted-foreground">
           Reminders also run automatically each night: officers get an in-app + email alert deep-linked to
           the member review screen, and the guardian gets in-app, email and SMS notices until the consent
           and safeguarding files are on file.
         </p>
 
         <div className="space-y-2">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+          <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Attached files
           </h3>
           {isLoading ? (
             <Skeleton className="h-16 w-full" />
           ) : rows.length === 0 ? (
-            <p className="text-xs text-emerald-deep/50">No attestations attached yet.</p>
+            <p className="text-xs text-muted-foreground">No attestations attached yet.</p>
           ) : (
             <ul className="divide-y divide-emerald-deep/10 rounded border border-emerald-deep/15">
               {rows.map((r) => (
                 <li key={r.id} className="flex flex-wrap items-center gap-3 p-3 text-xs">
-                  <FileText className="h-4 w-4 text-emerald-deep/50" />
-                  <span className="font-bold uppercase tracking-widest text-emerald-deep/70">{r.label}</span>
-                  <span className="text-emerald-deep/60">{r.filename}</span>
-                  <span className="text-emerald-deep/40">{prettyBytes(r.size_bytes)}</span>
-                  <span className="text-emerald-deep/40">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-bold uppercase tracking-widest text-muted-foreground">{r.label}</span>
+                  <span className="text-muted-foreground">{r.filename}</span>
+                  <span className="text-muted-foreground">{prettyBytes(r.size_bytes)}</span>
+                  <span className="text-muted-foreground">
                     {new Date(r.created_at).toLocaleString()}
                   </span>
                   {r.review_notes ? (
-                    <span className="basis-full text-emerald-deep/60">{r.review_notes}</span>
+                    <span className="basis-full text-muted-foreground">{r.review_notes}</span>
                   ) : null}
                   {r.url ? (
                     <a
                       href={r.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="ml-auto rounded border border-emerald-deep/20 px-2 py-1 font-bold uppercase tracking-widest text-emerald-deep/70 hover:border-emerald-mid"
+                      className="ml-auto rounded border border-emerald-deep/20 px-2 py-1 font-bold uppercase tracking-widest text-muted-foreground hover:border-emerald-mid"
                     >
                       Open
                     </a>

@@ -164,7 +164,7 @@ function AdminInvestments() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-serif text-2xl text-emerald-deep dark:text-emerald-100">Investments & Shares</h1>
-          <p className="mt-1 text-sm text-emerald-deep/60 dark:text-emerald-200/60">
+          <p className="mt-1 text-sm text-muted-foreground dark:text-emerald-200/60">
             Manage share products, holdings, and dividend runs.
           </p>
         </div>
@@ -183,7 +183,7 @@ function AdminInvestments() {
           </button>
           <button
             onClick={() => setShowNewRun(true)}
-            className="rounded-md bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-emerald-deep hover:opacity-90"
+            className="rounded-md bg-gold px-4 py-2 text-xs font-semibold uppercase tracking-widest text-brand-forest hover:opacity-90"
           >
             + Dividend run
           </button>
@@ -229,7 +229,7 @@ function AdminInvestments() {
         <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Share products</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+            <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
               <tr>
                 <th className="py-2">Code</th>
                 <th>Name</th>
@@ -267,7 +267,7 @@ function AdminInvestments() {
               ))}
               {data.products.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-sm text-emerald-deep/50">
+                  <td colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
                     No products yet.
                   </td>
                 </tr>
@@ -281,7 +281,7 @@ function AdminInvestments() {
         <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Dividend runs</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+            <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
               <tr>
                 <th className="py-2">Ref</th>
                 <th>Product</th>
@@ -310,7 +310,7 @@ function AdminInvestments() {
                         r.status === "executed"
                           ? "bg-emerald-deep/10 text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100"
                           : r.status === "draft"
-                            ? "bg-gold/20 text-emerald-deep"
+                            ? "bg-gold/20 text-brand-forest"
                             : r.status === "pending_approval"
                               ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
                               : r.status === "approved"
@@ -352,7 +352,7 @@ function AdminInvestments() {
               ))}
               {data.runs.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-6 text-center text-sm text-emerald-deep/50">
+                  <td colSpan={8} className="py-6 text-center text-sm text-muted-foreground">
                     No dividend runs yet.
                   </td>
                 </tr>
@@ -370,7 +370,7 @@ function AdminInvestments() {
           </p>
         )}
         {exportError && <p className="mt-3 text-sm text-red-600">Export failed: {exportError}</p>}
-        <p className="mt-3 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+        <p className="mt-3 text-xs text-muted-foreground dark:text-emerald-200/60">
           Dividend runs require dual control: after submission, an approver
           (super admin or compliance officer) other than the creator must
           approve the run before a finance officer can execute payouts, and
@@ -382,7 +382,7 @@ function AdminInvestments() {
         <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Top holders</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+            <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
               <tr>
                 <th className="py-2">Member</th>
                 <th>Member no.</th>
@@ -403,7 +403,7 @@ function AdminInvestments() {
               ))}
               {data.top_holders.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-sm text-emerald-deep/50">
+                  <td colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
                     No holdings yet.
                   </td>
                 </tr>
@@ -512,7 +512,7 @@ function RunActions({
     if (isCreator) {
       return (
         <div className="inline-flex items-center gap-2">
-          <span className="text-xs italic text-emerald-deep/60">Awaiting second reviewer</span>
+          <span className="text-xs italic text-muted-foreground">Awaiting second reviewer</span>
           {exportBtn}
         </div>
       );
@@ -533,7 +533,7 @@ function RunActions({
     if (isApprover) {
       return (
         <div className="inline-flex items-center gap-2">
-          <span className="text-xs italic text-emerald-deep/60">
+          <span className="text-xs italic text-muted-foreground">
             Awaiting a different officer
           </span>
           {exportBtn}
@@ -576,12 +576,12 @@ function ReviewDialog({
         <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
           {isReject ? "Reject" : "Approve"} dividend run {run.ref}
         </h3>
-        <p className="mt-1 text-xs text-emerald-deep/60 dark:text-emerald-200/60">
+        <p className="mt-1 text-xs text-muted-foreground dark:text-emerald-200/60">
           {run.product_name} · {run.period_start} → {run.period_end} · per unit{" "}
           {run.per_unit_amount}
         </p>
         <div className="mt-4 text-sm">
-          <label className="block text-xs uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+          <label className="block text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
             {isReject ? "Rejection reason (required)" : "Approval note (optional)"}
           </label>
           <textarea
@@ -623,7 +623,7 @@ function ReviewDialog({
 function KPI({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-emerald-deep/10 bg-white p-5 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-      <p className="text-[10px] uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">{label}</p>
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">{label}</p>
       <p className="mt-2 font-serif text-2xl text-emerald-deep dark:text-emerald-100">{value}</p>
     </div>
   );
@@ -893,20 +893,20 @@ function NewRunDialog({
           </Field>
         </div>
         <div className="mt-4 rounded-md bg-emerald-deep/5 p-3 text-sm dark:bg-emerald-100/5">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/60 dark:text-emerald-200/60">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
             Payout preview
           </p>
           {calcErr ? (
             <p className="mt-1 text-red-600">{calcErr}</p>
           ) : calcLoading && !calc ? (
-            <p className="mt-1 text-emerald-deep/60">Calculating…</p>
+            <p className="mt-1 text-muted-foreground">Calculating…</p>
           ) : calc ? (
             <dl className="mt-1 grid grid-cols-2 gap-y-1">
-              <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Eligible members</dt>
+              <dt className="text-muted-foreground dark:text-emerald-200/60">Eligible members</dt>
               <dd className="text-right font-semibold">{calc.eligible_members}</dd>
-              <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Total units</dt>
+              <dt className="text-muted-foreground dark:text-emerald-200/60">Total units</dt>
               <dd className="text-right font-semibold">{calc.total_units.toLocaleString()}</dd>
-              <dt className="text-emerald-deep/60 dark:text-emerald-200/60">Estimated total</dt>
+              <dt className="text-muted-foreground dark:text-emerald-200/60">Estimated total</dt>
               <dd className="text-right font-semibold">
                 {new Intl.NumberFormat("en-GH", { style: "currency", currency: calc.currency }).format(
                   calc.estimated_total,
@@ -914,7 +914,7 @@ function NewRunDialog({
               </dd>
             </dl>
           ) : (
-            <p className="mt-1 text-emerald-deep/60">Select a product and per-unit amount to preview.</p>
+            <p className="mt-1 text-muted-foreground">Select a product and per-unit amount to preview.</p>
           )}
         </div>
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
@@ -949,7 +949,7 @@ function NewRunDialog({
 function Field({ label, children, span }: { label: string; children: React.ReactNode; span?: 1 | 2 }) {
   return (
     <label className={span === 2 ? "col-span-2 block" : "block"}>
-      <span className="text-emerald-deep/70 dark:text-emerald-200/70">{label}</span>
+      <span className="text-muted-foreground dark:text-emerald-200/70">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
   );

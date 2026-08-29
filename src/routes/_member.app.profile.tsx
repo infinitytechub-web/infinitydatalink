@@ -100,7 +100,7 @@ function KycBanner({
     pending: {
       label: "Verification pending",
       hint: "Upload the required documents below. A reviewer will approve or reject shortly.",
-      className: "border-gold/40 bg-gold/10 text-gold",
+      className: "border-gold/40 bg-gold/10 text-brand-gold-ink dark:text-brand-gold",
       Icon: Clock,
     },
     active: {
@@ -214,7 +214,7 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
 
         <div className="flex items-center justify-end gap-2 sm:col-span-2">
           {identityLocked ? (
-            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-emerald-deep/50">
+            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-muted-foreground">
               <Lock className="h-3 w-3" /> Some fields locked after verification
             </span>
           ) : null}
@@ -305,7 +305,7 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
       <div
         role="note"
         aria-label="Privacy notice"
-        className="mx-6 mt-4 rounded border border-emerald-deep/15 bg-cream px-3 py-2 text-[11px] leading-relaxed text-emerald-deep/80"
+        className="mx-6 mt-4 rounded border border-emerald-deep/15 bg-cream px-3 py-2 text-[11px] leading-relaxed text-muted-foreground"
       >
         <span className="font-bold uppercase tracking-widest">Note · Private</span>
         <br />
@@ -314,7 +314,7 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
         permission to share.
       </div>
       {rows.length === 0 ? (
-        <div className="p-6 text-sm text-emerald-deep/60">
+        <div className="p-6 text-sm text-muted-foreground">
           No next of kin recorded. Add at least one trusted contact for account recovery and beneficiary purposes.
         </div>
 
@@ -324,12 +324,12 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
             <li key={r.id} className="grid gap-2 px-6 py-4 sm:grid-cols-[1fr_auto]">
               <div>
                 <p className="text-sm font-semibold">{r.full_name}</p>
-                <p className="text-xs text-emerald-deep/60">
+                <p className="text-xs text-muted-foreground">
                   {r.relationship}
                   {r.phone ? ` · ${r.phone}` : ""}
                   {r.email ? ` · ${r.email}` : ""}
                 </p>
-                {r.address ? <p className="text-[11px] text-emerald-deep/50">{r.address}</p> : null}
+                {r.address ? <p className="text-[11px] text-muted-foreground">{r.address}</p> : null}
               </div>
               <div className="flex items-center gap-1.5">
                 <button
@@ -558,16 +558,16 @@ function DocumentSlot({
         />
       </div>
       {docs.length === 0 ? (
-        <p className="mt-3 text-xs text-emerald-deep/50">JPG, PNG or PDF · up to 8 MB.</p>
+        <p className="mt-3 text-xs text-muted-foreground">JPG, PNG or PDF · up to 8 MB.</p>
       ) : (
         <ul className="mt-3 space-y-2">
           {docs.map((d) => (
             <li key={d.id} className="flex items-center justify-between gap-2 rounded bg-cream/50 px-3 py-2 text-xs">
               <div className="flex min-w-0 items-center gap-2">
-                <FileText className="h-3 w-3 shrink-0 text-emerald-deep/50" />
+                <FileText className="h-3 w-3 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
                   <p className="truncate">{d.storage_path.split("/").pop()}</p>
-                  <p className="text-[10px] text-emerald-deep/50">
+                  <p className="text-[10px] text-muted-foreground">
                     Uploaded {new Date(d.created_at).toLocaleDateString()} · {(d.size_bytes / 1024).toFixed(0)} KB
                   </p>
                   {d.status === "rejected" && d.review_notes ? (
@@ -599,7 +599,7 @@ function DocumentSlot({
 
 function DocStatusPill({ status }: { status: KycDocStatus }) {
   const map = {
-    pending: "bg-gold/10 text-gold",
+    pending: "bg-gold/10 text-brand-gold-ink dark:text-brand-gold",
     approved: "bg-emerald-mid/10 text-emerald-mid",
     rejected: "bg-destructive/10 text-destructive",
   } as const;
@@ -616,7 +616,7 @@ function RegionPresetCard() {
   const [region, setRegion] = useState(cfg.id);
   return (
     <div className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">Region preset</p>
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Region preset</p>
       <select
         value={region}
         onChange={(e) => {
@@ -632,7 +632,7 @@ function RegionPresetCard() {
           </option>
         ))}
       </select>
-      <p className="mt-2 text-[11px] text-emerald-deep/50">Controls currency, ID label, and MoMo providers.</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">Controls currency, ID label, and MoMo providers.</p>
     </div>
   );
 }
@@ -640,18 +640,18 @@ function RegionPresetCard() {
 function MembershipCard({ profile }: { profile: MemberProfileFull["profile"] }) {
   return (
     <div className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-emerald-deep/50">Membership</p>
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Membership</p>
       <dl className="grid gap-3 text-sm">
         <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">Member no.</dt>
+          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Member no.</dt>
           <dd className="tabular mt-1">{profile.member_no ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">Tier</dt>
+          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Tier</dt>
           <dd className="mt-1 capitalize">{profile.tier}</dd>
         </div>
         <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-widest text-emerald-deep/40">KYC status</dt>
+          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">KYC status</dt>
           <dd className="mt-1 capitalize">{profile.kyc}</dd>
         </div>
       </dl>
@@ -682,7 +682,7 @@ function TextField({
   className?: string;
 }) {
   return (
-    <label className={`flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60 ${className ?? ""}`}>
+    <label className={`flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${className ?? ""}`}>
       {label}
       <input
         type={type}
@@ -691,9 +691,9 @@ function TextField({
         placeholder={placeholder}
         disabled={disabled}
         required={required}
-        className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal text-emerald-deep outline-none focus:border-emerald-mid disabled:bg-cream/50 disabled:text-emerald-deep/50"
+        className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal text-emerald-deep outline-none focus:border-emerald-mid disabled:bg-cream/50 disabled:text-muted-foreground"
       />
-      {hint ? <span className="text-[10px] font-normal text-emerald-deep/50">{hint}</span> : null}
+      {hint ? <span className="text-[10px] font-normal text-muted-foreground">{hint}</span> : null}
     </label>
   );
 }
@@ -710,7 +710,7 @@ function SelectField({
   options: string[];
 }) {
   return (
-    <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/60">
+    <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
       {label}
       <select
         value={value}

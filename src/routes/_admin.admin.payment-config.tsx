@@ -108,18 +108,18 @@ function Body({ canManage }: { canManage: boolean }) {
                     <span
                       className={
                         "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest " +
-                        (row.enabled ? "bg-emerald-mid/15 text-emerald-mid" : "bg-emerald-deep/10 text-emerald-deep/60")
+                        (row.enabled ? "bg-emerald-mid/15 text-emerald-mid" : "bg-emerald-deep/10 text-muted-foreground")
                       }
                     >
                       {row.enabled ? row.mode : "disabled"}
                     </span>
                   ) : (
-                    <span className="rounded-full bg-emerald-deep/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-emerald-deep/40">
+                    <span className="rounded-full bg-emerald-deep/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
                       not set up
                     </span>
                   )}
                 </div>
-                <p className="mt-2 text-xs text-emerald-deep/60">{t.blurb}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{t.blurb}</p>
               </button>
             );
           })}
@@ -139,7 +139,7 @@ function Body({ canManage }: { canManage: boolean }) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-emerald-deep/40">
+                <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Received</th>
                   <th className="px-6 py-3 font-medium">Provider</th>
                   <th className="px-6 py-3 font-medium">Event</th>
@@ -151,9 +151,9 @@ function Body({ canManage }: { canManage: boolean }) {
               <tbody className="divide-y divide-emerald-deep/5">
                 {data.events.map((e) => (
                   <tr key={e.id}>
-                    <td className="px-6 py-3 text-[11px] text-emerald-deep/60">{new Date(e.created_at).toLocaleString()}</td>
+                    <td className="px-6 py-3 text-[11px] text-muted-foreground">{new Date(e.created_at).toLocaleString()}</td>
                     <td className="px-6 py-3 text-sm font-semibold">{e.provider_code}</td>
-                    <td className="px-6 py-3 text-sm text-emerald-deep/70">{e.event_type ?? "—"}</td>
+                    <td className="px-6 py-3 text-sm text-muted-foreground">{e.event_type ?? "—"}</td>
                     <td className="px-6 py-3 text-sm">
                       {e.signature_verified ? (
                         <span className="inline-flex items-center gap-1 text-emerald-mid">
@@ -165,10 +165,10 @@ function Body({ canManage }: { canManage: boolean }) {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-3 text-[11px] text-emerald-deep/60">
+                    <td className="px-6 py-3 text-[11px] text-muted-foreground">
                       {e.processed_at ? new Date(e.processed_at).toLocaleString() : "pending"}
                     </td>
-                    <td className="px-6 py-3 text-[11px] text-emerald-deep/50">{e.error ?? "—"}</td>
+                    <td className="px-6 py-3 text-[11px] text-muted-foreground">{e.error ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -257,7 +257,7 @@ function ProviderForm({
           mut.mutate();
         }}
       >
-        <div className="rounded-lg border border-emerald-deep/10 bg-cream/40 p-4 text-xs text-emerald-deep/70">
+        <div className="rounded-lg border border-emerald-deep/10 bg-cream/40 p-4 text-xs text-muted-foreground">
           <p className="flex items-center gap-2 font-semibold text-emerald-deep">
             <ShieldCheck className="h-4 w-4 text-emerald-mid" /> Credentials are stored as backend secrets
           </p>
@@ -309,7 +309,7 @@ function ProviderForm({
           <div className="md:col-span-2">
             <Label htmlFor="webhook-path">Callback path</Label>
             <Input id="webhook-path" value={webhookPath} onChange={(e) => setWebhookPath(e.target.value)} disabled={!canManage} />
-            <p className="mt-1 text-[11px] text-emerald-deep/50">
+            <p className="mt-1 text-[11px] text-muted-foreground">
               Signed callbacks are accepted at this path and journalled for reconciliation.
             </p>
           </div>
@@ -318,7 +318,7 @@ function ProviderForm({
         <div className="flex items-center justify-between rounded-lg border border-emerald-deep/10 p-4">
           <div>
             <p className="text-sm font-semibold">Enable this rail</p>
-            <p className="text-xs text-emerald-deep/60">Disabled providers reject intents and callbacks.</p>
+            <p className="text-xs text-muted-foreground">Disabled providers reject intents and callbacks.</p>
           </div>
           <Switch checked={enabled} onCheckedChange={setEnabled} disabled={!canManage} />
         </div>
@@ -336,7 +336,7 @@ function ProviderForm({
         </div>
 
         <div className="flex items-center justify-end gap-3">
-          {!canManage && <span className="text-xs text-emerald-deep/50">Read-only — payments.manage required.</span>}
+          {!canManage && <span className="text-xs text-muted-foreground">Read-only — payments.manage required.</span>}
           <Button type="submit" disabled={!canManage || mut.isPending}>
             {mut.isPending ? "Submitting…" : "Submit for approval"}
           </Button>
@@ -412,7 +412,7 @@ function ReadinessPanel({ code, label, canManage }: { code: string; label: strin
                   )}
                   <div>
                     <p className="font-semibold">{c.label}</p>
-                    <p className="text-xs text-emerald-deep/60">{c.detail}</p>
+                    <p className="text-xs text-muted-foreground">{c.detail}</p>
                   </div>
                 </li>
               ))}

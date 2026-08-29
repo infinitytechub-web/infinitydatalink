@@ -181,7 +181,7 @@ function ActivityContent() {
                   },
                 })
               }
-              className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+              className="rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
             >
               Reset
             </button>
@@ -197,7 +197,7 @@ function ActivityContent() {
             <div className="p-6">
               {grouped.map((day) => (
                 <div key={day.date} className="mb-8 last:mb-0">
-                  <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                  <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                     {day.date} · {day.entries.length} event{day.entries.length === 1 ? "" : "s"}
                   </div>
                   <ol className="relative border-l-2 border-emerald-deep/10 pl-5">
@@ -223,25 +223,25 @@ function ActivityContent() {
                                   {e.action}
                                 </span>
                               </div>
-                              <span className="tabular text-[11px] text-emerald-deep/60">
+                              <span className="tabular text-[11px] text-muted-foreground">
                                 {new Date(e.created_at).toLocaleTimeString()}
                               </span>
                             </div>
-                            <div className="mt-1.5 grid grid-cols-1 gap-1 text-xs text-emerald-deep/70 md:grid-cols-3">
+                            <div className="mt-1.5 grid grid-cols-1 gap-1 text-xs text-muted-foreground md:grid-cols-3">
                               <div>
-                                <span className="text-emerald-deep/40">Actor: </span>
+                                <span className="text-muted-foreground">Actor: </span>
                                 {e.actor_email ?? e.actor_id ?? "—"}
                                 {e.actor_role && (
-                                  <span className="ml-1 text-[9px] uppercase tracking-widest text-emerald-deep/40">
+                                  <span className="ml-1 text-[9px] uppercase tracking-widest text-muted-foreground">
                                     · {e.actor_role}
                                   </span>
                                 )}
                               </div>
                               <div className="truncate">
-                                <span className="text-emerald-deep/40">Target: </span>
+                                <span className="text-muted-foreground">Target: </span>
                                 <span className="tabular font-mono">{e.target ?? "—"}</span>
                               </div>
-                              <div className="text-emerald-deep/40">Click for details →</div>
+                              <div className="text-muted-foreground">Click for details →</div>
                             </div>
                           </button>
                         </li>
@@ -280,10 +280,10 @@ function ActivityContent() {
               <DetailRow label="Actor ID" value={selected.actor_id ?? "—"} mono />
               <DetailRow label="Entry ID" value={selected.id} mono />
               <div>
-                <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Metadata
                 </div>
-                <pre className="max-h-64 overflow-auto rounded border border-emerald-deep/10 bg-cream/30 p-3 text-[11px] text-emerald-deep/80">
+                <pre className="max-h-64 overflow-auto rounded border border-emerald-deep/10 bg-cream/30 p-3 text-[11px] text-muted-foreground">
                   {selected.meta ? JSON.stringify(selected.meta, null, 2) : "— none —"}
                 </pre>
                 <button
@@ -295,7 +295,7 @@ function ActivityContent() {
                       toast.error("Copy failed");
                     }
                   }}
-                  className="mt-2 rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70 hover:bg-cream/50"
+                  className="mt-2 rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-cream/50"
                 >
                   Copy JSON
                 </button>
@@ -335,7 +335,7 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-4 rounded border border-emerald-deep/10 bg-card px-3 py-2 text-xs">
-      <div className="text-emerald-deep/50">{label}</div>
+      <div className="text-muted-foreground">{label}</div>
       <div className={`text-right text-emerald-deep/90 break-all ${mono ? "tabular font-mono" : ""}`}>
         {value}
       </div>
@@ -346,7 +346,7 @@ function DetailRow({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/50">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       {children}

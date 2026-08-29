@@ -149,7 +149,7 @@ function ConsoleTile({ tile, allowed, pendingCount }: { tile: Tile; allowed: boo
           <p className="truncate text-sm font-semibold text-foreground">{tile.label}</p>
           <div className="mt-0.5 flex flex-wrap gap-1.5">
             {tile.badge ? (
-              <span className="inline-block rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-gold">
+              <span className="inline-block rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-gold-ink dark:text-brand-gold">
                 {tile.badge}
               </span>
             ) : null}

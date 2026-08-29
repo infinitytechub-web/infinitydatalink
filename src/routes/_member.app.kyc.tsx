@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_member/app/kyc")({
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">Verification status failed to load: {error.message}</div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-emerald-deep/70">Not found.</div>,
+  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
 
 function KycStatusPage() {
@@ -87,7 +87,7 @@ function Body() {
         <SectionCard title="Next action">
           {data.next_action ? (
             <div className="space-y-3 p-6">
-              <p className="text-sm text-emerald-deep/80">{data.next_action.label}</p>
+              <p className="text-sm text-muted-foreground">{data.next_action.label}</p>
               <Link
                 to={data.next_action.link}
                 className="inline-flex items-center rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream hover:bg-emerald-mid"
@@ -96,7 +96,7 @@ function Body() {
               </Link>
             </div>
           ) : (
-            <div className="p-6 text-sm text-emerald-deep/70">
+            <div className="p-6 text-sm text-muted-foreground">
               You're all set — no action needed from you right now.
             </div>
           )}
@@ -116,7 +116,7 @@ function Body() {
         <SectionCard
           title={data.latest_decision.decision === "approved" ? "Latest decision" : "Reviewer feedback"}
         >
-          <div className="space-y-3 p-6 text-sm text-emerald-deep/80">
+          <div className="space-y-3 p-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               {data.latest_decision.decision === "approved" ? (
                 <ShieldCheck className="h-4 w-4 text-success" />
@@ -127,12 +127,12 @@ function Body() {
               <span className="font-semibold uppercase tracking-widest text-[11px]">
                 {data.latest_decision.decision === "approved" ? "Approved" : "Rejected"}
               </span>
-              <span className="text-[11px] text-emerald-deep/50">
+              <span className="text-[11px] text-muted-foreground">
                 {new Date(data.latest_decision.reviewed_at).toLocaleString()}
               </span>
             </div>
             {data.latest_decision.reviewer_name && data.latest_decision.decision === "approved" ? (
-              <div className="text-[11px] text-emerald-deep/50">
+              <div className="text-[11px] text-muted-foreground">
                 Verified by {data.latest_decision.reviewer_name}
               </div>
             ) : null}
@@ -147,7 +147,7 @@ function Body() {
 
       <SectionCard title="Notifications">
         {data.notifications.length === 0 ? (
-          <div className="p-6 text-sm text-emerald-deep/60">
+          <div className="p-6 text-sm text-muted-foreground">
             No notifications yet. We'll email you when there's an update.
           </div>
         ) : (
@@ -155,15 +155,15 @@ function Body() {
             {data.notifications.map((n) => (
               <li key={n.id} className="flex items-center gap-3 px-6 py-3 text-sm">
                 {n.channel === "email" ? (
-                  <Mail className="h-4 w-4 text-emerald-deep/60" />
+                  <Mail className="h-4 w-4 text-muted-foreground" />
                 ) : (
-                  <Smartphone className="h-4 w-4 text-emerald-deep/60" />
+                  <Smartphone className="h-4 w-4 text-muted-foreground" />
                 )}
                 <div className="flex-1">
                   <div className="font-semibold capitalize">
                     {n.channel} · {n.decision}
                   </div>
-                  <div className="text-[11px] text-emerald-deep/50">
+                  <div className="text-[11px] text-muted-foreground">
                     {n.sent_at
                       ? `Sent ${new Date(n.sent_at).toLocaleString()}`
                       : `Queued ${new Date(n.created_at).toLocaleString()}`}
@@ -183,7 +183,7 @@ function Body() {
             ))}
           </ul>
         )}
-        <div className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-emerald-deep/50">
+        <div className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-muted-foreground">
           SMS notifications coming soon.
         </div>
       </SectionCard>
@@ -222,7 +222,7 @@ function StatusBanner({ data }: { data: MyKycStatus }) {
           <StatusPill status={data.kyc as any} />
           <h2 className="text-lg font-semibold text-emerald-deep">{info.title}</h2>
         </div>
-        <p className="mt-1 text-sm text-emerald-deep/70">{info.body}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{info.body}</p>
       </div>
     </div>
   );
@@ -241,7 +241,7 @@ function Step({
 }) {
   const Icon = state === "done" ? CheckCircle2 : state === "in_progress" ? Clock : Circle;
   const color =
-    state === "done" ? "text-emerald-mid" : state === "in_progress" ? "text-gold" : "text-emerald-deep/40";
+    state === "done" ? "text-emerald-mid" : state === "in_progress" ? "text-brand-gold-ink dark:text-brand-gold" : "text-muted-foreground";
   return (
     <div className="flex items-start gap-4 px-6 py-4">
       <div className={`mt-0.5 ${color}`}>
@@ -249,12 +249,12 @@ function Step({
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 text-sm font-semibold text-emerald-deep">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/40">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Step {index}
           </span>
           {label}
         </div>
-        <p className="mt-1 text-[12px] text-emerald-deep/60">{hint}</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">{hint}</p>
       </div>
     </div>
   );

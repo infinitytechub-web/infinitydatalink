@@ -71,7 +71,7 @@ export function DocumentPreviewPanel({
           className={cn(
             "rounded border px-3 py-2 text-[11px] leading-relaxed",
             missing.length === 0
-              ? "border-emerald-mid/40 bg-emerald-mid/10 text-emerald-deep/80"
+              ? "border-emerald-mid/40 bg-emerald-mid/10 text-muted-foreground"
               : "border-destructive/40 bg-destructive/10 text-destructive",
           )}
         >
@@ -104,7 +104,7 @@ export function DocumentPreviewPanel({
                       ? "bg-emerald-mid/20 text-emerald-mid"
                       : blocking
                         ? "bg-destructive/15 text-destructive"
-                        : "bg-emerald-deep/10 text-emerald-deep/40",
+                        : "bg-emerald-deep/10 text-muted-foreground",
                   )}
                 >
                   {row.present ? (
@@ -116,11 +116,11 @@ export function DocumentPreviewPanel({
                 <div className="min-w-0">
                   <p className="text-xs font-semibold">
                     {row.label}
-                    <span className="ml-1 text-[10px] font-bold uppercase tracking-widest text-emerald-deep/40">
+                    <span className="ml-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                       {row.requirement}
                     </span>
                   </p>
-                  <p className="text-[11px] text-emerald-deep/60">
+                  <p className="text-[11px] text-muted-foreground">
                     {row.present
                       ? `On file${row.status ? ` · ${row.status}` : ""}`
                       : blocking
@@ -135,7 +135,7 @@ export function DocumentPreviewPanel({
         </ul>
 
         {documents.length === 0 ? (
-          <p className="text-sm text-emerald-deep/60">No documents uploaded yet.</p>
+          <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
         ) : (
           <div className="space-y-3">
             <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Uploaded documents">
@@ -163,12 +163,12 @@ export function DocumentPreviewPanel({
                         className="h-16 w-full object-cover"
                       />
                     ) : isPdf(d.mime_type) ? (
-                      <FileText className="h-6 w-6 text-emerald-deep/50" />
+                      <FileText className="h-6 w-6 text-muted-foreground" />
                     ) : (
-                      <ImageIcon className="h-6 w-6 text-emerald-deep/40" />
+                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
                     )}
                   </span>
-                  <span className="mt-1 block truncate text-[10px] font-bold uppercase tracking-widest text-emerald-deep/70">
+                  <span className="mt-1 block truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                     {d.doc_type.replace(/_/g, " ")}
                   </span>
                 </button>
@@ -245,7 +245,7 @@ function Viewer({ doc }: { doc: PreviewDocument }) {
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-deep/10 px-3 py-2">
         <div className="min-w-0">
           <p className="truncate text-xs font-semibold">{kycDocLabel(doc.doc_type)}</p>
-          <p className="text-[11px] text-emerald-deep/50">
+          <p className="text-[11px] text-muted-foreground">
             {new Date(doc.created_at).toLocaleString()} · {(doc.size_bytes / 1024).toFixed(0)} KB ·{" "}
             {doc.mime_type}
             {doc.status ? ` · ${doc.status}` : ""}
@@ -257,7 +257,7 @@ function Viewer({ doc }: { doc: PreviewDocument }) {
               <ToolButton label="Zoom out" onClick={() => stepZoom(1 / 1.3)}>
                 <Minus className="h-3 w-3" />
               </ToolButton>
-              <span className="w-12 text-center text-[10px] font-bold tabular-nums text-emerald-deep/60">
+              <span className="w-12 text-center text-[10px] font-bold tabular-nums text-muted-foreground">
                 {Math.round(zoom * 100)}%
               </span>
               <ToolButton label="Zoom in" onClick={() => stepZoom(1.3)}>
@@ -321,13 +321,13 @@ function Viewer({ doc }: { doc: PreviewDocument }) {
           className="h-[26rem] w-full bg-cream/60"
         />
       ) : (
-        <div className="grid h-40 place-items-center text-xs text-emerald-deep/60">
+        <div className="grid h-40 place-items-center text-xs text-muted-foreground">
           Preview unavailable for this file type — use “Open” to download it.
         </div>
       )}
 
       {doc.review_notes ? (
-        <p className="border-t border-emerald-deep/10 px-3 py-2 text-[11px] text-emerald-deep/70">
+        <p className="border-t border-emerald-deep/10 px-3 py-2 text-[11px] text-muted-foreground">
           Notes: {doc.review_notes}
         </p>
       ) : null}
@@ -350,7 +350,7 @@ function ToolButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="grid h-6 w-6 place-items-center rounded border border-emerald-deep/15 text-emerald-deep/70 hover:bg-cream"
+      className="grid h-6 w-6 place-items-center rounded border border-emerald-deep/15 text-muted-foreground hover:bg-cream"
     >
       {children}
     </button>

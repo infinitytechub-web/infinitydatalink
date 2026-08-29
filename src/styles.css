@@ -117,15 +117,17 @@
   --brand-gold-deep: #d4a72c;
   --brand-gold: #f5c451;          /* accent gold */
   --brand-gold-light: #ffdc8a;
+  --brand-gold-ink: #8f6a08;      /* gold that clears AA text contrast on white */
 
   /* Semantic aliases — every value below points at the ramp above. */
   --emerald-deep: var(--brand-forest);
-  --emerald-mid: var(--brand-teal-bright);
+  --emerald-mid: var(--brand-teal);      /* text-safe teal on white (5.5:1) */
   --gold: var(--brand-gold);
   --cream: #f4f7f6;
-  --success: #059669;
-  --warning: #d97706;
-  --info: #0284c7;
+  /* Status inks are AA (≥4.5:1) against the white card surface. */
+  --success: #047857;
+  --warning: #b45309;
+  --info: #0369a1;
 
   --background: #f4f7f6;
   --foreground: var(--brand-forest);
@@ -139,18 +141,21 @@
   --secondary-foreground: var(--brand-forest);
   --muted: #e9f0ee;
   --muted-foreground: #4b6560;
-  --accent: var(--brand-teal-bright);
+  /* Accent fills carry white labels, so the light-mode accent uses the darker
+     teal rung (5.5:1) instead of the bright rung (3.7:1). */
+  --accent: var(--brand-teal);
   --accent-foreground: #ffffff;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
   --border: #dbe6e2;
-  --input: #c2d3ce;
-  --ring: rgba(13, 148, 136, 0.45);
+  /* Input borders are non-text UI boundaries: ≥3:1 against the card. */
+  --input: #6f8e87;
+  --ring: rgba(15, 118, 110, 0.9);
 
   /* Chart series — dark-mode-safe palette lives in `.dark` below. */
   --chart-1: var(--brand-teal);
   --chart-2: var(--brand-teal-bright);
-  --chart-3: var(--brand-gold);
+  --chart-3: var(--brand-gold-ink);
   --chart-4: #0284c7;   /* sky */
   --chart-5: #7c3aed;   /* violet */
   --chart-6: #dc2626;   /* crimson */
@@ -197,7 +202,7 @@
   --destructive: #f87171;
   --destructive-foreground: #0b1220;
   --border: rgba(148, 163, 184, 0.16);
-  --input: rgba(148, 163, 184, 0.22);
+  --input: rgba(148, 163, 184, 0.65);
   --ring: rgba(45, 212, 191, 0.55);
 
   /* Dark-mode chart palette — brighter, higher-chroma variants that clear
@@ -224,6 +229,14 @@
 
 
 @layer base {
+  /* Gold fills always carry forest ink (7.4:1–12.5:1). Any explicit `text-*`
+     utility still wins, since utilities cascade after this base rule. */
+  .bg-gold,
+  .bg-brand-gold,
+  .bg-brand-gold-light,
+  .bg-brand-gold-deep {
+    color: var(--brand-forest);
+  }
   * {
     border-color: var(--color-border);
   }
