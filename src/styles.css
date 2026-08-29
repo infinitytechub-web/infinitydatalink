@@ -202,7 +202,7 @@
   --destructive: #f87171;
   --destructive-foreground: #0b1220;
   --border: rgba(148, 163, 184, 0.16);
-  --input: rgba(148, 163, 184, 0.22);
+  --input: rgba(148, 163, 184, 0.65);
   --ring: rgba(45, 212, 191, 0.55);
 
   /* Dark-mode chart palette — brighter, higher-chroma variants that clear
