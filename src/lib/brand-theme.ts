@@ -148,9 +148,15 @@ export function buildBrandPaletteCss(input: BrandPaletteInput): string {
     );
   }
 
-  // Dark mode: lift the primary so it keeps contrast against dark surfaces,
-  // and keep secondary surfaces as a translucent wash of the brand color.
-  const darkPrimary = luminance(primary) < 0.25 ? lighten(primary, 0.28) : primary;
+  // Dark mode: lift the primary until it clears AA text contrast on the dark
+  // card surface, and keep secondary surfaces a translucent brand wash.
+  const DARK_SURFACE: Rgb = { r: 10, g: 37, b: 31 }; // --card in .dark
+  const darkPrimary = ensureContrast(
+    luminance(primary) < 0.25 ? lighten(primary, 0.28) : primary,
+    DARK_SURFACE,
+    4.5,
+    WHITE,
+  );
   const dark: Array<[string, string]> = [
     ...brandVars,
     ["--primary", toHex(darkPrimary)],
