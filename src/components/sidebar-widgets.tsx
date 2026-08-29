@@ -10,13 +10,13 @@ import type { NavItem } from "@/components/portal-shell.types";
  * padding, ring, radius, and hover treatment.
  */
 export const SIDEBAR_WIDGET_SURFACE =
-  "rounded-2xl bg-white/[0.04] ring-1 ring-inset ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]";
+  "nav-3d-panel rounded-2xl bg-white/[0.04] ring-1 ring-inset ring-white/10";
 export const SIDEBAR_WIDGET_PADDING = "p-2";
 export const SIDEBAR_ITEM_BASE =
-  "group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm outline-none transition-all duration-200 lg:py-2 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-0";
+  "nav-3d-item group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm outline-none will-change-transform lg:py-2 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-0";
 export const SIDEBAR_ITEM_IDLE = "text-white/80 hover:bg-white/10 hover:text-white";
 export const SIDEBAR_ITEM_ACTIVE =
-  "bg-white/15 text-white ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_24px_-12px_rgba(255,255,255,0.35)]";
+  "nav-3d-item-active bg-white/15 text-white ring-1 ring-white/25";
 
 /** Group container — renders the padded card unless the rail is collapsed. */
 export function SidebarWidget({
@@ -31,6 +31,7 @@ export function SidebarWidget({
   return (
     <section
       className={cn(
+        "nav-3d-scene",
         SIDEBAR_WIDGET_SURFACE,
         collapsed ? "lg:bg-transparent lg:p-0 lg:ring-0 lg:shadow-none" : SIDEBAR_WIDGET_PADDING,
         className,
@@ -40,6 +41,7 @@ export function SidebarWidget({
     </section>
   );
 }
+
 
 /** Group label with the coloured accent dot. Hidden while collapsed. */
 export function SidebarWidgetHeader({
