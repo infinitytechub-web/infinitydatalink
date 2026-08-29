@@ -49,10 +49,23 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Semantic / legacy brand aliases. Names retained for backwards compat with
-     class usage across the codebase (bg-emerald-deep, text-cream, bg-gold,
-     etc). Values now resolve to the enterprise Royal-Blue / Emerald / Gold
-     palette so no downstream file needs to change. */
+  /* ── Canonical brand ramp ───────────────────────────────────────────────
+     Single source of truth for the dark-green / teal / gold identity. Every
+     component should use these utilities (bg-brand-forest, from-brand-teal,
+     text-brand-gold, …) instead of inline hex values. JS/TS consumers import
+     the same values from `@/lib/brand-palette`. */
+  --color-brand-forest: var(--brand-forest);
+  --color-brand-forest-deep: var(--brand-forest-deep);
+  --color-brand-forest-soft: var(--brand-forest-soft);
+  --color-brand-teal-deep: var(--brand-teal-deep);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-teal-bright: var(--brand-teal-bright);
+  --color-brand-teal-glow: var(--brand-teal-glow);
+  --color-brand-gold-deep: var(--brand-gold-deep);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-light: var(--brand-gold-light);
+
+  /* Semantic / legacy brand aliases, resolved onto the ramp above. */
   --color-emerald-deep: var(--emerald-deep);
   --color-emerald-mid: var(--emerald-mid);
   --color-gold: var(--gold);
@@ -60,6 +73,7 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-info: var(--info);
+
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
