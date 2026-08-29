@@ -121,7 +121,7 @@
 
   /* Semantic aliases — every value below points at the ramp above. */
   --emerald-deep: var(--brand-forest);
-  --emerald-mid: var(--brand-teal-bright);
+  --emerald-mid: var(--brand-teal);      /* text-safe teal on white (5.5:1) */
   --gold: var(--brand-gold);
   --cream: #f4f7f6;
   /* Status inks are AA (≥4.5:1) against the white card surface. */

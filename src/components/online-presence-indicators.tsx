@@ -124,7 +124,7 @@ export const SidebarOnlinePanel = memo(function SidebarOnlinePanel({
         </span>
       </div>
       {users.length === 0 ? (
-        <p className="flex items-center gap-2 py-1 text-[11px] text-white/50">
+        <p className="flex items-center gap-2 py-1 text-[11px] text-white/75">
           <Users className="size-3.5" aria-hidden="true" /> Connecting…
         </p>
       ) : (
@@ -144,7 +144,7 @@ export const SidebarOnlinePanel = memo(function SidebarOnlinePanel({
               </span>
               <span className="min-w-0 flex-1 truncate text-[11px] text-white/85">
                 {u.name}
-                {u.token === meId ? <span className="text-white/40"> (you)</span> : null}
+                {u.token === meId ? <span className="text-white/75"> (you)</span> : null}
                 <span className="sr-only">
                   {" "}
                   — online{u.role === "Staff" ? ", staff" : ""}

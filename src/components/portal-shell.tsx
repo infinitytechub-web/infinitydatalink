@@ -246,7 +246,7 @@ export function PortalShell({
               <>
                 <div className="min-w-0 flex-1 text-xs">
                   <p className="truncate font-medium text-white">{user?.fullName ?? "Guest"}</p>
-                  <p className="truncate capitalize text-white/60">
+                  <p className="truncate capitalize text-white/75">
                     {user?.roles?.[0]?.replace(/_/g, " ") ?? "no role"}
                   </p>
                 </div>
@@ -254,7 +254,7 @@ export function PortalShell({
                   type="button"
                   onClick={handleSignOut}
                   aria-label="Sign out"
-                  className="grid size-8 place-items-center rounded-md text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                  className="grid size-8 place-items-center rounded-md text-white/75 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <LogOut className="size-3.5" />
                 </button>
