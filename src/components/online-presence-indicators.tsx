@@ -137,7 +137,7 @@ export const SidebarOnlinePanel = memo(function SidebarOnlinePanel({
                 </span>
                 <span
                   className={cn(
-                    "absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-[#0a1a33]",
+                    "absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-[#06231d]",
                     !reduced && "animate-pulse",
                   )}
                 />

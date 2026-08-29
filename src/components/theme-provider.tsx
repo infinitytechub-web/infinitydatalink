@@ -62,7 +62,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Hint native UI (scrollbars, form controls, autofill) to match.
     root.style.colorScheme = theme;
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.content = theme === "dark" ? "#071120" : "#0a1a33";
+    if (meta) meta.content = theme === "dark" ? "#04140f" : "#06231d";
   }, [theme]);
 
   const setTheme = useCallback((t: Theme) => {
