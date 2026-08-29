@@ -33,9 +33,9 @@ const BASE_TONES = {
   royal: {
     bg: "bg-linear-to-br from-brand-forest via-brand-teal to-brand-teal-bright",
     ring: "ring-brand-teal-bright/40",
-    label: "text-blue-50/85",
+    label: "text-teal-50/85",
     value: "text-white",
-    hint: "text-blue-50/75",
+    hint: "text-teal-50/75",
     bar: "bg-linear-to-r from-brand-forest via-brand-teal to-brand-teal-bright",
     chip: "from-brand-forest to-brand-teal",
   },
@@ -50,10 +50,10 @@ const BASE_TONES = {
   },
   gold: {
     bg: "bg-linear-to-br from-brand-gold-deep via-brand-gold to-brand-gold-light",
-    ring: "ring-amber-300/50",
-    label: "text-amber-50/95",
-    value: "text-white",
-    hint: "text-amber-50/85",
+    ring: "ring-brand-gold/50",
+    label: "text-brand-forest/80",
+    value: "text-brand-forest",
+    hint: "text-brand-forest/70",
     bar: "bg-linear-to-r from-brand-gold-deep via-brand-gold to-brand-gold-light",
     chip: "from-brand-gold-deep to-brand-gold",
   },
@@ -180,7 +180,7 @@ export const BUTTON_TONE = {
   success:
     "bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-sm ring-1 ring-emerald-400/40 hover:brightness-110",
   primary:
-    "bg-linear-to-r from-brand-forest to-brand-teal text-white shadow-sm ring-1 ring-blue-400/40 hover:brightness-110",
+    "bg-linear-to-r from-brand-forest to-brand-teal text-white shadow-sm ring-1 ring-brand-teal-bright/40 hover:brightness-110",
 } as const;
 
 /** Chart palette — sourced from CSS variables so series colors flip with
