@@ -117,15 +117,17 @@
   --brand-gold-deep: #d4a72c;
   --brand-gold: #f5c451;          /* accent gold */
   --brand-gold-light: #ffdc8a;
+  --brand-gold-ink: #8f6a08;      /* gold that clears AA text contrast on white */
 
   /* Semantic aliases — every value below points at the ramp above. */
   --emerald-deep: var(--brand-forest);
   --emerald-mid: var(--brand-teal-bright);
   --gold: var(--brand-gold);
   --cream: #f4f7f6;
-  --success: #059669;
-  --warning: #d97706;
-  --info: #0284c7;
+  /* Status inks are AA (≥4.5:1) against the white card surface. */
+  --success: #047857;
+  --warning: #b45309;
+  --info: #0369a1;
 
   --background: #f4f7f6;
   --foreground: var(--brand-forest);
