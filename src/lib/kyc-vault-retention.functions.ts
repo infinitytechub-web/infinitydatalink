@@ -9,6 +9,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { writeAudit } from "@/lib/audit-log";
+import { loadRoleSet } from "@/lib/role-guards";
 import type { VaultRetentionPolicy, VaultPurgeResult } from "@/lib/kyc-vault-purge.server";
 
 export type { VaultRetentionPolicy, VaultPurgeResult };
