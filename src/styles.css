@@ -106,28 +106,40 @@
 :root {
   --radius: 0.625rem; /* 10px — compact banking console cards */
 
-  /* Enterprise palette: Royal Blue primary, Emerald secondary, Gold accent. */
-  --emerald-deep: #06231d;      /* institutional navy ink (text) */
-  --emerald-mid: #0d9488;       /* teal accent */
-  --gold: #f5c451;              /* reserved highlight gold */
-  --cream: #f4f7f6;             /* off-white background */
+  /* ── Brand ramp (single source of truth) ─────────────────────────────── */
+  --brand-forest-deep: #04140f;   /* darkest ink / app bg in dark mode */
+  --brand-forest: #06231d;        /* dark-green rail + body ink */
+  --brand-forest-soft: #0a251f;   /* raised forest surface */
+  --brand-teal-deep: #0f5f57;
+  --brand-teal: #0f766e;          /* brand primary */
+  --brand-teal-bright: #0d9488;
+  --brand-teal-glow: #2dd4bf;
+  --brand-gold-deep: #d4a72c;
+  --brand-gold: #f5c451;          /* accent gold */
+  --brand-gold-light: #ffdc8a;
+
+  /* Semantic aliases — every value below points at the ramp above. */
+  --emerald-deep: var(--brand-forest);
+  --emerald-mid: var(--brand-teal-bright);
+  --gold: var(--brand-gold);
+  --cream: #f4f7f6;
   --success: #059669;
   --warning: #d97706;
   --info: #0284c7;
 
   --background: #f4f7f6;
-  --foreground: #06231d;
+  --foreground: var(--brand-forest);
   --card: #ffffff;
-  --card-foreground: #06231d;
+  --card-foreground: var(--brand-forest);
   --popover: #ffffff;
-  --popover-foreground: #06231d;
-  --primary: #0f766e;           /* Deep teal — brand primary */
+  --popover-foreground: var(--brand-forest);
+  --primary: var(--brand-teal);
   --primary-foreground: #ffffff;
   --secondary: #e6efec;
-  --secondary-foreground: #06231d;
+  --secondary-foreground: var(--brand-forest);
   --muted: #e9f0ee;
   --muted-foreground: #4b6560;
-  --accent: #0d9488;            /* Teal */
+  --accent: var(--brand-teal-bright);
   --accent-foreground: #ffffff;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
@@ -136,9 +148,9 @@
   --ring: rgba(13, 148, 136, 0.45);
 
   /* Chart series — dark-mode-safe palette lives in `.dark` below. */
-  --chart-1: #0f766e;   /* deep teal */
-  --chart-2: #0d9488;   /* teal */
-  --chart-3: #f5c451;   /* gold */
+  --chart-1: var(--brand-teal);
+  --chart-2: var(--brand-teal-bright);
+  --chart-3: var(--brand-gold);
   --chart-4: #0284c7;   /* sky */
   --chart-5: #7c3aed;   /* violet */
   --chart-6: #dc2626;   /* crimson */
@@ -146,16 +158,17 @@
   --chart-grid: rgba(6, 35, 29, 0.08);
   --chart-axis: #64748b;
 
-  /* Sidebar: deep navy premium rail with subtle gradient (applied in shell). */
-  --sidebar: #06231d;
+  /* Sidebar: dark-green premium rail with subtle gradient (applied in shell). */
+  --sidebar: var(--brand-forest);
   --sidebar-foreground: #d8e7e2;
-  --sidebar-primary: #f5c451;
-  --sidebar-primary-foreground: #06231d;
+  --sidebar-primary: var(--brand-gold);
+  --sidebar-primary-foreground: var(--brand-forest);
   --sidebar-accent: rgba(255, 255, 255, 0.08);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.10);
-  --sidebar-ring: #0d9488;
+  --sidebar-ring: var(--brand-teal-bright);
 }
+
 
 .dark {
   --emerald-deep: #e3efec;      /* invert: bright body text */
