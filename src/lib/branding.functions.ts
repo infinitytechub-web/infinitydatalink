@@ -1,4 +1,5 @@
 import { writeAudit } from "@/lib/audit-log";
+import { BRAND_DEFAULT_COLORS } from "@/lib/brand-palette";
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
@@ -69,9 +70,9 @@ export type BrandingSettings = {
 const DEFAULTS: BrandingSettings = {
   app_name: "IT-360 CashApp",
   tagline: null,
-  primary_color: "#0f766e",
-  accent_color: "#f5c451",
-  secondary_color: "#0f766e",
+  primary_color: BRAND_DEFAULT_COLORS.primary_color,
+  accent_color: BRAND_DEFAULT_COLORS.accent_color,
+  secondary_color: BRAND_DEFAULT_COLORS.secondary_color,
   logo_url: null,
   favicon_url: null,
   touch_icon_url: null,

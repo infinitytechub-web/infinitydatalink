@@ -1,3 +1,4 @@
+import { BRAND, BRAND_DEFAULT_COLORS } from "@/lib/brand-palette";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -411,11 +412,11 @@ function ColorField({
         <Input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="#0d9488"
+          placeholder={BRAND.teal}
           className={valid ? "" : "border-destructive"}
         />
       </div>
-      {!valid ? <p className="text-xs text-destructive">Enter a valid hex color like #0d9488</p> : null}
+      {!valid ? <p className="text-xs text-destructive">Enter a valid hex color like {BRAND.teal}</p> : null}
     </div>
   );
 }
@@ -480,9 +481,9 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 function BrandingPreview({ form, logoUrl }: { form: Form; logoUrl: string | null }) {
-  const primary = HEX.test(form.primary_color) ? form.primary_color : "#0d9488";
-  const accent = HEX.test(form.accent_color) ? form.accent_color : "#f5c451";
-  const secondary = HEX.test(form.secondary_color) ? form.secondary_color : "#0f766e";
+  const primary = HEX.test(form.primary_color) ? form.primary_color : BRAND_DEFAULT_COLORS.primary_color;
+  const accent = HEX.test(form.accent_color) ? form.accent_color : BRAND_DEFAULT_COLORS.accent_color;
+  const secondary = HEX.test(form.secondary_color) ? form.secondary_color : BRAND_DEFAULT_COLORS.secondary_color;
   return (
     <SectionCard title="Live preview">
       <div className="p-6">
