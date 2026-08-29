@@ -4,8 +4,8 @@
 /* Variable faces ship a single stylesheet whose @font-face rules are split by
    unicode-range, so non-latin subsets are never downloaded. The static mono
    face is pinned to its latin subset to keep the blocking CSS small. */
-@import "@fontsource-variable/manrope/wght.css";
-@import "@fontsource-variable/sora/wght.css";
+/* Sora (display) + Inter (body/UI) are loaded from Google Fonts via <link>
+   tags in src/routes/__root.tsx. */
 @import "@fontsource/ibm-plex-mono/latin-400.css";
 @import "@fontsource/ibm-plex-mono/latin-500.css";
 
@@ -17,17 +17,14 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Body/UI = Manrope, display/headings = Sora. The "serif" alias is remapped
-     to Sora so existing `font-serif` usage renders as the display face. */
+  /* Body/UI = Inter, display/headings = Sora (both from Google Fonts, loaded
+     via <link> in __root.tsx). The "serif" alias is remapped to Sora so
+     existing `font-serif` usage renders as the display face. */
   --font-sans:
-    "Manrope Variable", "Manrope", ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-serif:
-    "Sora Variable", "Sora", "Manrope Variable", ui-sans-serif, system-ui,
-    sans-serif;
-  --font-display:
-    "Sora Variable", "Sora", "Manrope Variable", ui-sans-serif, system-ui,
-    sans-serif;
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono:
     "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     monospace;
@@ -75,71 +72,71 @@
 
   /* Enterprise elevation — primary-tinted so cards feel connected to the
      brand instead of using flat neutral drop-shadows. */
-  --shadow-xs: 0 1px 2px rgba(10, 26, 51, 0.04);
+  --shadow-xs: 0 1px 2px rgba(6, 35, 29, 0.04);
   --shadow-sm:
-    0 1px 2px rgba(10, 26, 51, 0.04),
-    0 1px 3px rgba(18, 58, 107, 0.06);
+    0 1px 2px rgba(6, 35, 29, 0.04),
+    0 1px 3px rgba(15, 118, 110, 0.06);
   --shadow-md:
-    0 4px 6px -1px rgba(10, 26, 51, 0.05),
-    0 8px 16px -6px rgba(18, 58, 107, 0.10);
+    0 4px 6px -1px rgba(6, 35, 29, 0.05),
+    0 8px 16px -6px rgba(15, 118, 110, 0.10);
   --shadow-lg:
-    0 10px 24px -8px rgba(10, 26, 51, 0.10),
-    0 20px 40px -18px rgba(18, 58, 107, 0.20);
+    0 10px 24px -8px rgba(6, 35, 29, 0.10),
+    0 20px 40px -18px rgba(15, 118, 110, 0.20);
   --shadow-elevated:
-    0 1px 2px rgba(10, 26, 51, 0.05),
-    0 12px 32px -14px rgba(18, 58, 107, 0.28);
+    0 1px 2px rgba(6, 35, 29, 0.05),
+    0 12px 32px -14px rgba(15, 118, 110, 0.28);
   --shadow-nav:
-    0 20px 50px -30px rgba(10, 26, 51, 0.55);
+    0 20px 50px -30px rgba(6, 35, 29, 0.55);
 }
 
 :root {
   --radius: 0.625rem; /* 10px — compact banking console cards */
 
   /* Enterprise palette: Royal Blue primary, Emerald secondary, Gold accent. */
-  --emerald-deep: #0a1a33;      /* institutional navy ink (text) */
+  --emerald-deep: #06231d;      /* institutional navy ink (text) */
   --emerald-mid: #0d9488;       /* teal accent */
-  --gold: #c9a227;              /* reserved highlight gold */
-  --cream: #f6f8fb;             /* off-white background */
+  --gold: #f5c451;              /* reserved highlight gold */
+  --cream: #f4f7f6;             /* off-white background */
   --success: #059669;
   --warning: #d97706;
   --info: #0284c7;
 
-  --background: #f6f8fb;
-  --foreground: #0a1a33;
+  --background: #f4f7f6;
+  --foreground: #06231d;
   --card: #ffffff;
-  --card-foreground: #0a1a33;
+  --card-foreground: #06231d;
   --popover: #ffffff;
-  --popover-foreground: #0a1a33;
-  --primary: #123a6b;           /* Institutional navy */
+  --popover-foreground: #06231d;
+  --primary: #0f766e;           /* Deep teal — brand primary */
   --primary-foreground: #ffffff;
-  --secondary: #eef2f7;
-  --secondary-foreground: #0a1a33;
-  --muted: #eef2f7;
-  --muted-foreground: #4a5b73;
+  --secondary: #e6efec;
+  --secondary-foreground: #06231d;
+  --muted: #e9f0ee;
+  --muted-foreground: #4b6560;
   --accent: #0d9488;            /* Teal */
   --accent-foreground: #ffffff;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
-  --border: #dde4ee;
-  --input: #c3cedd;
+  --border: #dbe6e2;
+  --input: #c2d3ce;
   --ring: rgba(13, 148, 136, 0.45);
 
   /* Chart series — dark-mode-safe palette lives in `.dark` below. */
-  --chart-1: #123a6b;   /* navy */
+  --chart-1: #0f766e;   /* deep teal */
   --chart-2: #0d9488;   /* teal */
-  --chart-3: #c9a227;   /* gold */
+  --chart-3: #f5c451;   /* gold */
   --chart-4: #0284c7;   /* sky */
   --chart-5: #7c3aed;   /* violet */
   --chart-6: #dc2626;   /* crimson */
   --chart-7: #475569;   /* slate */
-  --chart-grid: rgba(10, 26, 51, 0.08);
+  --chart-grid: rgba(6, 35, 29, 0.08);
   --chart-axis: #64748b;
 
   /* Sidebar: deep navy premium rail with subtle gradient (applied in shell). */
-  --sidebar: #0a1a33;
-  --sidebar-foreground: #dce5f0;
-  --sidebar-primary: #c9a227;
-  --sidebar-primary-foreground: #0a1a33;
+  --sidebar: #06231d;
+  --sidebar-foreground: #d8e7e2;
+  --sidebar-primary: #f5c451;
+  --sidebar-primary-foreground: #06231d;
   --sidebar-accent: rgba(255, 255, 255, 0.08);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.10);
@@ -147,22 +144,22 @@
 }
 
 .dark {
-  --emerald-deep: #e4ecf6;      /* invert: bright body text */
+  --emerald-deep: #e3efec;      /* invert: bright body text */
   --emerald-mid: #2dd4bf;
-  --gold: #e0be4e;
-  --cream: #071120;
+  --gold: #f5c451;
+  --cream: #04140f;
   --success: #10b981;
   --warning: #f59e0b;
   --info: #38bdf8;
 
-  --background: #071120;
-  --foreground: #e4ecf6;
-  --card: #0d1c31;
-  --card-foreground: #e4ecf6;
-  --popover: #0d1c31;
-  --popover-foreground: #e4ecf6;
-  --primary: #2f6ba8;
-  --primary-foreground: #ffffff;
+  --background: #04140f;
+  --foreground: #e3efec;
+  --card: #0a251f;
+  --card-foreground: #e3efec;
+  --popover: #0a251f;
+  --popover-foreground: #e3efec;
+  --primary: #14b8a6;
+  --primary-foreground: #04140f;
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #e2e8f0;
   --muted: rgba(255, 255, 255, 0.05);
@@ -177,9 +174,9 @@
 
   /* Dark-mode chart palette — brighter, higher-chroma variants that clear
      WCAG contrast on the dark card surface. */
-  --chart-1: #7fb2e8;   /* navy → soft blue */
+  --chart-1: #5eead4;   /* teal → aqua */
   --chart-2: #2dd4bf;   /* teal */
-  --chart-3: #e0be4e;   /* gold */
+  --chart-3: #f5c451;   /* gold */
   --chart-4: #38bdf8;   /* sky */
   --chart-5: #c084fc;   /* violet */
   --chart-6: #fb7185;   /* rose */
@@ -187,10 +184,10 @@
   --chart-grid: rgba(226, 232, 240, 0.12);
   --chart-axis: rgba(226, 232, 240, 0.7);
 
-  --sidebar: #050d1a;
-  --sidebar-foreground: #e4ecf6;
-  --sidebar-primary: #e0be4e;
-  --sidebar-primary-foreground: #050d1a;
+  --sidebar: #03110d;
+  --sidebar-foreground: #e3efec;
+  --sidebar-primary: #f5c451;
+  --sidebar-primary-foreground: #03110d;
   --sidebar-accent: rgba(255, 255, 255, 0.06);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.08);

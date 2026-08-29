@@ -20,9 +20,9 @@ import {
 const DEFAULTS: BrandingSettings = {
   app_name: "IT-360 CashApp",
   tagline: null,
-  primary_color: "#0d9488",
+  primary_color: "#0f766e",
   accent_color: "#f5c451",
-  secondary_color: "#0f766e",
+  secondary_color: "#0d9488",
   logo_url: null,
   favicon_url: null,
   touch_icon_url: null,

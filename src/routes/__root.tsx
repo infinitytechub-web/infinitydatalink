@@ -13,8 +13,6 @@ import appCss from "../styles.css?url";
 // Hashed, build-safe URLs for the two latin variable faces used above the
 // fold. Preloading them removes the CSS→font request waterfall that delayed
 // first paint of the hero text.
-import manropeLatin from "@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url";
-import soraLatin from "@fontsource-variable/sora/files/sora-latin-wght-normal.woff2?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -93,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0d9488" },
+      { name: "theme-color", content: "#0f766e" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "IT-360 CashApp" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -107,8 +105,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp" },
     ],
     links: [
-      { rel: "preload", as: "font", type: "font/woff2", href: manropeLatin, crossOrigin: "anonymous" },
-      { rel: "preload", as: "font", type: "font/woff2", href: soraLatin, crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
