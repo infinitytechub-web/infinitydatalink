@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useBranding } from "@/components/branding-provider";
 import { AuthBrandMark } from "@/components/auth-brand-mark";
+import { PhoneField } from "@/components/phone-field";
 import DOMPurify from "isomorphic-dompurify";
 import { calculateAge, isMinor, validateDateOfBirth } from "@/lib/age";
 import { GHANA_REGIONS, districtsForRegion } from "@/lib/ghana-locations";
@@ -463,17 +464,13 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               </p>
             ) : null}
           </Field>
-          <Field label="Telephone number">
-            <input
-              type="tel"
-              required
-              autoComplete="tel"
-              className={inputClass(focusRing)}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="024 123 4567"
-            />
-          </Field>
+          <PhoneField
+            value={phone}
+            onChange={setPhone}
+            required
+            label="Telephone number"
+            hint="10-digit Ghana mobile number, e.g. 024 123 4567"
+          />
           <Field
             label="Date of birth"
             hint={

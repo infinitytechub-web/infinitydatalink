@@ -2392,49 +2392,70 @@ export type Database = {
       payment_intents: {
         Row: {
           amount_minor: number
+          cancel_reason: string | null
           created_at: string
           created_by: string | null
           currency: string
           failure_reason: string | null
           id: string
+          idempotency_key: string | null
           member_id: string | null
           metadata: Json
+          payer_network: string | null
+          payer_phone: string | null
           provider_code: string
           provider_reference: string | null
           purpose: string
+          rail: string
           reference: string
+          settled_at: string | null
+          settled_by: string | null
           status: string
           updated_at: string
         }
         Insert: {
           amount_minor: number
+          cancel_reason?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           failure_reason?: string | null
           id?: string
+          idempotency_key?: string | null
           member_id?: string | null
           metadata?: Json
+          payer_network?: string | null
+          payer_phone?: string | null
           provider_code: string
           provider_reference?: string | null
           purpose?: string
+          rail?: string
           reference: string
+          settled_at?: string | null
+          settled_by?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           amount_minor?: number
+          cancel_reason?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           failure_reason?: string | null
           id?: string
+          idempotency_key?: string | null
           member_id?: string | null
           metadata?: Json
+          payer_network?: string | null
+          payer_phone?: string | null
           provider_code?: string
           provider_reference?: string | null
           purpose?: string
+          rail?: string
           reference?: string
+          settled_at?: string | null
+          settled_by?: string | null
           status?: string
           updated_at?: string
         }
@@ -2524,6 +2545,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "payment_receipts_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_refunds: {
+        Row: {
+          amount_minor: number
+          approved_by: string | null
+          created_at: string
+          currency: string
+          decided_at: string | null
+          decision_note: string | null
+          id: string
+          intent_id: string
+          provider_reference: string | null
+          reason: string
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          decided_at?: string | null
+          decision_note?: string | null
+          id?: string
+          intent_id: string
+          provider_reference?: string | null
+          reason: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          decided_at?: string | null
+          decision_note?: string | null
+          id?: string
+          intent_id?: string
+          provider_reference?: string | null
+          reason?: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_refunds_intent_id_fkey"
             columns: ["intent_id"]
             isOneToOne: false
             referencedRelation: "payment_intents"
@@ -5412,6 +5489,7 @@ export type Database = {
         Args: { _type: string; _value: string }
         Returns: string
       }
+      next_payment_receipt_no: { Args: never; Returns: string }
       normalize_national_id: {
         Args: { _type: string; _value: string }
         Returns: string

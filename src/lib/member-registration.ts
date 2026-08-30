@@ -1,3 +1,5 @@
+import { checkGhPhone } from "@/lib/gh-phone";
+
 /**
  * Shared registration biodata helpers (client-safe).
  *
@@ -49,12 +51,12 @@ export function isValidGhanaCard(value: string): boolean {
 
 /**
  * Normalize a Ghana telephone number to `+233XXXXXXXXX`.
- * Accepts `0XXXXXXXXX`, `233XXXXXXXXX`, `+233XXXXXXXXX` with any spacing.
+ * Strict: the number must be a supported 10-digit Ghana mobile number on a
+ * recognised network. Validation is delegated to `@/lib/gh-phone` so every
+ * capture point in the app (registration, KYC, payments, teller) shares one rule.
  */
 export function normalizePhone(input: string): string | null {
-  const raw = input.replace(/[\s()-]/g, "");
-  if (/^0\d{9}$/.test(raw)) return `+233${raw.slice(1)}`;
-  if (/^\+233\d{9}$/.test(raw)) return raw;
-  if (/^233\d{9}$/.test(raw)) return `+${raw}`;
-  return null;
+  const check = checkGhPhone(input);
+  if (!check.valid) return null;
+  return `+233${check.phone.slice(1)}`;
 }
