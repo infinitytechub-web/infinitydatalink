@@ -75,8 +75,7 @@ export function PayNowPanel() {
       }),
     onSuccess: async (res) => {
       if (res.duplicate) toast.info(`Existing payment reused: ${res.intent.reference}`);
-      else toast.success(`Payment ${res.intent.reference} created`);
-      if (res.checkout_url) window.open(res.checkout_url, "_blank", "noopener");
+      else toast.success(`Payment ${res.intent.reference} created`, { description: res.message });
       setAmount("");
       setNote("");
       await qc.invalidateQueries({ queryKey: ["payments"] });
