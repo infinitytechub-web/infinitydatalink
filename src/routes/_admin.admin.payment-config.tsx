@@ -183,7 +183,97 @@ function Body({ canManage }: { canManage: boolean }) {
   );
 }
 
+function RailsPanel({ rails, canManage }: { rails: RailConfigRow[]; canManage: boolean }) {
+  const qc = useQueryClient();
+  const call = useServerFn(setPaymentRailEnabled);
+  const [pending, setPending] = useState<string | null>(null);
+
+  const mut = useMutation({
+    mutationFn: (v: { rail: string; enabled: boolean }) => call({ data: v }),
+    onSuccess: async (_r, v) => {
+      toast.success(v.enabled ? "Rail enabled" : "Rail disabled");
+      await qc.invalidateQueries({ queryKey: ["admin", "payment-config"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setPending(null),
+  });
+
+  const groups: { kind: string; label: string }[] = [
+    { kind: "mobile_money", label: "Mobile money" },
+    { kind: "bank", label: "Bank" },
+    { kind: "card", label: "Cards" },
+    { kind: "cash", label: "Cash" },
+  ];
+
+  return (
+    <SectionCard
+      title="Payment rails"
+      action={
+        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+          {rails.filter((r) => r.rail_enabled).length}/{rails.length} enabled
+        </span>
+      }
+    >
+      <div className="space-y-6 p-6">
+        <p className="text-xs text-muted-foreground">
+          A rail becomes selectable for members once it is switched on here and a provider that supports it is enabled with
+          credentials. Turning a rail off blocks new intents immediately without changing any provider credentials.
+        </p>
+        {groups.map((g) => {
+          const items = rails.filter((r) => r.kind === g.kind);
+          if (items.length === 0) return null;
+          return (
+            <div key={g.kind} className="space-y-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{g.label}</p>
+              <ul className="divide-y divide-emerald-deep/5 rounded-lg border border-emerald-deep/10">
+                {items.map((r) => (
+                  <li key={r.rail} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                    <div className="min-w-0">
+                      <p className="flex items-center gap-2 text-sm font-semibold">
+                        {r.label}
+                        <span
+                          className={
+                            "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest " +
+                            (!r.rail_enabled
+                              ? "bg-destructive/10 text-destructive"
+                              : r.live
+                                ? "bg-emerald-mid/15 text-emerald-mid"
+                                : r.selectable
+                                  ? "bg-accent-gold/15 text-accent-gold"
+                                  : "bg-emerald-deep/10 text-muted-foreground")
+                          }
+                        >
+                          {r.statusLabel}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{r.note}</p>
+                      {r.providerCode && (
+                        <p className="mt-1 font-mono text-[11px] text-muted-foreground">provider: {r.providerCode}</p>
+                      )}
+                    </div>
+                    <Switch
+                      aria-label={`Enable ${r.label}`}
+                      checked={r.rail_enabled}
+                      disabled={!canManage || (mut.isPending && pending === r.rail)}
+                      onCheckedChange={(next) => {
+                        setPending(r.rail);
+                        mut.mutate({ rail: r.rail, enabled: next });
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+        {!canManage && <p className="text-xs text-muted-foreground">Read-only — payments.manage required to change rails.</p>}
+      </div>
+    </SectionCard>
+  );
+}
+
 type SavedProvider = {
+
   code: string;
   label: string;
   mode: string;
