@@ -6118,6 +6118,8 @@ export type Database = {
         | "member"
         | "admin"
         | "manager"
+        | "teller"
+        | "support_officer"
       collateral_status: "pledged" | "released" | "seized"
       entity_role: "owner" | "admin" | "member"
       entity_status: "pending" | "active" | "suspended" | "closed"
@@ -6319,6 +6321,8 @@ export const Constants = {
         "member",
         "admin",
         "manager",
+        "teller",
+        "support_officer",
       ],
       collateral_status: ["pledged", "released", "seized"],
       entity_role: ["owner", "admin", "member"],
