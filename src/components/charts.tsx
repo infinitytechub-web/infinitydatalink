@@ -38,10 +38,13 @@ export function BarList({
   rows,
   format,
   emptyLabel,
+  colorful = true,
 }: {
   rows: { label: string; value: number; hint?: ReactNode }[];
   format?: (v: number) => string;
   emptyLabel?: string;
+  /** Tint each bar with a distinct palette color (default) instead of primary. */
+  colorful?: boolean;
 }) {
   const reduced = useReducedMotion();
   const max = Math.max(1, ...rows.map((r) => r.value));
@@ -50,18 +53,26 @@ export function BarList({
   }
   return (
     <ul className="divide-y divide-border">
-      {rows.map((row) => {
+      {rows.map((row, i) => {
         const pct = Math.max(2, Math.round((row.value / max) * 100));
+        const color = CHART_PALETTE[i % CHART_PALETTE.length];
         return (
           <li
             key={row.label}
-            className="grid grid-cols-[minmax(6rem,10rem)_minmax(0,1fr)_minmax(3rem,auto)] items-center gap-3 px-6 py-3 text-sm"
+            className="grid grid-cols-[minmax(6rem,10rem)_minmax(0,1fr)_minmax(3rem,auto)] items-center gap-3 px-6 py-3 text-sm transition-colors hover:bg-muted/40"
           >
-            <span className="truncate text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              {row.label}
+            <span className="flex min-w-0 items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              {colorful ? (
+                <span
+                  aria-hidden="true"
+                  className="size-2 shrink-0 rounded-full"
+                  style={{ background: color }}
+                />
+              ) : null}
+              <span className="truncate">{row.label}</span>
             </span>
             <div
-              className="h-2 overflow-hidden rounded-full bg-muted"
+              className="h-2.5 overflow-hidden rounded-full bg-muted"
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={max}
@@ -70,13 +81,21 @@ export function BarList({
             >
               <div
                 className={cn(
-                  "h-full rounded-full bg-primary",
+                  "h-full rounded-full",
+                  colorful ? undefined : "bg-primary",
                   reduced ? undefined : "transition-[width] duration-500 ease-out",
                 )}
-                style={{ width: `${pct}%` }}
+                style={
+                  colorful
+                    ? {
+                        width: `${pct}%`,
+                        background: `linear-gradient(90deg, ${color} 0%, color-mix(in oklab, ${color} 62%, white) 100%)`,
+                      }
+                    : { width: `${pct}%` }
+                }
               />
             </div>
-            <span className="tabular text-right font-medium text-foreground">
+            <span className="tabular text-right font-semibold text-foreground">
               {format ? format(row.value) : row.value}
             </span>
             {row.hint ? <span className="col-span-3 text-xs text-muted-foreground">{row.hint}</span> : null}
@@ -86,3 +105,4 @@ export function BarList({
     </ul>
   );
 }
+

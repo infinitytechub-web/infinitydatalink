@@ -3,9 +3,26 @@ import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Lock } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowDownToLine,
+  BadgeCheck,
+  Ban,
+  HandCoins,
+  Landmark,
+  Lock,
+  PercentCircle,
+  PiggyBank,
+  ShieldAlert,
+  Sparkles,
+  Timer,
+  TrendingUp,
+  Wallet,
+  XCircle,
+} from "lucide-react";
 import { TrendChart, BarList } from "@/components/charts";
-import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primitives";
+import { EmptyState, PageHeader, SectionCard } from "@/components/primitives";
+import { PremiumStatCard, ProgressRing } from "@/components/premium";
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/org-config";
@@ -168,12 +185,40 @@ function AnalyticsBody() {
       </SectionCard>
 
       {/* ---------------- Savings growth ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Opening balance" value={<span className="tabular">{formatMoney(data.savings.opening_balance)}</span>} />
-        <KPIStat label="Closing balance" value={<span className="tabular">{formatMoney(data.savings.closing_balance)}</span>} />
-        <KPIStat label="Deposits in range" value={<span className="tabular">{formatMoney(data.savings.deposits_total)}</span>} />
-        <KPIStat label="Growth" value={<span className="tabular">{pctText(data.savings.growth_rate)}</span>} />
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="royal"
+          icon={<PiggyBank className="size-4" />}
+          label="Opening balance"
+          value={<span className="tabular">{formatMoney(data.savings.opening_balance)}</span>}
+          hint={`As at ${s.from}`}
+        />
+        <PremiumStatCard
+          tone="emerald"
+          icon={<TrendingUp className="size-4" />}
+          label="Closing balance"
+          value={<span className="tabular">{formatMoney(data.savings.closing_balance)}</span>}
+          delta={data.savings.growth_rate}
+          deltaLabel="in range"
+          spark={data.savings.series.map((r) => r.cumulative)}
+        />
+        <PremiumStatCard
+          tone="sky"
+          icon={<ArrowDownToLine className="size-4" />}
+          label="Deposits in range"
+          value={<span className="tabular">{formatMoney(data.savings.deposits_total)}</span>}
+          spark={data.savings.series.map((r) => r.deposits)}
+        />
+        <PremiumStatCard
+          tone="gold"
+          icon={<Sparkles className="size-4" />}
+          label="Growth"
+          value={<span className="tabular">{pctText(data.savings.growth_rate)}</span>}
+          progress={Math.min(1, Math.abs(data.savings.growth_rate))}
+          hint="Net balance movement over the period"
+        />
       </section>
+
 
       <SectionCard
         title="Savings growth"
@@ -199,6 +244,7 @@ function AnalyticsBody() {
         ) : (
           <div className="p-4">
             <TrendChart
+              variant="area"
               title="Savings growth"
               data={data.savings.series}
               xKey="bucket"
@@ -213,15 +259,37 @@ function AnalyticsBody() {
       </SectionCard>
 
       {/* ---------------- Withdrawal trends ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Requested" value={<span className="tabular">{formatMoney(data.withdrawals.requested_total)}</span>} />
-        <KPIStat label="Paid out" value={<span className="tabular">{formatMoney(data.withdrawals.paid_total)}</span>} />
-        <KPIStat label="Approval rate" value={<span className="tabular">{pctText(data.withdrawals.approval_rate)}</span>} />
-        <KPIStat
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="violet"
+          icon={<Wallet className="size-4" />}
+          label="Requested"
+          value={<span className="tabular">{formatMoney(data.withdrawals.requested_total)}</span>}
+          spark={data.withdrawals.series.map((r) => r.amount)}
+        />
+        <PremiumStatCard
+          tone="emerald"
+          icon={<BadgeCheck className="size-4" />}
+          label="Paid out"
+          value={<span className="tabular">{formatMoney(data.withdrawals.paid_total)}</span>}
+          spark={data.withdrawals.series.map((r) => r.paid)}
+        />
+        <PremiumStatCard
+          tone="sky"
+          icon={<PercentCircle className="size-4" />}
+          label="Approval rate"
+          value={<span className="tabular">{pctText(data.withdrawals.approval_rate)}</span>}
+          progress={data.withdrawals.approval_rate}
+        />
+        <PremiumStatCard
+          tone="gold"
+          icon={<Timer className="size-4" />}
           label="Avg decision time"
           value={<span className="tabular">{data.withdrawals.avg_decision_hours.toFixed(1)}h</span>}
+          hint="Request submitted to decision"
         />
       </section>
+
 
       <SectionCard
         title="Withdrawal trends"
@@ -249,6 +317,7 @@ function AnalyticsBody() {
         ) : (
           <div className="p-4">
             <TrendChart
+              variant="area"
               title="Withdrawal trends"
               data={data.withdrawals.series}
               xKey="bucket"
@@ -274,12 +343,50 @@ function AnalyticsBody() {
       </div>
 
       {/* ---------------- Loan performance ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Disbursed" value={<span className="tabular">{formatMoney(data.loans.disbursed_total)}</span>} />
-        <KPIStat label="Repaid" value={<span className="tabular">{formatMoney(data.loans.repaid_total)}</span>} />
-        <KPIStat label="On-time rate" value={<span className="tabular">{pctText(data.loans.on_time_rate)}</span>} />
-        <KPIStat label="Overdue installments" value={<span className="tabular">{data.loans.overdue_installments}</span>} />
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="royal"
+          icon={<Landmark className="size-4" />}
+          label="Disbursed"
+          value={<span className="tabular">{formatMoney(data.loans.disbursed_total)}</span>}
+          spark={data.loans.series.map((r) => r.disbursed)}
+        />
+        <PremiumStatCard
+          tone="emerald"
+          icon={<HandCoins className="size-4" />}
+          label="Repaid"
+          value={<span className="tabular">{formatMoney(data.loans.repaid_total)}</span>}
+          spark={data.loans.series.map((r) => r.repaid)}
+        />
+        <PremiumStatCard
+          tone="sky"
+          icon={<Timer className="size-4" />}
+          label="On-time rate"
+          value={<span className="tabular">{pctText(data.loans.on_time_rate)}</span>}
+          progress={data.loans.on_time_rate}
+        />
+        <PremiumStatCard
+          tone="rose"
+          icon={<AlertTriangle className="size-4" />}
+          label="Overdue installments"
+          value={<span className="tabular">{data.loans.overdue_installments.toLocaleString()}</span>}
+          hint="Instalments past their due date"
+        />
       </section>
+
+      <SectionCard title="Portfolio health" accent="sky">
+        <div className="grid grid-cols-2 gap-6 p-6 sm:grid-cols-4">
+          <ProgressRing value={data.loans.on_time_rate} label="On-time repayment" tone={0} />
+          <ProgressRing
+            value={data.loans.disbursed_total > 0 ? data.loans.repaid_total / data.loans.disbursed_total : 0}
+            label="Repaid vs disbursed"
+            tone={1}
+          />
+          <ProgressRing value={data.withdrawals.approval_rate} label="Withdrawal approvals" tone={2} />
+          <ProgressRing value={data.cancellations.cancellation_rate} label="Cancellation rate" tone={4} />
+        </div>
+      </SectionCard>
+
 
       <SectionCard
         title="Loan performance"
@@ -304,6 +411,7 @@ function AnalyticsBody() {
         ) : (
           <div className="p-4">
             <TrendChart
+              variant="area"
               title="Loan performance"
               data={data.loans.series}
               xKey="bucket"
@@ -327,12 +435,39 @@ function AnalyticsBody() {
       </div>
 
       {/* ---------------- Cancellation rates ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Requests" value={<span className="tabular">{data.cancellations.total_requests}</span>} />
-        <KPIStat label="Cancelled" value={<span className="tabular">{data.cancellations.total_cancelled}</span>} />
-        <KPIStat label="Cancellation rate" value={<span className="tabular">{pctText(data.cancellations.cancellation_rate)}</span>} />
-        <KPIStat label="Admin-initiated share" value={<span className="tabular">{pctText(data.cancellations.admin_share)}</span>} />
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="slate"
+          icon={<Ban className="size-4" />}
+          label="Requests"
+          value={<span className="tabular">{data.cancellations.total_requests.toLocaleString()}</span>}
+          spark={data.cancellations.series.map((r) => r.total)}
+        />
+        <PremiumStatCard
+          tone="rose"
+          icon={<XCircle className="size-4" />}
+          label="Cancelled"
+          value={<span className="tabular">{data.cancellations.total_cancelled.toLocaleString()}</span>}
+          spark={data.cancellations.series.map((r) => r.cancelled)}
+        />
+        <PremiumStatCard
+          tone="violet"
+          icon={<PercentCircle className="size-4" />}
+          label="Cancellation rate"
+          value={<span className="tabular">{pctText(data.cancellations.cancellation_rate)}</span>}
+          progress={data.cancellations.cancellation_rate}
+          hint="Share of requests withdrawn before payout"
+        />
+        <PremiumStatCard
+          tone="gold"
+          icon={<ShieldAlert className="size-4" />}
+          label="Admin-initiated share"
+          value={<span className="tabular">{pctText(data.cancellations.admin_share)}</span>}
+          progress={data.cancellations.admin_share}
+          hint="Cancellations performed by staff"
+        />
       </section>
+
 
       <SectionCard
         title="Batch cancellation rates"
@@ -359,6 +494,7 @@ function AnalyticsBody() {
         ) : (
           <div className="p-4">
             <TrendChart
+              variant="area"
               title="Batch cancellation rates"
               data={data.cancellations.series}
               xKey="bucket"

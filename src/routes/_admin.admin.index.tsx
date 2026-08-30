@@ -7,20 +7,27 @@ import {
   EmptyState,
   ErrorState,
   KPIGridSkeleton,
-  KPIStat,
   Money,
   PageHeader,
   SectionCard,
   SectionCardSkeleton,
   StatusPill,
 } from "@/components/primitives";
+import { PremiumStatCard } from "@/components/premium";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
 import { generateBusinessInsights } from "@/lib/ai-insights.functions";
 import { getAdminOverview, type ActivityEntry, type PendingApproval } from "@/lib/admin-analytics.functions";
 import { decideLoan } from "@/lib/admin-loans.functions";
 import { useStepUp } from "@/components/step-up-dialog";
-import { RefreshCw, Sparkles } from "lucide-react";
+import {
+  ClipboardCheck,
+  Landmark,
+  PiggyBank,
+  RefreshCw,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
 import { PurgeControlsWidget } from "@/components/purge-controls-widget";
 import { RealtimeNotifications } from "@/components/realtime-notifications";
@@ -123,32 +130,40 @@ function DashboardBody() {
   const { data: o } = useSuspenseQuery(overviewQuery);
   return (
     <>
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat
-          tone="indigo"
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="royal"
+          icon={<Users className="size-4" />}
           label="Members"
           value={<span className="tabular">{o.members_total.toLocaleString()}</span>}
           hint={`+${o.members_new_30d} in last 30 days`}
         />
-        <KPIStat
-          tone="teal"
+        <PremiumStatCard
+          tone="emerald"
+          icon={<PiggyBank className="size-4" />}
           label="Assets under management"
           value={<>GH₵ <span className="tabular">{formatCompact(o.savings_aum)}</span></>}
-          hint={`${pctFmt(o.savings_delta_mom)} MoM net contributions`}
+          delta={o.savings_delta_mom}
+          deltaLabel="MoM"
+          hint="Net contributions month over month"
         />
-        <KPIStat
-          tone="emerald"
+        <PremiumStatCard
+          tone="sky"
+          icon={<Landmark className="size-4" />}
           label="Active loans"
           value={<>GH₵ <span className="tabular">{formatCompact(o.loans_active_principal)}</span></>}
+          progress={o.loans_on_time_rate}
           hint={`${(o.loans_on_time_rate * 100).toFixed(1)}% approved`}
         />
-        <KPIStat
-          tone="amber"
+        <PremiumStatCard
+          tone="gold"
+          icon={<ClipboardCheck className="size-4" />}
           label="Pending approvals"
           value={<span className="tabular">{o.pending_loans + o.pending_withdrawals}</span>}
           hint={`${o.pending_loans} loans · ${o.pending_withdrawals} withdrawals`}
         />
       </section>
+
 
       <div className="grid gap-8 lg:grid-cols-3">
         <ApprovalQueue approvals={o.pending_approvals} />
