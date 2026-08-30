@@ -20,7 +20,6 @@ const recentTxnsQuery = queryOptions({
 });
 
 function PaymentsPage() {
-  const cfg = getOrgConfig();
   return (
     <>
       <PageHeader
@@ -29,21 +28,10 @@ function PaymentsPage() {
         description="Repay active loans, top up savings, and track every transaction across every rail."
       />
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {[
-          { title: "Mobile Money", desc: cfg.momoProviders.join(" · ") || "Local MoMo rails" },
-          { title: "Bank Transfers", desc: "Instant · Same-day · International" },
-          { title: "Cards", desc: "Visa · Mastercard · Verve" },
-        ].map((r) => (
-          <div key={r.title} className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{r.title}</p>
-            <p className="font-serif text-lg text-emerald-deep">{r.desc}</p>
-            <p className="mt-3 text-[11px] text-muted-foreground">
-              Manual credit for now. Pick a target below to record the payment.
-            </p>
-          </div>
-        ))}
-      </div>
+      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+        <PayNowPanel />
+      </Suspense>
+
 
       <Suspense fallback={<Skeleton className="h-40 w-full" />}>
         <ActiveLoansPanel />
