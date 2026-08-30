@@ -22,6 +22,7 @@ import {
   restoreKycVault,
   purgeKycVaultEntry,
   bulkRestoreKycVault,
+  bulkPurgeKycVault,
 } from "@/lib/kyc-vault.functions";
 import type { VaultEntry } from "@/lib/kyc-vault.shared";
 import { VaultRetentionPanel } from "@/components/vault-retention-panel";
@@ -54,12 +55,17 @@ function VaultPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkReason, setBulkReason] = useState("");
+  const [purgeOpen, setPurgeOpen] = useState(false);
+  const [purgeReason, setPurgeReason] = useState("");
+  const [purgeConfirm, setPurgeConfirm] = useState("");
   const [details, setDetails] = useState<VaultEntry | null>(null);
 
   const listFn = useServerFn(listKycVault);
   const restoreFn = useServerFn(restoreKycVault);
   const purgeFn = useServerFn(purgeKycVaultEntry);
   const bulkRestoreFn = useServerFn(bulkRestoreKycVault);
+  const bulkPurgeFn = useServerFn(bulkPurgeKycVault);
+
 
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["kyc-vault", q, page],
@@ -100,6 +106,33 @@ function VaultPage() {
     },
     onError: (e: any) => toast.error(e?.message ?? "Bulk restore failed"),
   });
+
+  const bulkPurgeMut = useMutation({
+    mutationFn: async () =>
+      await bulkPurgeFn({
+        data: {
+          ids: Array.from(selected),
+          reason: purgeReason.trim(),
+          confirm: "PURGE" as const,
+        },
+      }),
+    onSuccess: (res) => {
+      if (res.failed === 0)
+        toast.success(`${res.purged} record${res.purged === 1 ? "" : "s"} permanently deleted`);
+      else toast.warning(`${res.purged} deleted · ${res.failed} blocked`);
+      for (const r of res.results.filter((x) => !x.ok)) {
+        toast.error(`${r.member_name ?? r.id.slice(0, 8)}: ${r.error}`);
+      }
+      setSelected(new Set());
+      setPurgeOpen(false);
+      setPurgeReason("");
+      setPurgeConfirm("");
+      void qc.invalidateQueries();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Bulk delete failed"),
+  });
+
+
 
   const entries = data?.entries ?? [];
   const total = data?.total ?? 0;
@@ -165,6 +198,17 @@ function VaultPage() {
               }}
             >
               <RotateCcw className="mr-1 size-3.5" /> Restore selected
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => {
+                setPurgeReason("");
+                setPurgeConfirm("");
+                setPurgeOpen(true);
+              }}
+            >
+              <Trash2 className="mr-1 size-3.5" /> Delete forever
             </Button>
             <button
               onClick={() => setSelected(new Set())}
@@ -350,6 +394,77 @@ function VaultPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={purgeOpen} onOpenChange={(o) => !o && setPurgeOpen(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Permanently delete {selected.size} vault record{selected.size === 1 ? "" : "s"}?
+            </DialogTitle>
+            <DialogDescription>
+              This is irreversible. The archived KYC snapshots and every archived document file are
+              destroyed and can never be restored — restore instead if there is any doubt. Records
+              still inside their retention window are blocked unless you are a super admin, and each
+              deletion writes its own audit entry naming you, the member and the reason.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs">
+              <p className="font-semibold text-destructive">Selected for permanent deletion</p>
+              <ul className="mt-1 max-h-32 space-y-0.5 overflow-y-auto text-muted-foreground">
+                {entries
+                  .filter((e) => selected.has(e.id))
+                  .map((e) => (
+                    <li key={e.id}>
+                      {e.member_name ?? e.member_id} · {e.member_no ?? "no member no"} ·{" "}
+                      {e.document_count} doc{e.document_count === 1 ? "" : "s"}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="vault-purge-reason">Reason (min 10 characters)</Label>
+              <Textarea
+                id="vault-purge-reason"
+                rows={3}
+                value={purgeReason}
+                onChange={(e) => setPurgeReason(e.target.value)}
+                placeholder="Why must these archives be destroyed?"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="vault-purge-confirm">
+                Type <span className="font-mono font-semibold">PURGE</span> to confirm
+              </Label>
+              <Input
+                id="vault-purge-confirm"
+                value={purgeConfirm}
+                onChange={(e) => setPurgeConfirm(e.target.value)}
+                placeholder="PURGE"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPurgeOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={
+                purgeReason.trim().length < 10 ||
+                purgeConfirm !== "PURGE" ||
+                selected.size === 0 ||
+                bulkPurgeMut.isPending
+              }
+              onClick={() => bulkPurgeMut.mutate()}
+            >
+              {bulkPurgeMut.isPending ? "Deleting…" : "Permanently delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
 
       <Dialog open={!!action} onOpenChange={(o) => !o && setAction(null)}>
         <DialogContent>
