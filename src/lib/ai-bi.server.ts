@@ -220,7 +220,10 @@ type RawBriefing = {
   confidence?: unknown;
 };
 
-const str = (v: unknown, max = 240) => String(v ?? "").trim().slice(0, max);
+const str = (v: unknown, max = 240) =>
+  String(v ?? "")
+    .trim()
+    .slice(0, max);
 
 /** Parse and normalise the model output; throws when the shape is unusable. */
 export function parseBriefing(text: string, model: string): BiBriefing {
