@@ -1,10 +1,15 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell } from "lucide-react";
+import { Bell, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
-import { listMyNotifications, markNotificationsRead } from "@/lib/notifications.functions";
+import {
+  clearMyReadNotifications,
+  listMyNotifications,
+  markNotificationsRead,
+} from "@/lib/notifications.functions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +37,7 @@ export function NotificationBell() {
   const qc = useQueryClient();
   const load = useServerFn(listMyNotifications);
   const markRead = useServerFn(markNotificationsRead);
+  const clearRead = useServerFn(clearMyReadNotifications);
   const [open, setOpen] = useState(false);
 
   const query = useQuery({
@@ -48,6 +54,18 @@ export function NotificationBell() {
       void qc.invalidateQueries({ queryKey: ["notification-bell"] });
       void qc.invalidateQueries({ queryKey: ["my-notifications"] });
     },
+  });
+
+  const clear = useMutation({
+    mutationFn: () => clearRead({}),
+    onSuccess: (r) => {
+      toast.success(
+        r.deleted > 0 ? `Cleared ${r.deleted} read notification(s)` : "No read notifications to clear",
+      );
+      void qc.invalidateQueries({ queryKey: ["notification-bell"] });
+      void qc.invalidateQueries({ queryKey: ["my-notifications"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not clear notifications"),
   });
 
   const rows = useMemo(() => (query.data?.rows ?? []).slice(0, 8), [query.data]);
@@ -104,6 +122,16 @@ export function NotificationBell() {
           ))
         )}
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            if (!clear.isPending) clear.mutate();
+          }}
+          className="text-xs font-semibold text-destructive focus:text-destructive"
+        >
+          <Trash2 className="mr-2 size-3.5" />
+          {clear.isPending ? "Clearing…" : "Clear all read notifications"}
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <a href="/app/inbox" className="w-full text-xs font-semibold">
             View all notifications
