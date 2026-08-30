@@ -24,6 +24,7 @@ import { Route as AdminAdminRouteImport } from './routes/_admin.admin'
 import { Route as MemberAppIndexRouteImport } from './routes/_member.app.index'
 import { Route as AdminAdminIndexRouteImport } from './routes/_admin.admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as MemberAppWithdrawalsRouteImport } from './routes/_member.app.withdrawals'
 import { Route as MemberAppTransfersRouteImport } from './routes/_member.app.transfers'
 import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
 import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
@@ -38,6 +39,7 @@ import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
 import { Route as MemberAppInvestmentsRouteImport } from './routes/_member.app.investments'
 import { Route as MemberAppInboxRouteImport } from './routes/_member.app.inbox'
 import { Route as MemberAppGuaranteesRouteImport } from './routes/_member.app.guarantees'
+import { Route as MemberAppFilesRouteImport } from './routes/_member.app.files'
 import { Route as AdminAdminVaultRouteImport } from './routes/_admin.admin.vault'
 import { Route as AdminAdminTellerRouteImport } from './routes/_admin.admin.teller'
 import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
@@ -50,6 +52,7 @@ import { Route as AdminAdminRelationshipsRouteImport } from './routes/_admin.adm
 import { Route as AdminAdminRecurringRouteImport } from './routes/_admin.admin.recurring'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
 import { Route as AdminAdminPaymentConfigRouteImport } from './routes/_admin.admin.payment-config'
+import { Route as AdminAdminOperationsRouteImport } from './routes/_admin.admin.operations'
 import { Route as AdminAdminNotificationsRouteImport } from './routes/_admin.admin.notifications'
 import { Route as AdminAdminMembersRouteImport } from './routes/_admin.admin.members'
 import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
@@ -66,6 +69,7 @@ import { Route as AdminAdminInvestmentsRouteImport } from './routes/_admin.admin
 import { Route as AdminAdminHealthRouteImport } from './routes/_admin.admin.health'
 import { Route as AdminAdminFxRouteImport } from './routes/_admin.admin.fx'
 import { Route as AdminAdminFinanceRouteImport } from './routes/_admin.admin.finance'
+import { Route as AdminAdminFilesRouteImport } from './routes/_admin.admin.files'
 import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.entities'
 import { Route as AdminAdminDocumentsRouteImport } from './routes/_admin.admin.documents'
 import { Route as AdminAdminCronRunsRouteImport } from './routes/_admin.admin.cron-runs'
@@ -214,6 +218,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MemberAppWithdrawalsRoute = MemberAppWithdrawalsRouteImport.update({
+  id: '/withdrawals',
+  path: '/withdrawals',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 const MemberAppTransfersRoute = MemberAppTransfersRouteImport.update({
   id: '/transfers',
   path: '/transfers',
@@ -284,6 +293,11 @@ const MemberAppGuaranteesRoute = MemberAppGuaranteesRouteImport.update({
   path: '/guarantees',
   getParentRoute: () => MemberAppRoute,
 } as any)
+const MemberAppFilesRoute = MemberAppFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 const AdminAdminVaultRoute = AdminAdminVaultRouteImport.update({
   id: '/vault',
   path: '/vault',
@@ -342,6 +356,11 @@ const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
 const AdminAdminPaymentConfigRoute = AdminAdminPaymentConfigRouteImport.update({
   id: '/payment-config',
   path: '/payment-config',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminOperationsRoute = AdminAdminOperationsRouteImport.update({
+  id: '/operations',
+  path: '/operations',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminNotificationsRoute = AdminAdminNotificationsRouteImport.update({
@@ -425,6 +444,11 @@ const AdminAdminFxRoute = AdminAdminFxRouteImport.update({
 const AdminAdminFinanceRoute = AdminAdminFinanceRouteImport.update({
   id: '/finance',
   path: '/finance',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminFilesRoute = AdminAdminFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminEntitiesRoute = AdminAdminEntitiesRouteImport.update({
@@ -858,6 +882,7 @@ export interface FileRoutesByFullPath {
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
   '/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
+  '/admin/files': typeof AdminAdminFilesRoute
   '/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/admin/fx': typeof AdminAdminFxRoute
   '/admin/health': typeof AdminAdminHealthRoute
@@ -874,6 +899,7 @@ export interface FileRoutesByFullPath {
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/notifications': typeof AdminAdminNotificationsRoute
+  '/admin/operations': typeof AdminAdminOperationsRoute
   '/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
@@ -886,6 +912,7 @@ export interface FileRoutesByFullPath {
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/admin/teller': typeof AdminAdminTellerRoute
   '/admin/vault': typeof AdminAdminVaultRoute
+  '/app/files': typeof MemberAppFilesRoute
   '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/inbox': typeof MemberAppInboxRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
@@ -900,6 +927,7 @@ export interface FileRoutesByFullPath {
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/app/transfers': typeof MemberAppTransfersRoute
+  '/app/withdrawals': typeof MemberAppWithdrawalsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AdminAdminIndexRoute
   '/app/': typeof MemberAppIndexRoute
@@ -984,6 +1012,7 @@ export interface FileRoutesByTo {
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
+  '/admin/files': typeof AdminAdminFilesRoute
   '/admin/fx': typeof AdminAdminFxRoute
   '/admin/health': typeof AdminAdminHealthRoute
   '/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
@@ -999,6 +1028,7 @@ export interface FileRoutesByTo {
   '/admin/logs': typeof AdminAdminLogsRoute
   '/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/admin/notifications': typeof AdminAdminNotificationsRoute
+  '/admin/operations': typeof AdminAdminOperationsRoute
   '/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
@@ -1010,6 +1040,7 @@ export interface FileRoutesByTo {
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/admin/teller': typeof AdminAdminTellerRoute
   '/admin/vault': typeof AdminAdminVaultRoute
+  '/app/files': typeof MemberAppFilesRoute
   '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/inbox': typeof MemberAppInboxRoute
   '/app/investments': typeof MemberAppInvestmentsRoute
@@ -1023,6 +1054,7 @@ export interface FileRoutesByTo {
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/app/transfers': typeof MemberAppTransfersRoute
+  '/app/withdrawals': typeof MemberAppWithdrawalsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AdminAdminIndexRoute
   '/app': typeof MemberAppIndexRoute
@@ -1114,6 +1146,7 @@ export interface FileRoutesById {
   '/_admin/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/_admin/admin/documents': typeof AdminAdminDocumentsRoute
   '/_admin/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
+  '/_admin/admin/files': typeof AdminAdminFilesRoute
   '/_admin/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/_admin/admin/fx': typeof AdminAdminFxRoute
   '/_admin/admin/health': typeof AdminAdminHealthRoute
@@ -1130,6 +1163,7 @@ export interface FileRoutesById {
   '/_admin/admin/logs': typeof AdminAdminLogsRoute
   '/_admin/admin/members': typeof AdminAdminMembersRouteWithChildren
   '/_admin/admin/notifications': typeof AdminAdminNotificationsRoute
+  '/_admin/admin/operations': typeof AdminAdminOperationsRoute
   '/_admin/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/recurring': typeof AdminAdminRecurringRoute
@@ -1142,6 +1176,7 @@ export interface FileRoutesById {
   '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
   '/_admin/admin/teller': typeof AdminAdminTellerRoute
   '/_admin/admin/vault': typeof AdminAdminVaultRoute
+  '/_member/app/files': typeof MemberAppFilesRoute
   '/_member/app/guarantees': typeof MemberAppGuaranteesRoute
   '/_member/app/inbox': typeof MemberAppInboxRoute
   '/_member/app/investments': typeof MemberAppInvestmentsRoute
@@ -1156,6 +1191,7 @@ export interface FileRoutesById {
   '/_member/app/support': typeof MemberAppSupportRoute
   '/_member/app/transactions': typeof MemberAppTransactionsRoute
   '/_member/app/transfers': typeof MemberAppTransfersRoute
+  '/_member/app/withdrawals': typeof MemberAppWithdrawalsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_member/app/': typeof MemberAppIndexRoute
@@ -1246,6 +1282,7 @@ export interface FileRouteTypes {
     | '/admin/cron-runs'
     | '/admin/documents'
     | '/admin/entities'
+    | '/admin/files'
     | '/admin/finance'
     | '/admin/fx'
     | '/admin/health'
@@ -1262,6 +1299,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/members'
     | '/admin/notifications'
+    | '/admin/operations'
     | '/admin/payment-config'
     | '/admin/payments'
     | '/admin/recurring'
@@ -1274,6 +1312,7 @@ export interface FileRouteTypes {
     | '/admin/super-admins'
     | '/admin/teller'
     | '/admin/vault'
+    | '/app/files'
     | '/app/guarantees'
     | '/app/inbox'
     | '/app/investments'
@@ -1288,6 +1327,7 @@ export interface FileRouteTypes {
     | '/app/support'
     | '/app/transactions'
     | '/app/transfers'
+    | '/app/withdrawals'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/app/'
@@ -1372,6 +1412,7 @@ export interface FileRouteTypes {
     | '/admin/console'
     | '/admin/cron-runs'
     | '/admin/documents'
+    | '/admin/files'
     | '/admin/fx'
     | '/admin/health'
     | '/admin/investments'
@@ -1387,6 +1428,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/members'
     | '/admin/notifications'
+    | '/admin/operations'
     | '/admin/payment-config'
     | '/admin/payments'
     | '/admin/recurring'
@@ -1398,6 +1440,7 @@ export interface FileRouteTypes {
     | '/admin/super-admins'
     | '/admin/teller'
     | '/admin/vault'
+    | '/app/files'
     | '/app/guarantees'
     | '/app/inbox'
     | '/app/investments'
@@ -1411,6 +1454,7 @@ export interface FileRouteTypes {
     | '/app/support'
     | '/app/transactions'
     | '/app/transfers'
+    | '/app/withdrawals'
     | '/lovable/email/suppression'
     | '/admin'
     | '/app'
@@ -1501,6 +1545,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/cron-runs'
     | '/_admin/admin/documents'
     | '/_admin/admin/entities'
+    | '/_admin/admin/files'
     | '/_admin/admin/finance'
     | '/_admin/admin/fx'
     | '/_admin/admin/health'
@@ -1517,6 +1562,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/logs'
     | '/_admin/admin/members'
     | '/_admin/admin/notifications'
+    | '/_admin/admin/operations'
     | '/_admin/admin/payment-config'
     | '/_admin/admin/payments'
     | '/_admin/admin/recurring'
@@ -1529,6 +1575,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/super-admins'
     | '/_admin/admin/teller'
     | '/_admin/admin/vault'
+    | '/_member/app/files'
     | '/_member/app/guarantees'
     | '/_member/app/inbox'
     | '/_member/app/investments'
@@ -1543,6 +1590,7 @@ export interface FileRouteTypes {
     | '/_member/app/support'
     | '/_member/app/transactions'
     | '/_member/app/transfers'
+    | '/_member/app/withdrawals'
     | '/lovable/email/suppression'
     | '/_admin/admin/'
     | '/_member/app/'
@@ -1745,6 +1793,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_member/app/withdrawals': {
+      id: '/_member/app/withdrawals'
+      path: '/withdrawals'
+      fullPath: '/app/withdrawals'
+      preLoaderRoute: typeof MemberAppWithdrawalsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
     '/_member/app/transfers': {
       id: '/_member/app/transfers'
       path: '/transfers'
@@ -1843,6 +1898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppGuaranteesRouteImport
       parentRoute: typeof MemberAppRoute
     }
+    '/_member/app/files': {
+      id: '/_member/app/files'
+      path: '/files'
+      fullPath: '/app/files'
+      preLoaderRoute: typeof MemberAppFilesRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
     '/_admin/admin/vault': {
       id: '/_admin/admin/vault'
       path: '/vault'
@@ -1925,6 +1987,13 @@ declare module '@tanstack/react-router' {
       path: '/payment-config'
       fullPath: '/admin/payment-config'
       preLoaderRoute: typeof AdminAdminPaymentConfigRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/operations': {
+      id: '/_admin/admin/operations'
+      path: '/operations'
+      fullPath: '/admin/operations'
+      preLoaderRoute: typeof AdminAdminOperationsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/notifications': {
@@ -2037,6 +2106,13 @@ declare module '@tanstack/react-router' {
       path: '/finance'
       fullPath: '/admin/finance'
       preLoaderRoute: typeof AdminAdminFinanceRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/files': {
+      id: '/_admin/admin/files'
+      path: '/files'
+      fullPath: '/admin/files'
+      preLoaderRoute: typeof AdminAdminFilesRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/entities': {
@@ -2743,6 +2819,7 @@ interface AdminAdminRouteChildren {
   AdminAdminCronRunsRoute: typeof AdminAdminCronRunsRoute
   AdminAdminDocumentsRoute: typeof AdminAdminDocumentsRoute
   AdminAdminEntitiesRoute: typeof AdminAdminEntitiesRouteWithChildren
+  AdminAdminFilesRoute: typeof AdminAdminFilesRoute
   AdminAdminFinanceRoute: typeof AdminAdminFinanceRouteWithChildren
   AdminAdminFxRoute: typeof AdminAdminFxRoute
   AdminAdminHealthRoute: typeof AdminAdminHealthRoute
@@ -2759,6 +2836,7 @@ interface AdminAdminRouteChildren {
   AdminAdminLogsRoute: typeof AdminAdminLogsRoute
   AdminAdminMembersRoute: typeof AdminAdminMembersRouteWithChildren
   AdminAdminNotificationsRoute: typeof AdminAdminNotificationsRoute
+  AdminAdminOperationsRoute: typeof AdminAdminOperationsRoute
   AdminAdminPaymentConfigRoute: typeof AdminAdminPaymentConfigRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminRecurringRoute: typeof AdminAdminRecurringRoute
@@ -2786,6 +2864,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminCronRunsRoute: AdminAdminCronRunsRoute,
   AdminAdminDocumentsRoute: AdminAdminDocumentsRoute,
   AdminAdminEntitiesRoute: AdminAdminEntitiesRouteWithChildren,
+  AdminAdminFilesRoute: AdminAdminFilesRoute,
   AdminAdminFinanceRoute: AdminAdminFinanceRouteWithChildren,
   AdminAdminFxRoute: AdminAdminFxRoute,
   AdminAdminHealthRoute: AdminAdminHealthRoute,
@@ -2802,6 +2881,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminLogsRoute: AdminAdminLogsRoute,
   AdminAdminMembersRoute: AdminAdminMembersRouteWithChildren,
   AdminAdminNotificationsRoute: AdminAdminNotificationsRoute,
+  AdminAdminOperationsRoute: AdminAdminOperationsRoute,
   AdminAdminPaymentConfigRoute: AdminAdminPaymentConfigRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminRecurringRoute: AdminAdminRecurringRoute,
@@ -2874,6 +2954,7 @@ const MemberAppSavingsRouteWithChildren =
   MemberAppSavingsRoute._addFileChildren(MemberAppSavingsRouteChildren)
 
 interface MemberAppRouteChildren {
+  MemberAppFilesRoute: typeof MemberAppFilesRoute
   MemberAppGuaranteesRoute: typeof MemberAppGuaranteesRoute
   MemberAppInboxRoute: typeof MemberAppInboxRoute
   MemberAppInvestmentsRoute: typeof MemberAppInvestmentsRoute
@@ -2888,11 +2969,13 @@ interface MemberAppRouteChildren {
   MemberAppSupportRoute: typeof MemberAppSupportRoute
   MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
   MemberAppTransfersRoute: typeof MemberAppTransfersRoute
+  MemberAppWithdrawalsRoute: typeof MemberAppWithdrawalsRoute
   MemberAppIndexRoute: typeof MemberAppIndexRoute
   MemberAppEntitiesRegisterRoute: typeof MemberAppEntitiesRegisterRoute
 }
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
+  MemberAppFilesRoute: MemberAppFilesRoute,
   MemberAppGuaranteesRoute: MemberAppGuaranteesRoute,
   MemberAppInboxRoute: MemberAppInboxRoute,
   MemberAppInvestmentsRoute: MemberAppInvestmentsRoute,
@@ -2907,6 +2990,7 @@ const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppSupportRoute: MemberAppSupportRoute,
   MemberAppTransactionsRoute: MemberAppTransactionsRoute,
   MemberAppTransfersRoute: MemberAppTransfersRoute,
+  MemberAppWithdrawalsRoute: MemberAppWithdrawalsRoute,
   MemberAppIndexRoute: MemberAppIndexRoute,
   MemberAppEntitiesRegisterRoute: MemberAppEntitiesRegisterRoute,
 }

@@ -2058,6 +2058,69 @@ export type Database = {
           },
         ]
       }
+      member_files: {
+        Row: {
+          category: string
+          checksum: string | null
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          filename: string
+          id: string
+          mime_type: string
+          owner_id: string
+          review_note: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          shared_with_staff: boolean
+          size_bytes: number
+          storage_path: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          category?: string
+          checksum?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          filename: string
+          id?: string
+          mime_type: string
+          owner_id: string
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shared_with_staff?: boolean
+          size_bytes: number
+          storage_path: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          category?: string
+          checksum?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          filename?: string
+          id?: string
+          mime_type?: string
+          owner_id?: string
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shared_with_staff?: boolean
+          size_bytes?: number
+          storage_path?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       minor_status_changes: {
         Row: {
           change_kind: string

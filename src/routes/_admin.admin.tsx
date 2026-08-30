@@ -83,6 +83,7 @@ const groups: NavGroup[] = [
   {
     label: "Operations",
     items: [
+      { to: "/admin/operations", label: "Operations Dashboard", icon: <Activity /> },
       { to: "/admin/savings", label: "Savings", icon: <PiggyBank /> },
       { to: "/admin/savings/withdrawals", label: "Withdrawal approvals", icon: <BanknoteArrowDown /> },
       { to: "/admin/recurring", label: "Recurring schedules", icon: <RefreshCw /> },
@@ -118,6 +119,7 @@ const groups: NavGroup[] = [
       { to: "/admin/health", label: "Integration Health", icon: <Activity /> },
       { to: "/admin/cron-runs", label: "Scheduled job runs", icon: <History /> },
       { to: "/admin/documents", label: "Document Management", icon: <FileText /> },
+      { to: "/admin/files", label: "Member Files", icon: <FileText />, cap: "files.view" },
       { to: "/admin/relationships", label: "Relationship types", icon: <Users /> },
       { to: "/admin/super-admins", label: "Super Admins", icon: <Crown /> },
 
@@ -175,6 +177,8 @@ const CRUMBS: Record<string, string> = {
   "/admin/cron-runs": "Scheduled Job Runs",
 
   "/admin/documents": "Document Management",
+  "/admin/files": "Member Files",
+  "/admin/operations": "Operations Dashboard",
   "/admin/relationships": "Relationship Types",
   "/admin/super-admins": "Super Admins",
 

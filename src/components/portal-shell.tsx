@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { UniversalClock } from "@/components/universal-clock";
+import { NotificationBell } from "@/components/notification-bell";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, X, LogOut, Search, PanelLeftClose, PanelLeftOpen } from "lucide-react";
@@ -303,6 +304,7 @@ export function PortalShell({
             </div>
             <UniversalClock />
             <OnlinePresencePill />
+            <NotificationBell />
             <ThemeToggle />
             {action}
           </div>
