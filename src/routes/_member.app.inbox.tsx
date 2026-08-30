@@ -3,7 +3,7 @@ import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { BellRing, CheckCheck, MailOpen, RotateCcw, Search, Settings2 } from "lucide-react";
+import { BellRing, CheckCheck, MailOpen, RotateCcw, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, SectionCard, SectionCardSkeleton, EmptyState, StatusPill } from "@/components/primitives";
 import { Pagination } from "@/components/table-controls";
@@ -11,6 +11,7 @@ import { KycReminderLog } from "@/components/kyc-reminder-log";
 import { Button } from "@/components/ui/button";
 import { NOTIFICATION_CATEGORIES } from "@/lib/notification-preferences.functions";
 import {
+  clearMyReadNotifications,
   listMyNotifications,
   markAllNotificationsRead,
   markNotificationUnread,
@@ -135,6 +136,20 @@ function InboxContent() {
     onError: (err: any) => toast.error(err?.message ?? "Could not clear the inbox"),
   });
 
+  const clearRead = useMutation({
+    mutationFn: () => clearMyReadNotifications({}),
+    onSuccess: (res) => {
+      toast.success(
+        res.deleted > 0
+          ? `${res.deleted} read notification${res.deleted === 1 ? "" : "s"} deleted`
+          : "No read notifications to delete",
+      );
+      refresh();
+    },
+    onError: (err: any) => toast.error(err?.message ?? "Could not delete read notifications"),
+  });
+
+  const readCount = Math.max(0, data.total - data.unread);
   const unreadOnPage = data.rows.filter((r) => !r.read_at).map((r) => r.id);
 
   return (
@@ -216,6 +231,16 @@ function InboxContent() {
             >
               <CheckCheck className="mr-2 h-4 w-4" />
               Mark all read
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={clearRead.isPending}
+              onClick={() => clearRead.mutate()}
+              title="Permanently delete every notification you have already read"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {clearRead.isPending ? "Clearing…" : "Clear read"}
             </Button>
           </div>
         </div>
