@@ -22,9 +22,15 @@ import {
   Handshake as HandshakeIcon,
   Calculator,
   FileBarChart,
+  Target,
+  Lock,
+  HandCoins,
+  BanknoteArrowDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
+
 
 /**
  * Member information architecture, grouped by the task the member came to do
