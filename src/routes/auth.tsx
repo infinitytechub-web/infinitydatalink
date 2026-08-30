@@ -119,7 +119,6 @@ function AuthPage() {
         {branding.footer_html ? (
           <div
             className="mb-2 normal-case tracking-normal text-muted-foreground"
-            // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(branding.footer_html, {
                 ALLOWED_TAGS: ["a", "b", "strong", "i", "em", "u", "br", "span", "p", "small"],
