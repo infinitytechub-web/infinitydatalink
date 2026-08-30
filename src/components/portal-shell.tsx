@@ -198,6 +198,25 @@ export function PortalShell({
           </button>
         </div>
 
+        {!collapsed && !loading ? (
+          <div className="px-3 pt-3">
+            <label className="sr-only" htmlFor="nav-filter">
+              Filter navigation
+            </label>
+            <div className="flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 focus-within:border-white/40">
+              <Search className="size-3.5 shrink-0 text-white/70" aria-hidden="true" />
+              <input
+                id="nav-filter"
+                type="search"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Find a page…"
+                className="min-w-0 flex-1 bg-transparent text-xs text-white placeholder:text-white/60 focus:outline-none"
+              />
+            </div>
+          </div>
+        ) : null}
+
         <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-busy={loading || undefined}>
           {loading ? (
             <>
@@ -205,14 +224,14 @@ export function PortalShell({
               <SidebarWidgetSkeleton rows={5} collapsed={collapsed} />
               <SidebarWidgetSkeleton rows={3} collapsed={collapsed} />
             </>
-          ) : visibleGroups.length === 0 ? (
+          ) : navGroups.length === 0 ? (
             <SidebarWidgetEmpty
               label="Navigation"
-              message="No sections available"
+              message={filter ? "No matching pages" : "No sections available"}
               collapsed={collapsed}
             />
           ) : (
-            visibleGroups.map((g, gi) => {
+            navGroups.map((g, gi) => {
               const accent = GROUP_ACCENTS[gi % GROUP_ACCENTS.length];
               return (
                 <SidebarWidget key={g.label} collapsed={collapsed}>
@@ -220,7 +239,7 @@ export function PortalShell({
                   {g.items.length === 0 ? (
                     <SidebarWidgetEmpty message="No items" collapsed={collapsed} />
                   ) : (
-                    <div className="space-y-1">
+                    <ul className="space-y-1">
                       {g.items.map((item) => {
                         const active =
                           pathname === item.to ||
@@ -228,23 +247,25 @@ export function PortalShell({
                             item.to !== "/admin" &&
                             pathname.startsWith(item.to));
                         return (
-                          <SidebarNavItem
-                            key={item.to}
-                            item={item}
-                            accent={accent}
-                            active={active}
-                            collapsed={collapsed}
-                            onNavigate={handleNavClick}
-                          />
+                          <li key={item.to}>
+                            <SidebarNavItem
+                              item={item}
+                              accent={accent}
+                              active={active}
+                              collapsed={collapsed}
+                              onNavigate={handleNavClick}
+                            />
+                          </li>
                         );
                       })}
-                    </div>
+                    </ul>
                   )}
                 </SidebarWidget>
               );
             })
           )}
         </nav>
+
 
         <div className={cn("px-3 pb-3", collapsed && "lg:px-2")}>
           <SidebarOnlinePanel collapsed={collapsed} />
