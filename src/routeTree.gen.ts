@@ -51,6 +51,7 @@ import { Route as AdminAdminSavingsRouteImport } from './routes/_admin.admin.sav
 import { Route as AdminAdminRolesRouteImport } from './routes/_admin.admin.roles'
 import { Route as AdminAdminReportsRouteImport } from './routes/_admin.admin.reports'
 import { Route as AdminAdminRelationshipsRouteImport } from './routes/_admin.admin.relationships'
+import { Route as AdminAdminRecycleBinRouteImport } from './routes/_admin.admin.recycle-bin'
 import { Route as AdminAdminRecurringRouteImport } from './routes/_admin.admin.recurring'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/_admin.admin.payments'
 import { Route as AdminAdminPaymentConfigRouteImport } from './routes/_admin.admin.payment-config'
@@ -355,6 +356,11 @@ const AdminAdminReportsRoute = AdminAdminReportsRouteImport.update({
 const AdminAdminRelationshipsRoute = AdminAdminRelationshipsRouteImport.update({
   id: '/relationships',
   path: '/relationships',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminRecycleBinRoute = AdminAdminRecycleBinRouteImport.update({
+  id: '/recycle-bin',
+  path: '/recycle-bin',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminRecurringRoute = AdminAdminRecurringRouteImport.update({
@@ -929,6 +935,7 @@ export interface FileRoutesByFullPath {
   '/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
+  '/admin/recycle-bin': typeof AdminAdminRecycleBinRoute
   '/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
@@ -1062,6 +1069,7 @@ export interface FileRoutesByTo {
   '/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/recurring': typeof AdminAdminRecurringRoute
+  '/admin/recycle-bin': typeof AdminAdminRecycleBinRoute
   '/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/admin/reports': typeof AdminAdminReportsRoute
   '/admin/roles': typeof AdminAdminRolesRoute
@@ -1201,6 +1209,7 @@ export interface FileRoutesById {
   '/_admin/admin/payment-config': typeof AdminAdminPaymentConfigRoute
   '/_admin/admin/payments': typeof AdminAdminPaymentsRoute
   '/_admin/admin/recurring': typeof AdminAdminRecurringRoute
+  '/_admin/admin/recycle-bin': typeof AdminAdminRecycleBinRoute
   '/_admin/admin/relationships': typeof AdminAdminRelationshipsRoute
   '/_admin/admin/reports': typeof AdminAdminReportsRoute
   '/_admin/admin/roles': typeof AdminAdminRolesRoute
@@ -1341,6 +1350,7 @@ export interface FileRouteTypes {
     | '/admin/payment-config'
     | '/admin/payments'
     | '/admin/recurring'
+    | '/admin/recycle-bin'
     | '/admin/relationships'
     | '/admin/reports'
     | '/admin/roles'
@@ -1474,6 +1484,7 @@ export interface FileRouteTypes {
     | '/admin/payment-config'
     | '/admin/payments'
     | '/admin/recurring'
+    | '/admin/recycle-bin'
     | '/admin/relationships'
     | '/admin/reports'
     | '/admin/roles'
@@ -1612,6 +1623,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/payment-config'
     | '/_admin/admin/payments'
     | '/_admin/admin/recurring'
+    | '/_admin/admin/recycle-bin'
     | '/_admin/admin/relationships'
     | '/_admin/admin/reports'
     | '/_admin/admin/roles'
@@ -2030,6 +2042,13 @@ declare module '@tanstack/react-router' {
       path: '/relationships'
       fullPath: '/admin/relationships'
       preLoaderRoute: typeof AdminAdminRelationshipsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/recycle-bin': {
+      id: '/_admin/admin/recycle-bin'
+      path: '/recycle-bin'
+      fullPath: '/admin/recycle-bin'
+      preLoaderRoute: typeof AdminAdminRecycleBinRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/recurring': {
@@ -2919,6 +2938,7 @@ interface AdminAdminRouteChildren {
   AdminAdminPaymentConfigRoute: typeof AdminAdminPaymentConfigRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminRecurringRoute: typeof AdminAdminRecurringRoute
+  AdminAdminRecycleBinRoute: typeof AdminAdminRecycleBinRoute
   AdminAdminRelationshipsRoute: typeof AdminAdminRelationshipsRoute
   AdminAdminReportsRoute: typeof AdminAdminReportsRoute
   AdminAdminRolesRoute: typeof AdminAdminRolesRoute
@@ -2966,6 +2986,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminPaymentConfigRoute: AdminAdminPaymentConfigRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminRecurringRoute: AdminAdminRecurringRoute,
+  AdminAdminRecycleBinRoute: AdminAdminRecycleBinRoute,
   AdminAdminRelationshipsRoute: AdminAdminRelationshipsRoute,
   AdminAdminReportsRoute: AdminAdminReportsRoute,
   AdminAdminRolesRoute: AdminAdminRolesRoute,
