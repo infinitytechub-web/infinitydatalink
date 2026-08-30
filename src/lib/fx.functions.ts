@@ -2,6 +2,8 @@
 // and cached server-side (in-memory + fx_rates DB). Falls back to last-known DB row.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { ADMIN_ROLES, assertAnyRole, loadRoleSet } from "@/lib/role-guards";
 
 export const DEFAULT_BASE = "GHS";
 export const SUPPORTED_QUOTES = [
@@ -140,7 +142,10 @@ async function recordTodayHistory(rows: FxRate[]) {
 
 // POST so responses are never served from an HTTP cache — a manual refresh must
 // always reach the handler.
+// Staff-only: rate reads trigger outbound provider calls and privileged DB
+// writes, and the stored data is restricted to finance/compliance staff.
 export const getFxRates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
@@ -149,7 +154,8 @@ export const getFxRates = createServerFn({ method: "POST" })
       })
       .parse(d ?? {}),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAnyRole(await loadRoleSet(context.supabase, context.userId), ADMIN_ROLES, "staff");
     const { rows, source } = await getRates(data.base, data.force);
     return {
       base: data.base.toUpperCase(),
@@ -160,6 +166,7 @@ export const getFxRates = createServerFn({ method: "POST" })
   });
 
 export const convertFx = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
@@ -169,7 +176,8 @@ export const convertFx = createServerFn({ method: "GET" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAnyRole(await loadRoleSet(context.supabase, context.userId), ADMIN_ROLES, "staff");
     const { rows } = await getRates(data.from);
     const row = rows.find((r) => r.quote.toUpperCase() === data.to.toUpperCase());
     if (!row) throw new Error(`Rate ${data.from}->${data.to} unavailable`);
@@ -308,6 +316,7 @@ async function backfill(base: string, dates: string[]): Promise<HistoryRow[]> {
 }
 
 export const getFxHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
@@ -317,7 +326,8 @@ export const getFxHistory = createServerFn({ method: "POST" })
       })
       .parse(d ?? {}),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAnyRole(await loadRoleSet(context.supabase, context.userId), ADMIN_ROLES, "staff");
     const base = data.base.toUpperCase();
     const range = (Object.keys(FX_RANGES).includes(data.range) ? data.range : "30D") as FxRangeKey;
     const quotes = Array.from(
