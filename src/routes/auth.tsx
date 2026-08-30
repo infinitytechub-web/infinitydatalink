@@ -463,17 +463,13 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               </p>
             ) : null}
           </Field>
-          <Field label="Telephone number">
-            <input
-              type="tel"
-              required
-              autoComplete="tel"
-              className={inputClass(focusRing)}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="024 123 4567"
-            />
-          </Field>
+          <PhoneField
+            value={phone}
+            onChange={setPhone}
+            required
+            label="Telephone number"
+            hint="10-digit Ghana mobile number, e.g. 024 123 4567"
+          />
           <Field
             label="Date of birth"
             hint={
