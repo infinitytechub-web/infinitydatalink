@@ -149,9 +149,12 @@ export const getEntity = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }): Promise<{ entity: EntityRow; members: EntityMembership[] }> => {
     await assertStaff(context.supabase, context.userId);
-    const { data: entity, error } = await context.supabase
+    // Contact / tax columns: privileged read after the staff role check.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: entity, error } = await (supabaseAdmin as any)
       .from("entities")
       .select("*")
+
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
