@@ -2634,6 +2634,7 @@ export type Database = {
       }
       payment_webhook_events: {
         Row: {
+          body_hash: string | null
           created_at: string
           error: string | null
           event_id: string | null
@@ -2645,6 +2646,7 @@ export type Database = {
           signature_verified: boolean
         }
         Insert: {
+          body_hash?: string | null
           created_at?: string
           error?: string | null
           event_id?: string | null
@@ -2656,6 +2658,7 @@ export type Database = {
           signature_verified?: boolean
         }
         Update: {
+          body_hash?: string | null
           created_at?: string
           error?: string | null
           event_id?: string | null

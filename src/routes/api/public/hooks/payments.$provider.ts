@@ -17,8 +17,15 @@ export const Route = createFileRoute("/api/public/hooks/payments/$provider")({
         const signature =
           request.headers.get(template.signatureHeader) ?? request.headers.get("x-signature");
 
+        // Forward all headers lower-cased so the processor can find whichever
+        // timestamp header this provider signs with (replay-window check).
+        const headers: Record<string, string> = {};
+        request.headers.forEach((value, key) => {
+          headers[key.toLowerCase()] = value;
+        });
+
         const { processPaymentWebhook } = await import("@/lib/payment-webhooks.server");
-        const outcome = await processPaymentWebhook({ providerCode: code, rawBody, signature });
+        const outcome = await processPaymentWebhook({ providerCode: code, rawBody, signature, headers });
         return Response.json(outcome.body, { status: outcome.status });
       },
     },
