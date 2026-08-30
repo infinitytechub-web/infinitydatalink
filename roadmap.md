@@ -9,6 +9,7 @@
 
 ## Pending
 - [ ] Phase 3 — Operations Dashboard refinements and member-facing Withdrawals surface refresh.
-- [ ] Phase 4 — Reports hub (admin + member exports), Notifications expansion.
-- [ ] Phase 5 — Accounts & Access management screen, File Management (secure storage + RBAC downloads), end-to-end verification pass.
+- [x] Phase 4 — Reports hub: `/admin/exports` with 8 datasets (savings, loans, repayments, withdrawals, deposits, income, expenses, transactions), date/status/reference filters, range totals, pagination and audited CSV/Excel/PDF/Print downloads (`src/lib/reports.functions.ts`, `src/lib/reports.shared.ts`).
+- [x] Phase 5a — Accounts & Access: `/admin/roles` permission matrix, role grants/revokes and team member management.
+- [ ] Phase 5 — File Management (secure storage + RBAC downloads), end-to-end verification pass.
 
