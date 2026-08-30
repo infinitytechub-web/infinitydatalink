@@ -55,12 +55,17 @@ function VaultPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkReason, setBulkReason] = useState("");
+  const [purgeOpen, setPurgeOpen] = useState(false);
+  const [purgeReason, setPurgeReason] = useState("");
+  const [purgeConfirm, setPurgeConfirm] = useState("");
   const [details, setDetails] = useState<VaultEntry | null>(null);
 
   const listFn = useServerFn(listKycVault);
   const restoreFn = useServerFn(restoreKycVault);
   const purgeFn = useServerFn(purgeKycVaultEntry);
   const bulkRestoreFn = useServerFn(bulkRestoreKycVault);
+  const bulkPurgeFn = useServerFn(bulkPurgeKycVault);
+
 
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["kyc-vault", q, page],
