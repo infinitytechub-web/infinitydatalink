@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useBranding } from "@/components/branding-provider";
 import { AuthBrandMark } from "@/components/auth-brand-mark";
+import { PhoneField } from "@/components/phone-field";
 import DOMPurify from "isomorphic-dompurify";
 import { calculateAge, isMinor, validateDateOfBirth } from "@/lib/age";
 import { GHANA_REGIONS, districtsForRegion } from "@/lib/ghana-locations";
