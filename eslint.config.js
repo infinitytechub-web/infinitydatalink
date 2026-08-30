@@ -40,4 +40,11 @@ export default tseslint.config(
     },
   },
   eslintPluginPrettier,
+  {
+    // Auto-generated integration files are not hand-maintained.
+    files: ["src/integrations/supabase/**", "src/routeTree.gen.ts"],
+    rules: {
+      "prefer-const": "off",
+    },
+  },
 );
