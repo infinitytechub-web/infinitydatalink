@@ -29,6 +29,7 @@ import { Route as MemberAppTransfersRouteImport } from './routes/_member.app.tra
 import { Route as MemberAppTransactionsRouteImport } from './routes/_member.app.transactions'
 import { Route as MemberAppSupportRouteImport } from './routes/_member.app.support'
 import { Route as MemberAppSavingsRouteImport } from './routes/_member.app.savings'
+import { Route as MemberAppReportsRouteImport } from './routes/_member.app.reports'
 import { Route as MemberAppRepaymentsRouteImport } from './routes/_member.app.repayments'
 import { Route as MemberAppProfileRouteImport } from './routes/_member.app.profile'
 import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
@@ -243,6 +244,11 @@ const MemberAppSupportRoute = MemberAppSupportRouteImport.update({
 const MemberAppSavingsRoute = MemberAppSavingsRouteImport.update({
   id: '/savings',
   path: '/savings',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppReportsRoute = MemberAppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => MemberAppRoute,
 } as any)
 const MemberAppRepaymentsRoute = MemberAppRepaymentsRouteImport.update({
@@ -937,6 +943,7 @@ export interface FileRoutesByFullPath {
   '/app/payments': typeof MemberAppPaymentsRoute
   '/app/profile': typeof MemberAppProfileRoute
   '/app/repayments': typeof MemberAppRepaymentsRoute
+  '/app/reports': typeof MemberAppReportsRoute
   '/app/savings': typeof MemberAppSavingsRouteWithChildren
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
@@ -1067,6 +1074,7 @@ export interface FileRoutesByTo {
   '/app/payments': typeof MemberAppPaymentsRoute
   '/app/profile': typeof MemberAppProfileRoute
   '/app/repayments': typeof MemberAppRepaymentsRoute
+  '/app/reports': typeof MemberAppReportsRoute
   '/app/support': typeof MemberAppSupportRoute
   '/app/transactions': typeof MemberAppTransactionsRoute
   '/app/transfers': typeof MemberAppTransfersRoute
@@ -1205,6 +1213,7 @@ export interface FileRoutesById {
   '/_member/app/payments': typeof MemberAppPaymentsRoute
   '/_member/app/profile': typeof MemberAppProfileRoute
   '/_member/app/repayments': typeof MemberAppRepaymentsRoute
+  '/_member/app/reports': typeof MemberAppReportsRoute
   '/_member/app/savings': typeof MemberAppSavingsRouteWithChildren
   '/_member/app/support': typeof MemberAppSupportRoute
   '/_member/app/transactions': typeof MemberAppTransactionsRoute
@@ -1343,6 +1352,7 @@ export interface FileRouteTypes {
     | '/app/payments'
     | '/app/profile'
     | '/app/repayments'
+    | '/app/reports'
     | '/app/savings'
     | '/app/support'
     | '/app/transactions'
@@ -1473,6 +1483,7 @@ export interface FileRouteTypes {
     | '/app/payments'
     | '/app/profile'
     | '/app/repayments'
+    | '/app/reports'
     | '/app/support'
     | '/app/transactions'
     | '/app/transfers'
@@ -1610,6 +1621,7 @@ export interface FileRouteTypes {
     | '/_member/app/payments'
     | '/_member/app/profile'
     | '/_member/app/repayments'
+    | '/_member/app/reports'
     | '/_member/app/savings'
     | '/_member/app/support'
     | '/_member/app/transactions'
@@ -1850,6 +1862,13 @@ declare module '@tanstack/react-router' {
       path: '/savings'
       fullPath: '/app/savings'
       preLoaderRoute: typeof MemberAppSavingsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/reports': {
+      id: '/_member/app/reports'
+      path: '/reports'
+      fullPath: '/app/reports'
+      preLoaderRoute: typeof MemberAppReportsRouteImport
       parentRoute: typeof MemberAppRoute
     }
     '/_member/app/repayments': {
@@ -3007,6 +3026,7 @@ interface MemberAppRouteChildren {
   MemberAppPaymentsRoute: typeof MemberAppPaymentsRoute
   MemberAppProfileRoute: typeof MemberAppProfileRoute
   MemberAppRepaymentsRoute: typeof MemberAppRepaymentsRoute
+  MemberAppReportsRoute: typeof MemberAppReportsRoute
   MemberAppSavingsRoute: typeof MemberAppSavingsRouteWithChildren
   MemberAppSupportRoute: typeof MemberAppSupportRoute
   MemberAppTransactionsRoute: typeof MemberAppTransactionsRoute
@@ -3028,6 +3048,7 @@ const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppPaymentsRoute: MemberAppPaymentsRoute,
   MemberAppProfileRoute: MemberAppProfileRoute,
   MemberAppRepaymentsRoute: MemberAppRepaymentsRoute,
+  MemberAppReportsRoute: MemberAppReportsRoute,
   MemberAppSavingsRoute: MemberAppSavingsRouteWithChildren,
   MemberAppSupportRoute: MemberAppSupportRoute,
   MemberAppTransactionsRoute: MemberAppTransactionsRoute,

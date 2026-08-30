@@ -21,6 +21,7 @@ import {
   BellRing,
   Handshake as HandshakeIcon,
   Calculator,
+  FileBarChart,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
@@ -38,7 +39,9 @@ const groups: NavGroup[] = [
       { to: "/app/investments", label: "Investments", icon: <TrendingUp /> },
       { to: "/app/withdrawals", label: "Withdrawals", icon: <ArrowLeftRight /> },
       { to: "/app/files", label: "My Documents", icon: <ReceiptText /> },
+      { to: "/app/reports", label: "Reports & Statements", icon: <FileBarChart /> },
       { to: "/app/transactions", label: "Transactions", icon: <ArrowLeftRight /> },
+
       { to: "/app/payments", label: "Payments", icon: <CreditCard /> },
       { to: "/app/transfers", label: "Transfers", icon: <Send /> },
       { to: "/app/profile", label: "Profile & KYC", icon: <UserCircle2 /> },
@@ -73,6 +76,7 @@ const CRUMBS: Record<string, string> = {
   "/app/investments": "Investments & Shares",
   "/app/withdrawals": "Withdrawals",
   "/app/files": "My Documents",
+  "/app/reports": "Reports & Statements",
   "/app/transactions": "Transactions",
   "/app/payments": "Payments",
   "/app/transfers": "Transfers",
