@@ -149,7 +149,6 @@ function InboxContent() {
     onError: (err: any) => toast.error(err?.message ?? "Could not delete read notifications"),
   });
 
-  const readCount = Math.max(0, data.total - data.unread);
   const unreadOnPage = data.rows.filter((r) => !r.read_at).map((r) => r.id);
 
   return (
