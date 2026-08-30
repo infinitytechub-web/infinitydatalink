@@ -21,13 +21,11 @@
      via <link> in __root.tsx). The "serif" alias is remapped to Sora so
      existing `font-serif` usage renders as the display face. */
   --font-sans:
-    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
   --font-serif: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono:
-    "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -74,7 +72,6 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
 
-
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -87,41 +84,32 @@
   /* Enterprise elevation — primary-tinted so cards feel connected to the
      brand instead of using flat neutral drop-shadows. */
   --shadow-xs: 0 1px 2px rgba(6, 35, 29, 0.04);
-  --shadow-sm:
-    0 1px 2px rgba(6, 35, 29, 0.04),
-    0 1px 3px rgba(15, 118, 110, 0.06);
-  --shadow-md:
-    0 4px 6px -1px rgba(6, 35, 29, 0.05),
-    0 8px 16px -6px rgba(15, 118, 110, 0.10);
-  --shadow-lg:
-    0 10px 24px -8px rgba(6, 35, 29, 0.10),
-    0 20px 40px -18px rgba(15, 118, 110, 0.20);
-  --shadow-elevated:
-    0 1px 2px rgba(6, 35, 29, 0.05),
-    0 12px 32px -14px rgba(15, 118, 110, 0.28);
-  --shadow-nav:
-    0 20px 50px -30px rgba(6, 35, 29, 0.55);
+  --shadow-sm: 0 1px 2px rgba(6, 35, 29, 0.04), 0 1px 3px rgba(15, 118, 110, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(6, 35, 29, 0.05), 0 8px 16px -6px rgba(15, 118, 110, 0.1);
+  --shadow-lg: 0 10px 24px -8px rgba(6, 35, 29, 0.1), 0 20px 40px -18px rgba(15, 118, 110, 0.2);
+  --shadow-elevated: 0 1px 2px rgba(6, 35, 29, 0.05), 0 12px 32px -14px rgba(15, 118, 110, 0.28);
+  --shadow-nav: 0 20px 50px -30px rgba(6, 35, 29, 0.55);
 }
 
 :root {
   --radius: 0.625rem; /* 10px — compact banking console cards */
 
   /* ── Brand ramp (single source of truth) ─────────────────────────────── */
-  --brand-forest-deep: #04140f;   /* darkest ink / app bg in dark mode */
-  --brand-forest: #06231d;        /* dark-green rail + body ink */
-  --brand-forest-soft: #0a251f;   /* raised forest surface */
+  --brand-forest-deep: #04140f; /* darkest ink / app bg in dark mode */
+  --brand-forest: #06231d; /* dark-green rail + body ink */
+  --brand-forest-soft: #0a251f; /* raised forest surface */
   --brand-teal-deep: #0f5f57;
-  --brand-teal: #0f766e;          /* brand primary */
+  --brand-teal: #0f766e; /* brand primary */
   --brand-teal-bright: #0d9488;
   --brand-teal-glow: #2dd4bf;
   --brand-gold-deep: #d4a72c;
-  --brand-gold: #f5c451;          /* accent gold */
+  --brand-gold: #f5c451; /* accent gold */
   --brand-gold-light: #ffdc8a;
-  --brand-gold-ink: #8f6a08;      /* gold that clears AA text contrast on white */
+  --brand-gold-ink: #8f6a08; /* gold that clears AA text contrast on white */
 
   /* Semantic aliases — every value below points at the ramp above. */
   --emerald-deep: var(--brand-forest);
-  --emerald-mid: var(--brand-teal);      /* text-safe teal on white (5.5:1) */
+  --emerald-mid: var(--brand-teal); /* text-safe teal on white (5.5:1) */
   --gold: var(--brand-gold);
   --cream: #f4f7f6;
   /* Status inks are AA (≥4.5:1) against the white card surface. */
@@ -156,10 +144,10 @@
   --chart-1: var(--brand-teal);
   --chart-2: var(--brand-teal-bright);
   --chart-3: var(--brand-gold-ink);
-  --chart-4: #0284c7;   /* sky */
-  --chart-5: #7c3aed;   /* violet */
-  --chart-6: #dc2626;   /* crimson */
-  --chart-7: #475569;   /* slate */
+  --chart-4: #0284c7; /* sky */
+  --chart-5: #7c3aed; /* violet */
+  --chart-6: #dc2626; /* crimson */
+  --chart-7: #475569; /* slate */
   --chart-grid: rgba(6, 35, 29, 0.08);
   --chart-axis: #64748b;
 
@@ -170,14 +158,13 @@
   --sidebar-primary-foreground: var(--brand-forest);
   --sidebar-accent: rgba(255, 255, 255, 0.08);
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.10);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: var(--brand-teal-bright);
 }
 
-
 .dark {
   /* Dark mode keeps the same ramp; only which rung each role uses changes. */
-  --emerald-deep: #e3efec;      /* invert: bright body text */
+  --emerald-deep: #e3efec; /* invert: bright body text */
   --emerald-mid: var(--brand-teal-glow);
   --gold: var(--brand-gold);
   --cream: var(--brand-forest-deep);
@@ -207,13 +194,13 @@
 
   /* Dark-mode chart palette — brighter, higher-chroma variants that clear
      WCAG contrast on the dark card surface. */
-  --chart-1: #5eead4;   /* teal → aqua */
+  --chart-1: #5eead4; /* teal → aqua */
   --chart-2: var(--brand-teal-glow);
   --chart-3: var(--brand-gold);
-  --chart-4: #38bdf8;   /* sky */
-  --chart-5: #c084fc;   /* violet */
-  --chart-6: #fb7185;   /* rose */
-  --chart-7: #cbd5e1;   /* slate */
+  --chart-4: #38bdf8; /* sky */
+  --chart-5: #c084fc; /* violet */
+  --chart-6: #fb7185; /* rose */
+  --chart-7: #cbd5e1; /* slate */
   --chart-grid: rgba(226, 232, 240, 0.12);
   --chart-axis: rgba(226, 232, 240, 0.7);
 
@@ -226,7 +213,6 @@
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: var(--brand-teal-glow);
 }
-
 
 @layer base {
   /* Gold fills always carry forest ink (7.4:1–12.5:1). Any explicit `text-*`
@@ -252,7 +238,12 @@
     line-height: 1.5;
     letter-spacing: -0.005em;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
     line-height: 1.18;
@@ -287,8 +278,14 @@
 
 /* Subtle route fade-in. */
 @keyframes fade-in {
-  from { opacity: 0; transform: translate3d(0, 4px, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 .animate-fade-in {
   animation: fade-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -308,8 +305,12 @@
 
 /* Shimmer sweep for skeleton loaders. */
 @keyframes shimmer {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Respect user reduced-motion preference. */

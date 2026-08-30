@@ -5,6 +5,7 @@ working and verified without breaking what already exists. Everything listed is 
 scope; the phases only control the order.
 
 Verified starting point (checked against the live database and code):
+
 - `app_role` currently has: `super_admin`, `compliance_officer`, `loan_officer`,
   `finance_officer`, `auditor`, `member`. There is **no** `manager` or generic `admin` role.
 - `settings_change_requests` exists (0 rows) but only super admins can read/insert it,
@@ -25,8 +26,8 @@ Verified starting point (checked against the live database and code):
   the "Staff/Officer" tier so nothing currently working regresses.
 - Introduce a permissions layer: module × action capability matrix
   (`view, create, edit, delete, approve, reject, export, print, download,
-  manage_users, manage_kyc, manage_payments, manage_security, manage_reports,
-  manage_settings`) over modules (kyc, membership, entities, savings, loans, payments,
+manage_users, manage_kyc, manage_payments, manage_security, manage_reports,
+manage_settings`) over modules (kyc, membership, entities, savings, loans, payments,
   approvals, reports, security, settings, documents, users).
 - Single source of truth in `src/lib/permissions.ts` plus a database mirror
   (`role_permissions` table + `private.has_permission(uid, module, action)`) so RLS

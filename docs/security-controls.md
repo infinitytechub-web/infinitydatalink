@@ -13,14 +13,14 @@ Last verified: 2026-07-09.
 
 App roles are enumerated in the `public.app_role` enum:
 
-| Role                  | Purpose                                       |
-| --------------------- | --------------------------------------------- |
-| `super_admin`         | Full administrative access                    |
-| `compliance_officer`  | KYC review and decisions                      |
-| `loan_officer`        | Loan origination and decisions                |
-| `finance_officer`     | Finance operations, ledger corrections        |
-| `auditor`             | Read-only across all data                     |
-| `member`              | End-user, owns their own profile & records    |
+| Role                 | Purpose                                    |
+| -------------------- | ------------------------------------------ |
+| `super_admin`        | Full administrative access                 |
+| `compliance_officer` | KYC review and decisions                   |
+| `loan_officer`       | Loan origination and decisions             |
+| `finance_officer`    | Finance operations, ledger corrections     |
+| `auditor`            | Read-only across all data                  |
+| `member`             | End-user, owns their own profile & records |
 
 ### Storage
 
@@ -40,8 +40,9 @@ the REST/Data API):
   admin-audience reads (super_admin / auditor).
 
 Rules:
+
 - RLS policies MUST use these helpers, never inline `EXISTS (SELECT … FROM
-  user_roles …)`. Inline lookups can recurse when the target table itself has
+user_roles …)`. Inline lookups can recurse when the target table itself has
   RLS.
 - Both are `SECURITY DEFINER` with `SET search_path = public` so they run
   under a stable schema resolution regardless of caller settings.
@@ -73,8 +74,8 @@ SECURITY` in the same migration that creates it, immediately followed by
   `kyc_notifications`.
 - **Admin-audience reads**: `USING (private.can_read_all(auth.uid()))`.
 - **Role-scoped writes** (e.g. KYC decisions): `USING
-  (private.has_role(auth.uid(), 'compliance_officer') OR
-  private.has_role(auth.uid(), 'super_admin'))`.
+(private.has_role(auth.uid(), 'compliance_officer') OR
+private.has_role(auth.uid(), 'super_admin'))`.
 - **Server-only tables** (queues, logs written from SECURITY DEFINER code):
   no `TO anon` / `TO authenticated` policies; writes happen via service role
   or SECURITY DEFINER helpers.
@@ -104,6 +105,7 @@ GRANT ALL ON public.<table> TO service_role;
 ```
 
 Guidance:
+
 - Drop `authenticated` privileges (or narrow to `SELECT`) for tables that
   should only be written by server code.
 - **Never** add `anon` grants to user-owned tables.
@@ -121,23 +123,23 @@ client-callable API.
 
 ### Current state (public schema)
 
-| Function                                       | SECURITY DEFINER | `search_path`         | Callable by                        |
-| ---------------------------------------------- | ---------------- | --------------------- | ---------------------------------- |
-| `handle_new_user()`                            | yes              | `public`              | Trigger only (revoked from all)    |
-| `update_updated_at_column()`                   | no               | `public`              | Trigger only (revoked from all)    |
-| `enqueue_email(text, jsonb)`                   | yes              | `public, pg_temp`     | `service_role` only                |
-| `read_email_batch(text, int, int)`             | yes              | `public, pg_temp`     | `service_role` only                |
-| `delete_email(text, bigint)`                   | yes              | `public, pg_temp`     | `service_role` only                |
-| `move_to_dlq(text, text, bigint, jsonb)`       | yes              | `public, pg_temp`     | `service_role` only                |
-| `email_queue_dispatch()`                       | yes              | `""` (empty)          | `service_role` / cron              |
-| `email_queue_wake()`                           | yes              | `""` (empty)          | Trigger / `service_role`           |
+| Function                                 | SECURITY DEFINER | `search_path`     | Callable by                     |
+| ---------------------------------------- | ---------------- | ----------------- | ------------------------------- |
+| `handle_new_user()`                      | yes              | `public`          | Trigger only (revoked from all) |
+| `update_updated_at_column()`             | no               | `public`          | Trigger only (revoked from all) |
+| `enqueue_email(text, jsonb)`             | yes              | `public, pg_temp` | `service_role` only             |
+| `read_email_batch(text, int, int)`       | yes              | `public, pg_temp` | `service_role` only             |
+| `delete_email(text, bigint)`             | yes              | `public, pg_temp` | `service_role` only             |
+| `move_to_dlq(text, text, bigint, jsonb)` | yes              | `public, pg_temp` | `service_role` only             |
+| `email_queue_dispatch()`                 | yes              | `""` (empty)      | `service_role` / cron           |
+| `email_queue_wake()`                     | yes              | `""` (empty)      | Trigger / `service_role`        |
 
 ### Private-schema helpers (not on the Data API)
 
-| Function                                        | SECURITY DEFINER | `search_path` |
-| ----------------------------------------------- | ---------------- | ------------- |
-| `private.has_role(uuid, app_role)`              | yes              | `public`      |
-| `private.can_read_all(uuid)`                    | yes              | `public`      |
+| Function                           | SECURITY DEFINER | `search_path` |
+| ---------------------------------- | ---------------- | ------------- |
+| `private.has_role(uuid, app_role)` | yes              | `public`      |
+| `private.can_read_all(uuid)`       | yes              | `public`      |
 
 The `private` schema is not in PostgREST's exposed schemas, so no REST
 grant lockdown is required — RLS predicates still invoke them via the
@@ -175,6 +177,7 @@ DEFINER function in this project sets `search_path` at creation time via
 `SET search_path = …` (verified with `pg_proc.proconfig`).
 
 Rules:
+
 - **SECURITY DEFINER**: always `SET search_path = public, pg_temp`
   (or `= ""` if the function fully-qualifies every reference, as the email
   queue dispatchers do).
@@ -196,9 +199,11 @@ Rules:
 - `supabaseAdmin` (service role) **bypasses RLS**. Load it inside handler
   bodies only, and verify the caller's role before any write:
   ```ts
-  const { data: isAdmin } = await context.supabase
-    .rpc('has_role', { _user_id: context.userId, _role: 'super_admin' });
-  if (!isAdmin) throw new Error('Forbidden');
+  const { data: isAdmin } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "super_admin",
+  });
+  if (!isAdmin) throw new Error("Forbidden");
   ```
 - Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code, loaders, or
   loader-returned data.
@@ -208,6 +213,7 @@ Rules:
 ## 7. Maintenance checklist
 
 When adding a table:
+
 - [ ] `CREATE TABLE` in migration
 - [ ] `GRANT` to `authenticated` (and `service_role`); add `anon` only if a
       policy allows anonymous reads
@@ -217,6 +223,7 @@ When adding a table:
       inline `user_roles` subqueries
 
 When adding a SECURITY DEFINER function:
+
 - [ ] `SET search_path = public, pg_temp` in the function definition
 - [ ] `REVOKE ALL … FROM PUBLIC, anon, authenticated`
 - [ ] `GRANT EXECUTE` only to the roles that must call it
@@ -224,6 +231,7 @@ When adding a SECURITY DEFINER function:
 - [ ] All object references fully schema-qualified inside the body
 
 When touching roles:
+
 - [ ] Role writes go through server code with role verification, never a
       client mutation on `user_roles`
 - [ ] New role added? Extend `app_role` enum + update RLS predicates that

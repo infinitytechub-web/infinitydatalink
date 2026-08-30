@@ -18,37 +18,37 @@ Core Architecture
 
 The application shall use:
 
-* React Vite
+- React Vite
 
-* TypeScript
+- TypeScript
 
-* pnpm
+- pnpm
 
-* Progressive Web App (PWA)
+- Progressive Web App (PWA)
 
-* Component-based architecture
+- Component-based architecture
 
-* Secure REST/GraphQL API-ready services
+- Secure REST/GraphQL API-ready services
 
-* Reusable UI components
+- Reusable UI components
 
-* Modular folder structure
+- Modular folder structure
 
-* Responsive design
+- Responsive design
 
-* Clean Architecture
+- Clean Architecture
 
-* Repository Pattern
+- Repository Pattern
 
-* Service Layer
+- Service Layer
 
-* Role-Based Access Control (RBAC)
+- Role-Based Access Control (RBAC)
 
-* Secure authentication
+- Secure authentication
 
-* Enterprise logging
+- Enterprise logging
 
-* Production-ready configuration
+- Production-ready configuration
 
 ⸻
 
@@ -66,33 +66,33 @@ Authentication
 
 The authentication system shall include:
 
-* User Login (left side)
+- User Login (left side)
 
-* Admin Login (right side)
+- Admin Login (right side)
 
-* Strong password validation
+- Strong password validation
 
-* Password strength meter
+- Password strength meter
 
-* Optional Two-Factor Authentication (2FA)
+- Optional Two-Factor Authentication (2FA)
 
-* Account lockout after three failed login attempts
+- Account lockout after three failed login attempts
 
-* Forced password change after first login
+- Forced password change after first login
 
-* Session timeout with automatic logout
+- Session timeout with automatic logout
 
-* Remember Me option
+- Remember Me option
 
-* Secure password reset
+- Secure password reset
 
-* Email verification
+- Email verification
 
-* Admin approval before account activation
+- Admin approval before account activation
 
-* JWT/OAuth-ready authentication
+- JWT/OAuth-ready authentication
 
-* Secure encrypted credentials
+- Secure encrypted credentials
 
 ⸻
 
@@ -100,53 +100,53 @@ Admin Record Management
 
 Every Admin Portal module shall support:
 
-* Add
+- Add
 
-* Edit
+- Edit
 
-* Delete
+- Delete
 
-* View
+- View
 
-* Search
+- Search
 
-* Filter
+- Filter
 
-* Sort
+- Sort
 
-* Print
+- Print
 
-* Download
+- Download
 
-* Export
+- Export
 
-* Archive
+- Archive
 
-* Restore
+- Restore
 
-* Approve
+- Approve
 
-* Reject
+- Reject
 
-* Bulk Actions
+- Bulk Actions
 
 For all applicable modules, support:
 
-* Upload
+- Upload
 
-* Preview
+- Preview
 
-* PDF Export
+- PDF Export
 
-* Excel Export
+- Excel Export
 
-* CSV Export
+- CSV Export
 
-* Email
+- Email
 
-* Print
+- Print
 
-* Audit History
+- Audit History
 
 Permissions must be controlled entirely through Role-Based Access Control.
 
@@ -156,41 +156,41 @@ Professional Printing Standards
 
 Every printable document shall automatically include:
 
-* Organization logo
+- Organization logo
 
-* Organization name
+- Organization name
 
-* Address
+- Address
 
-* Contact information
+- Contact information
 
-* Date
+- Date
 
-* Time
+- Time
 
-* Reference Number
+- Reference Number
 
-* User ID
+- User ID
 
-* QR Code
+- QR Code
 
-* Barcode (optional)
+- Barcode (optional)
 
-* Authorized officer details
+- Authorized officer details
 
-* Digital signature support
+- Digital signature support
 
-* Footer disclaimer
+- Footer disclaimer
 
-* Page numbering
+- Page numbering
 
 Downloads shall support:
 
-* PDF
+- PDF
 
-* Excel
+- Excel
 
-* CSV
+- CSV
 
 ⸻
 
@@ -198,39 +198,39 @@ User Interface
 
 Design a world-class fintech interface featuring:
 
-* Professional typography
+- Professional typography
 
-* Teal & White administration theme
+- Teal & White administration theme
 
-* Premium color palette
+- Premium color palette
 
-* Dark Mode
+- Dark Mode
 
-* Light Mode
+- Light Mode
 
-* Accessibility compliance
+- Accessibility compliance
 
-* Beautiful dashboard cards
+- Beautiful dashboard cards
 
-* Modern charts
+- Modern charts
 
-* Responsive tables
+- Responsive tables
 
-* Professional icons
+- Professional icons
 
-* Glassmorphism effects where appropriate
+- Glassmorphism effects where appropriate
 
-* 3D left navigation
+- 3D left navigation
 
-* Mobile-first interface
+- Mobile-first interface
 
-* Consistent spacing
+- Consistent spacing
 
-* Excellent visual hierarchy
+- Excellent visual hierarchy
 
-* Smooth animations
+- Smooth animations
 
-* Fast loading
+- Fast loading
 
 ⸻
 
@@ -240,21 +240,21 @@ Financial Management
 
 Include:
 
-* Financial dashboard
+- Financial dashboard
 
-* Cash flow
+- Cash flow
 
-* Income
+- Income
 
-* Expenses
+- Expenses
 
-* Contributions
+- Contributions
 
-* Transfers
+- Transfers
 
-* Balance management
+- Balance management
 
-* Financial summaries
+- Financial summaries
 
 ⸻
 
@@ -262,49 +262,49 @@ Membership Management
 
 Support:
 
-* Individual registration
+- Individual registration
 
-* Group registration
+- Group registration
 
-* Department registration
+- Department registration
 
-* Institutional registration
+- Institutional registration
 
 Member profile includes:
 
-* Full Name
+- Full Name
 
-* Photo
+- Photo
 
-* Gender
+- Gender
 
-* Date of Birth
+- Date of Birth
 
-* Region
+- Region
 
-* Digital Address
+- Digital Address
 
-* Ghana Card Number (Mandatory)
+- Ghana Card Number (Mandatory)
 
-* Contact Details
+- Contact Details
 
-* Email
+- Email
 
-* Membership Status
+- Membership Status
 
-* KYC Status
+- KYC Status
 
-* Linked Mobile Money Accounts
+- Linked Mobile Money Accounts
 
-* Linked Bank Accounts
+- Linked Bank Accounts
 
-* Unique User ID
+- Unique User ID
 
-* Security Settings
+- Security Settings
 
-* Biometric Login Settings
+- Biometric Login Settings
 
-* Account Statements
+- Account Statements
 
 ⸻
 
@@ -312,43 +312,43 @@ Savings Module
 
 Support:
 
-* Daily Savings
+- Daily Savings
 
-* Weekly Savings
+- Weekly Savings
 
-* Monthly Savings
+- Monthly Savings
 
-* Quarterly Savings
+- Quarterly Savings
 
-* Biannual Savings
+- Biannual Savings
 
-* Annual Savings
+- Annual Savings
 
 Features include:
 
-* Contribution schedules
+- Contribution schedules
 
-* Automatic reminders
+- Automatic reminders
 
-* Failed contribution alerts
+- Failed contribution alerts
 
-* Savings goals
+- Savings goals
 
-* Progress tracking
+- Progress tracking
 
-* Interest calculation
+- Interest calculation
 
-* Interest earned
+- Interest earned
 
-* Deposit into savings
+- Deposit into savings
 
-* Eligible withdrawals
+- Eligible withdrawals
 
-* Savings history
+- Savings history
 
-* Savings analytics
+- Savings analytics
 
-* Savings statements
+- Savings statements
 
 ⸻
 
@@ -356,33 +356,33 @@ Withdrawal Module
 
 Support:
 
-* Daily
+- Daily
 
-* Weekly
+- Weekly
 
-* Monthly
+- Monthly
 
-* Quarterly
+- Quarterly
 
-* Biannual
+- Biannual
 
-* Annual
+- Annual
 
 Include:
 
-* Withdrawal limits
+- Withdrawal limits
 
-* Approval workflows
+- Approval workflows
 
-* Multi-level approvals
+- Multi-level approvals
 
-* Withdrawal tracking
+- Withdrawal tracking
 
-* Withdrawal history
+- Withdrawal history
 
-* Status monitoring
+- Status monitoring
 
-* Notifications
+- Notifications
 
 ⸻
 
@@ -390,37 +390,37 @@ Loans Module
 
 Include:
 
-* Loan Application
+- Loan Application
 
-* Loan Calculator
+- Loan Calculator
 
-* Loan Eligibility
+- Loan Eligibility
 
-* Guarantor Management
+- Guarantor Management
 
-* Approval Workflow
+- Approval Workflow
 
-* Multi-level Approval
+- Multi-level Approval
 
-* Loan Progress Tracker
+- Loan Progress Tracker
 
-* Repayment Schedule
+- Repayment Schedule
 
-* Outstanding Balance
+- Outstanding Balance
 
-* Amount Paid
+- Amount Paid
 
-* Penalties
+- Penalties
 
-* Interest Calculation
+- Interest Calculation
 
-* Loan Statements
+- Loan Statements
 
-* Loan History
+- Loan History
 
-* Notifications
+- Notifications
 
-* Email Alerts
+- Email Alerts
 
 ⸻
 
@@ -428,43 +428,43 @@ Payments & Transactions
 
 Support:
 
-* Deposits
+- Deposits
 
-* Withdrawals
+- Withdrawals
 
-* Transfers
+- Transfers
 
-* Loan Repayments
+- Loan Repayments
 
-* Mobile Money
+- Mobile Money
 
-* Bank Transfers
+- Bank Transfers
 
-* Visa
+- Visa
 
-* Mastercard
+- Mastercard
 
-* International Payments
+- International Payments
 
 Features:
 
-* Transaction History
+- Transaction History
 
-* Search
+- Search
 
-* Filters
+- Filters
 
-* Receipts
+- Receipts
 
-* Statements
+- Statements
 
-* Payment Confirmation
+- Payment Confirmation
 
-* Email Notifications
+- Email Notifications
 
-* Internal Notifications
+- Internal Notifications
 
-* API Integration Ready
+- API Integration Ready
 
 ⸻
 
@@ -472,49 +472,49 @@ User Dashboard
 
 Display:
 
-* Total Balance
+- Total Balance
 
-* Total Savings
+- Total Savings
 
-* Active Loans
+- Active Loans
 
-* Outstanding Loans
+- Outstanding Loans
 
-* Upcoming Repayment
+- Upcoming Repayment
 
-* Savings Progress
+- Savings Progress
 
-* Recent Transactions
+- Recent Transactions
 
-* Financial Charts
+- Financial Charts
 
-* AI Insights
+- AI Insights
 
 Quick Actions:
 
-* Deposit
+- Deposit
 
-* Withdraw
+- Withdraw
 
-* Transfer
+- Transfer
 
-* Apply for Loan
+- Apply for Loan
 
-* Make Payment
+- Make Payment
 
-* View Statements
+- View Statements
 
 Bottom Navigation:
 
-* Home
+- Home
 
-* Savings
+- Savings
 
-* Loans
+- Loans
 
-* Transactions
+- Transactions
 
-* More/Profile
+- More/Profile
 
 ⸻
 
@@ -522,41 +522,41 @@ Admin Dashboard
 
 Include:
 
-* Analytics Dashboard
+- Analytics Dashboard
 
-* AI Business Intelligence
+- AI Business Intelligence
 
-* Financial Dashboard
+- Financial Dashboard
 
-* Membership Dashboard
+- Membership Dashboard
 
-* Savings Dashboard
+- Savings Dashboard
 
-* Loans Dashboard
+- Loans Dashboard
 
-* Payment Dashboard
+- Payment Dashboard
 
-* MoMo Dashboard
+- MoMo Dashboard
 
-* Audit Dashboard
+- Audit Dashboard
 
-* Live Users
+- Live Users
 
-* Notifications
+- Notifications
 
-* Reports
+- Reports
 
-* Security Dashboard
+- Security Dashboard
 
-* Backup Dashboard
+- Backup Dashboard
 
-* System Health
+- System Health
 
-* Database Monitoring
+- Database Monitoring
 
-* API Monitoring
+- API Monitoring
 
-* Activity Timeline
+- Activity Timeline
 
 ⸻
 
@@ -564,21 +564,21 @@ AI Business Intelligence
 
 Provide:
 
-* Predictive analytics
+- Predictive analytics
 
-* Savings trends
+- Savings trends
 
-* Loan default prediction
+- Loan default prediction
 
-* Financial insights
+- Financial insights
 
-* Revenue forecasting
+- Revenue forecasting
 
-* Risk analysis
+- Risk analysis
 
-* Intelligent recommendations
+- Intelligent recommendations
 
-* Executive dashboards
+- Executive dashboards
 
 ⸻
 
@@ -586,31 +586,31 @@ Notifications
 
 Support:
 
-* Deposits
+- Deposits
 
-* Withdrawals
+- Withdrawals
 
-* Loan Approvals
+- Loan Approvals
 
-* Loan Rejections
+- Loan Rejections
 
-* Loan Repayments
+- Loan Repayments
 
-* Savings Milestones
+- Savings Milestones
 
-* Registration
+- Registration
 
-* Failed Contributions
+- Failed Contributions
 
-* Security Alerts
+- Security Alerts
 
-* System Alerts
+- System Alerts
 
-* Push Notifications
+- Push Notifications
 
-* Email Notifications
+- Email Notifications
 
-* SMS-ready integration
+- SMS-ready integration
 
 ⸻
 
@@ -618,17 +618,17 @@ Support Centre
 
 Include:
 
-* Live Chat
+- Live Chat
 
-* WhatsApp Support
+- WhatsApp Support
 
-* FAQs
+- FAQs
 
-* Help Centre
+- Help Centre
 
-* Ticketing System
+- Ticketing System
 
-* Contact Support
+- Contact Support
 
 ⸻
 
@@ -636,37 +636,37 @@ Security Centre
 
 Implement enterprise security including:
 
-* Firewall Monitoring
+- Firewall Monitoring
 
-* Malware Detection
+- Malware Detection
 
-* File Scanning
+- File Scanning
 
-* Login Monitoring
+- Login Monitoring
 
-* Geo-location Tracking
+- Geo-location Tracking
 
-* IP Tracking
+- IP Tracking
 
-* Digital Address Tracking
+- Digital Address Tracking
 
-* Device History
+- Device History
 
-* MAC Address Tracking (where technically supported)
+- MAC Address Tracking (where technically supported)
 
-* Secure Sessions
+- Secure Sessions
 
-* Encryption
+- Encryption
 
-* RBAC
+- RBAC
 
-* Audit Logs
+- Audit Logs
 
-* API Security
+- API Security
 
-* OWASP compliance
+- OWASP compliance
 
-* Secure File Uploads
+- Secure File Uploads
 
 ⸻
 
@@ -674,31 +674,31 @@ File Management
 
 Support:
 
-* Excel Upload
+- Excel Upload
 
-* CSV Upload
+- CSV Upload
 
-* Validation
+- Validation
 
-* Malware Scanning
+- Malware Scanning
 
-* Preview
+- Preview
 
-* Approval
+- Approval
 
-* Rejection
+- Rejection
 
-* Archive
+- Archive
 
-* Restore
+- Restore
 
-* Download
+- Download
 
-* Delete
+- Delete
 
-* Upload History
+- Upload History
 
-* Status Tracking
+- Status Tracking
 
 ⸻
 
@@ -758,35 +758,35 @@ Engineering Standards
 
 The system must include:
 
-* TypeScript strict mode
+- TypeScript strict mode
 
-* ESLint
+- ESLint
 
-* Prettier
+- Prettier
 
-* Environment configuration
+- Environment configuration
 
-* Secure secrets management
+- Secure secrets management
 
-* Optimized builds
+- Optimized builds
 
-* Lazy loading
+- Lazy loading
 
-* Code splitting
+- Code splitting
 
-* Error boundaries
+- Error boundaries
 
-* Form validation
+- Form validation
 
-* Input sanitization
+- Input sanitization
 
-* Secure authentication
+- Secure authentication
 
-* Professional logging
+- Professional logging
 
-* Unit testing ready
+- Unit testing ready
 
-* Production build optimization
+- Production build optimization
 
 ⸻
 
@@ -794,33 +794,33 @@ Final Deliverables
 
 Deliver a complete, production-ready React Vite PWA that is:
 
-* Secure for financial operations
+- Secure for financial operations
 
-* Highly scalable
+- Highly scalable
 
-* Fast-loading
+- Fast-loading
 
-* Responsive across all devices
+- Responsive across all devices
 
-* Easy to maintain
+- Easy to maintain
 
-* Enterprise-grade
+- Enterprise-grade
 
-* Free from TypeScript, dependency, routing, authentication, permission, UI, build, and deployment errors
+- Free from TypeScript, dependency, routing, authentication, permission, UI, build, and deployment errors
 
-* Ready for backend integration
+- Ready for backend integration
 
-* Ready for PostgreSQL/MySQL/Supabase integration
+- Ready for PostgreSQL/MySQL/Supabase integration
 
-* Ready for payment gateway integration
+- Ready for payment gateway integration
 
-* Ready for AI integration
+- Ready for AI integration
 
-* Ready for email and SMS services
+- Ready for email and SMS services
 
-* Ready for cloud deployment
+- Ready for cloud deployment
 
-* Optimized for performance, accessibility, maintainability, and long-term scalability.
+- Optimized for performance, accessibility, maintainability, and long-term scalability.
 
 The final user experience must make it effortless for members to understand their financial position, monitor savings, manage loans, complete transactions, receive timely notifications, and perform common financial tasks with minimal navigation while giving administrators comprehensive control, real-time analytics, robust security, and complete operational visibility.
 
