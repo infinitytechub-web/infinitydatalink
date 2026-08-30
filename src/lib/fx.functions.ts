@@ -2,6 +2,8 @@
 // and cached server-side (in-memory + fx_rates DB). Falls back to last-known DB row.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { ADMIN_ROLES, assertAnyRole, loadRoleSet } from "@/lib/role-guards";
 
 export const DEFAULT_BASE = "GHS";
 export const SUPPORTED_QUOTES = [
