@@ -304,6 +304,7 @@ function AnalyticsBody() {
         ) : (
           <div className="p-4">
             <TrendChart
+              variant="area"
               title="Loan performance"
               data={data.loans.series}
               xKey="bucket"
