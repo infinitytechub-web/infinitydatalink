@@ -355,7 +355,12 @@ export function PortalShell({
           </div>
         </header>
 
-        <div className="mx-auto w-full max-w-7xl flex-1 animate-fade-in space-y-8 p-4 lg:p-8">
+        <div
+          id="portal-content"
+          tabIndex={-1}
+          className="mx-auto w-full max-w-7xl flex-1 animate-fade-in space-y-8 p-4 lg:p-8"
+        >
+
           {children}
         </div>
 
