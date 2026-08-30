@@ -122,6 +122,10 @@ export function SidebarNavItem({
         </span>
       )}
 
+      {item.disabled && !collapsed ? (
+        <Lock className="ml-auto size-3 shrink-0 text-white/50" aria-hidden="true" />
+      ) : null}
+
       {active && !collapsed ? (
         <span
           aria-hidden="true"
@@ -131,7 +135,30 @@ export function SidebarNavItem({
           )}
         />
       ) : null}
+    </>
+  );
+
+  // Locked rows stay visible (so the portal shape is predictable) but are inert
+  // and announce why via the accessible name.
+  if (item.disabled) {
+    return (
+      <span aria-disabled="true" title={label} aria-label={label} className={rowClass}>
+        {inner}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      to={item.to}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      title={collapsed || item.hint ? label : undefined}
+      className={rowClass}
+    >
+      {inner}
     </Link>
+
   );
 }
 
