@@ -24,6 +24,7 @@ import { TrendChart, BarList } from "@/components/charts";
 import { EmptyState, PageHeader, SectionCard } from "@/components/primitives";
 import { PremiumStatCard, ProgressRing } from "@/components/premium";
 import { ExportBar } from "@/components/export-bar";
+import { AnalyticsReportButton } from "@/components/analytics-report-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DrilldownDialog, type DrilldownTarget } from "@/components/analytics-drilldown";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -211,6 +212,14 @@ function AnalyticsBody() {
                 { header: "Value", accessor: (r) => r.value, align: "right" },
               ]}
               rows={kpiRows}
+            />
+            <AnalyticsReportButton
+              data={data}
+              from={s.from}
+              to={s.to}
+              granularity={s.granularity}
+              entity={s.entity}
+              entityLabel={entityLabel}
             />
             <ThemeToggle />
           </div>

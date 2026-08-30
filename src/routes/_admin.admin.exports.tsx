@@ -134,6 +134,24 @@ function ExportsPage() {
         description="Filter any operational dataset by date, status or reference, review the figures, then download as CSV, Excel or PDF. Every download is audited."
       />
 
+      <SectionCard title="Analytics dashboard report">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+          <p className="max-w-2xl text-xs text-muted-foreground">
+            Download the full analytics dashboard — KPI summary plus savings growth, withdrawal
+            trend, loan performance and cancellation series with their mix breakdowns — as a
+            multi-section CSV or a branded PDF report for the selected period and organisation
+            scope.
+          </p>
+          <Link
+            to="/admin/analytics"
+            search={{ from: s.from, to: s.to, granularity: "week" as const, entity: "all" }}
+            className="inline-flex items-center gap-1.5 rounded border border-primary bg-primary px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90"
+          >
+            <FileBarChart className="h-3 w-3" /> Open dashboard reports
+          </Link>
+        </div>
+      </SectionCard>
+
       <SectionCard title="Report">
         <div className="flex flex-wrap gap-2 p-4">
           {REPORT_DATASETS.map((d) => {
