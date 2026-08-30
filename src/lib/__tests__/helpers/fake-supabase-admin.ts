@@ -199,7 +199,7 @@ export function makePaymentsDb(
   const db = new FakeSupabaseAdmin({
     unique: {
       payment_intents: ["idempotency_key", "reference"],
-      payment_webhook_events: ["event_id"],
+      payment_webhook_events: ["event_id", "body_hash"],
       payment_receipts: ["intent_id", "receipt_no"],
     },
   });
