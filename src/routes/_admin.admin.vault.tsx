@@ -199,6 +199,17 @@ function VaultPage() {
             >
               <RotateCcw className="mr-1 size-3.5" /> Restore selected
             </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => {
+                setPurgeReason("");
+                setPurgeConfirm("");
+                setPurgeOpen(true);
+              }}
+            >
+              <Trash2 className="mr-1 size-3.5" /> Delete forever
+            </Button>
             <button
               onClick={() => setSelected(new Set())}
               className="ml-auto text-[11px] underline text-muted-foreground"
