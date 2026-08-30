@@ -112,10 +112,13 @@ export function SectionCard({
       )}
     >
       <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-0.5 opacity-70", SECTION_ACCENT(accent))} />
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-linear-to-b from-muted/40 to-transparent px-5 py-3.5">
-        <h3 className="font-display text-base font-semibold tracking-tight text-foreground">{title}</h3>
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border/60 bg-linear-to-b from-muted/40 to-transparent px-5 py-3.5 sm:flex sm:flex-wrap sm:justify-between">
+        <h3 className="min-w-0 truncate font-display text-base font-semibold tracking-tight text-foreground">
+          {title}
+        </h3>
         {action}
       </header>
+
       {children}
     </section>
   );
