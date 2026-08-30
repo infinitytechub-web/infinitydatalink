@@ -19,9 +19,11 @@ type Props<T> = {
   rows: T[];
   /** Required RBAC permission. If the current session lacks it, controls are locked. */
   permission: Permission;
+  /** Fired after an allowed download starts; used by callers to write an audit entry. */
+  onExport?: (format: "csv" | "excel" | "pdf" | "print") => void;
 };
 
-export function ExportBar<T>({ title, subtitle, filename, columns, rows, permission }: Props<T>) {
+export function ExportBar<T>({ title, subtitle, filename, columns, rows, permission, onExport }: Props<T>) {
   const { user, hasPermission } = useAuth();
   const allowed = hasPermission(permission);
   // Column selection applies to CSV & Excel only; PDF/Print always render the full column set.
@@ -75,7 +77,10 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
     <div className="flex flex-wrap items-center gap-1.5">
       <button
         className={btn}
-        onClick={guard(() => void exportPdf(opts))}
+        onClick={guard(() => {
+          onExport?.("pdf");
+          return exportPdf(opts);
+        })}
         title="Export PDF with QR + barcode (all columns)"
       >
         <FileText className="h-3 w-3" /> PDF
@@ -83,7 +88,10 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
       <button
         className={btn}
         disabled={noneSelected}
-        onClick={guard(() => exportExcel(csvExcelOpts))}
+        onClick={guard(() => {
+          onExport?.("excel");
+          exportExcel(csvExcelOpts);
+        })}
         title={
           noneSelected
             ? "Select at least one column"
@@ -95,7 +103,10 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
       <button
         className={btn}
         disabled={noneSelected}
-        onClick={guard(() => exportCsv(csvExcelOpts))}
+        onClick={guard(() => {
+          onExport?.("csv");
+          exportCsv(csvExcelOpts);
+        })}
         title={
           noneSelected
             ? "Select at least one column"
@@ -106,7 +117,10 @@ export function ExportBar<T>({ title, subtitle, filename, columns, rows, permiss
       </button>
       <button
         className={btn}
-        onClick={guard(() => void exportPrint(opts))}
+        onClick={guard(() => {
+          onExport?.("print");
+          return exportPrint(opts);
+        })}
         title="Print-ready view (all columns)"
       >
         <Printer className="h-3 w-3" /> Print
