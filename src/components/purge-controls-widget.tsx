@@ -19,9 +19,10 @@ import {
   purgeAuditLog,
   purgeRecycleBin,
 } from "@/lib/notifications.functions";
+import { purgeAllLogEntries } from "@/lib/log-purge.functions";
 import { useAuth } from "@/lib/auth";
 
-type PurgeKind = "notifications" | "audit" | "recycle";
+type PurgeKind = "notifications" | "read-notifications" | "audit" | "audit-all" | "system" | "recycle";
 type NoteScope = "read" | "unread" | "all" | "system";
 
 const NOTE_SCOPES: { value: NoteScope; label: string; hint: string }[] = [
@@ -35,6 +36,15 @@ const NOTE_SCOPES: { value: NoteScope; label: string; hint: string }[] = [
   },
 ];
 
+const TITLES: Record<PurgeKind, string> = {
+  notifications: "Clear notifications",
+  "read-notifications": "Delete all read messages",
+  audit: "Purge audit log",
+  "audit-all": "Delete every audit entry",
+  system: "Delete every system log",
+  recycle: "Empty recycle bin",
+};
+
 export function PurgeControlsWidget() {
   const { hasRole } = useAuth();
   const qc = useQueryClient();
@@ -46,6 +56,7 @@ export function PurgeControlsWidget() {
   const nFn = useServerFn(recycleNotifications);
   const aFn = useServerFn(purgeAuditLog);
   const rFn = useServerFn(purgeRecycleBin);
+  const logsFn = useServerFn(purgeAllLogEntries);
 
   const purgeMut = useMutation({
     mutationFn: async () => {
@@ -54,13 +65,27 @@ export function PurgeControlsWidget() {
           label: "notifications moved to the recycle bin",
           n: (await nFn({ data: { scope: noteScope, retention_days: 30, confirm: "PURGE" } })).deleted,
         };
+      if (open === "read-notifications")
+        return {
+          label: "read messages moved to the recycle bin",
+          n: (await nFn({ data: { scope: "read", retention_days: 30, confirm: "PURGE" } })).deleted,
+        };
       if (open === "audit")
         return {
           label: "audit entries",
           n: (await aFn({ data: { older_than_days: days, confirm: "PURGE" } })).deleted,
         };
+      if (open === "audit-all" || open === "system") {
+        const scope = open === "audit-all" ? ("audit" as const) : ("system" as const);
+        const r = await logsFn({ data: { scope, confirm: "PURGE" } });
+        return {
+          label: `${scope === "audit" ? "audit" : "system log"} entries archived${r.remaining ? " — run again to continue" : ""}`,
+          n: r.archived,
+        };
+      }
       return { label: "recycle-bin entries", n: (await rFn({ data: { all: true, confirm: "PURGE" } })).deleted };
     },
+
     onSuccess: (r) => {
       toast.success(`Purged ${r.n} ${r.label}`);
       qc.invalidateQueries();
@@ -92,10 +117,37 @@ export function PurgeControlsWidget() {
           danger
         />
         <PurgeTile
+          label="Read messages"
+          hint="Clear every alert recipients already opened"
+          onClick={() => {
+            setOpen("read-notifications");
+            setConfirm("");
+          }}
+          danger
+        />
+        <PurgeTile
           label="Audit trail"
           hint="Delete entries older than N days"
           onClick={() => {
             setOpen("audit");
+            setConfirm("");
+          }}
+          danger
+        />
+        <PurgeTile
+          label="Audit trail — all"
+          hint="Archive every audit entry (restorable)"
+          onClick={() => {
+            setOpen("audit-all");
+            setConfirm("");
+          }}
+          danger
+        />
+        <PurgeTile
+          label="System logs"
+          hint="Archive every runtime/system log entry"
+          onClick={() => {
+            setOpen("system");
             setConfirm("");
           }}
           danger
@@ -114,22 +166,19 @@ export function PurgeControlsWidget() {
       <Dialog open={!!open} onOpenChange={(o) => !o && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {open === "audit"
-                ? "Purge audit log"
-                : open === "recycle"
-                  ? "Empty recycle bin"
-                  : "Clear notifications"}
-            </DialogTitle>
+            <DialogTitle>{open ? TITLES[open] : "Purge"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              {open === "notifications"
+              {open === "notifications" || open === "read-notifications"
                 ? "Selected notifications move to the recycle bin and can be restored for 30 days."
-                : "This is irreversible."}{" "}
+                : open === "audit-all" || open === "system"
+                  ? "Entries are snapshotted into the log recycle bin before deletion, in batches of 500 (up to 10,000 per click)."
+                  : "This is irreversible."}{" "}
               An audit entry will be recorded for the action.
             </p>
             {open === "audit" ? (
+
               <div>
                 <Label className="text-xs">Older than (days)</Label>
                 <Input

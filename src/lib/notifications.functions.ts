@@ -279,3 +279,18 @@ export const restoreRecycledNotification = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { restored: Boolean(ok) };
   });
+
+/**
+ * Member-facing "clear read" for the dashboard bell and inbox.
+ *
+ * Members have no DELETE policy on `notifications` by design, so this goes
+ * through `public.clear_my_read_notifications()` — a `SECURITY DEFINER` routine
+ * that hard-scopes the delete to `auth.uid()` and read rows only.
+ */
+export const clearMyReadNotifications = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("clear_my_read_notifications" as never);
+    if (error) throw new Error(error.message);
+    return { deleted: Number(data ?? 0) };
+  });
