@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyKycStatus } from "@/lib/member-kyc.functions";
@@ -81,7 +81,7 @@ function buildGroups(kycApproved: boolean): NavGroup[] {
       label: "Records",
       items: [
         { to: "/app/reports", label: "Reports & statements", icon: <FileBarChart />, ...locked },
-        { to: "/app/files", label: "My documents", icon: <ReceiptText /> },
+        { to: "/app/files", label: "My documents", icon: <ReceiptText />, ...locked },
       ],
     },
     {
