@@ -40,5 +40,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   loan_officer: "Loan Officer",
   finance_officer: "Finance Officer",
   auditor: "Auditor",
+  teller: "Teller",
+  support_officer: "Support Officer",
   member: "Member",
 };

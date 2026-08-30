@@ -73,7 +73,7 @@ export function LoanCalculator({
 
   return (
     <div className="space-y-6">
-      <SectionCard title="Loan inputs" description="Adjust the figures to model a repayment plan.">
+      <SectionCard title="Loan inputs">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1.5">
             <Label htmlFor="calc-amount">Loan amount</Label>
@@ -136,10 +136,7 @@ export function LoanCalculator({
 
       {applyAction ? <div className="flex flex-wrap gap-3">{applyAction(result)}</div> : null}
 
-      <SectionCard
-        title="Repayment schedule"
-        description="Estimated due dates, split between interest and principal."
-      >
+      <SectionCard title="Repayment schedule">
         <div className="max-h-[28rem] overflow-auto rounded-lg border border-border">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-muted/70 text-[11px] uppercase tracking-wider text-muted-foreground">
