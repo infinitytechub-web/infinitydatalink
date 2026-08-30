@@ -123,7 +123,7 @@ export function LoanCalculator({
         <KPIStat label="Instalment" value={formatMoney(estimate.installment)} tone="royal" hint={`${estimate.periods} payments`} />
         <KPIStat label="Total interest" value={formatMoney(estimate.totalInterest)} tone="gold" />
         <KPIStat label="Total repayment" value={formatMoney(estimate.totalRepayment)} tone="teal" />
-        <KPIStat label="Principal" value={formatMoney(amountNum)} tone="forest" />
+        <KPIStat label="Principal" value={formatMoney(amountNum)} tone="slate" />
       </div>
 
       <p className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
