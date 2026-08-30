@@ -103,8 +103,10 @@ const groups: NavGroup[] = [
     label: "Counter",
     items: [
       { to: "/admin/teller", label: "Teller Mode", icon: <Calculator />, cap: "teller.view" },
+      { to: "/admin/support", label: "Support queue", icon: <LifeBuoy />, cap: "support.view" },
     ],
   },
+
   {
     label: "Governance",
     items: [
