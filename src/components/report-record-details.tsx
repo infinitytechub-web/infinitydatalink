@@ -62,7 +62,7 @@ export function ReportRecordDetails({
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Status
                 </span>
-                <StatusPill status={detail.status} />
+                <StatusPill status={detail.status as never} />
               </div>
             ) : null}
 
