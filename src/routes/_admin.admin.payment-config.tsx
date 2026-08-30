@@ -126,9 +126,12 @@ function Body({ canManage }: { canManage: boolean }) {
         </div>
       </SectionCard>
 
+      <RailsPanel rails={data.rails} canManage={canManage} />
+
       <ProviderForm key={selected} code={selected} canManage={canManage} saved={saved} />
 
       <ReadinessPanel code={selected} canManage={canManage} label={template.label} />
+
 
       <SectionCard title="Recent webhook callbacks">
         {data.events.length === 0 ? (
