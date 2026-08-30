@@ -95,6 +95,8 @@ export type TrendChartProps<T extends Record<string, unknown>> = {
   title: string;
   height?: number;
   className?: string;
+  /** "area" renders soft gradient fills under each series (premium look). */
+  variant?: "line" | "area";
 };
 
 // Default export so React.lazy() can pick it up cleanly.
@@ -105,12 +107,51 @@ export default function TrendChartImpl<T extends Record<string, unknown>>({
   title,
   height = 320,
   className,
+  variant = "line",
 }: TrendChartProps<T>): ReactNode {
   const reduced = useReducedMotion();
   const colored = useMemo(
     () => series.map((s, i) => ({ ...s, color: s.color ?? chartPalette[i % chartPalette.length] })),
     [series],
   );
+  const gradientId = (key: string) => `grad-${key.replace(/[^a-zA-Z0-9_-]/g, "")}-${variant}`;
+
+  const axes = (
+    <>
+      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
+      <XAxis
+        dataKey={xKey}
+        fontSize={11}
+        stroke="var(--chart-axis)"
+        tick={{ fill: "var(--chart-axis)" }}
+        tickLine={false}
+        axisLine={{ stroke: "var(--chart-grid)" }}
+        minTickGap={16}
+      />
+      <YAxis
+        fontSize={11}
+        stroke="var(--chart-axis)"
+        tick={{ fill: "var(--chart-axis)" }}
+        tickLine={false}
+        axisLine={false}
+        width={48}
+      />
+      <Tooltip
+        cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1, strokeDasharray: "3 3" }}
+        isAnimationActive={!reduced}
+        animationDuration={reduced ? 0 : 120}
+        content={<AccessibleTooltip series={colored} />}
+      />
+      <Legend
+        wrapperStyle={{ fontSize: 11, paddingTop: 8, color: "var(--muted-foreground)" }}
+        iconType="circle"
+        iconSize={8}
+      />
+    </>
+  );
+
+  const rows = data as Record<string, unknown>[];
+  const margin = { top: 8, right: 12, bottom: 4, left: -8 };
 
   return (
     <div
@@ -121,54 +162,55 @@ export default function TrendChartImpl<T extends Record<string, unknown>>({
     >
       <ChartA11ySummary title={title} data={data} series={colored} xKey={xKey} />
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data as Record<string, unknown>[]} margin={{ top: 8, right: 12, bottom: 4, left: -8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
-          <XAxis
-            dataKey={xKey}
-            fontSize={11}
-            stroke="var(--chart-axis)"
-            tick={{ fill: "var(--chart-axis)" }}
-            tickLine={false}
-            axisLine={{ stroke: "var(--chart-grid)" }}
-            minTickGap={16}
-          />
-          <YAxis
-            fontSize={11}
-            stroke="var(--chart-axis)"
-            tick={{ fill: "var(--chart-axis)" }}
-            tickLine={false}
-            axisLine={false}
-            width={48}
-          />
-          <Tooltip
-            cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1, strokeDasharray: "3 3" }}
-            isAnimationActive={!reduced}
-            animationDuration={reduced ? 0 : 120}
-            content={<AccessibleTooltip series={colored} />}
-          />
-          <Legend
-            wrapperStyle={{ fontSize: 11, paddingTop: 8, color: "var(--muted-foreground)" }}
-            iconType="circle"
-            iconSize={8}
-          />
-
-          {colored.map((s) => (
-            <Line
-              key={s.key}
-              type="monotone"
-              dataKey={s.key}
-              name={s.label}
-              stroke={s.color}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
-              isAnimationActive={!reduced}
-              animationDuration={reduced ? 0 : 400}
-              animationEasing="ease-out"
-            />
-          ))}
-        </LineChart>
+        {variant === "area" ? (
+          <AreaChart data={rows} margin={margin}>
+            <defs>
+              {colored.map((s) => (
+                <linearGradient key={s.key} id={gradientId(s.key)} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={s.color} stopOpacity={0.45} />
+                  <stop offset="100%" stopColor={s.color} stopOpacity={0.02} />
+                </linearGradient>
+              ))}
+            </defs>
+            {axes}
+            {colored.map((s) => (
+              <Area
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                name={s.label}
+                stroke={s.color}
+                strokeWidth={2.25}
+                fill={`url(#${gradientId(s.key)})`}
+                activeDot={{ r: 4 }}
+                isAnimationActive={!reduced}
+                animationDuration={reduced ? 0 : 500}
+                animationEasing="ease-out"
+              />
+            ))}
+          </AreaChart>
+        ) : (
+          <LineChart data={rows} margin={margin}>
+            {axes}
+            {colored.map((s) => (
+              <Line
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                name={s.label}
+                stroke={s.color}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4 }}
+                isAnimationActive={!reduced}
+                animationDuration={reduced ? 0 : 400}
+                animationEasing="ease-out"
+              />
+            ))}
+          </LineChart>
+        )}
       </ResponsiveContainer>
     </div>
   );
 }
+
