@@ -176,18 +176,24 @@ function MemberLayout() {
   return (
     <PortalShell
       brand="IT-360 CashApp"
-      groups={groups}
+      groups={buildGroups(kycApproved)}
       breadcrumb={breadcrumb}
       action={
-        <button className="rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream shadow-sm hover:bg-emerald-mid">
-          New Transaction
-        </button>
+        kycApproved ? (
+          <Link
+            to="/app/transfers"
+            className="inline-flex min-h-11 items-center rounded-md bg-emerald-deep px-4 text-xs font-semibold uppercase tracking-widest text-cream shadow-sm hover:bg-emerald-mid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            New transfer
+          </Link>
+        ) : null
       }
     >
       {kyc ? <KycDecisionBanner status={kyc} /> : null}
       <Outlet />
     </PortalShell>
   );
+
 }
 
 
