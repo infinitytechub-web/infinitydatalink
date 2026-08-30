@@ -221,8 +221,8 @@ export const listMyGuarantees = createServerFn({ method: "GET" })
     let loans = new Map<string, any>();
     let profiles = new Map<string, any>();
     if (loanIds.length) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: l } = await (supabaseAdmin as any)
+
         .from("loans")
         .select("id, ref, amount, status, user_id")
         .in("id", loanIds);
