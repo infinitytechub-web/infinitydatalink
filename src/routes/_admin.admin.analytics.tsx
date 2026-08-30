@@ -249,6 +249,7 @@ function AnalyticsBody() {
         ) : (
           <div className="p-4">
             <TrendChart
+              variant="area"
               title="Withdrawal trends"
               data={data.withdrawals.series}
               xKey="bucket"
