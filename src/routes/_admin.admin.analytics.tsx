@@ -213,15 +213,37 @@ function AnalyticsBody() {
       </SectionCard>
 
       {/* ---------------- Withdrawal trends ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Requested" value={<span className="tabular">{formatMoney(data.withdrawals.requested_total)}</span>} />
-        <KPIStat label="Paid out" value={<span className="tabular">{formatMoney(data.withdrawals.paid_total)}</span>} />
-        <KPIStat label="Approval rate" value={<span className="tabular">{pctText(data.withdrawals.approval_rate)}</span>} />
-        <KPIStat
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="violet"
+          icon={<Wallet className="size-4" />}
+          label="Requested"
+          value={<span className="tabular">{formatMoney(data.withdrawals.requested_total)}</span>}
+          spark={data.withdrawals.series.map((r) => r.amount)}
+        />
+        <PremiumStatCard
+          tone="emerald"
+          icon={<BadgeCheck className="size-4" />}
+          label="Paid out"
+          value={<span className="tabular">{formatMoney(data.withdrawals.paid_total)}</span>}
+          spark={data.withdrawals.series.map((r) => r.paid)}
+        />
+        <PremiumStatCard
+          tone="sky"
+          icon={<PercentCircle className="size-4" />}
+          label="Approval rate"
+          value={<span className="tabular">{pctText(data.withdrawals.approval_rate)}</span>}
+          progress={data.withdrawals.approval_rate}
+        />
+        <PremiumStatCard
+          tone="gold"
+          icon={<Timer className="size-4" />}
           label="Avg decision time"
           value={<span className="tabular">{data.withdrawals.avg_decision_hours.toFixed(1)}h</span>}
+          hint="Request submitted to decision"
         />
       </section>
+
 
       <SectionCard
         title="Withdrawal trends"
