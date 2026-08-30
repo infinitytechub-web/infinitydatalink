@@ -12,11 +12,12 @@ async function roleSet(supabase: any, userId: string): Promise<Set<string>> {
   return new Set((data ?? []).map((r: any) => String(r.role)));
 }
 
-async function assertRead(supabase: any, userId: string) {
+async function assertRead(supabase: any, userId: string): Promise<Set<string>> {
   const roles = await roleSet(supabase, userId);
   if (!Array.from(roles).some((r) => SECURITY_ROLES.has(r))) {
     throw new Error("Forbidden: loan, finance or audit role required");
   }
+  return roles;
 }
 
 async function assertWrite(supabase: any, userId: string) {
@@ -25,6 +26,7 @@ async function assertWrite(supabase: any, userId: string) {
     throw new Error("Forbidden: super admin or loan officer role required");
   }
 }
+
 
 export type GuarantorRow = {
   id: string;
@@ -60,9 +62,15 @@ export const getLoanSecurity = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ loan_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }): Promise<{ guarantors: GuarantorRow[]; collateral: CollateralRow[] }> => {
-    await assertRead(context.supabase, context.userId);
+    const roles = await assertRead(context.supabase, context.userId);
+    // Guarantor phone/email are revoked from `authenticated` at the column
+    // level, so they are read through the privileged client *after* the role
+    // check, and masked for roles that only need identification (auditors).
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { canSeeRawContacts, maskEmail, maskPhone } = await import("@/lib/pii-mask");
+    const showRaw = canSeeRawContacts(roles);
     const [g, c] = await Promise.all([
-      context.supabase
+      (supabaseAdmin as any)
         .from("loan_guarantors")
         .select("id, loan_id, member_id, full_name, relationship, phone, email, guaranteed_amount, consent, consent_at, consent_note, created_at")
         .eq("loan_id", data.loan_id)
@@ -76,9 +84,15 @@ export const getLoanSecurity = createServerFn({ method: "GET" })
     if (g.error) throw new Error(g.error.message);
     if (c.error) throw new Error(c.error.message);
     return {
-      guarantors: (g.data ?? []).map((r: any) => ({ ...r, guaranteed_amount: Number(r.guaranteed_amount ?? 0) })),
+      guarantors: (g.data ?? []).map((r: any) => ({
+        ...r,
+        guaranteed_amount: Number(r.guaranteed_amount ?? 0),
+        phone: showRaw ? r.phone : maskPhone(r.phone),
+        email: showRaw ? r.email : maskEmail(r.email),
+      })),
       collateral: (c.data ?? []).map((r: any) => ({ ...r, estimated_value: Number(r.estimated_value ?? 0) })),
     };
+
   });
 
 export const addLoanGuarantor = createServerFn({ method: "POST" })
@@ -191,19 +205,24 @@ export type MyGuaranteeRow = GuarantorRow & {
 export const listMyGuarantees = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<MyGuaranteeRow[]> => {
-    const { data: rows, error } = await context.supabase
+    // Own guarantee records only — contact columns are revoked from
+    // `authenticated`, so the read runs through the privileged client with a
+    // hard `member_id = self` filter.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await (supabaseAdmin as any)
       .from("loan_guarantors")
       .select("id, loan_id, member_id, full_name, relationship, phone, email, guaranteed_amount, consent, consent_at, consent_note, created_at")
       .eq("member_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
+
     const loanIds = Array.from(new Set((rows ?? []).map((r: any) => r.loan_id)));
     let loans = new Map<string, any>();
     let profiles = new Map<string, any>();
     if (loanIds.length) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: l } = await (supabaseAdmin as any)
+
         .from("loans")
         .select("id, ref, amount, status, user_id")
         .in("id", loanIds);
