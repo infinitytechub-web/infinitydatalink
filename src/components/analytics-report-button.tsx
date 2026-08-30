@@ -28,14 +28,7 @@ type Props = {
  * series and mix breakdown — as one CSV or one branded PDF report. Gated by
  * the export RBAC permission; each download writes an audit entry.
  */
-export function AnalyticsReportButton({
-  data,
-  from,
-  to,
-  granularity,
-  entity,
-  entityLabel,
-}: Props) {
+export function AnalyticsReportButton({ data, from, to, granularity, entity, entityLabel }: Props) {
   const { hasPermission } = useAuth();
   const allowed = hasPermission(EXPORT_PERMISSION);
   const audit = useServerFn(logAnalyticsExport);
