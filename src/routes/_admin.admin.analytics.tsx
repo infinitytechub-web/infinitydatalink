@@ -274,12 +274,50 @@ function AnalyticsBody() {
       </div>
 
       {/* ---------------- Loan performance ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Disbursed" value={<span className="tabular">{formatMoney(data.loans.disbursed_total)}</span>} />
-        <KPIStat label="Repaid" value={<span className="tabular">{formatMoney(data.loans.repaid_total)}</span>} />
-        <KPIStat label="On-time rate" value={<span className="tabular">{pctText(data.loans.on_time_rate)}</span>} />
-        <KPIStat label="Overdue installments" value={<span className="tabular">{data.loans.overdue_installments}</span>} />
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="royal"
+          icon={<Landmark className="size-4" />}
+          label="Disbursed"
+          value={<span className="tabular">{formatMoney(data.loans.disbursed_total)}</span>}
+          spark={data.loans.series.map((r) => r.disbursed)}
+        />
+        <PremiumStatCard
+          tone="emerald"
+          icon={<HandCoins className="size-4" />}
+          label="Repaid"
+          value={<span className="tabular">{formatMoney(data.loans.repaid_total)}</span>}
+          spark={data.loans.series.map((r) => r.repaid)}
+        />
+        <PremiumStatCard
+          tone="sky"
+          icon={<Timer className="size-4" />}
+          label="On-time rate"
+          value={<span className="tabular">{pctText(data.loans.on_time_rate)}</span>}
+          progress={data.loans.on_time_rate}
+        />
+        <PremiumStatCard
+          tone="rose"
+          icon={<AlertTriangle className="size-4" />}
+          label="Overdue installments"
+          value={<span className="tabular">{data.loans.overdue_installments.toLocaleString()}</span>}
+          hint="Instalments past their due date"
+        />
       </section>
+
+      <SectionCard title="Portfolio health" accent="sky">
+        <div className="grid grid-cols-2 gap-6 p-6 sm:grid-cols-4">
+          <ProgressRing value={data.loans.on_time_rate} label="On-time repayment" tone={0} />
+          <ProgressRing
+            value={data.loans.disbursed_total > 0 ? data.loans.repaid_total / data.loans.disbursed_total : 0}
+            label="Repaid vs disbursed"
+            tone={1}
+          />
+          <ProgressRing value={data.withdrawals.approval_rate} label="Withdrawal approvals" tone={2} />
+          <ProgressRing value={data.cancellations.cancellation_rate} label="Cancellation rate" tone={4} />
+        </div>
+      </SectionCard>
+
 
       <SectionCard
         title="Loan performance"
