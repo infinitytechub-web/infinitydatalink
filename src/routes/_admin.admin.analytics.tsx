@@ -359,6 +359,7 @@ function AnalyticsBody() {
         ) : (
           <div className="p-4">
             <TrendChart
+              variant="area"
               title="Batch cancellation rates"
               data={data.cancellations.series}
               xKey="bucket"
