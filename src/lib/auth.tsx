@@ -29,6 +29,8 @@ export type AppRole =
   | "loan_officer"
   | "finance_officer"
   | "auditor"
+  | "teller"
+  | "support_officer"
   | "member";
 
 export type Permission =
@@ -54,6 +56,8 @@ export const ADMIN_ROLE_LABEL: Record<Exclude<AppRole, "member">, string> = {
   loan_officer: "Loan Officer",
   finance_officer: "Finance Officer",
   auditor: "Auditor",
+  teller: "Teller",
+  support_officer: "Support Officer",
 };
 
 const ALL_EXPORTS: Permission[] = [
@@ -69,11 +73,14 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   loan_officer: ["export:loans", "export:members", "export:approvals", "loans:decide"],
   finance_officer: ["export:savings", "export:payments", "export:loans", "export:approvals"],
   auditor: [...ALL_EXPORTS],
+  teller: ["export:members", "export:savings", "export:payments"],
+  support_officer: ["export:members"],
   member: ["export:own_transactions", "export:own_loans", "export:own_savings", "export:own_statement"],
 };
 
 const ADMIN_ROLES: AppRole[] = [
   "super_admin", "admin", "manager", "compliance_officer", "loan_officer", "finance_officer", "auditor",
+  "teller", "support_officer",
 ];
 
 export type AccountStatus = "pending" | "approved" | "rejected" | "deactivated";

@@ -23,11 +23,20 @@ const Schema = z.object({
 const ghs = (n: number) =>
   `GH₵${n.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export function LoanApplicationDialog({ trigger }: { trigger: React.ReactNode }) {
+export function LoanApplicationDialog({
+  trigger,
+  defaultAmount,
+  defaultTermMonths,
+}: {
+  trigger: React.ReactNode;
+  /** Pre-fills the form, e.g. from the loan calculator. */
+  defaultAmount?: number;
+  defaultTermMonths?: number;
+}) {
   const [open, setOpen] = useState(false);
   const [productId, setProductId] = useState<string>("");
-  const [amount, setAmount] = useState<string>("");
-  const [term, setTerm] = useState<string>("12");
+  const [amount, setAmount] = useState<string>(defaultAmount && defaultAmount > 0 ? String(defaultAmount) : "");
+  const [term, setTerm] = useState<string>(defaultTermMonths ? String(defaultTermMonths) : "12");
   const [purpose, setPurpose] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 

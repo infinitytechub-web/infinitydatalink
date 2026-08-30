@@ -9,6 +9,8 @@ export const EDITABLE_ROLES = [
   "loan_officer",
   "finance_officer",
   "auditor",
+  "teller",
+  "support_officer",
   "member",
 ] as const;
 
@@ -38,5 +40,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   loan_officer: "Loan Officer",
   finance_officer: "Finance Officer",
   auditor: "Auditor",
+  teller: "Teller",
+  support_officer: "Support Officer",
   member: "Member",
 };

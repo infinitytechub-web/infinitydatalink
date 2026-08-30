@@ -36,6 +36,7 @@ import {
   Coins,
   FileText,
   PlugZap,
+  Calculator,
 
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
@@ -87,6 +88,7 @@ const groups: NavGroup[] = [
       { to: "/admin/recurring", label: "Recurring schedules", icon: <RefreshCw /> },
       { to: "/admin/loans", label: "Loans & Approvals", icon: <BadgeDollarSign /> },
       { to: "/admin/loan-products", label: "Loan products", icon: <ClipboardList /> },
+      { to: "/admin/loan-calculator", label: "Loan Calculator", icon: <Calculator /> },
       { to: "/admin/loan-arrears", label: "Arrears & collections", icon: <TrendingDown /> },
       { to: "/admin/loan-workouts", label: "Workout approvals", icon: <Scale /> },
       { to: "/admin/loan-settlements", label: "Settlement approvals", icon: <ClipboardCheck /> },
@@ -94,6 +96,12 @@ const groups: NavGroup[] = [
       { to: "/admin/payments", label: "Payments", icon: <CreditCard />, cap: "payments.view" },
       { to: "/admin/payment-config", label: "Payment configuration", icon: <PlugZap />, cap: "payments.view" },
       { to: "/admin/investments", label: "Investments & Shares", icon: <TrendingUp /> },
+    ],
+  },
+  {
+    label: "Counter",
+    items: [
+      { to: "/admin/teller", label: "Teller Mode", icon: <Calculator />, cap: "teller.view" },
     ],
   },
   {
@@ -148,6 +156,8 @@ const CRUMBS: Record<string, string> = {
   "/admin/recurring": "Recurring schedules",
   "/admin/loans": "Loans & Approvals",
   "/admin/loan-products": "Loan products & eligibility",
+  "/admin/loan-calculator": "Loan Calculator",
+  "/admin/teller": "Teller Mode",
   "/admin/loan-arrears": "Arrears & delinquency",
   "/admin/loan-workouts": "Workouts & write-offs",
   "/admin/loan-settlements": "Early settlement approvals",
