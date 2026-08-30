@@ -176,7 +176,8 @@ export const convertFx = createServerFn({ method: "GET" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAnyRole(await loadRoleSet(context.supabase, context.userId), ADMIN_ROLES, "staff");
     const { rows } = await getRates(data.from);
     const row = rows.find((r) => r.quote.toUpperCase() === data.to.toUpperCase());
     if (!row) throw new Error(`Rate ${data.from}->${data.to} unavailable`);
