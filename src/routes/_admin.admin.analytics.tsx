@@ -327,12 +327,39 @@ function AnalyticsBody() {
       </div>
 
       {/* ---------------- Cancellation rates ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Requests" value={<span className="tabular">{data.cancellations.total_requests}</span>} />
-        <KPIStat label="Cancelled" value={<span className="tabular">{data.cancellations.total_cancelled}</span>} />
-        <KPIStat label="Cancellation rate" value={<span className="tabular">{pctText(data.cancellations.cancellation_rate)}</span>} />
-        <KPIStat label="Admin-initiated share" value={<span className="tabular">{pctText(data.cancellations.admin_share)}</span>} />
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="slate"
+          icon={<Ban className="size-4" />}
+          label="Requests"
+          value={<span className="tabular">{data.cancellations.total_requests.toLocaleString()}</span>}
+          spark={data.cancellations.series.map((r) => r.total)}
+        />
+        <PremiumStatCard
+          tone="rose"
+          icon={<XCircle className="size-4" />}
+          label="Cancelled"
+          value={<span className="tabular">{data.cancellations.total_cancelled.toLocaleString()}</span>}
+          spark={data.cancellations.series.map((r) => r.cancelled)}
+        />
+        <PremiumStatCard
+          tone="violet"
+          icon={<PercentCircle className="size-4" />}
+          label="Cancellation rate"
+          value={<span className="tabular">{pctText(data.cancellations.cancellation_rate)}</span>}
+          progress={data.cancellations.cancellation_rate}
+          hint="Share of requests withdrawn before payout"
+        />
+        <PremiumStatCard
+          tone="gold"
+          icon={<ShieldAlert className="size-4" />}
+          label="Admin-initiated share"
+          value={<span className="tabular">{pctText(data.cancellations.admin_share)}</span>}
+          progress={data.cancellations.admin_share}
+          hint="Cancellations performed by staff"
+        />
       </section>
+
 
       <SectionCard
         title="Batch cancellation rates"
