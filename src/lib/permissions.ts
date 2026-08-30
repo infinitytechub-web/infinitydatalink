@@ -20,6 +20,9 @@ export const MODULES = [
   "documents",
   "users",
   "notifications",
+  "teller",
+  "support",
+  "files",
 ] as const;
 export type PermModule = (typeof MODULES)[number];
 
@@ -53,6 +56,9 @@ export const MODULE_LABELS: Record<PermModule, string> = {
   documents: "Documents",
   users: "Users & roles",
   notifications: "Notifications",
+  teller: "Teller operations",
+  support: "Support centre",
+  files: "File management",
 };
 
 export const ACTION_LABELS: Record<PermAction, string> = {
@@ -76,6 +82,8 @@ export const ROLE_TIERS: Array<{ role: Role; label: string; tier: string }> = [
   { role: "compliance_officer", label: "Compliance Officer", tier: "Staff / Officer" },
   { role: "loan_officer", label: "Loan Officer", tier: "Staff / Officer" },
   { role: "finance_officer", label: "Finance Officer", tier: "Staff / Officer" },
+  { role: "teller", label: "Teller", tier: "Front office" },
+  { role: "support_officer", label: "Support Officer", tier: "Service desk" },
   { role: "auditor", label: "Auditor", tier: "Read-only assurance" },
   { role: "member", label: "Member", tier: "End user" },
 ];
@@ -111,6 +119,32 @@ export const DEFAULT_ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     ["kyc", "members", "entities", "savings", "loans", "payments", "approvals", "reports", "security", "documents"],
     READ_ONLY,
   ),
+  teller: [
+    "teller.view",
+    "teller.create",
+    "teller.print",
+    "members.view",
+    "savings.view",
+    "savings.create",
+    "loans.view",
+    "payments.view",
+    "payments.create",
+    "files.view",
+    "reports.view",
+    "reports.print",
+  ],
+  support_officer: [
+    "support.view",
+    "support.create",
+    "support.edit",
+    "support.manage",
+    "members.view",
+    "notifications.view",
+    "files.view",
+    "files.create",
+    "files.download",
+    "reports.view",
+  ],
   member: [],
 };
 

@@ -8,6 +8,8 @@ export const ALL_ROLES = [
   "loan_officer",
   "finance_officer",
   "auditor",
+  "teller",
+  "support_officer",
   "member",
 ] as const;
 export type Role = (typeof ALL_ROLES)[number];
@@ -20,7 +22,12 @@ export const ADMIN_ROLES: readonly Role[] = [
   "loan_officer",
   "finance_officer",
   "auditor",
+  "teller",
+  "support_officer",
 ];
+
+export const TELLER_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "finance_officer", "teller"];
+export const SUPPORT_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "support_officer"];
 
 export const KYC_ADMIN_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "compliance_officer"];
 export const FINANCE_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "finance_officer"];

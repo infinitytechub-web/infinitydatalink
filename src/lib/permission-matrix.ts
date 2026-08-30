@@ -9,6 +9,8 @@ export const EDITABLE_ROLES = [
   "loan_officer",
   "finance_officer",
   "auditor",
+  "teller",
+  "support_officer",
   "member",
 ] as const;
 
