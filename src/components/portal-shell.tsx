@@ -43,22 +43,38 @@ export function PortalShell({
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, signOut, can, hasRole } = useAuth();
+  const [filter, setFilter] = useState("");
   // RBAC: drop nav items whose capability the signed-in user lacks, then drop
-  // groups that end up empty. Super admins always see everything.
+  // groups that end up empty. Super admins always see everything; `roles`
+  // widens a gate for destinations the capability matrix does not model.
   const visibleGroups = useMemo(() => {
-    const allow = (item: NavItem) =>
-      !item.cap ||
-      hasRole("super_admin") ||
-      (() => {
-        const [m, a] = item.cap.split(".") as [Parameters<typeof can>[0], Parameters<typeof can>[1]];
-        return can(m, a);
-      })();
+    const allow = (item: NavItem) => {
+      if (hasRole("super_admin")) return true;
+      if (item.roles?.some((r) => hasRole(r))) return true;
+      if (!item.cap) return true;
+      const [m, a] = item.cap.split(".") as [Parameters<typeof can>[0], Parameters<typeof can>[1]];
+      return can(m, a);
+    };
     return groups
       .map((g) => ({ ...g, items: g.items.filter(allow) }))
       .filter((g) => g.items.length > 0);
   }, [groups, can, hasRole]);
+  // Quick-find keeps deep back-office rails usable without endless scrolling.
+  const navGroups = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    if (!q) return visibleGroups;
+    return visibleGroups
+      .map((g) => ({
+        ...g,
+        items: g.items.filter(
+          (i) => i.label.toLowerCase().includes(q) || g.label.toLowerCase().includes(q),
+        ),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [visibleGroups, filter]);
   const [open, setOpen] = useState(false); // mobile drawer
   const [collapsed, setCollapsed] = useState(false); // desktop rail
+
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { branding } = useBranding();
