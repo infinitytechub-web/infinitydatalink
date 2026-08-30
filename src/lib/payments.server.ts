@@ -134,9 +134,14 @@ export async function loadRailAvailability(): Promise<RailAvailability[]> {
     const selectable = railOn && (providerReady || spec.manualSettlement);
 
 
+
     let statusLabel: string;
     let note: string;
-    if (isLive) {
+    if (!railOn) {
+      statusLabel = "Disabled";
+      note = "An administrator has switched this rail off.";
+    } else if (isLive) {
+
       statusLabel = "Live";
       note = `Processed by ${live!.code}.`;
     } else if (isSandbox) {
