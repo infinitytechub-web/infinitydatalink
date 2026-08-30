@@ -12,7 +12,7 @@ import {
   type ProviderTemplate,
 } from "@/lib/payment-providers";
 import { processPaymentWebhook, signWebhookBody } from "@/lib/payment-webhooks.server";
-import { RAILS, type RailAvailability } from "@/lib/payment-rails";
+import { type RailAvailability } from "@/lib/payment-rails";
 
 
 const SECRETISH = /(secret|api[_-]?key|password|token|private)/i;
