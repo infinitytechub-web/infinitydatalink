@@ -659,18 +659,21 @@ function AnalyticsBody() {
           <ProgressRing value={data.withdrawals.approval_rate} label="Withdrawal approvals" tone={2} onActivate={() => open({ metric: "withdrawal_requests", label: "Withdrawal approvals", context: "Withdrawal requests raised", permission: "export:savings" })}
             tooltip="Approved share of decided withdrawal requests"
           />
-          <ProgressRing value={data.cancellations.cancellation_rate} label="Cancellation rate"
- onActivate={() =>
-   open({
-     metric: "cancellations",
-     label: "Cancellation rate",
-     context: "Cancelled withdrawal requests",
-     permission: "export:audit",
-     money: true,
-   })
- }
- actionLabel="View underlying records"
- tooltip="Share of requests withdrawn before payout" tone={4} />
+          <ProgressRing
+            value={data.cancellations.cancellation_rate}
+            label="Cancellation rate"
+            tone={4}
+            onActivate={() =>
+              open({
+                metric: "cancellations",
+                label: "Cancellation rate",
+                context: "Cancelled withdrawal requests",
+                permission: "export:audit",
+                money: false,
+              })
+            }
+            tooltip="Share of requests cancelled before payout"
+          />
         </div>
       </SectionCard>
 
