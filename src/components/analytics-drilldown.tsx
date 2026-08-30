@@ -117,7 +117,8 @@ export function DrilldownDialog({
               ) : null}
               <div className="ml-auto">
                 <ExportBar
-                  permission={can("reports", "export") ? target!.permission : "export:security"}
+                  permission={target!.permission}
+                  alsoRequire={can("reports", "export")}
                   title={`${data.title} — ${target!.label}`}
                   subtitle={`${target!.from} to ${target!.to} · ${entityLabel}`}
                   filename={`${data.metric}_${target!.from}_to_${target!.to}`}
