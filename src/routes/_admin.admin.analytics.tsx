@@ -646,6 +646,15 @@ function AnalyticsBody() {
             value={data.loans.disbursed_total > 0 ? data.loans.repaid_total / data.loans.disbursed_total : 0}
             label="Repaid vs disbursed"
             tone={1}
+            onActivate={() =>
+              open({
+                metric: "loan_disbursements",
+                label: "Repaid vs disbursed",
+                context: "Loans disbursed",
+                permission: "export:loans",
+              })
+            }
+            tooltip="Repayments received against principal disbursed"
           />
           <ProgressRing value={data.withdrawals.approval_rate} label="Withdrawal approvals" tone={2} onActivate={() => open({ metric: "withdrawal_requests", label: "Withdrawal approvals", context: "Withdrawal requests raised", permission: "export:savings" })}
             tooltip="Approved share of decided withdrawal requests"
