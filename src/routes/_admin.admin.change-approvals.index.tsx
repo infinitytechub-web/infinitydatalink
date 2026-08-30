@@ -184,9 +184,7 @@ function PendingRequestsPage() {
       const failed = result.results.filter((r) => !r.ok);
       if (okCount) toast.success(`${okCount} request(s) processed`);
       if (failed.length)
-        toast.error(
-          `${failed.length} failed — ${friendly(failed[0]?.error ?? "unknown error")}`,
-        );
+        toast.error(`${failed.length} failed — ${friendly(failed[0]?.error ?? "unknown error")}`);
       setSelected((prev) => prev.filter((id) => failed.some((f) => f.id === id)));
       void queryClient.invalidateQueries({ queryKey: ["change-requests"] });
       void queryClient.invalidateQueries({ queryKey: ["change-audit-history"] });
@@ -214,7 +212,9 @@ function PendingRequestsPage() {
       <SectionCard title="Change requests">
         <div className="flex flex-wrap items-end gap-3 border-b border-border/60 px-5 py-4">
           <div className="grid gap-1.5">
-            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Status</Label>
+            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Status
+            </Label>
             <select
               value={search.status}
               onChange={(e) => setSearch({ status: e.target.value as ChangeStatus | "all" })}
@@ -229,7 +229,9 @@ function PendingRequestsPage() {
             </select>
           </div>
           <div className="grid gap-1.5">
-            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Kind</Label>
+            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Kind
+            </Label>
             <select
               value={search.kind}
               onChange={(e) => setSearch({ kind: e.target.value as ChangeKind | "all" })}
@@ -244,7 +246,9 @@ function PendingRequestsPage() {
             </select>
           </div>
           <div className="grid gap-1.5">
-            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Search summary</Label>
+            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Search summary
+            </Label>
             <Input
               value={search.q}
               onChange={(e) => setSearch({ q: e.target.value })}
@@ -252,7 +256,12 @@ function PendingRequestsPage() {
               className="h-9 w-56"
             />
           </div>
-          <Button variant="outline" size="sm" onClick={() => void query.refetch()} disabled={query.isFetching}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void query.refetch()}
+            disabled={query.isFetching}
+          >
             {query.isFetching ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
             Refresh
           </Button>
@@ -280,8 +289,13 @@ function PendingRequestsPage() {
                   <ListChecks className="h-4 w-4" aria-hidden /> {selected.length} selected
                 </span>
                 {can("approvals", "approve") ? (
-                  <Button size="sm" disabled={countEligible("approve") === 0} onClick={() => openBulk("approve")}>
-                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Bulk approve ({countEligible("approve")})
+                  <Button
+                    size="sm"
+                    disabled={countEligible("approve") === 0}
+                    onClick={() => openBulk("approve")}
+                  >
+                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Bulk approve (
+                    {countEligible("approve")})
                   </Button>
                 ) : null}
                 {can("approvals", "reject") ? (
@@ -291,7 +305,8 @@ function PendingRequestsPage() {
                     disabled={countEligible("reject") === 0}
                     onClick={() => openBulk("reject")}
                   >
-                    <XCircle className="mr-1.5 h-3.5 w-3.5" /> Bulk reject ({countEligible("reject")})
+                    <XCircle className="mr-1.5 h-3.5 w-3.5" /> Bulk reject (
+                    {countEligible("reject")})
                   </Button>
                 ) : null}
                 {can("approvals", "approve") ? (
@@ -301,7 +316,8 @@ function PendingRequestsPage() {
                     disabled={countEligible("apply") === 0}
                     onClick={() => openBulk("apply")}
                   >
-                    <PlayCircle className="mr-1.5 h-3.5 w-3.5" /> Bulk apply ({countEligible("apply")})
+                    <PlayCircle className="mr-1.5 h-3.5 w-3.5" /> Bulk apply (
+                    {countEligible("apply")})
                   </Button>
                 ) : null}
                 <Button size="sm" variant="ghost" onClick={() => setSelected([])}>
@@ -401,7 +417,10 @@ function PendingRequestsPage() {
                           {STATUS_LABELS[row.status]}
                         </span>
                         {row.error ? (
-                          <p className="mt-1 max-w-[16rem] truncate text-[11px] text-rose-600" title={row.error}>
+                          <p
+                            className="mt-1 max-w-[16rem] truncate text-[11px] text-rose-600"
+                            title={row.error}
+                          >
                             {row.error}
                           </p>
                         ) : null}
@@ -417,7 +436,11 @@ function PendingRequestsPage() {
                             <Button
                               size="sm"
                               disabled={row.is_own_request}
-                              title={row.is_own_request ? "You cannot approve your own request" : undefined}
+                              title={
+                                row.is_own_request
+                                  ? "You cannot approve your own request"
+                                  : undefined
+                              }
                               onClick={() => {
                                 setDecision({ row, mode: "approve" });
                                 setNote("");
@@ -463,7 +486,9 @@ function PendingRequestsPage() {
               pageSize={search.pageSize}
               total={query.data?.total ?? 0}
               onPage={(n) => navigate({ search: (prev: Search) => ({ ...prev, page: n }) })}
-              onPageSize={(n) => navigate({ search: (prev: Search) => ({ ...prev, pageSize: n, page: 1 }) })}
+              onPageSize={(n) =>
+                navigate({ search: (prev: Search) => ({ ...prev, pageSize: n, page: 1 }) })
+              }
             />
           </>
         )}
@@ -532,7 +557,10 @@ function PendingRequestsPage() {
             </p>
             <div className="flex flex-wrap items-end gap-2 rounded-md border border-border/60 p-3">
               <div className="grid flex-1 gap-1.5">
-                <Label htmlFor="bulk-fill" className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                <Label
+                  htmlFor="bulk-fill"
+                  className="text-[10px] uppercase tracking-widest text-muted-foreground"
+                >
                   Optional starting text for every comment
                 </Label>
                 <Input
@@ -550,7 +578,8 @@ function PendingRequestsPage() {
                 onClick={() =>
                   setBulkNotes((prev) => {
                     const next = { ...prev };
-                    for (const row of bulkRows) if (!(next[row.id] ?? "").trim()) next[row.id] = bulkFill;
+                    for (const row of bulkRows)
+                      if (!(next[row.id] ?? "").trim()) next[row.id] = bulkFill;
                     return next;
                   })
                 }
@@ -572,8 +601,14 @@ function PendingRequestsPage() {
                       rows={2}
                       className="mt-2"
                       aria-invalid={tooShort}
-                      placeholder={bulkMode === "reject" ? "Rejection reason for this request" : "Decision comment for this request"}
-                      onChange={(e) => setBulkNotes((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                      placeholder={
+                        bulkMode === "reject"
+                          ? "Rejection reason for this request"
+                          : "Decision comment for this request"
+                      }
+                      onChange={(e) =>
+                        setBulkNotes((prev) => ({ ...prev, [row.id]: e.target.value }))
+                      }
                     />
                     {tooShort ? (
                       <p className="mt-1 text-[11px] font-medium text-rose-600">
@@ -587,8 +622,8 @@ function PendingRequestsPage() {
 
             {skippedRows.length > 0 ? (
               <p className="rounded-md bg-muted/60 p-3 text-[11px] text-muted-foreground">
-                {skippedRows.length} selected request(s) are skipped for this action — they are either
-                your own requests or not in the right state.
+                {skippedRows.length} selected request(s) are skipped for this action — they are
+                either your own requests or not in the right state.
               </p>
             ) : null}
           </div>
@@ -602,7 +637,9 @@ function PendingRequestsPage() {
               onClick={() => bulkMode && bulk.mutate(bulkMode)}
             >
               {bulk.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
-              {invalidCount > 0 ? `${invalidCount} comment(s) missing` : `Confirm ${bulkRows.length}`}
+              {invalidCount > 0
+                ? `${invalidCount} comment(s) missing`
+                : `Confirm ${bulkRows.length}`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -612,7 +649,8 @@ function PendingRequestsPage() {
 }
 
 function friendly(message: string): string {
-  if (message.includes("two_person_rule_violation")) return "You cannot review your own change request.";
+  if (message.includes("two_person_rule_violation"))
+    return "You cannot review your own change request.";
   if (message.includes("not_pending")) return "This request has already been reviewed.";
   if (message.includes("not_appliable")) return "Only approved or failed requests can be applied.";
   if (message.includes("note_required")) return "A note of at least 5 characters is required.";

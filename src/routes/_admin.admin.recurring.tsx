@@ -5,7 +5,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { PauseCircle, PlayCircle, RefreshCw, Trash2 } from "lucide-react";
 import { z } from "zod";
-import { ErrorState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  ErrorState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -100,7 +107,10 @@ function Body() {
   return (
     <>
       <section className="grid gap-6 md:grid-cols-3">
-        <KPIStat label="Active schedules" value={<span className="tabular">{data.active_count}</span>} />
+        <KPIStat
+          label="Active schedules"
+          value={<span className="tabular">{data.active_count}</span>}
+        />
         <KPIStat label="Paused" value={<span className="tabular">{data.paused_count}</span>} />
         <KPIStat
           label="Failed last run"
@@ -117,7 +127,9 @@ function Body() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                navigate({ search: (s: SearchParams) => ({ ...s, q: term || undefined, page: 1 }) });
+                navigate({
+                  search: (s: SearchParams) => ({ ...s, q: term || undefined, page: 1 }),
+                });
               }}
             >
               <Input
@@ -127,8 +139,13 @@ function Body() {
                 className="h-9 w-64"
               />
             </form>
-            <Select value={search.status} onValueChange={(v) => setStatus(v as SearchParams["status"])}>
-              <SelectTrigger className="h-9 w-40"><SelectValue /></SelectTrigger>
+            <Select
+              value={search.status}
+              onValueChange={(v) => setStatus(v as SearchParams["status"])}
+            >
+              <SelectTrigger className="h-9 w-40">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
@@ -166,10 +183,20 @@ function Body() {
             Page {search.page} of {totalPages} · {data.total} total
           </span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" disabled={search.page <= 1} onClick={() => setPage(search.page - 1)}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={search.page <= 1}
+              onClick={() => setPage(search.page - 1)}
+            >
               Previous
             </Button>
-            <Button size="sm" variant="outline" disabled={search.page >= totalPages} onClick={() => setPage(search.page + 1)}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={search.page >= totalPages}
+              onClick={() => setPage(search.page + 1)}
+            >
               Next
             </Button>
           </div>
@@ -212,18 +239,28 @@ function Row({ r }: { r: AdminRecurringRow }) {
     <tr className="align-top">
       <td className="px-6 py-3 text-sm">
         <div className="font-semibold">{r.member_name ?? "Member"}</div>
-        <div className="text-[11px] text-muted-foreground">{r.member_email ?? r.member_no ?? r.user_id.slice(0, 8)}</div>
+        <div className="text-[11px] text-muted-foreground">
+          {r.member_email ?? r.member_no ?? r.user_id.slice(0, 8)}
+        </div>
       </td>
       <td className="px-6 py-3 text-sm text-muted-foreground">{r.account_label}</td>
       <td className="px-6 py-3 text-sm">
         <div>{scheduleLabel(r)}</div>
         <div className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
           <span className={`rounded px-1.5 py-0.5 ${statusBadge}`}>{statusLabel}</span>
-          {r.status === "paused" ? <PauseCircle className="h-3 w-3 text-amber-600" /> : <PlayCircle className="h-3 w-3 text-emerald-mid" />}
+          {r.status === "paused" ? (
+            <PauseCircle className="h-3 w-3 text-amber-600" />
+          ) : (
+            <PlayCircle className="h-3 w-3 text-emerald-mid" />
+          )}
         </div>
       </td>
-      <td className="px-6 py-3 text-right"><Money amount={r.amount} /></td>
-      <td className="px-6 py-3 text-[11px] text-muted-foreground">{new Date(r.next_run_at).toLocaleString()}</td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={r.amount} />
+      </td>
+      <td className="px-6 py-3 text-[11px] text-muted-foreground">
+        {new Date(r.next_run_at).toLocaleString()}
+      </td>
       <td className="px-6 py-3 text-[11px] text-muted-foreground">
         {r.last_run_at ? new Date(r.last_run_at).toLocaleString() : "—"}
         {r.last_run_error ? (
@@ -268,12 +305,18 @@ function CancelDialog({ r }: { r: AdminRecurringRow }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="border-destructive/40 text-destructive hover:bg-destructive/10">
+        <Button
+          size="sm"
+          variant="outline"
+          className="border-destructive/40 text-destructive hover:bg-destructive/10"
+        >
           <Trash2 className="mr-1 h-3.5 w-3.5" /> Cancel
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Cancel recurring schedule</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Cancel recurring schedule</DialogTitle>
+        </DialogHeader>
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -283,13 +326,27 @@ function CancelDialog({ r }: { r: AdminRecurringRow }) {
           }}
         >
           <p className="text-sm text-muted-foreground">
-            This permanently removes the schedule for <span className="font-semibold">{r.member_name ?? "the member"}</span> on{" "}
-            <span className="font-semibold">{r.account_label}</span>. The member can create a new one later.
+            This permanently removes the schedule for{" "}
+            <span className="font-semibold">{r.member_name ?? "the member"}</span> on{" "}
+            <span className="font-semibold">{r.account_label}</span>. The member can create a new
+            one later.
           </p>
-          <Textarea rows={3} placeholder="Reason for cancellation" value={note} onChange={(e) => setNote(e.target.value)} required />
+          <Textarea
+            rows={3}
+            placeholder="Reason for cancellation"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            required
+          />
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Keep schedule</Button>
-            <Button type="submit" disabled={mut.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Keep schedule
+            </Button>
+            <Button
+              type="submit"
+              disabled={mut.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               {mut.isPending ? "Cancelling…" : "Confirm cancellation"}
             </Button>
           </DialogFooter>

@@ -1,13 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Users, Clock, ShieldCheck } from "lucide-react";
-import {
-  EmptyState,
-  ErrorState,
-  KPIStat,
-  PageHeader,
-  SectionCard,
-} from "@/components/primitives";
+import { EmptyState, ErrorState, KPIStat, PageHeader, SectionCard } from "@/components/primitives";
 import { useOnlinePresence } from "@/lib/online-presence";
 import { LiveDot } from "@/components/online-presence-indicators";
 
@@ -110,7 +104,11 @@ function LiveUsersPanel() {
       />
 
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Users online now" value={<span className="tabular">{users.length}</span>} accent />
+        <KPIStat
+          label="Users online now"
+          value={<span className="tabular">{users.length}</span>}
+          accent
+        />
         <KPIStat label="Staff / admins" value={<span className="tabular">{staff}</span>} />
         <KPIStat label="Members" value={<span className="tabular">{Math.max(0, members)}</span>} />
         <KPIStat
@@ -141,11 +139,21 @@ function LiveUsersPanel() {
               <caption className="sr-only">Users currently online</caption>
               <thead>
                 <tr className="border-b border-border text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th scope="col" className="px-4 py-2.5">User</th>
-                  <th scope="col" className="px-4 py-2.5">Role</th>
-                  <th scope="col" className="px-4 py-2.5 text-right">Online since</th>
-                  <th scope="col" className="px-4 py-2.5 text-right">Active for</th>
-                  <th scope="col" className="px-4 py-2.5 text-right">Status</th>
+                  <th scope="col" className="px-4 py-2.5">
+                    User
+                  </th>
+                  <th scope="col" className="px-4 py-2.5">
+                    Role
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Online since
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Active for
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -200,8 +208,8 @@ function LiveUsersPanel() {
       </SectionCard>
 
       <p className="text-xs text-muted-foreground">
-        Presence is session-based and disappears the moment a user closes the app. For historical sign-in
-        activity see the{" "}
+        Presence is session-based and disappears the moment a user closes the app. For historical
+        sign-in activity see the{" "}
         <Link to="/admin/activity" className="font-medium text-primary hover:underline">
           activity timeline
         </Link>

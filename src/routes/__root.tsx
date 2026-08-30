@@ -96,13 +96,39 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "IT-360 CashApp" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "IT-360 CashApp — Enterprise Financial Management Platform" },
-      { property: "og:title", content: "IT-360 CashApp — Enterprise Financial Management Platform" },
-      { name: "twitter:title", content: "IT-360 CashApp — Enterprise Financial Management Platform" },
-      { name: "description", content: "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations." },
-      { property: "og:description", content: "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations." },
-      { name: "twitter:description", content: "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp" },
+      {
+        property: "og:title",
+        content: "IT-360 CashApp — Enterprise Financial Management Platform",
+      },
+      {
+        name: "twitter:title",
+        content: "IT-360 CashApp — Enterprise Financial Management Platform",
+      },
+      {
+        name: "description",
+        content:
+          "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations.",
+      },
+      {
+        property: "og:description",
+        content:
+          "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations.",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/oKYJ4nzjn7abpsUlqLaAW6BjMb12/social-images/social-1783555926945-cyber_1.webp",
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -196,4 +222,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

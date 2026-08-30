@@ -42,7 +42,11 @@ export const Route = createFileRoute("/_admin/admin/finance/summary")({
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Summary failed to load" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Summary failed to load"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -106,17 +110,41 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
           label="Income (period)"
           value={<Money amount={s.income_total} />}
           accent
-          hint={<Link to="/admin/finance/income" search={range} className="text-primary underline-offset-2 hover:underline">Income breakdown ({from} → {to}) →</Link>}
+          hint={
+            <Link
+              to="/admin/finance/income"
+              search={range}
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Income breakdown ({from} → {to}) →
+            </Link>
+          }
         />
         <KPIStat
           label="Expenses (period)"
           value={<Money amount={s.expense_total} />}
-          hint={<Link to="/admin/finance/breakdown" search={range} className="text-primary underline-offset-2 hover:underline">Expenses breakdown ({from} → {to}) →</Link>}
+          hint={
+            <Link
+              to="/admin/finance/breakdown"
+              search={range}
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Expenses breakdown ({from} → {to}) →
+            </Link>
+          }
         />
         <KPIStat
           label="Net (P&L)"
           value={<Money amount={s.net} signed />}
-          hint={<Link to="/admin/reports" search={{ ...range, granularity: "day" }} className="text-primary underline-offset-2 hover:underline">Analytics ({from} → {to}) →</Link>}
+          hint={
+            <Link
+              to="/admin/reports"
+              search={{ ...range, granularity: "day" }}
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Analytics ({from} → {to}) →
+            </Link>
+          }
         />
         <KPIStat
           label="AUM (snapshot)"
@@ -125,7 +153,13 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
             <>
               Outstanding loans: <Money amount={s.balance_snapshot.outstanding_loans} />
               <br />
-              <Link to="/admin/reports" search={{ ...range, granularity: "day" }} className="text-primary underline-offset-2 hover:underline">Full reports →</Link>
+              <Link
+                to="/admin/reports"
+                search={{ ...range, granularity: "day" }}
+                className="text-primary underline-offset-2 hover:underline"
+              >
+                Full reports →
+              </Link>
             </>
           }
         />
@@ -135,17 +169,43 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
         <KPIStat
           label="Pending expenses"
           value={<Money amount={s.balance_snapshot.pending_expenses_amount} />}
-          hint={<Link to="/admin/finance/expenses" className="text-primary underline-offset-2 hover:underline">Expense ledger →</Link>}
+          hint={
+            <Link
+              to="/admin/finance/expenses"
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Expense ledger →
+            </Link>
+          }
         />
         <KPIStat
           label="Pending transfers"
           value={<Money amount={s.balance_snapshot.pending_transfers_amount} />}
-          hint={<Link to="/admin/finance/transfers" className="text-primary underline-offset-2 hover:underline">Transfer ledger →</Link>}
+          hint={
+            <Link
+              to="/admin/finance/transfers"
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Transfer ledger →
+            </Link>
+          }
         />
         <KPIStat
           label="Active loans / accounts"
-          value={<span className="tabular">{s.balance_snapshot.active_loans} / {s.balance_snapshot.active_savings_accounts}</span>}
-          hint={<Link to="/admin/finance/contributions" search={range} className="text-primary underline-offset-2 hover:underline">Contributions ({from} → {to}) →</Link>}
+          value={
+            <span className="tabular">
+              {s.balance_snapshot.active_loans} / {s.balance_snapshot.active_savings_accounts}
+            </span>
+          }
+          hint={
+            <Link
+              to="/admin/finance/contributions"
+              search={range}
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Contributions ({from} → {to}) →
+            </Link>
+          }
         />
       </section>
 
@@ -157,7 +217,12 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
             title="Income vs Expenses"
             series={[
               { key: "income", label: "Income", format: (v) => formatMoney(v) },
-              { key: "expense", label: "Expenses", color: "var(--destructive)", format: (v) => formatMoney(v) },
+              {
+                key: "expense",
+                label: "Expenses",
+                color: "var(--destructive)",
+                format: (v) => formatMoney(v),
+              },
               { key: "net", label: "Net", color: "var(--accent)", format: (v) => formatMoney(v) },
             ]}
             height={260}
@@ -168,14 +233,20 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
       <div className="grid gap-6 md:grid-cols-2">
         <SectionCard title="Income by kind">
           <BarList
-            rows={s.income_by_kind.map((r) => ({ label: r.kind.replace(/_/g, " "), value: r.amount }))}
+            rows={s.income_by_kind.map((r) => ({
+              label: r.kind.replace(/_/g, " "),
+              value: r.amount,
+            }))}
             format={(v) => formatMoney(v)}
             emptyLabel="No income in this window"
           />
         </SectionCard>
         <SectionCard title="Expenses by kind">
           <BarList
-            rows={s.expense_by_kind.map((r) => ({ label: r.kind.replace(/_/g, " "), value: r.amount }))}
+            rows={s.expense_by_kind.map((r) => ({
+              label: r.kind.replace(/_/g, " "),
+              value: r.amount,
+            }))}
             format={(v) => formatMoney(v)}
             emptyLabel="No expenses in this window"
           />
@@ -184,4 +255,3 @@ function SummaryBody({ from, to }: { from: string; to: string }) {
     </div>
   );
 }
-

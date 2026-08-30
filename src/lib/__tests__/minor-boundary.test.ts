@@ -51,9 +51,12 @@ describe("under-18 boundary — timezone independence", () => {
     "2026-08-01T23:59:59Z", // Kiribati (UTC+14) local: 2026-08-02 already
   ];
 
-  it.each(instants)("stays a minor for every timezone-shifted instant before the birthday (%s)", (iso) => {
-    expect(isMinor(dob, new Date(iso))).toBe(true);
-  });
+  it.each(instants)(
+    "stays a minor for every timezone-shifted instant before the birthday (%s)",
+    (iso) => {
+      expect(isMinor(dob, new Date(iso))).toBe(true);
+    },
+  );
 
   it.each(["2026-08-02T00:00:00Z", "2026-08-02T11:00:00Z", "2026-08-02T23:59:59Z"])(
     "is an adult for every instant on the birthday date in UTC (%s)",
@@ -104,7 +107,6 @@ describe("under-18 boundary — leap years", () => {
     expect(isMinor("2012-02-29", new Date("2030-03-01T00:00:00Z"))).toBe(false);
     expect(calculateAge("2012-02-29", new Date("2032-02-29T00:00:00Z"))).toBe(20);
   });
-
 
   it("handles a 29 February evaluation date for a non-leap birth date", () => {
     expect(calculateAge("2006-03-01", new Date("2024-02-29T00:00:00Z"))).toBe(17);

@@ -8,16 +8,7 @@
  * its own business logic.
  */
 import { useState, type ReactNode } from "react";
-import {
-  Check,
-  Download,
-  Eye,
-  Pencil,
-  Printer,
-  Trash2,
-  X,
-  Loader2,
-} from "lucide-react";
+import { Check, Download, Eye, Pencil, Printer, Trash2, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import type { PermAction, PermModule } from "@/lib/permissions";
@@ -54,7 +45,6 @@ export type RecordActionsProps = {
   size?: "sm" | "md";
   className?: string;
 };
-
 
 const ACTION_META: Record<
   RecordActionKey,
@@ -169,7 +159,11 @@ export function RecordActions({
   if (visible.length === 0 && !extra) return null;
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-1", className)} role="group" aria-label={`${label} actions`}>
+    <div
+      className={cn("flex flex-wrap items-center gap-1", className)}
+      role="group"
+      aria-label={`${label} actions`}
+    >
       {visible.map((key) => {
         const meta = ACTION_META[key];
         const handler = handlers[key]!;

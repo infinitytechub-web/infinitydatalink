@@ -16,8 +16,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatMoney } from "@/lib/org-config";
 import {
   decideSettlementRequest,
@@ -37,7 +49,8 @@ export const Route = createFileRoute("/_admin/admin/loan-settlements")({
       { property: "og:title", content: "Early Settlement Approvals" },
       {
         property: "og:description",
-        content: "Finance approval queue for early loan payoff requests, with audit trail and member notifications.",
+        content:
+          "Finance approval queue for early loan payoff requests, with audit trail and member notifications.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -90,11 +103,16 @@ function SettlementsPage() {
 function SettlementsContent() {
   const { data: all } = useSuspenseQuery(requestsQuery);
   const [historyStatus, setHistoryStatus] = useState("approved");
-  const [deciding, setDeciding] = useState<{ row: SettlementRequestRow; approve: boolean } | null>(null);
+  const [deciding, setDeciding] = useState<{ row: SettlementRequestRow; approve: boolean } | null>(
+    null,
+  );
 
   const pending = useMemo(() => all.filter((r) => r.status === "pending"), [all]);
   const history = useMemo(
-    () => all.filter((r) => (historyStatus === "all" ? r.status !== "pending" : r.status === historyStatus)),
+    () =>
+      all.filter((r) =>
+        historyStatus === "all" ? r.status !== "pending" : r.status === historyStatus,
+      ),
     [all, historyStatus],
   );
   const pendingValue = useMemo(() => pending.reduce((s, r) => s + r.quoted_total, 0), [pending]);
@@ -108,7 +126,10 @@ function SettlementsContent() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KPIStat label="Awaiting decision" value={String(pending.length)} />
         <KPIStat label="Value in queue" value={formatMoney(pendingValue)} />
-        <KPIStat label="Approved settlements" value={String(all.filter((r) => r.status === "approved").length)} />
+        <KPIStat
+          label="Approved settlements"
+          value={String(all.filter((r) => r.status === "approved").length)}
+        />
         <KPIStat label="Approved value" value={formatMoney(approvedValue)} />
       </div>
 
@@ -158,7 +179,9 @@ function SettlementsContent() {
                       )}
                     </td>
                     <td className="py-3 pr-4 text-xs">
-                      <div className="text-muted-foreground">{new Date(r.requested_at).toLocaleString()}</div>
+                      <div className="text-muted-foreground">
+                        {new Date(r.requested_at).toLocaleString()}
+                      </div>
                       {r.member_note && <div className="mt-1">“{r.member_note}”</div>}
                     </td>
                     <td className="py-3">
@@ -166,7 +189,11 @@ function SettlementsContent() {
                         <Button size="sm" onClick={() => setDeciding({ row: r, approve: true })}>
                           Approve
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => setDeciding({ row: r, approve: false })}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDeciding({ row: r, approve: false })}
+                        >
                           Reject
                         </Button>
                       </div>
@@ -196,7 +223,10 @@ function SettlementsContent() {
         }
       >
         {history.length === 0 ? (
-          <EmptyState title="No decisions yet" hint="Approved, rejected and cancelled requests appear here." />
+          <EmptyState
+            title="No decisions yet"
+            hint="Approved, rejected and cancelled requests appear here."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -236,7 +266,9 @@ function SettlementsContent() {
                         {r.decided_at ? new Date(r.decided_at).toLocaleString() : ""}
                       </div>
                     </td>
-                    <td className="py-3 pr-4 text-xs text-muted-foreground">{r.decision_note ?? "—"}</td>
+                    <td className="py-3 pr-4 text-xs text-muted-foreground">
+                      {r.decision_note ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -262,7 +294,9 @@ function DecideDialog({
   const decide = useServerFn(decideSettlementRequest);
   const mutation = useMutation({
     mutationFn: () =>
-      decide({ data: { request_id: pending!.row.id, approve: pending!.approve, note: note.trim() } }),
+      decide({
+        data: { request_id: pending!.row.id, approve: pending!.approve, note: note.trim() },
+      }),
     onSuccess: () => {
       toast.success(pending?.approve ? "Settlement approved" : "Settlement rejected", {
         description: "The member has been notified and the decision is in the audit trail.",
@@ -289,7 +323,9 @@ function DecideDialog({
             <div className="rounded-lg border border-border/60 p-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Loan</span>
-                <span className="font-mono text-xs">{pending.row.loan_ref ?? pending.row.loan_id.slice(0, 8)}</span>
+                <span className="font-mono text-xs">
+                  {pending.row.loan_ref ?? pending.row.loan_id.slice(0, 8)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Member</span>
@@ -318,8 +354,8 @@ function DecideDialog({
                 }
               />
               <p className="text-xs text-muted-foreground">
-                At least 10 characters. Stored on the request and in the audit log, and shared with the member on
-                rejection.
+                At least 10 characters. Stored on the request and in the audit log, and shared with
+                the member on rejection.
               </p>
             </div>
           </div>
@@ -329,7 +365,11 @@ function DecideDialog({
             Cancel
           </Button>
           <Button disabled={!valid || mutation.isPending} onClick={() => mutation.mutate()}>
-            {mutation.isPending ? "Saving…" : pending?.approve ? "Approve settlement" : "Reject settlement"}
+            {mutation.isPending
+              ? "Saving…"
+              : pending?.approve
+                ? "Approve settlement"
+                : "Reject settlement"}
           </Button>
         </DialogFooter>
       </DialogContent>

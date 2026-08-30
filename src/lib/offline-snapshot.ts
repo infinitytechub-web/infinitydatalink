@@ -23,7 +23,10 @@ export function readSnapshot<T>(key: string): Snapshot<T> | null {
 export function writeSnapshot<T>(key: string, data: T): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(PREFIX + key, JSON.stringify({ data, saved_at: new Date().toISOString() }));
+    window.localStorage.setItem(
+      PREFIX + key,
+      JSON.stringify({ data, saved_at: new Date().toISOString() }),
+    );
   } catch {
     /* storage full or blocked — offline fallback is best-effort */
   }

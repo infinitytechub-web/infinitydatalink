@@ -56,7 +56,8 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
   const mutation = useMutation({
     mutationFn: async () => {
       if (!file) throw new Error("Choose a file to attach.");
-      if (file.size > MINOR_ATTESTATION_MAX_BYTES) throw new Error("File is larger than the 8 MB limit.");
+      if (file.size > MINOR_ATTESTATION_MAX_BYTES)
+        throw new Error("File is larger than the 8 MB limit.");
       const content_base64 = await readAsBase64(file);
       return upload({
         data: {
@@ -95,9 +96,10 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
     <SectionCard title="Guardian consent & safeguarding attestations">
       <div className="space-y-4 p-6">
         <p className="text-xs text-muted-foreground">
-          Attach the signed guardian consent and the completed safeguarding attestation supporting this
-          minor decision. Files are stored with the member's verification documents and appear in the Super
-          Admin documents register for later audit. PDF, JPEG, PNG or DOCX up to 8&nbsp;MB.
+          Attach the signed guardian consent and the completed safeguarding attestation supporting
+          this minor decision. Files are stored with the member's verification documents and appear
+          in the Super Admin documents register for later audit. PDF, JPEG, PNG or DOCX up to
+          8&nbsp;MB.
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -138,29 +140,29 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
         </label>
 
         <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          disabled={!canSubmit}
-          onClick={() => mutation.mutate()}
-          className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-40"
-        >
-          <Upload className="h-3.5 w-3.5" />
-          {mutation.isPending ? "Uploading…" : "Attach attestation"}
-        </button>
-        <button
-          type="button"
-          disabled={reminders.isPending}
-          onClick={() => reminders.mutate()}
-          className="inline-flex items-center gap-2 rounded border border-emerald-deep/20 px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:border-emerald-mid disabled:opacity-40"
-        >
-          <BellRing className="h-3.5 w-3.5" />
-          {reminders.isPending ? "Sending…" : "Send consent reminders"}
-        </button>
+          <button
+            type="button"
+            disabled={!canSubmit}
+            onClick={() => mutation.mutate()}
+            className="inline-flex items-center gap-2 rounded bg-emerald-deep px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-40"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            {mutation.isPending ? "Uploading…" : "Attach attestation"}
+          </button>
+          <button
+            type="button"
+            disabled={reminders.isPending}
+            onClick={() => reminders.mutate()}
+            className="inline-flex items-center gap-2 rounded border border-emerald-deep/20 px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:border-emerald-mid disabled:opacity-40"
+          >
+            <BellRing className="h-3.5 w-3.5" />
+            {reminders.isPending ? "Sending…" : "Send consent reminders"}
+          </button>
         </div>
         <p className="text-[11px] text-muted-foreground">
-          Reminders also run automatically each night: officers get an in-app + email alert deep-linked to
-          the member review screen, and the guardian gets in-app, email and SMS notices until the consent
-          and safeguarding files are on file.
+          Reminders also run automatically each night: officers get an in-app + email alert
+          deep-linked to the member review screen, and the guardian gets in-app, email and SMS
+          notices until the consent and safeguarding files are on file.
         </p>
 
         <div className="space-y-2">
@@ -176,7 +178,9 @@ export function MinorAttestationUploads({ memberId }: { memberId: string }) {
               {rows.map((r) => (
                 <li key={r.id} className="flex flex-wrap items-center gap-3 p-3 text-xs">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-bold uppercase tracking-widest text-muted-foreground">{r.label}</span>
+                  <span className="font-bold uppercase tracking-widest text-muted-foreground">
+                    {r.label}
+                  </span>
                   <span className="text-muted-foreground">{r.filename}</span>
                   <span className="text-muted-foreground">{prettyBytes(r.size_bytes)}</span>
                   <span className="text-muted-foreground">

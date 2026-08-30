@@ -8,7 +8,13 @@ import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primi
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/org-config";
-import { getReport, type AdminReport, type ReportBucket, type LoanStatusMix, type TopProduct } from "@/lib/admin-analytics.functions";
+import {
+  getReport,
+  type AdminReport,
+  type ReportBucket,
+  type LoanStatusMix,
+  type TopProduct,
+} from "@/lib/admin-analytics.functions";
 import { useAuth, type Permission } from "@/lib/auth";
 import { Lock } from "lucide-react";
 
@@ -153,10 +159,34 @@ function ReportsBody() {
       </SectionCard>
 
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="New members" value={<span className="tabular">{data.totals.new_members.toLocaleString()}</span>} />
-        <KPIStat label="Contributions" value={<>GH₵ <span className="tabular">{formatMoneyShort(data.totals.contributions)}</span></>} />
-        <KPIStat label="Disbursements" value={<>GH₵ <span className="tabular">{formatMoneyShort(data.totals.disbursements)}</span></>} />
-        <KPIStat label="Repayments" value={<>GH₵ <span className="tabular">{formatMoneyShort(data.totals.repayments)}</span></>} />
+        <KPIStat
+          label="New members"
+          value={<span className="tabular">{data.totals.new_members.toLocaleString()}</span>}
+        />
+        <KPIStat
+          label="Contributions"
+          value={
+            <>
+              GH₵ <span className="tabular">{formatMoneyShort(data.totals.contributions)}</span>
+            </>
+          }
+        />
+        <KPIStat
+          label="Disbursements"
+          value={
+            <>
+              GH₵ <span className="tabular">{formatMoneyShort(data.totals.disbursements)}</span>
+            </>
+          }
+        />
+        <KPIStat
+          label="Repayments"
+          value={
+            <>
+              GH₵ <span className="tabular">{formatMoneyShort(data.totals.repayments)}</span>
+            </>
+          }
+        />
       </section>
 
       <SectionCard
@@ -170,8 +200,16 @@ function ReportsBody() {
             columns={[
               { header: "Bucket", accessor: (r: ReportBucket) => r.bucket },
               { header: "New members", accessor: (r) => r.new_members, align: "right" },
-              { header: "Contributions", accessor: (r) => formatMoney(r.contributions), align: "right" },
-              { header: "Disbursements", accessor: (r) => formatMoney(r.disbursements), align: "right" },
+              {
+                header: "Contributions",
+                accessor: (r) => formatMoney(r.contributions),
+                align: "right",
+              },
+              {
+                header: "Disbursements",
+                accessor: (r) => formatMoney(r.disbursements),
+                align: "right",
+              },
               { header: "Repayments", accessor: (r) => formatMoney(r.repayments), align: "right" },
             ]}
             rows={data.series}
@@ -180,7 +218,10 @@ function ReportsBody() {
       >
         {isEmpty ? (
           <div className="p-6">
-            <EmptyState title="No activity in this range" hint="Widen the date range or seed activity." />
+            <EmptyState
+              title="No activity in this range"
+              hint="Widen the date range or seed activity."
+            />
           </div>
         ) : (
           <div className="p-4">
@@ -226,7 +267,9 @@ function StatusMix({ data, s }: { data: AdminReport; s: SearchInput }) {
       }
     >
       {data.loan_status_mix.length === 0 ? (
-        <div className="p-6"><EmptyState title="No loan activity in range" /></div>
+        <div className="p-6">
+          <EmptyState title="No loan activity in range" />
+        </div>
       ) : (
         <BarList
           rows={data.loan_status_mix.map((row) => ({ label: row.status, value: row.count }))}
@@ -256,7 +299,9 @@ function TopProducts({ data, s }: { data: AdminReport; s: SearchInput }) {
       }
     >
       {data.top_products.length === 0 ? (
-        <div className="p-6"><EmptyState title="No loan activity in range" /></div>
+        <div className="p-6">
+          <EmptyState title="No loan activity in range" />
+        </div>
       ) : (
         <table className="w-full">
           <thead>

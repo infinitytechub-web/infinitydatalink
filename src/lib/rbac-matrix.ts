@@ -58,7 +58,10 @@ export function capability(module: DecisionModule, outcome: DecisionOutcome): Ca
   return `${module}.${outcome}` as Capability;
 }
 
-export function rolesForDecision(module: DecisionModule, outcome: DecisionOutcome): readonly Role[] {
+export function rolesForDecision(
+  module: DecisionModule,
+  outcome: DecisionOutcome,
+): readonly Role[] {
   return [SUPER, ...(DECISION_PERMISSIONS[capability(module, outcome)] ?? [])];
 }
 

@@ -68,7 +68,9 @@ export const Route = createFileRoute("/_member/app/reports")({
     ],
   }),
   errorComponent: ({ error }) => <ErrorState title="Reports unavailable" message={error.message} />,
-  notFoundComponent: () => <EmptyState title="Nothing here" hint="This statement does not exist." />,
+  notFoundComponent: () => (
+    <EmptyState title="Nothing here" hint="This statement does not exist." />
+  ),
   component: MemberReportsPage,
 });
 
@@ -92,12 +94,13 @@ function MemberReportsPage() {
 
   const openRecord = (dataset: MemberReportDataset, id: string) =>
     void navigate({ search: (prev) => ({ ...prev, record: `${dataset}:${id}` }) });
-  const closeRecord = () =>
-    void navigate({ search: (prev) => ({ ...prev, record: undefined }) });
+  const closeRecord = () => void navigate({ search: (prev) => ({ ...prev, record: undefined }) });
 
   const [recordDataset, recordId] = (s.record ?? "").split(":");
   const validRecord =
-    recordDataset && recordId && (MEMBER_REPORT_DATASETS as readonly string[]).includes(recordDataset);
+    recordDataset &&
+    recordId &&
+    (MEMBER_REPORT_DATASETS as readonly string[]).includes(recordDataset);
 
   return (
     <div className="space-y-6">
@@ -153,13 +156,17 @@ function MemberReportsPage() {
                 );
               })}
             </div>
-            <p className="px-4 pb-4 text-xs text-muted-foreground">{MEMBER_DATASET_HINTS[s.dataset]}</p>
+            <p className="px-4 pb-4 text-xs text-muted-foreground">
+              {MEMBER_DATASET_HINTS[s.dataset]}
+            </p>
           </SectionCard>
           <Filters s={s} setSearch={setSearch} showStatus />
           <ReportView
             s={s}
             onPage={(n) => void navigate({ search: (prev) => ({ ...prev, page: n }) })}
-            onPageSize={(n) => void navigate({ search: (prev) => ({ ...prev, page: 1, page_size: n }) })}
+            onPageSize={(n) =>
+              void navigate({ search: (prev) => ({ ...prev, page: 1, page_size: n }) })
+            }
             onOpenRecord={openRecord}
           />
           <StatementSchedulePanel dataset={s.dataset} />
@@ -349,7 +356,10 @@ function ReportView({
                   {result.rows.map((row, i) => {
                     const recordId = row["record_id"] ? String(row["record_id"]) : null;
                     return (
-                      <tr key={i} className="border-b border-emerald-deep/5 last:border-0 hover:bg-cream/30">
+                      <tr
+                        key={i}
+                        className="border-b border-emerald-deep/5 last:border-0 hover:bg-cream/30"
+                      >
                         {result.columns.map((c, ci) => {
                           const raw = row[c.key];
                           const text = c.money ? formatMoney(Number(raw ?? 0)) : String(raw ?? "—");
@@ -357,7 +367,11 @@ function ReportView({
                           return (
                             <td
                               key={c.key}
-                              className={c.align === "right" ? "px-4 py-2.5 text-right tabular" : "px-4 py-2.5"}
+                              className={
+                                c.align === "right"
+                                  ? "px-4 py-2.5 text-right tabular"
+                                  : "px-4 py-2.5"
+                              }
                             >
                               {drill ? (
                                 <button
@@ -440,7 +454,11 @@ function ReconciliationView({
           <KPIStat
             label="Balance drift"
             value={formatMoney(data.net_drift)}
-            hint={data.issues.length === 0 ? "Everything reconciles" : `${data.issues.length} mismatch(es)`}
+            hint={
+              data.issues.length === 0
+                ? "Everything reconciles"
+                : `${data.issues.length} mismatch(es)`
+            }
             accent={Math.abs(data.net_drift) > 0.01}
           />
         </div>
@@ -484,7 +502,10 @@ function ReconciliationView({
               </thead>
               <tbody>
                 {data.issues.map((r) => (
-                  <tr key={r.key} className="border-b border-emerald-deep/5 last:border-0 hover:bg-cream/30">
+                  <tr
+                    key={r.key}
+                    className="border-b border-emerald-deep/5 last:border-0 hover:bg-cream/30"
+                  >
                     <td className="px-4 py-2.5">
                       <span className="rounded-full bg-destructive/10 px-2 py-1 text-[11px] font-semibold text-destructive">
                         {RECON_ISSUE_LABELS[r.issue]}

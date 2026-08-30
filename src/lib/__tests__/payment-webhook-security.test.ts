@@ -71,13 +71,15 @@ async function post(args: {
   const ts = args.timestamp ?? null;
   let signature: string | null = null;
   if (args.signAs === "none") signature = null;
-  else if (args.signAs === "payload") signature = signWebhookPayload(secret, args.rawBody, "sha256", String(ts));
+  else if (args.signAs === "payload")
+    signature = signWebhookPayload(secret, args.rawBody, "sha256", String(ts));
   else if (args.signAs === "stripe")
     signature = `t=${ts},v1=${signWebhookPayload(secret, args.rawBody, "sha256", String(ts))}`;
   else signature = signWebhookBody(secret, args.rawBody, "sha256");
 
   const headers: Record<string, string> = {};
-  if (ts && args.signAs !== "stripe") headers[args.headerName ?? "x-webhook-timestamp"] = String(ts);
+  if (ts && args.signAs !== "stripe")
+    headers[args.headerName ?? "x-webhook-timestamp"] = String(ts);
   return processPaymentWebhook({
     providerCode: args.providerCode ?? "hubtel",
     rawBody: args.rawBody,
@@ -94,7 +96,9 @@ beforeEach(() => {
 describe("signature verification", () => {
   it("accepts a correctly signed raw body", async () => {
     const intent = await makeIntent();
-    const res = await post({ rawBody: bodyFor({ data: { reference: intent.reference, status: "success" } }) });
+    const res = await post({
+      rawBody: bodyFor({ data: { reference: intent.reference, status: "success" } }),
+    });
     expect(res.status).toBe(200);
     expect(res.body["applied"]).toBe("succeeded");
   });
@@ -156,13 +160,15 @@ describe("signature verification", () => {
 
     db.rows("payment_providers").find((p) => p["code"] === "hubtel")!["enabled"] = false;
     expect(
-      (await processPaymentWebhook({ providerCode: "hubtel", rawBody: "{}", signature: "x" })).status,
+      (await processPaymentWebhook({ providerCode: "hubtel", rawBody: "{}", signature: "x" }))
+        .status,
     ).toBe(409);
 
     db.rows("payment_providers").find((p) => p["code"] === "hubtel")!["enabled"] = true;
     delete process.env["HUBTEL_WEBHOOK_SECRET"];
     expect(
-      (await processPaymentWebhook({ providerCode: "hubtel", rawBody: "{}", signature: "x" })).status,
+      (await processPaymentWebhook({ providerCode: "hubtel", rawBody: "{}", signature: "x" }))
+        .status,
     ).toBe(503);
     process.env["HUBTEL_WEBHOOK_SECRET"] = HOOK_SECRET;
   });
@@ -179,11 +185,19 @@ describe("replay protection", () => {
     const intent = await makeIntent();
     const raw = bodyFor({ data: { reference: intent.reference, status: "success" } });
 
-    const stale = await post({ rawBody: raw, timestamp: String(Date.now() - 10 * 60_000), signAs: "payload" });
+    const stale = await post({
+      rawBody: raw,
+      timestamp: String(Date.now() - 10 * 60_000),
+      signAs: "payload",
+    });
     expect(stale.status).toBe(401);
     expect(stale.body["error"]).toBe("timestamp_too_old");
 
-    const future = await post({ rawBody: raw, timestamp: String(Date.now() + 10 * 60_000), signAs: "payload" });
+    const future = await post({
+      rawBody: raw,
+      timestamp: String(Date.now() + 10 * 60_000),
+      signAs: "payload",
+    });
     expect(future.status).toBe(401);
     expect(future.body["error"]).toBe("timestamp_in_future");
 
@@ -218,7 +232,10 @@ describe("replay protection", () => {
 
   it("acknowledges a replayed event id exactly once", async () => {
     const intent = await makeIntent();
-    const raw = bodyFor({ id: "evt-fixed", data: { reference: intent.reference, status: "success" } });
+    const raw = bodyFor({
+      id: "evt-fixed",
+      data: { reference: intent.reference, status: "success" },
+    });
     const first = await post({ rawBody: raw });
     expect(first.body["applied"]).toBe("succeeded");
 
@@ -266,7 +283,9 @@ describe("state-machine and echo guards", () => {
     const { cancelIntent, getIntentByReference } = await import("@/lib/payments.server");
     const intent = await makeIntent();
     await cancelIntent({ reference: intent.reference, actorId: ACTOR, reason: "Payer aborted" });
-    const res = await post({ rawBody: bodyFor({ data: { reference: intent.reference, status: "success" } }) });
+    const res = await post({
+      rawBody: bodyFor({ data: { reference: intent.reference, status: "success" } }),
+    });
     expect(res.status).toBe(202);
     expect(String(res.body["note"])).toContain("transition_not_allowed");
     expect((await getIntentByReference(intent.reference))!.status).toBe("cancelled");
@@ -276,7 +295,9 @@ describe("state-machine and echo guards", () => {
     const { getIntentByReference } = await import("@/lib/payments.server");
     const intent = await makeIntent();
     await post({ rawBody: bodyFor({ data: { reference: intent.reference, status: "success" } }) });
-    const res = await post({ rawBody: bodyFor({ data: { reference: intent.reference, status: "chargeback" } }) });
+    const res = await post({
+      rawBody: bodyFor({ data: { reference: intent.reference, status: "chargeback" } }),
+    });
     expect(res.body["applied"]).toBe("reversed");
     expect((await getIntentByReference(intent.reference))!.status).toBe("reversed");
   });
@@ -326,14 +347,18 @@ describe("state-machine and echo guards", () => {
   });
 
   it("journals an unknown reference without failing the delivery", async () => {
-    const res = await post({ rawBody: bodyFor({ data: { reference: "IW-00000000-NOPE", status: "success" } }) });
+    const res = await post({
+      rawBody: bodyFor({ data: { reference: "IW-00000000-NOPE", status: "success" } }),
+    });
     expect(res.status).toBe(202);
     expect(res.body["note"]).toBe("unknown_reference");
     expect(db.rows("payment_webhook_events")[0]!["error"]).toBe("unknown_reference");
   });
 
   it("flags a payload with no reference at all", async () => {
-    const res = await post({ rawBody: JSON.stringify({ id: "evt-noref", event: "charge.success" }) });
+    const res = await post({
+      rawBody: JSON.stringify({ id: "evt-noref", event: "charge.success" }),
+    });
     expect(res.status).toBe(202);
     expect(res.body["note"]).toBe("no_reference_in_payload");
   });

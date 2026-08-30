@@ -28,7 +28,6 @@ import type { VaultEntry } from "@/lib/kyc-vault.shared";
 import { VaultRetentionPanel } from "@/components/vault-retention-panel";
 import { VaultEntryDetailsDialog } from "@/components/vault-entry-details";
 
-
 export const Route = createFileRoute("/_admin/admin/vault")({
   head: () => ({
     meta: [
@@ -50,7 +49,9 @@ function VaultPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
-  const [action, setAction] = useState<{ kind: "restore" | "purge"; entry: VaultEntry } | null>(null);
+  const [action, setAction] = useState<{ kind: "restore" | "purge"; entry: VaultEntry } | null>(
+    null,
+  );
   const [reason, setReason] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -65,7 +66,6 @@ function VaultPage() {
   const purgeFn = useServerFn(purgeKycVaultEntry);
   const bulkRestoreFn = useServerFn(bulkRestoreKycVault);
   const bulkPurgeFn = useServerFn(bulkPurgeKycVault);
-
 
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["kyc-vault", q, page],
@@ -132,8 +132,6 @@ function VaultPage() {
     onError: (e: any) => toast.error(e?.message ?? "Bulk delete failed"),
   });
 
-
-
   const entries = data?.entries ?? [];
   const total = data?.total ?? 0;
   const allChecked = entries.length > 0 && entries.every((e) => selected.has(e.id));
@@ -154,8 +152,6 @@ function VaultPage() {
       />
 
       <VaultRetentionPanel />
-
-
 
       <SectionCard
         title="Archived KYC reviews"
@@ -234,7 +230,9 @@ function VaultPage() {
                       aria-label="Select all vault entries"
                       checked={allChecked}
                       onChange={(e) =>
-                        setSelected(e.target.checked ? new Set(entries.map((x) => x.id)) : new Set())
+                        setSelected(
+                          e.target.checked ? new Set(entries.map((x) => x.id)) : new Set(),
+                        )
                       }
                     />
                   </th>
@@ -363,12 +361,14 @@ function VaultPage() {
       <Dialog open={bulkOpen} onOpenChange={(o) => !o && setBulkOpen(false)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Restore {selected.size} KYC record{selected.size === 1 ? "" : "s"}</DialogTitle>
+            <DialogTitle>
+              Restore {selected.size} KYC record{selected.size === 1 ? "" : "s"}
+            </DialogTitle>
             <DialogDescription>
-              Each record is validated before anything is written: entries whose archived status is not
-              a valid verification state, whose member no longer exists, or whose member has submitted
-              again since deletion are skipped and reported instead of overwriting newer data. Every
-              member gets their own audit entry and notification.
+              Each record is validated before anything is written: entries whose archived status is
+              not a valid verification state, whose member no longer exists, or whose member has
+              submitted again since deletion are skipped and reported instead of overwriting newer
+              data. Every member gets their own audit entry and notification.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
@@ -463,8 +463,6 @@ function VaultPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-
 
       <Dialog open={!!action} onOpenChange={(o) => !o && setAction(null)}>
         <DialogContent>

@@ -46,7 +46,8 @@ export function StatementSchedulePanel({ dataset }: { dataset: MemberReportDatas
     staleTime: 15_000,
   });
 
-  const invalidate = () => void qc.invalidateQueries({ queryKey: ["member", "statement-schedules"] });
+  const invalidate = () =>
+    void qc.invalidateQueries({ queryKey: ["member", "statement-schedules"] });
 
   const saveMutation = useMutation({
     mutationFn: () => save({ data: { ...form, active: true } }),
@@ -78,7 +79,9 @@ export function StatementSchedulePanel({ dataset }: { dataset: MemberReportDatas
           Statement
           <select
             value={form.dataset}
-            onChange={(e) => setForm((f) => ({ ...f, dataset: e.target.value as MemberReportDataset }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, dataset: e.target.value as MemberReportDataset }))
+            }
             className="mt-1 w-full rounded border border-emerald-deep/15 bg-card px-2 py-1.5 text-sm text-foreground"
           >
             {MEMBER_REPORT_DATASETS.map((d) => (
@@ -92,7 +95,9 @@ export function StatementSchedulePanel({ dataset }: { dataset: MemberReportDatas
           Frequency
           <select
             value={form.frequency}
-            onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value as StatementFrequency }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, frequency: e.target.value as StatementFrequency }))
+            }
             className="mt-1 w-full rounded border border-emerald-deep/15 bg-card px-2 py-1.5 text-sm text-foreground"
           >
             {STATEMENT_FREQUENCIES.map((f) => (
@@ -131,15 +136,18 @@ export function StatementSchedulePanel({ dataset }: { dataset: MemberReportDatas
           </Button>
         </div>
         <p className="text-xs text-muted-foreground sm:col-span-2 lg:col-span-4">
-          Delivery follows your notification preferences — if email or SMS is switched off there, that
-          channel is skipped and the run is marked accordingly.
+          Delivery follows your notification preferences — if email or SMS is switched off there,
+          that channel is skipped and the run is marked accordingly.
         </p>
       </div>
 
       {query.isPending ? (
         <Skeleton className="m-4 h-24" />
       ) : schedules.length === 0 ? (
-        <EmptyState title="No schedules yet" hint="Pick a statement and frequency above to start automatic delivery." />
+        <EmptyState
+          title="No schedules yet"
+          hint="Pick a statement and frequency above to start automatic delivery."
+        />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -159,7 +167,8 @@ export function StatementSchedulePanel({ dataset }: { dataset: MemberReportDatas
                   <td className="px-4 py-2.5">{MEMBER_DATASET_LABELS[s.dataset]}</td>
                   <td className="px-4 py-2.5">{FREQUENCY_LABELS[s.frequency]}</td>
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">
-                    {[s.email ? "Email" : null, s.sms ? "SMS" : null].filter(Boolean).join(" · ") || "In-app only"}
+                    {[s.email ? "Email" : null, s.sms ? "SMS" : null].filter(Boolean).join(" · ") ||
+                      "In-app only"}
                   </td>
                   <td className="px-4 py-2.5 text-xs">
                     {s.active ? new Date(s.next_run_at).toLocaleString() : "Paused"}

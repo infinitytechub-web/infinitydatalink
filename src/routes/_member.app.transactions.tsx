@@ -3,7 +3,14 @@ import { Suspense, useState } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { EmptyState, Money, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
+import {
+  EmptyState,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Pagination, SortHeader, type SortState } from "@/components/table-controls";
 import { formatMoney } from "@/lib/org-config";
@@ -51,7 +58,8 @@ function TxContent() {
     ((r.note ?? "") + r.ref + (r.channel ?? "") + r.kind).toLowerCase().includes(q.toLowerCase()),
   );
   const sort: SortState = { sortBy: s.sortBy, sortDir: s.sortDir };
-  const setSort = (next: SortState) => navigate({ search: (p: any) => ({ ...p, ...next, page: 1 }) });
+  const setSort = (next: SortState) =>
+    navigate({ search: (p: any) => ({ ...p, ...next, page: 1 }) });
 
   return (
     <SectionCard
@@ -83,7 +91,12 @@ function TxContent() {
       }
     >
       {data.total === 0 ? (
-        <div className="p-6"><EmptyState title="No transactions yet" hint="Deposits, repayments and transfers will appear here." /></div>
+        <div className="p-6">
+          <EmptyState
+            title="No transactions yet"
+            hint="Deposits, repayments and transfers will appear here."
+          />
+        </div>
       ) : (
         <>
           <table className="w-full">
@@ -93,8 +106,20 @@ function TxContent() {
                 <th className="px-6 py-3 font-medium">Description</th>
                 <th className="px-6 py-3 font-medium">Channel</th>
                 <SortHeader label="Date" field="created_at" sort={sort} onSort={setSort} />
-                <SortHeader label="Amount" field="amount" sort={sort} onSort={setSort} align="right" />
-                <SortHeader label="Status" field="status" sort={sort} onSort={setSort} align="right" />
+                <SortHeader
+                  label="Amount"
+                  field="amount"
+                  sort={sort}
+                  onSort={setSort}
+                  align="right"
+                />
+                <SortHeader
+                  label="Status"
+                  field="status"
+                  sort={sort}
+                  onSort={setSort}
+                  align="right"
+                />
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-deep/5">
@@ -103,11 +128,17 @@ function TxContent() {
                   <td className="tabular px-6 py-4 text-sm font-semibold">{r.ref}</td>
                   <td className="px-6 py-4 text-sm">{r.note ?? r.kind}</td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{r.channel ?? "—"}</td>
-                  <td className="tabular px-6 py-4 text-sm">{new Date(r.created_at).toLocaleDateString()}</td>
-                  <td className={`px-6 py-4 text-right font-bold ${r.amount < 0 ? "text-destructive" : "text-emerald-mid"}`}>
+                  <td className="tabular px-6 py-4 text-sm">
+                    {new Date(r.created_at).toLocaleDateString()}
+                  </td>
+                  <td
+                    className={`px-6 py-4 text-right font-bold ${r.amount < 0 ? "text-destructive" : "text-emerald-mid"}`}
+                  >
                     <Money amount={r.amount} signed />
                   </td>
-                  <td className="px-6 py-4 text-right"><StatusPill status={r.status} /></td>
+                  <td className="px-6 py-4 text-right">
+                    <StatusPill status={r.status} />
+                  </td>
                 </tr>
               ))}
             </tbody>

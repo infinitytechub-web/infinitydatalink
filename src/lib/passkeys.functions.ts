@@ -179,33 +179,30 @@ export const deleteMyPasskey = createServerFn({ method: "POST" })
 
 // --- authentication (sign-in) ---------------------------------------------
 
-export const beginPasskeyAuthentication = createServerFn({ method: "POST" })
-  .handler(async () => {
-    const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { rpID } = deriveOrigin();
+export const beginPasskeyAuthentication = createServerFn({ method: "POST" }).handler(async () => {
+  const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { rpID } = deriveOrigin();
 
-    // Usernameless / discoverable-credential flow — the authenticator picks
-    // the account and returns a userHandle we resolve in the finish step.
-    const options = await generateAuthenticationOptions({
-      rpID,
-      userVerification: "required",
-      allowCredentials: [],
-    });
-
-    await supabaseAdmin.from("passkey_challenges").insert({
-      user_id: null,
-      challenge: options.challenge,
-      kind: "authentication",
-    });
-
-    return options;
+  // Usernameless / discoverable-credential flow — the authenticator picks
+  // the account and returns a userHandle we resolve in the finish step.
+  const options = await generateAuthenticationOptions({
+    rpID,
+    userVerification: "required",
+    allowCredentials: [],
   });
 
+  await supabaseAdmin.from("passkey_challenges").insert({
+    user_id: null,
+    challenge: options.challenge,
+    kind: "authentication",
+  });
+
+  return options;
+});
+
 export const finishPasskeyAuthentication = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    z.object({ response: z.any() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ response: z.any() }).parse(input))
   .handler(async ({ data }) => {
     const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -265,8 +262,9 @@ export const finishPasskeyAuthentication = createServerFn({ method: "POST" })
     await supabaseAdmin.from("passkey_challenges").delete().eq("id", challengeRow.id);
 
     // Resolve email for this user + mint a magic-link token the client can exchange for a session
-    const { data: userInfo, error: userErr } =
-      await supabaseAdmin.auth.admin.getUserById(cred.user_id as string);
+    const { data: userInfo, error: userErr } = await supabaseAdmin.auth.admin.getUserById(
+      cred.user_id as string,
+    );
     if (userErr || !userInfo?.user?.email) throw new Error("Unable to resolve account email");
     const email = userInfo.user.email;
 

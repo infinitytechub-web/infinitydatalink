@@ -37,4 +37,3 @@ export async function writeAudit(entry: AuditEntry | AuditEntry[]): Promise<void
     console.error("audit alert dispatch failed", (err as Error)?.message);
   }
 }
-

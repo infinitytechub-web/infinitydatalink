@@ -59,8 +59,8 @@ function RequestChangePage() {
     return (
       <SectionCard title="Request a change">
         <p className="p-6 text-sm text-muted-foreground">
-          You have read-only access to change approvals. Ask an administrator for the “Change approvals → Create”
-          permission to raise requests.
+          You have read-only access to change approvals. Ask an administrator for the “Change
+          approvals → Create” permission to raise requests.
         </p>
       </SectionCard>
     );
@@ -141,20 +141,21 @@ function RequestChangePage() {
       <SectionCard title="How review works" accent="none">
         <ol className="space-y-3 p-5 text-xs text-muted-foreground">
           <li>
-            <span className="font-semibold text-foreground">1. Request.</span> You stage the change with a summary
-            and payload. It is recorded in the audit history immediately.
+            <span className="font-semibold text-foreground">1. Request.</span> You stage the change
+            with a summary and payload. It is recorded in the audit history immediately.
           </li>
           <li>
-            <span className="font-semibold text-foreground">2. Review.</span> A different reviewer with approve
-            rights opens it under “Pending review”.
+            <span className="font-semibold text-foreground">2. Review.</span> A different reviewer
+            with approve rights opens it under “Pending review”.
           </li>
           <li>
-            <span className="font-semibold text-foreground">3. Decision.</span> Approve or reject with a mandatory
-            comment. Approval applies the change in one transaction.
+            <span className="font-semibold text-foreground">3. Decision.</span> Approve or reject
+            with a mandatory comment. Approval applies the change in one transaction.
           </li>
           <li>
-            <span className="font-semibold text-foreground">4. Apply / retry.</span> If applying fails, the request
-            is marked failed with the error and can be retried from its detail screen.
+            <span className="font-semibold text-foreground">4. Apply / retry.</span> If applying
+            fails, the request is marked failed with the error and can be retried from its detail
+            screen.
           </li>
         </ol>
       </SectionCard>

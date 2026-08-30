@@ -5,12 +5,14 @@ import { useOnlinePresence } from "@/lib/online-presence";
 import { LiveDot } from "@/components/online-presence-indicators";
 
 function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]!.toUpperCase())
-    .join("") || "?";
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0]!.toUpperCase())
+      .join("") || "?"
+  );
 }
 
 /** Live roster of everyone currently using the app (shared presence channel). */
@@ -35,7 +37,11 @@ export function OnlineUsersWidget({ className }: { className?: string }) {
       }
     >
       {users.length === 0 ? (
-        <EmptyState title="Connecting…" hint="Active sessions appear here in real time." icon={<Users className="h-5 w-5" />} />
+        <EmptyState
+          title="Connecting…"
+          hint="Active sessions appear here in real time."
+          icon={<Users className="h-5 w-5" />}
+        />
       ) : (
         <ul className="divide-y divide-border">
           {users.map((u) => (
@@ -49,16 +55,24 @@ export function OnlineUsersWidget({ className }: { className?: string }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">
                   {u.name}
-                  {u.token === meId ? <span className="ml-1 text-xs text-muted-foreground">(you)</span> : null}
+                  {u.token === meId ? (
+                    <span className="ml-1 text-xs text-muted-foreground">(you)</span>
+                  ) : null}
                 </p>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {u.role} · since {new Date(u.online_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {u.role} · since{" "}
+                  {new Date(u.online_at).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </p>
               </div>
               <span
                 className={cn(
                   "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
-                  u.role === "Staff" ? "bg-gold/15 text-brand-gold-ink dark:text-brand-gold" : "bg-muted text-muted-foreground",
+                  u.role === "Staff"
+                    ? "bg-gold/15 text-brand-gold-ink dark:text-brand-gold"
+                    : "bg-muted text-muted-foreground",
                 )}
               >
                 {u.role}

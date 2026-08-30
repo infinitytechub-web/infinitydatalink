@@ -88,7 +88,12 @@ export type MemberInvestmentSummary = {
   holdings: ShareHolding[];
   recent: ShareTxn[];
   products: ShareProduct[];
-  savings_accounts: Array<{ id: string; nickname: string | null; balance: number; plan_name: string }>;
+  savings_accounts: Array<{
+    id: string;
+    nickname: string | null;
+    balance: number;
+    plan_name: string;
+  }>;
   totals: { units: number; cost_basis: number; market_value: number; dividends: number };
 };
 
@@ -115,7 +120,9 @@ export const getMyInvestments = createServerFn({ method: "GET" })
         .order("updated_at", { ascending: false }),
       supabase
         .from("share_transactions")
-        .select("id, ref, kind, units, unit_price, amount, product_id, note, created_at, share_products(name)")
+        .select(
+          "id, ref, kind, units, unit_price, amount, product_id, note, created_at, share_products(name)",
+        )
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(25),
@@ -363,8 +370,6 @@ export const getMyHoldingBreakdown = createServerFn({ method: "GET" })
     };
   });
 
-
-
 // ============================================================================
 // Member: purchase / sell
 // ============================================================================
@@ -496,7 +501,6 @@ export const transferShares = createServerFn({ method: "POST" })
     };
   });
 
-
 // ============================================================================
 // Admin: products, holdings, dividend runs
 // ============================================================================
@@ -546,28 +550,31 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
     const roles = await assertStaff(context.supabase, context.userId);
     const { supabase } = context;
 
-    const [{ data: products, error: pErr }, { data: runs, error: rErr }, { data: holdings, error: hErr }] =
-      await Promise.all([
-        supabase
-          .from("share_products")
-          .select(
-            "id, code, name, description, unit_price, currency, dividend_rate_annual, min_units, max_units_per_member, total_units_issued, is_active, created_at",
-          )
-          .order("code", { ascending: true }),
-        supabase
-          .from("dividend_runs")
-          .select(
-            "id, ref, product_id, period_start, period_end, per_unit_amount, units_paid, members_paid, total_paid, status, note, executed_at, created_at, created_by, submitted_by, submitted_at, approved_by, approved_at, approval_note, rejected_by, rejected_at, rejection_reason, share_products(name)",
-          )
-          .order("created_at", { ascending: false })
-          .limit(50),
-        supabase
-          .from("share_holdings")
-          .select(
-            "user_id, units, cost_basis, total_dividends, share_products(unit_price), profiles(full_name, member_no)",
-          )
-          .gt("units", 0),
-      ]);
+    const [
+      { data: products, error: pErr },
+      { data: runs, error: rErr },
+      { data: holdings, error: hErr },
+    ] = await Promise.all([
+      supabase
+        .from("share_products")
+        .select(
+          "id, code, name, description, unit_price, currency, dividend_rate_annual, min_units, max_units_per_member, total_units_issued, is_active, created_at",
+        )
+        .order("code", { ascending: true }),
+      supabase
+        .from("dividend_runs")
+        .select(
+          "id, ref, product_id, period_start, period_end, per_unit_amount, units_paid, members_paid, total_paid, status, note, executed_at, created_at, created_by, submitted_by, submitted_at, approved_by, approved_at, approval_note, rejected_by, rejected_at, rejection_reason, share_products(name)",
+        )
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("share_holdings")
+        .select(
+          "user_id, units, cost_basis, total_dividends, share_products(unit_price), profiles(full_name, member_no)",
+        )
+        .gt("units", 0),
+    ]);
     if (pErr) throw new Error(pErr.message);
     if (rErr) throw new Error(rErr.message);
     if (hErr) throw new Error(hErr.message);
@@ -593,7 +600,10 @@ export const getAdminInvestments = createServerFn({ method: "GET" })
     yearStart.setUTCMonth(0, 1);
     yearStart.setUTCHours(0, 0, 0, 0);
 
-    const holdersByUser = new Map<string, { units: number; cost: number; value: number; name: string | null; mno: string | null }>();
+    const holdersByUser = new Map<
+      string,
+      { units: number; cost: number; value: number; name: string | null; mno: string | null }
+    >();
     let totalUnits = 0;
     let totalCost = 0;
     let totalValue = 0;
@@ -690,11 +700,16 @@ export const upsertShareProduct = createServerFn({ method: "POST" })
     if (data.id) {
       const { data: prev } = await context.supabase
         .from("share_products")
-        .select("code, name, description, unit_price, currency, dividend_rate_annual, min_units, max_units_per_member, is_active")
+        .select(
+          "code, name, description, unit_price, currency, dividend_rate_annual, min_units, max_units_per_member, is_active",
+        )
         .eq("id", data.id)
         .maybeSingle();
       before = prev ?? null;
-      const { error } = await context.supabase.from("share_products").update(payload).eq("id", data.id);
+      const { error } = await context.supabase
+        .from("share_products")
+        .update(payload)
+        .eq("id", data.id);
       if (error) throw new Error(error.message);
       resultId = data.id;
       action = "shares.product.update";
@@ -799,7 +814,7 @@ export const createDividendRun = createServerFn({ method: "POST" })
     await writeAudit({
       actor_id: context.userId,
       action: "shares.dividend_run.create",
-      target: (row!.id as string),
+      target: row!.id as string,
       meta: {
         ref: row!.ref,
         product_id: data.product_id,
@@ -869,10 +884,13 @@ export const submitDividendRunForApproval = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => SubmitApprovalSchema.parse(data))
   .handler(async ({ data, context }): Promise<DividendRun> => {
     await assertFinanceStaff(context.supabase, context.userId);
-    const { data: row, error } = await (context.supabase as any).rpc("submit_dividend_run_for_approval", {
-      _run_id: data.run_id,
-      _actor_id: context.userId,
-    });
+    const { data: row, error } = await (context.supabase as any).rpc(
+      "submit_dividend_run_for_approval",
+      {
+        _run_id: data.run_id,
+        _actor_id: context.userId,
+      },
+    );
     if (error) throw new Error(error.message);
     return mapDividendRun(Array.isArray(row) ? row[0] : row);
   });
@@ -1023,7 +1041,6 @@ export const listDividendAudit = createServerFn({ method: "GET" })
     };
   });
 
-
 export type DividendRunExportRow = {
   member_no: string | null;
   full_name: string | null;
@@ -1037,66 +1054,72 @@ export type DividendRunExportRow = {
 export const getDividendRunExport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ run_id: z.string().uuid() }).parse(data))
-  .handler(async ({ data, context }): Promise<{
-    run: DividendRun;
-    rows: DividendRunExportRow[];
-  }> => {
-    await assertStaff(context.supabase, context.userId);
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{
+      run: DividendRun;
+      rows: DividendRunExportRow[];
+    }> => {
+      await assertStaff(context.supabase, context.userId);
 
-    const { data: runRow, error: runErr } = await context.supabase
-      .from("dividend_runs")
-      .select("*, share_products(name, currency)")
-      .eq("id", data.run_id)
-      .single();
-    if (runErr) throw new Error(runErr.message);
-    const run = mapDividendRun(runRow);
-    const currency = (runRow as any)?.share_products?.currency ?? "GHS";
+      const { data: runRow, error: runErr } = await context.supabase
+        .from("dividend_runs")
+        .select("*, share_products(name, currency)")
+        .eq("id", data.run_id)
+        .single();
+      if (runErr) throw new Error(runErr.message);
+      const run = mapDividendRun(runRow);
+      const currency = (runRow as any)?.share_products?.currency ?? "GHS";
 
-    let rows: DividendRunExportRow[] = [];
+      let rows: DividendRunExportRow[] = [];
 
-    if (run.status === "executed") {
-      const { data: txns, error: tErr } = await context.supabase
-        .from("share_transactions")
-        .select("user_id, units, unit_price, amount, profiles!share_transactions_user_id_fkey(full_name, member_no)")
-        .eq("dividend_run_id", data.run_id)
-        .eq("kind", "dividend");
-      if (tErr) throw new Error(tErr.message);
-      rows = (txns ?? []).map((t: any) => ({
-        member_no: t.profiles?.member_no ?? null,
-        full_name: t.profiles?.full_name ?? null,
-        units: Number(t.units ?? 0),
-        per_unit_amount: Number(t.unit_price ?? run.per_unit_amount),
-        amount: Number(t.amount ?? 0),
-        currency,
-        status: "paid",
-      }));
-    } else {
-      const { data: holdings, error: hErr } = await context.supabase
-        .from("share_holdings")
-        .select("user_id, units, profiles!share_holdings_user_id_fkey(full_name, member_no)")
-        .eq("product_id", run.product_id)
-        .gt("units", 0);
-      if (hErr) throw new Error(hErr.message);
-      rows = (holdings ?? []).map((h: any) => {
-        const units = Number(h.units ?? 0);
-        return {
-          member_no: h.profiles?.member_no ?? null,
-          full_name: h.profiles?.full_name ?? null,
-          units,
-          per_unit_amount: run.per_unit_amount,
-          amount: Number((units * run.per_unit_amount).toFixed(2)),
+      if (run.status === "executed") {
+        const { data: txns, error: tErr } = await context.supabase
+          .from("share_transactions")
+          .select(
+            "user_id, units, unit_price, amount, profiles!share_transactions_user_id_fkey(full_name, member_no)",
+          )
+          .eq("dividend_run_id", data.run_id)
+          .eq("kind", "dividend");
+        if (tErr) throw new Error(tErr.message);
+        rows = (txns ?? []).map((t: any) => ({
+          member_no: t.profiles?.member_no ?? null,
+          full_name: t.profiles?.full_name ?? null,
+          units: Number(t.units ?? 0),
+          per_unit_amount: Number(t.unit_price ?? run.per_unit_amount),
+          amount: Number(t.amount ?? 0),
           currency,
-          status: "estimated",
-        };
-      });
-    }
+          status: "paid",
+        }));
+      } else {
+        const { data: holdings, error: hErr } = await context.supabase
+          .from("share_holdings")
+          .select("user_id, units, profiles!share_holdings_user_id_fkey(full_name, member_no)")
+          .eq("product_id", run.product_id)
+          .gt("units", 0);
+        if (hErr) throw new Error(hErr.message);
+        rows = (holdings ?? []).map((h: any) => {
+          const units = Number(h.units ?? 0);
+          return {
+            member_no: h.profiles?.member_no ?? null,
+            full_name: h.profiles?.full_name ?? null,
+            units,
+            per_unit_amount: run.per_unit_amount,
+            amount: Number((units * run.per_unit_amount).toFixed(2)),
+            currency,
+            status: "estimated",
+          };
+        });
+      }
 
-    rows.sort(
-      (a, b) => b.amount - a.amount || (a.member_no ?? "").localeCompare(b.member_no ?? ""),
-    );
-    return { run, rows };
-  });
-
+      rows.sort(
+        (a, b) => b.amount - a.amount || (a.member_no ?? "").localeCompare(b.member_no ?? ""),
+      );
+      return { run, rows };
+    },
+  );
 
 // ============================================================================
 // Time-series for charts (last N months)
@@ -1137,7 +1160,9 @@ async function buildSeries(
   opts: { userId?: string; months: number },
 ): Promise<InvestmentSeriesPoint[]> {
   const buckets = emptyMonthlyBuckets(opts.months);
-  const from = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() - (opts.months - 1), 1));
+  const from = new Date(
+    Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() - (opts.months - 1), 1),
+  );
   let txnQ = supabase
     .from("share_transactions")
     .select("kind, units, amount, created_at, share_products(unit_price)")
@@ -1150,7 +1175,10 @@ async function buildSeries(
   // Pre-window running totals (units and cumulative dividends before the window)
   let priorUnits = 0;
   let priorDividends = 0;
-  let priorQ = supabase.from("share_transactions").select("kind, units, amount").lt("created_at", from.toISOString());
+  let priorQ = supabase
+    .from("share_transactions")
+    .select("kind, units, amount")
+    .lt("created_at", from.toISOString());
   if (opts.userId) priorQ = priorQ.eq("user_id", opts.userId);
   const { data: prior, error: pErr } = await priorQ;
   if (pErr) throw new Error(pErr.message);
@@ -1197,10 +1225,13 @@ async function buildSeries(
   for (let i = 0; i < buckets.length; i++) {
     if (monthPrice[i] > 0) lastPrice = monthPrice[i];
     if (buckets[i].portfolio_value === 0) {
-      buckets[i].portfolio_value = Number((runningUnitsAt(buckets, i, priorUnits) * lastPrice).toFixed(2));
+      buckets[i].portfolio_value = Number(
+        (runningUnitsAt(buckets, i, priorUnits) * lastPrice).toFixed(2),
+      );
       if (buckets[i].portfolio_value === 0) buckets[i].portfolio_value = lastValue;
     }
-    if (buckets[i].dividends_cum === 0 && buckets[i].returns === 0) buckets[i].dividends_cum = lastDivCum;
+    if (buckets[i].dividends_cum === 0 && buckets[i].returns === 0)
+      buckets[i].dividends_cum = lastDivCum;
     lastValue = buckets[i].portfolio_value;
     lastDivCum = buckets[i].dividends_cum;
   }

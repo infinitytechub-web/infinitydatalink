@@ -16,10 +16,7 @@ import { getMyRepaymentDashboard } from "@/lib/member-repayments.functions";
 
 export const Route = createFileRoute("/_member/app/repayments")({
   head: () => ({
-    meta: [
-      { title: "Loan repayments — IT-360 CashApp" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Loan repayments — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: RepaymentsPage,
 });
@@ -31,7 +28,11 @@ const dashboardQuery = queryOptions({
 
 function fmtDate(value: string | null) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return new Date(value).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function RepaymentsPage() {
@@ -89,7 +90,10 @@ function RepaymentsContent() {
               title="No disbursed loans yet"
               hint="Once a loan is approved and disbursed, its balance and schedule appear here."
               action={
-                <Link to="/app/loans" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+                <Link
+                  to="/app/loans"
+                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
                   View loan applications
                 </Link>
               }
@@ -122,18 +126,26 @@ function RepaymentsContent() {
                       </Link>
                       <p className="text-xs text-muted-foreground">{loan.product}</p>
                     </td>
-                    <td className="px-6 py-3"><StatusPill status={loan.status} /></td>
-                    <td className="px-6 py-3 text-right tabular-nums"><Money amount={loan.outstanding_principal} /></td>
+                    <td className="px-6 py-3">
+                      <StatusPill status={loan.status} />
+                    </td>
+                    <td className="px-6 py-3 text-right tabular-nums">
+                      <Money amount={loan.outstanding_principal} />
+                    </td>
                     <td className="px-6 py-3 text-right tabular-nums">
                       {loan.monthly_payment == null ? "—" : formatMoney(loan.monthly_payment)}
                     </td>
                     <td className="px-6 py-3 text-right tabular-nums text-muted-foreground">
                       {loan.installments_paid}/{loan.installments_total || "—"}
                     </td>
-                    <td className="px-6 py-3 text-right text-muted-foreground">{fmtDate(loan.next_due_date)}</td>
+                    <td className="px-6 py-3 text-right text-muted-foreground">
+                      {fmtDate(loan.next_due_date)}
+                    </td>
                     <td className="px-6 py-3 text-right tabular-nums">
                       {loan.arrears > 0 ? (
-                        <span className="font-medium text-destructive">{formatMoney(loan.arrears)}</span>
+                        <span className="font-medium text-destructive">
+                          {formatMoney(loan.arrears)}
+                        </span>
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )}
@@ -158,7 +170,10 @@ function RepaymentsContent() {
         ) : (
           <ul className="divide-y divide-border">
             {upcoming.map((item) => (
-              <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+              <li
+                key={item.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-6 py-4"
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
                     Installment {item.installment_no} · {item.loan_ref}
@@ -174,7 +189,9 @@ function RepaymentsContent() {
                       Overdue
                     </span>
                   ) : null}
-                  <span className="text-sm font-semibold tabular-nums">{formatMoney(item.remaining)}</span>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {formatMoney(item.remaining)}
+                  </span>
                   <Link
                     to="/app/loans/$loanId"
                     params={{ loanId: item.loan_id }}
@@ -230,8 +247,12 @@ function RepaymentsContent() {
                       )}
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">{row.channel ?? "—"}</td>
-                    <td className="px-6 py-3"><StatusPill status={row.status as "cleared" | "pending" | "failed"} /></td>
-                    <td className="px-6 py-3 text-right tabular-nums"><Money amount={row.amount} /></td>
+                    <td className="px-6 py-3">
+                      <StatusPill status={row.status as "cleared" | "pending" | "failed"} />
+                    </td>
+                    <td className="px-6 py-3 text-right tabular-nums">
+                      <Money amount={row.amount} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

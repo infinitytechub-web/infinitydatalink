@@ -60,7 +60,9 @@ export const listAdminLoans = createServerFn({ method: "GET" })
     await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
       .from("loans")
-      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, user_id")
+      .select(
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, user_id",
+      )
       .order("created_at", { ascending: false })
       .limit(data.limit);
     if (data.status) q = q.eq("status", data.status as any);
@@ -74,7 +76,12 @@ export const listAdminLoans = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name, member_no")
         .in("id", userIds);
-      profileMap = new Map((profiles ?? []).map((p: any) => [p.id, { full_name: p.full_name, member_no: p.member_no }]));
+      profileMap = new Map(
+        (profiles ?? []).map((p: any) => [
+          p.id,
+          { full_name: p.full_name, member_no: p.member_no },
+        ]),
+      );
     }
 
     return (loans ?? []).map((l: any) => ({
@@ -120,7 +127,8 @@ export const decideLoan = createServerFn({ method: "POST" })
       .maybeSingle();
     if (fetchErr) throw new Error(fetchErr.message);
     if (!current) throw new Error("Loan not found");
-    if (current.status !== "pending") throw new Error(`Cannot decide loan in status “${current.status}”`);
+    if (current.status !== "pending")
+      throw new Error(`Cannot decide loan in status “${current.status}”`);
 
     const { data: updated, error } = await context.supabase
       .from("loans")
@@ -131,7 +139,9 @@ export const decideLoan = createServerFn({ method: "POST" })
         decision_note: data.note,
       })
       .eq("id", data.loan_id)
-      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, user_id")
+      .select(
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, user_id",
+      )
       .single();
     if (error) throw new Error(error.message);
 
@@ -203,15 +213,17 @@ export const listLoanAudit = createServerFn({ method: "GET" })
       data.decision === "approved"
         ? ["loan.approved"]
         : data.decision === "rejected"
-        ? ["loan.rejected"]
-        : ["loan.approved", "loan.rejected"];
+          ? ["loan.rejected"]
+          : ["loan.approved", "loan.rejected"];
 
     const fromIdx = (data.page - 1) * data.pageSize;
     const toIdx = fromIdx + data.pageSize - 1;
 
     let q = context.supabase
       .from("audit_log")
-      .select("id, created_at, actor_id, actor_email, actor_role, action, target, meta", { count: "exact" })
+      .select("id, created_at, actor_id, actor_email, actor_role, action, target, meta", {
+        count: "exact",
+      })
       .in("action", actions)
       .order("created_at", { ascending: false });
 
@@ -235,7 +247,10 @@ export const listLoanAudit = createServerFn({ method: "GET" })
         .select("id, full_name, member_no")
         .in("id", memberIds);
       profileMap = new Map(
-        (profiles ?? []).map((p: any) => [p.id, { full_name: p.full_name, member_no: p.member_no }]),
+        (profiles ?? []).map((p: any) => [
+          p.id,
+          { full_name: p.full_name, member_no: p.member_no },
+        ]),
       );
     }
 
@@ -318,10 +333,15 @@ export const getAdminLoanDetail = createServerFn({ method: "GET" })
     if (!loan) throw new Error("Loan not found");
 
     const { data: profile } = await context.supabase
-      .from("profiles").select("full_name, member_no").eq("id", loan.user_id).maybeSingle();
+      .from("profiles")
+      .select("full_name, member_no")
+      .eq("id", loan.user_id)
+      .maybeSingle();
     const { data: sched } = await context.supabase
       .from("loan_repayments")
-      .select("id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, paid_at, status")
+      .select(
+        "id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, paid_at, status",
+      )
       .eq("loan_id", loan.id)
       .order("installment_no", { ascending: true });
 
@@ -346,11 +366,13 @@ export const getAdminLoanDetail = createServerFn({ method: "GET" })
 export const disburseLoan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      loan_id: z.string().uuid(),
-      channel: z.string().trim().min(2).max(40),
-      note: z.string().trim().max(500).optional(),
-    }).parse(d),
+    z
+      .object({
+        loan_id: z.string().uuid(),
+        channel: z.string().trim().min(2).max(40),
+        note: z.string().trim().max(500).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertLoanDisbursementRole(context.supabase, context.userId);
@@ -368,12 +390,14 @@ export const disburseLoan = createServerFn({ method: "POST" })
 export const recordLoanRepayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      loan_id: z.string().uuid(),
-      amount: z.number().positive().max(100_000_000),
-      channel: z.string().trim().min(2).max(40),
-      note: z.string().trim().max(500).optional(),
-    }).parse(d),
+    z
+      .object({
+        loan_id: z.string().uuid(),
+        amount: z.number().positive().max(100_000_000),
+        channel: z.string().trim().min(2).max(40),
+        note: z.string().trim().max(500).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertLoanDisbursementRole(context.supabase, context.userId);
@@ -449,7 +473,8 @@ export const adminListPendingPayments = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name, member_no")
         .in("id", userIds);
-      for (const p of profs ?? []) profilesMap.set(p.id, { full_name: p.full_name, member_no: p.member_no });
+      for (const p of profs ?? [])
+        profilesMap.set(p.id, { full_name: p.full_name, member_no: p.member_no });
     }
     return (rows ?? []).map((t: any) => ({
       id: t.id,
@@ -467,7 +492,6 @@ export const adminListPendingPayments = createServerFn({ method: "GET" })
       savings_account_id: t.savings_account_id,
       plan_name: t.savings_accounts?.savings_plans?.name ?? null,
     }));
-
   });
 
 export type AdminPaymentsSummary = {
@@ -485,15 +509,26 @@ export const adminGetPaymentsSummary = createServerFn({ method: "GET" })
     const since24h = new Date(Date.now() - 24 * 3600_000).toISOString();
     const [{ data: pend }, { data: cleared }, { count: failed }] = await Promise.all([
       context.supabase.from("transactions").select("kind").eq("status", "pending"),
-      context.supabase.from("transactions").select("amount").eq("status", "cleared").gte("created_at", since24h),
-      context.supabase.from("transactions").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", since24h),
+      context.supabase
+        .from("transactions")
+        .select("amount")
+        .eq("status", "cleared")
+        .gte("created_at", since24h),
+      context.supabase
+        .from("transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "failed")
+        .gte("created_at", since24h),
     ]);
     const p = pend ?? [];
     return {
       pending_count: p.length,
       pending_savings: p.filter((r: any) => r.kind === "deposit" || r.kind === "withdrawal").length,
       pending_repayments: p.filter((r: any) => r.kind === "loan_repayment").length,
-      cleared_24h_volume: (cleared ?? []).reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0),
+      cleared_24h_volume: (cleared ?? []).reduce(
+        (s: number, r: any) => s + Number(r.amount ?? 0),
+        0,
+      ),
       failed_24h: failed ?? 0,
     };
   });

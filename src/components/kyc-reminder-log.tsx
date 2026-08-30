@@ -72,9 +72,17 @@ function LogBody() {
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-4">
         <Stat label="Reminder events" value={data.summary.total} />
-        <Stat label="Sent" value={data.summary.sent} tone="text-emerald-600 dark:text-emerald-400" />
+        <Stat
+          label="Sent"
+          value={data.summary.sent}
+          tone="text-emerald-600 dark:text-emerald-400"
+        />
         <Stat label="Failed" value={data.summary.failed} tone="text-red-600 dark:text-red-400" />
-        <Stat label="Pending" value={data.summary.pending} tone="text-amber-600 dark:text-amber-400" />
+        <Stat
+          label="Pending"
+          value={data.summary.pending}
+          tone="text-amber-600 dark:text-amber-400"
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

@@ -100,7 +100,9 @@ export function idempotencyKey(parts: {
     ? `c:${parts.clientKey}`
     : `t:${Math.floor(Date.now() / (parts.windowMs ?? 120_000))}`;
   return createHash("sha256")
-    .update([parts.memberId ?? "anon", parts.rail, parts.purpose, parts.amountMinor, bucket].join("|"))
+    .update(
+      [parts.memberId ?? "anon", parts.rail, parts.purpose, parts.amountMinor, bucket].join("|"),
+    )
     .digest("hex")
     .slice(0, 48);
 }
@@ -133,15 +135,12 @@ export async function loadRailAvailability(): Promise<RailAvailability[]> {
     const providerReady = Boolean(live || sandbox);
     const selectable = railOn && (providerReady || spec.manualSettlement);
 
-
-
     let statusLabel: string;
     let note: string;
     if (!railOn) {
       statusLabel = "Disabled";
       note = "An administrator has switched this rail off.";
     } else if (isLive) {
-
       statusLabel = "Live";
       note = `Processed by ${live!.code}.`;
     } else if (isSandbox) {
@@ -252,7 +251,8 @@ export async function createIntent(input: CreateIntentInput): Promise<CreateInte
     .insert({
       reference,
       rail: input.rail,
-      provider_code: availability.providerCode ?? (spec.kind === "cash" ? "cash_desk" : "unassigned"),
+      provider_code:
+        availability.providerCode ?? (spec.kind === "cash" ? "cash_desk" : "unassigned"),
       member_id: input.memberId,
       purpose: input.purpose,
       amount_minor: input.amountMinor,
@@ -265,7 +265,11 @@ export async function createIntent(input: CreateIntentInput): Promise<CreateInte
         note: input.note ?? null,
         target_id: input.targetId ?? null,
         rail_kind: spec.kind,
-        provider_mode: availability.live ? "live" : availability.sandbox ? "sandbox" : "unconfigured",
+        provider_mode: availability.live
+          ? "live"
+          : availability.sandbox
+            ? "sandbox"
+            : "unconfigured",
       },
       created_by: input.actorId,
     })
@@ -314,7 +318,8 @@ export async function listIntents(
   if (filters.search) {
     // Escape PostgREST filter metacharacters before interpolating.
     const s = filters.search.replace(/[,()*"\\]/g, "");
-    if (s) q = q.or(`reference.ilike.%${s}%,provider_reference.ilike.%${s}%,payer_phone.ilike.%${s}%`);
+    if (s)
+      q = q.or(`reference.ilike.%${s}%,provider_reference.ilike.%${s}%,payer_phone.ilike.%${s}%`);
   }
   const from = (filters.page - 1) * filters.pageSize;
   const { data, count, error } = await q
@@ -326,7 +331,11 @@ export async function listIntents(
 
 export async function getIntentByReference(reference: string): Promise<IntentRow | null> {
   const db = await admin();
-  const { data } = await db.from("payment_intents").select(INTENT_COLUMNS).eq("reference", reference).maybeSingle();
+  const { data } = await db
+    .from("payment_intents")
+    .select(INTENT_COLUMNS)
+    .eq("reference", reference)
+    .maybeSingle();
   return (data ?? null) as IntentRow | null;
 }
 
@@ -345,7 +354,9 @@ export async function listRefunds(intentIds: string[]): Promise<RefundRow[]> {
   const db = await admin();
   const { data } = await db
     .from("payment_refunds")
-    .select("id, intent_id, amount_minor, currency, reason, status, requested_by, approved_by, decision_note, created_at")
+    .select(
+      "id, intent_id, amount_minor, currency, reason, status, requested_by, approved_by, decision_note, created_at",
+    )
     .in("intent_id", intentIds)
     .order("created_at", { ascending: false });
   return (data ?? []) as RefundRow[];
@@ -428,7 +439,8 @@ export async function cancelIntent(args: {
 }): Promise<IntentRow> {
   const intent = await getIntentByReference(args.reference);
   if (!intent) throw new Error("Payment not found");
-  if (args.memberScope && intent.member_id !== args.memberScope) throw new Error("Payment not found");
+  if (args.memberScope && intent.member_id !== args.memberScope)
+    throw new Error("Payment not found");
   if (!["pending", "processing", "requires_configuration"].includes(intent.status)) {
     throw new Error(`Only an open payment can be cancelled (this one is ${intent.status})`);
   }
@@ -511,7 +523,10 @@ export async function buildReconciliation(dateFrom?: string | null, dateTo?: str
         summary.mismatches.push({ reference: row.reference, issue: "Settled without a receipt" });
       }
       if (!manual && !row.provider_reference) {
-        summary.mismatches.push({ reference: row.reference, issue: "Settled without a provider reference" });
+        summary.mismatches.push({
+          reference: row.reference,
+          issue: "Settled without a provider reference",
+        });
       }
     } else if (row.status === "requires_configuration") {
       summary.unconfigured += 1;
@@ -528,7 +543,10 @@ export async function buildReconciliation(dateFrom?: string | null, dateTo?: str
       }
     }
     if (receiptByIntent.has(row.id) && row.status !== "succeeded") {
-      summary.mismatches.push({ reference: row.reference, issue: `Receipt exists but status is ${row.status}` });
+      summary.mismatches.push({
+        reference: row.reference,
+        issue: `Receipt exists but status is ${row.status}`,
+      });
     }
   }
 

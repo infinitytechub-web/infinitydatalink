@@ -63,9 +63,14 @@ async function logScan(
   reasons: string[],
 ) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin
-    .from("upload_scan_log")
-    .insert({ user_id: userId, filename, mime_type: mime, size_bytes: size, verdict, reasons } as never);
+  await supabaseAdmin.from("upload_scan_log").insert({
+    user_id: userId,
+    filename,
+    mime_type: mime,
+    size_bytes: size,
+    verdict,
+    reasons,
+  } as never);
 }
 
 // ============================================================================
@@ -74,22 +79,26 @@ async function logScan(
 
 export const listMyFiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ files: MemberFile[]; used_bytes: number; quota_bytes: number }> => {
-    const { data, error } = await context.supabase
-      .from("member_files")
-      .select(SELECT_COLS)
-      .eq("owner_id", context.userId)
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false })
-      .limit(500);
-    if (error) throw new Error(error.message);
-    const files = (data ?? []).map((r) => mapRow(r));
-    return {
-      files,
-      used_bytes: files.reduce((s, f) => s + f.size_bytes, 0),
-      quota_bytes: MEMBER_QUOTA_BYTES,
-    };
-  });
+  .handler(
+    async ({
+      context,
+    }): Promise<{ files: MemberFile[]; used_bytes: number; quota_bytes: number }> => {
+      const { data, error } = await context.supabase
+        .from("member_files")
+        .select(SELECT_COLS)
+        .eq("owner_id", context.userId)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw new Error(error.message);
+      const files = (data ?? []).map((r) => mapRow(r));
+      return {
+        files,
+        used_bytes: files.reduce((s, f) => s + f.size_bytes, 0),
+        quota_bytes: MEMBER_QUOTA_BYTES,
+      };
+    },
+  );
 
 const RegisterSchema = z.object({
   storage_path: z.string().min(3).max(400),
@@ -111,7 +120,14 @@ export const registerMyFile = createServerFn({ method: "POST" })
       size: data.size_bytes,
     });
     if (!verdict.ok) {
-      await logScan(context.userId, data.filename, data.mime_type, data.size_bytes, "rejected", verdict.reasons);
+      await logScan(
+        context.userId,
+        data.filename,
+        data.mime_type,
+        data.size_bytes,
+        "rejected",
+        verdict.reasons,
+      );
       throw new Error(`Upload rejected: ${verdict.reasons.join(", ")}`);
     }
     if (!data.storage_path.startsWith(`${context.userId}/`)) {
@@ -126,7 +142,9 @@ export const registerMyFile = createServerFn({ method: "POST" })
     if (qErr) throw new Error(qErr.message);
     const used = (existing ?? []).reduce((s, r: any) => s + Number(r.size_bytes ?? 0), 0);
     if (used + data.size_bytes > MEMBER_QUOTA_BYTES) {
-      await logScan(context.userId, data.filename, data.mime_type, data.size_bytes, "rejected", ["quota_exceeded"]);
+      await logScan(context.userId, data.filename, data.mime_type, data.size_bytes, "rejected", [
+        "quota_exceeded",
+      ]);
       throw new Error("Upload rejected: quota_exceeded");
     }
 
@@ -180,10 +198,10 @@ export const updateMyFile = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = {};
     if (data.filename !== undefined) {
       if (/[\\/]|\.\./.test(data.filename)) throw new Error("illegal_filename");
-      patch['filename'] = data.filename;
+      patch["filename"] = data.filename;
     }
-    if (data.category !== undefined) patch['category'] = data.category;
-    if (data.shared_with_staff !== undefined) patch['shared_with_staff'] = data.shared_with_staff;
+    if (data.category !== undefined) patch["category"] = data.category;
+    if (data.shared_with_staff !== undefined) patch["shared_with_staff"] = data.shared_with_staff;
     if (Object.keys(patch).length === 0) return { ok: true };
 
     const { error } = await context.supabase
@@ -242,40 +260,51 @@ export const deleteMyFile = createServerFn({ method: "POST" })
 export const signFileUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), purpose: z.enum(["preview", "download"]).default("preview") }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        purpose: z.enum(["preview", "download"]).default("preview"),
+      })
+      .parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ url: string; mime_type: string; filename: string }> => {
-    // RLS decides visibility: owners see their own rows, staff with files.view
-    // see shared rows. A row that comes back is a row the caller may read.
-    const { data: row, error } = await context.supabase
-      .from("member_files")
-      .select("id, owner_id, storage_path, filename, mime_type")
-      .eq("id", data.id)
-      .is("deleted_at", null)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!row) throw new Error("File not found");
+  .handler(
+    async ({ data, context }): Promise<{ url: string; mime_type: string; filename: string }> => {
+      // RLS decides visibility: owners see their own rows, staff with files.view
+      // see shared rows. A row that comes back is a row the caller may read.
+      const { data: row, error } = await context.supabase
+        .from("member_files")
+        .select("id, owner_id, storage_path, filename, mime_type")
+        .eq("id", data.id)
+        .is("deleted_at", null)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!row) throw new Error("File not found");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: signed, error: sErr } = await supabaseAdmin.storage
-      .from(FILE_BUCKET)
-      .createSignedUrl((row as any).storage_path, 120, {
-        download: data.purpose === "download" ? (row as any).filename : undefined,
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: signed, error: sErr } = await supabaseAdmin.storage
+        .from(FILE_BUCKET)
+        .createSignedUrl((row as any).storage_path, 120, {
+          download: data.purpose === "download" ? (row as any).filename : undefined,
+        });
+      if (sErr || !signed?.signedUrl) throw new Error(sErr?.message ?? "Could not sign file");
+
+      await writeAudit({
+        actor_id: context.userId,
+        action: data.purpose === "download" ? "file.downloaded" : "file.previewed",
+        target: data.id,
+        meta: {
+          filename: (row as any).filename,
+          owner_id: (row as any).owner_id,
+          self: (row as any).owner_id === context.userId,
+        },
       });
-    if (sErr || !signed?.signedUrl) throw new Error(sErr?.message ?? "Could not sign file");
-
-    await writeAudit({
-      actor_id: context.userId,
-      action: data.purpose === "download" ? "file.downloaded" : "file.previewed",
-      target: data.id,
-      meta: {
+      return {
+        url: signed.signedUrl,
+        mime_type: (row as any).mime_type,
         filename: (row as any).filename,
-        owner_id: (row as any).owner_id,
-        self: (row as any).owner_id === context.userId,
-      },
-    });
-    return { url: signed.signedUrl, mime_type: (row as any).mime_type, filename: (row as any).filename };
-  });
+      };
+    },
+  );
 
 // ============================================================================
 // Admin / staff
@@ -330,9 +359,11 @@ export const adminListFiles = createServerFn({ method: "POST" })
     }
 
     const from = (data.page - 1) * data.page_size;
-    const { data: rows, count, error } = await q
-      .order("created_at", { ascending: false })
-      .range(from, from + data.page_size - 1);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, from + data.page_size - 1);
     if (error) throw new Error(error.message);
 
     const labels = await ownerLabels(context.supabase, [

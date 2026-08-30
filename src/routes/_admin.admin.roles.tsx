@@ -53,10 +53,7 @@ function RolesPage() {
   if (!hasRole("super_admin") && !can("users", "view")) return <Navigate to="/admin" />;
   return (
     <>
-      <PageHeader
-        eyebrow="Governance"
-        title="Roles & Permissions"
-      />
+      <PageHeader eyebrow="Governance" title="Roles & Permissions" />
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <PermissionMatrixEditor />
       </Suspense>
@@ -93,36 +90,26 @@ const ROLE_TONE: Record<AppRole, "success" | "warning" | "info" | "neutral" | "d
 };
 
 const PERMISSION_CATEGORIES: Record<string, string[]> = {
-  "Governance": [
+  Governance: [
     "Full system access",
     "Assign and revoke all roles (incl. super admin)",
     "Manage branding, settings, security centre",
     "View & export all audit logs",
     "No admin access",
   ],
-  "Compliance & KYC": [
-    "Review KYC submissions",
-    "Approve / reject member verification",
-  ],
-  "Loans": [
+  "Compliance & KYC": ["Review KYC submissions", "Approve / reject member verification"],
+  Loans: [
     "Review loan applications",
     "Approve / reject / disburse loans",
     "View member savings & repayment history",
   ],
-  "Finance": [
+  Finance: [
     "Post income, expenses & balance adjustments",
     "Approve transfers",
     "Access financial reports & exports",
   ],
-  "Audit": [
-    "Read-only access to all financial data",
-    "View audit logs & exports",
-    "Read audit logs",
-  ],
-  "Member": [
-    "Manage own savings, loans, transfers",
-    "Update own profile & KYC documents",
-  ],
+  Audit: ["Read-only access to all financial data", "View audit logs & exports", "Read audit logs"],
+  Member: ["Manage own savings, loans, transfers", "Update own profile & KYC documents"],
 };
 
 const ALL_CATEGORIES = Object.keys(PERMISSION_CATEGORIES);
@@ -144,7 +131,8 @@ function PermissionsMatrix() {
     return ALL_ROLES.map((role) => {
       const matched = ROLE_PERMISSIONS[role].filter((p) => {
         const matchesText = !normalizedQuery || p.toLowerCase().includes(normalizedQuery);
-        const matchesCategory = activeCategory === "All" || permissionCategory(p) === activeCategory;
+        const matchesCategory =
+          activeCategory === "All" || permissionCategory(p) === activeCategory;
         return matchesText && matchesCategory;
       });
       return { role, matched, visible: matched.length > 0 };
@@ -202,7 +190,9 @@ function PermissionsMatrix() {
               >
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm font-semibold">{ROLE_LABEL[role]}</span>
-                  <span className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{role}</span>
+                  <span className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
+                    {role}
+                  </span>
                 </div>
                 <ul className="list-disc space-y-1 pl-4 text-xs text-slate-600 dark:text-slate-300">
                   {matched.map((p) => {
@@ -419,7 +409,10 @@ function UserRow({
               <span className="text-xs text-slate-400">no roles</span>
             ) : (
               row.roles.map((r) => (
-                <span key={r} className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
+                <span
+                  key={r}
+                  className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                >
                   {ROLE_LABEL[r]}
                 </span>
               ))
@@ -447,7 +440,10 @@ function ManageDialog({ row, onClose }: { row: UserWithRolesRow; onClose: () => 
   const [reason, setReason] = useState("");
 
   const assignedNonSuper = useMemo(
-    () => row.roles.filter((r): r is AssignableRole => (ASSIGNABLE_ROLES as readonly string[]).includes(r)),
+    () =>
+      row.roles.filter((r): r is AssignableRole =>
+        (ASSIGNABLE_ROLES as readonly string[]).includes(r),
+      ),
     [row.roles],
   );
 
@@ -499,7 +495,10 @@ function ManageDialog({ row, onClose }: { row: UserWithRolesRow; onClose: () => 
                 <span className="text-xs text-slate-400">none</span>
               ) : (
                 row.roles.map((r) => (
-                  <span key={r} className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
+                  <span
+                    key={r}
+                    className="rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                  >
                     {ROLE_LABEL[r]}
                   </span>
                 ))
@@ -610,7 +609,10 @@ function BulkDialog({
   const [selectedRole, setSelectedRole] = useState<AssignableRole>(ASSIGNABLE_ROLES[0]);
   const [note, setNote] = useState("");
   const [reason, setReason] = useState("");
-  const [result, setResult] = useState<{ ok: string[]; failed: { user_id: string; error: string }[] } | null>(null);
+  const [result, setResult] = useState<{
+    ok: string[];
+    failed: { user_id: string; error: string }[];
+  } | null>(null);
 
   const mut = useMutation({
     mutationFn: async () => {
@@ -635,9 +637,7 @@ function BulkDialog({
 
   const isRevoke = mode === "revoke";
   const canSubmit =
-    !mut.isPending &&
-    userIds.length > 0 &&
-    (!isRevoke || reason.trim().length >= 3);
+    !mut.isPending && userIds.length > 0 && (!isRevoke || reason.trim().length >= 3);
 
   return (
     <Dialog open onOpenChange={(o) => !o && (result ? onDone() : onClose())}>
@@ -657,12 +657,8 @@ function BulkDialog({
         {result ? (
           <div className="space-y-2 text-sm">
             <div className="rounded border border-emerald-deep/15 p-3">
-              <div className="font-semibold text-emerald-deep">
-                Succeeded: {result.ok.length}
-              </div>
-              <div className="font-semibold text-red-600">
-                Failed: {result.failed.length}
-              </div>
+              <div className="font-semibold text-emerald-deep">Succeeded: {result.ok.length}</div>
+              <div className="font-semibold text-red-600">Failed: {result.failed.length}</div>
             </div>
             {result.failed.length > 0 && (
               <ul className="max-h-40 overflow-auto rounded border border-red-500/20 p-2 text-xs">

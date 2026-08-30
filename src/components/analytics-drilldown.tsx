@@ -56,15 +56,7 @@ export function DrilldownDialog({
   const enabled = Boolean(target);
 
   const { data, isPending, error } = useQuery({
-    queryKey: [
-      "admin",
-      "insights",
-      "drilldown",
-      target?.metric,
-      target?.from,
-      target?.to,
-      entity,
-    ],
+    queryKey: ["admin", "insights", "drilldown", target?.metric, target?.from, target?.to, entity],
     queryFn: () =>
       fetchFn({
         data: {
@@ -127,7 +119,8 @@ export function DrilldownDialog({
                   columns={[
                     {
                       header: "Date",
-                      accessor: (r: DrilldownRow) => new Date(r.occurred_at).toISOString().slice(0, 10),
+                      accessor: (r: DrilldownRow) =>
+                        new Date(r.occurred_at).toISOString().slice(0, 10),
                     },
                     { header: "Member", accessor: (r: DrilldownRow) => r.member_name },
                     { header: "Member no", accessor: (r: DrilldownRow) => r.member_no },
@@ -146,7 +139,10 @@ export function DrilldownDialog({
             </div>
 
             {data.breakdown.length > 0 ? (
-              <section aria-label="Breakdown by category" className="rounded-lg border border-border">
+              <section
+                aria-label="Breakdown by category"
+                className="rounded-lg border border-border"
+              >
                 <h3 className="border-b border-border px-4 py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   Breakdown
                 </h3>
@@ -168,12 +164,24 @@ export function DrilldownDialog({
                   </caption>
                   <thead className="bg-muted/50">
                     <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-                      <th scope="col" className="px-3 py-2">Date</th>
-                      <th scope="col" className="px-3 py-2">Member</th>
-                      <th scope="col" className="px-3 py-2">Category</th>
-                      <th scope="col" className="px-3 py-2">Status</th>
-                      <th scope="col" className="px-3 py-2 text-right">{money ? "Amount" : "Count"}</th>
-                      <th scope="col" className="px-3 py-2">Detail</th>
+                      <th scope="col" className="px-3 py-2">
+                        Date
+                      </th>
+                      <th scope="col" className="px-3 py-2">
+                        Member
+                      </th>
+                      <th scope="col" className="px-3 py-2">
+                        Category
+                      </th>
+                      <th scope="col" className="px-3 py-2">
+                        Status
+                      </th>
+                      <th scope="col" className="px-3 py-2 text-right">
+                        {money ? "Amount" : "Count"}
+                      </th>
+                      <th scope="col" className="px-3 py-2">
+                        Detail
+                      </th>
                     </tr>
                   </thead>
                   <tbody>

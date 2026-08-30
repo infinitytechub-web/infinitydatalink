@@ -33,10 +33,13 @@ export function authorizeCronRequest(request: Request): Response | null {
   const trusted = pickTrustedSecrets();
   if (trusted.length === 0) {
     // Fail closed: without a configured secret nothing may trigger these jobs.
-    return new Response(JSON.stringify({ success: false, error: "scheduler auth not configured" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: false, error: "scheduler auth not configured" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   const presented = extractPresented(request);

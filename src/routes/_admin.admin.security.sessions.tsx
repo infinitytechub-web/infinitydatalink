@@ -52,7 +52,10 @@ function Content() {
     () =>
       data.rows
         .slice()
-        .sort((a, b) => Number(b.active) - Number(a.active) || b.last_seen_at.localeCompare(a.last_seen_at)),
+        .sort(
+          (a, b) =>
+            Number(b.active) - Number(a.active) || b.last_seen_at.localeCompare(a.last_seen_at),
+        ),
     [data.rows],
   );
 
@@ -70,7 +73,11 @@ function Content() {
           hint="live presence channel"
         />
         <KPIStat label="Staff online" value={<span className="tabular">{staff}</span>} />
-        <KPIStat label="Active sessions" value={<span className="tabular">{data.active}</span>} accent />
+        <KPIStat
+          label="Active sessions"
+          value={<span className="tabular">{data.active}</span>}
+          accent
+        />
         <KPIStat label="Idle sessions (12h)" value={<span className="tabular">{data.idle}</span>} />
       </section>
 
@@ -88,7 +95,10 @@ function Content() {
         }
       >
         {users.length === 0 ? (
-          <EmptyState title="Nobody online" hint="The roster updates in real time as people sign in." />
+          <EmptyState
+            title="Nobody online"
+            hint="The roster updates in real time as people sign in."
+          />
         ) : (
           <ul className="divide-y divide-emerald-deep/5">
             {users.map((u) => (
@@ -96,9 +106,13 @@ function Content() {
                 <span className="flex items-center gap-3">
                   <LiveDot />
                   <span className="text-sm font-semibold text-emerald-deep">{u.name}</span>
-                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{u.role}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {u.role}
+                  </span>
                 </span>
-                <span className="tabular text-xs text-emerald-deep/55">online {duration(u.online_at)}</span>
+                <span className="tabular text-xs text-emerald-deep/55">
+                  online {duration(u.online_at)}
+                </span>
               </li>
             ))}
           </ul>
@@ -122,7 +136,10 @@ function Content() {
         }
       >
         {rows.length === 0 ? (
-          <EmptyState title="No recent sessions" hint="Sessions from the last 12 hours appear here." />
+          <EmptyState
+            title="No recent sessions"
+            hint="Sessions from the last 12 hours appear here."
+          />
         ) : (
           <table className="w-full">
             <thead>
@@ -142,7 +159,9 @@ function Content() {
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                        r.active ? "bg-emerald-mid/10 text-emerald-mid" : "bg-cream text-muted-foreground"
+                        r.active
+                          ? "bg-emerald-mid/10 text-emerald-mid"
+                          : "bg-cream text-muted-foreground"
                       }`}
                     >
                       {r.active ? <LiveDot /> : null}
@@ -154,7 +173,9 @@ function Content() {
                   <td className="px-6 py-4 text-xs text-muted-foreground">{r.browser}</td>
                   <td className="tabular px-6 py-4 text-right text-xs">
                     {duration(r.started_at)}
-                    <span className="ml-2 text-muted-foreground">last seen {duration(r.last_seen_at)} ago</span>
+                    <span className="ml-2 text-muted-foreground">
+                      last seen {duration(r.last_seen_at)} ago
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -162,8 +183,9 @@ function Content() {
           </table>
         )}
         <p className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-muted-foreground">
-          Privacy note: session records are retained for security monitoring only. Redacted addresses hide the host
-          portion, and user agents are reduced to device and browser families so individuals cannot be fingerprinted.
+          Privacy note: session records are retained for security monitoring only. Redacted
+          addresses hide the host portion, and user agents are reduced to device and browser
+          families so individuals cannot be fingerprinted.
         </p>
       </SectionCard>
     </div>

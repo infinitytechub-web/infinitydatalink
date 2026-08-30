@@ -30,11 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  listMyAccounts,
-  submitContribution,
-  type SavingsAccount,
-} from "@/lib/savings.functions";
+import { listMyAccounts, submitContribution, type SavingsAccount } from "@/lib/savings.functions";
 import { getMyTransactions } from "@/lib/member-data.functions";
 import { RecurringContributionsSection } from "@/components/recurring-contributions";
 import { GoalDialog } from "@/components/goal-dialog";
@@ -138,18 +134,18 @@ function Body() {
   const total = accounts.reduce((s, a) => s + a.balance, 0);
   const active = accounts.filter((a) => a.status === "active");
   const recentRows = recent.data && "rows" in recent.data ? recent.data.rows : [];
-  const clearedDeposits = recentRows.filter(
-    (t) => t.kind === "deposit" && t.status === "cleared",
-  );
+  const clearedDeposits = recentRows.filter((t) => t.kind === "deposit" && t.status === "cleared");
   const lifetime = clearedDeposits.reduce((s, t) => s + Number(t.amount ?? 0), 0);
-  const pendingDeposits = recentRows.filter(
-    (t) => t.kind === "deposit" && t.status === "pending",
-  );
+  const pendingDeposits = recentRows.filter((t) => t.kind === "deposit" && t.status === "pending");
 
   return (
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Total balance" value={<Money amount={total} />} hint={`${active.length} active plan(s)`} />
+        <KPIStat
+          label="Total balance"
+          value={<Money amount={total} />}
+          hint={`${active.length} active plan(s)`}
+        />
         <KPIStat
           label="Lifetime contributions"
           value={<Money amount={lifetime} />}
@@ -170,7 +166,10 @@ function Body() {
       {accounts.length === 0 ? (
         <SectionCard title="Get started">
           <div className="p-6">
-            <EmptyState title="No savings plans yet" hint="Pick a plan to start contributing and building interest." />
+            <EmptyState
+              title="No savings plans yet"
+              hint="Pick a plan to start contributing and building interest."
+            />
             <div className="mt-4">
               <Link
                 to="/app/savings/enroll"
@@ -199,15 +198,18 @@ function Body() {
             }))}
           />
 
-
-
-
-
           <SectionCard title="Contribution history">
             {recent.isLoading ? (
-              <div className="p-6"><Skeleton className="h-40 w-full" /></div>
+              <div className="p-6">
+                <Skeleton className="h-40 w-full" />
+              </div>
             ) : clearedDeposits.length === 0 && pendingDeposits.length === 0 ? (
-              <div className="p-6"><EmptyState title="No contributions yet" hint="Use Top up to fund an account and it will appear here." /></div>
+              <div className="p-6">
+                <EmptyState
+                  title="No contributions yet"
+                  hint="Use Top up to fund an account and it will appear here."
+                />
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -221,19 +223,23 @@ function Body() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-emerald-deep/5">
-                    {[...pendingDeposits, ...clearedDeposits]
-                      .slice(0, 15)
-                      .map((t: any) => (
-                        <tr key={t.id}>
-                          <td className="px-6 py-3 text-[11px] text-muted-foreground">
-                            {new Date(t.created_at).toLocaleString()}
-                          </td>
-                          <td className="px-6 py-3 font-mono text-[11px] text-muted-foreground">{t.ref}</td>
-                          <td className="px-6 py-3 text-muted-foreground">{t.channel ?? "—"}</td>
-                          <td className="px-6 py-3 text-right"><Money amount={Number(t.amount)} /></td>
-                          <td className="px-6 py-3 text-right"><StatusPill status={t.status} /></td>
-                        </tr>
-                      ))}
+                    {[...pendingDeposits, ...clearedDeposits].slice(0, 15).map((t: any) => (
+                      <tr key={t.id}>
+                        <td className="px-6 py-3 text-[11px] text-muted-foreground">
+                          {new Date(t.created_at).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-3 font-mono text-[11px] text-muted-foreground">
+                          {t.ref}
+                        </td>
+                        <td className="px-6 py-3 text-muted-foreground">{t.channel ?? "—"}</td>
+                        <td className="px-6 py-3 text-right">
+                          <Money amount={Number(t.amount)} />
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          <StatusPill status={t.status} />
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -248,11 +254,7 @@ function Body() {
 function AccountCard({ a }: { a: SavingsAccount }) {
   return (
     <div className="group rounded-lg border border-emerald-deep/10 bg-card p-5 transition hover:border-emerald-mid/40 hover:shadow-sm">
-      <Link
-        to="/app/savings/$accountId"
-        params={{ accountId: a.id }}
-        className="block"
-      >
+      <Link to="/app/savings/$accountId" params={{ accountId: a.id }} className="block">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -261,13 +263,17 @@ function AccountCard({ a }: { a: SavingsAccount }) {
             <div className="mt-1 text-lg font-semibold text-emerald-deep">
               {a.nickname || a.plan_name}
             </div>
-            {a.nickname ? <div className="text-[11px] text-muted-foreground">{a.plan_name}</div> : null}
+            {a.nickname ? (
+              <div className="text-[11px] text-muted-foreground">{a.plan_name}</div>
+            ) : null}
           </div>
           <StatusPill status={a.status === "active" ? "active" : "closed"} />
         </div>
         <div className="mt-4 flex items-end justify-between">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Balance</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Balance
+            </div>
             <div className="text-2xl font-semibold tabular text-emerald-deep">
               <Money amount={a.balance} />
             </div>
@@ -290,7 +296,9 @@ function AccountCard({ a }: { a: SavingsAccount }) {
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
               <Money amount={a.balance} /> of <Money amount={a.goal_amount} />
-              {a.goal_target_date ? ` · by ${new Date(a.goal_target_date).toLocaleDateString()}` : ""}
+              {a.goal_target_date
+                ? ` · by ${new Date(a.goal_target_date).toLocaleDateString()}`
+                : ""}
             </div>
           </div>
         ) : null}
@@ -298,7 +306,11 @@ function AccountCard({ a }: { a: SavingsAccount }) {
       {a.status === "active" ? (
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-emerald-deep/5 pt-4">
           <QuickDepositButton accountId={a.id} accountLabel={a.nickname || a.plan_name} />
-          <GoalDialog accountId={a.id} currentAmount={a.goal_amount} currentDate={a.goal_target_date} />
+          <GoalDialog
+            accountId={a.id}
+            currentAmount={a.goal_amount}
+            currentDate={a.goal_target_date}
+          />
           <Link
             to="/app/savings/$accountId"
             params={{ accountId: a.id }}
@@ -314,7 +326,13 @@ function AccountCard({ a }: { a: SavingsAccount }) {
 
 const QUICK_AMOUNTS = [50, 100, 250, 500];
 
-function QuickDepositButton({ accountId, accountLabel }: { accountId: string; accountLabel: string }) {
+function QuickDepositButton({
+  accountId,
+  accountLabel,
+}: {
+  accountId: string;
+  accountLabel: string;
+}) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [channel, setChannel] = useState("mobile_money");
@@ -324,7 +342,9 @@ function QuickDepositButton({ accountId, accountLabel }: { accountId: string; ac
   const call = useServerFn(submitContribution);
   const mut = useMutation({
     mutationFn: () =>
-      call({ data: { account_id: accountId, amount: Number(amount), channel, note: note || null } }),
+      call({
+        data: { account_id: accountId, amount: Number(amount), channel, note: note || null },
+      }),
     onSuccess: async () => {
       toast.success("Contribution submitted — pending finance approval.");
       setOpen(false);
@@ -405,10 +425,20 @@ function QuickDepositButton({ accountId, accountLabel }: { accountId: string; ac
           </div>
           <div>
             <Label htmlFor="qd-note">Note (optional)</Label>
-            <Textarea id="qd-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+            <Textarea
+              id="qd-note"
+              rows={2}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={mut.isPending}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              disabled={mut.isPending}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={mut.isPending}>

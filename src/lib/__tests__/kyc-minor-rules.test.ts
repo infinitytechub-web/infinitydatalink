@@ -6,8 +6,18 @@ import {
   isGuardianRelationship,
 } from "@/lib/kyc-minor-rules";
 
-const guardian = { id: "11111111-1111-1111-1111-111111111111", full_name: "Ama", relationship: "Mother", phone: "0244000000" };
-const sibling = { id: "22222222-2222-2222-2222-222222222222", full_name: "Kojo", relationship: "Brother", phone: "0244000001" };
+const guardian = {
+  id: "11111111-1111-1111-1111-111111111111",
+  full_name: "Ama",
+  relationship: "Mother",
+  phone: "0244000000",
+};
+const sibling = {
+  id: "22222222-2222-2222-2222-222222222222",
+  full_name: "Kojo",
+  relationship: "Brother",
+  phone: "0244000001",
+};
 
 const goodReview = {
   guardian_nok_id: guardian.id,
@@ -25,7 +35,9 @@ describe("minor KYC guardrails", () => {
   });
 
   it("requires a guardian with a phone number", () => {
-    expect(eligibleGuardians([guardian, sibling, { ...guardian, id: "x", phone: "" }])).toHaveLength(1);
+    expect(
+      eligibleGuardians([guardian, sibling, { ...guardian, id: "x", phone: "" }]),
+    ).toHaveLength(1);
   });
 
   it("does not apply to adults", () => {

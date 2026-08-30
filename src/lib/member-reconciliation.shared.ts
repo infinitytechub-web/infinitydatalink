@@ -18,7 +18,12 @@ export const RECON_ISSUE_LABELS: Record<ReconIssueKind, string> = {
 };
 
 /** Datasets a reconciliation row can drill into. */
-export type ReconRecordDataset = "transactions" | "withdrawals" | "receipts" | "repayments" | "savings";
+export type ReconRecordDataset =
+  | "transactions"
+  | "withdrawals"
+  | "receipts"
+  | "repayments"
+  | "savings";
 
 export type MemberReconIssue = {
   key: string;

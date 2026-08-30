@@ -18,8 +18,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL =
-  process.env.VITE_SUPABASE_URL ?? "https://xypqvwkfldpjgejhgrjo.supabase.co";
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? "https://xypqvwkfldpjgejhgrjo.supabase.co";
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "";
 
 const MEMBER_EMAIL = process.env.E2E_MEMBER_EMAIL;
@@ -49,7 +48,9 @@ async function signIn(email: string, password: string): Promise<SupabaseClient> 
   return c;
 }
 
-async function activeAccounts(c: SupabaseClient): Promise<Array<{ id: string; balance: number; user_id: string }>> {
+async function activeAccounts(
+  c: SupabaseClient,
+): Promise<Array<{ id: string; balance: number; user_id: string }>> {
   const { data } = await c
     .from("savings_accounts")
     .select("id, balance, user_id")
@@ -77,7 +78,10 @@ test.describe("Anonymous callers cannot touch the transfer RPCs", () => {
   });
 
   test("clear_transfer rejects anon", async () => {
-    const { error } = await anon.rpc("clear_transfer", { _transfer_id: ZERO_UUID, _actor_id: ZERO_UUID });
+    const { error } = await anon.rpc("clear_transfer", {
+      _transfer_id: ZERO_UUID,
+      _actor_id: ZERO_UUID,
+    });
     expect(error).not.toBeNull();
   });
 
@@ -140,7 +144,10 @@ test.describe("Member requesting a transfer", () => {
       .neq("user_id", (await member.auth.getUser()).data.user?.id ?? ZERO_UUID)
       .limit(1);
     const foreign = (others ?? [])[0] as { id: string } | undefined;
-    test.skip(!foreign || myAccounts.length < 1, "no foreign account available to attempt spoofed source");
+    test.skip(
+      !foreign || myAccounts.length < 1,
+      "no foreign account available to attempt spoofed source",
+    );
     const dest = myAccounts[0]!;
     const { error } = await member.rpc("request_transfer", {
       _from_account_id: foreign!.id,
@@ -154,7 +161,11 @@ test.describe("Member requesting a transfer", () => {
   test("member cannot invoke finance-only clear/reject", async () => {
     const guards = await Promise.all([
       member.rpc("clear_transfer", { _transfer_id: ZERO_UUID, _actor_id: ZERO_UUID }),
-      member.rpc("reject_transfer", { _transfer_id: ZERO_UUID, _reason: "nope", _actor_id: ZERO_UUID }),
+      member.rpc("reject_transfer", {
+        _transfer_id: ZERO_UUID,
+        _reason: "nope",
+        _actor_id: ZERO_UUID,
+      }),
     ]);
     for (const g of guards) expect(g.error).not.toBeNull();
   });
@@ -195,7 +206,11 @@ test.describe("Lifecycle: pending → cleared", () => {
     });
     expect(clearErr).toBeNull();
 
-    const after = await member.from("transfers").select("status, cleared_at, out_txn_id, in_txn_id").eq("id", transferId).single();
+    const after = await member
+      .from("transfers")
+      .select("status, cleared_at, out_txn_id, in_txn_id")
+      .eq("id", transferId)
+      .single();
     expect(after.data?.status).toBe("cleared");
     expect(after.data?.cleared_at).not.toBeNull();
     expect(after.data?.out_txn_id).not.toBeNull();
@@ -209,7 +224,10 @@ test.describe("Lifecycle: pending → cleared", () => {
     expect(dst2.balance).toBeCloseTo(other!.balance + amount, 2);
 
     // A pending transfer that is already cleared cannot be cleared again.
-    const twice = await finance.rpc("clear_transfer", { _transfer_id: transferId, _actor_id: financeId });
+    const twice = await finance.rpc("clear_transfer", {
+      _transfer_id: transferId,
+      _actor_id: financeId,
+    });
     expect(twice.error?.message ?? "").toMatch(/transfer_not_pending/i);
   });
 
@@ -236,7 +254,10 @@ test.describe("Lifecycle: pending → cleared", () => {
 
     const finance = await signIn(FINANCE_EMAIL!, FINANCE_PASSWORD!);
     const financeId = (await finance.auth.getUser()).data.user!.id;
-    const { error: clearErr } = await finance.rpc("clear_transfer", { _transfer_id: id, _actor_id: financeId });
+    const { error: clearErr } = await finance.rpc("clear_transfer", {
+      _transfer_id: id,
+      _actor_id: financeId,
+    });
     expect(clearErr).toBeNull();
 
     // Recipient sees the incoming transfer under their own client via RLS.
@@ -278,7 +299,11 @@ test.describe("Lifecycle: pending → failed (rejected)", () => {
     });
     expect(rejErr).toBeNull();
 
-    const after = await member.from("transfers").select("status, note, cleared_at").eq("id", id).single();
+    const after = await member
+      .from("transfers")
+      .select("status, note, cleared_at")
+      .eq("id", id)
+      .single();
     expect(after.data?.status).toBe("failed");
     expect(after.data?.note ?? "").toContain(reason);
     expect(after.data?.cleared_at).not.toBeNull();
@@ -291,9 +316,16 @@ test.describe("Lifecycle: pending → failed (rejected)", () => {
     expect(dst2.balance).toBeCloseTo(startDst, 2);
 
     // Already-terminal transfer cannot be rejected again nor cleared.
-    const rejAgain = await finance.rpc("reject_transfer", { _transfer_id: id, _reason: "again", _actor_id: financeId });
+    const rejAgain = await finance.rpc("reject_transfer", {
+      _transfer_id: id,
+      _reason: "again",
+      _actor_id: financeId,
+    });
     expect(rejAgain.error?.message ?? "").toMatch(/transfer_not_pending/i);
-    const clearTerminal = await finance.rpc("clear_transfer", { _transfer_id: id, _actor_id: financeId });
+    const clearTerminal = await finance.rpc("clear_transfer", {
+      _transfer_id: id,
+      _actor_id: financeId,
+    });
     expect(clearTerminal.error?.message ?? "").toMatch(/transfer_not_pending/i);
   });
 });

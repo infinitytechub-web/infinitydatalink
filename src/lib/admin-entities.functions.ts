@@ -147,49 +147,56 @@ export type EntityMembership = {
 export const getEntity = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<{ entity: EntityRow; members: EntityMembership[] }> => {
-    await assertStaff(context.supabase, context.userId);
-    // Contact / tax columns: privileged read after the staff role check.
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: entity, error } = await (supabaseAdmin as any)
-      .from("entities")
-      .select("*")
+  .handler(
+    async ({ data, context }): Promise<{ entity: EntityRow; members: EntityMembership[] }> => {
+      await assertStaff(context.supabase, context.userId);
+      // Contact / tax columns: privileged read after the staff role check.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: entity, error } = await (supabaseAdmin as any)
+        .from("entities")
+        .select("*")
 
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!entity) throw new Error("entity_not_found");
-    const { data: em } = await context.supabase
-      .from("entity_memberships")
-      .select("id,entity_id,profile_id,role,status,joined_at,profiles!inner(full_name,member_no)")
-      .eq("entity_id", data.id)
-      .order("joined_at", { ascending: true });
-    const members: EntityMembership[] = ((em ?? []) as any[]).map((r) => ({
-      id: r.id,
-      entity_id: r.entity_id,
-      profile_id: r.profile_id,
-      role: r.role,
-      status: r.status,
-      joined_at: r.joined_at,
-      member_name: r.profiles?.full_name ?? null,
-      member_no: r.profiles?.member_no ?? null,
-      email: null,
-    }));
-    return { entity: entity as EntityRow, members };
-  });
+        .eq("id", data.id)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!entity) throw new Error("entity_not_found");
+      const { data: em } = await context.supabase
+        .from("entity_memberships")
+        .select("id,entity_id,profile_id,role,status,joined_at,profiles!inner(full_name,member_no)")
+        .eq("entity_id", data.id)
+        .order("joined_at", { ascending: true });
+      const members: EntityMembership[] = ((em ?? []) as any[]).map((r) => ({
+        id: r.id,
+        entity_id: r.entity_id,
+        profile_id: r.profile_id,
+        role: r.role,
+        status: r.status,
+        joined_at: r.joined_at,
+        member_name: r.profiles?.full_name ?? null,
+        member_no: r.profiles?.member_no ?? null,
+        email: null,
+      }));
+      return { entity: entity as EntityRow, members };
+    },
+  );
 
 export const lookupMemberByNumber = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ member_no: z.string().min(1).max(50) }).parse(d))
-  .handler(async ({ data, context }): Promise<{ id: string; full_name: string | null; member_no: string | null } | null> => {
-    await assertStaff(context.supabase, context.userId);
-    const { data: p } = await context.supabase
-      .from("profiles")
-      .select("id, full_name, member_no")
-      .eq("member_no", data.member_no)
-      .maybeSingle();
-    return (p as any) ?? null;
-  });
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ id: string; full_name: string | null; member_no: string | null } | null> => {
+      await assertStaff(context.supabase, context.userId);
+      const { data: p } = await context.supabase
+        .from("profiles")
+        .select("id, full_name, member_no")
+        .eq("member_no", data.member_no)
+        .maybeSingle();
+      return (p as any) ?? null;
+    },
+  );
 
 export const registerEntity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -322,7 +329,13 @@ export const uploadEntityDocument = createServerFn({ method: "POST" })
     z
       .object({
         entity_id: z.string().uuid(),
-        doc_type: z.enum(["registration_cert", "tax_cert", "mandate_letter", "id_document", "other"]),
+        doc_type: z.enum([
+          "registration_cert",
+          "tax_cert",
+          "mandate_letter",
+          "id_document",
+          "other",
+        ]),
         filename: z.string().min(1).max(160),
         mime_type: z.string().min(3).max(80),
         content_base64: z.string().min(4),
@@ -331,7 +344,8 @@ export const uploadEntityDocument = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<EntityDocumentRow> => {
     await assertEntityAccess(context.supabase, context.userId, data.entity_id);
-    if (!ALLOWED_MIMES.has(data.mime_type)) throw new Error("Only JPEG, PNG or PDF files are accepted.");
+    if (!ALLOWED_MIMES.has(data.mime_type))
+      throw new Error("Only JPEG, PNG or PDF files are accepted.");
     // decode base64
     const b64 = data.content_base64.replace(/^data:[^;]+;base64,/, "");
     const buffer = Buffer.from(b64, "base64");
@@ -401,7 +415,12 @@ export type EntityTimelineEvent = {
 export const listEntityTimeline = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ entity_id: z.string().uuid(), limit: z.number().int().min(1).max(200).default(100) }).parse(d),
+    z
+      .object({
+        entity_id: z.string().uuid(),
+        limit: z.number().int().min(1).max(200).default(100),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<EntityTimelineEvent[]> => {
     await assertStaff(context.supabase, context.userId);

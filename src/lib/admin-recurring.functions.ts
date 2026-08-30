@@ -1,12 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  assertAnyRole,
-  FINANCE_ROLES,
-  loadRoleSet,
-  type Role,
-} from "@/lib/role-guards";
+import { assertAnyRole, FINANCE_ROLES, loadRoleSet, type Role } from "@/lib/role-guards";
 
 export type AdminRecurringStatus = "active" | "paused";
 export type AdminRecurringRow = {
@@ -81,7 +76,10 @@ export const adminListRecurring = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     const userIds = Array.from(new Set((rows ?? []).map((r: any) => r.user_id as string)));
-    const profileMap = new Map<string, { full_name: string | null; email: string | null; member_no: string | null }>();
+    const profileMap = new Map<
+      string,
+      { full_name: string | null; email: string | null; member_no: string | null }
+    >();
     if (userIds.length > 0) {
       const { data: profs, error: perr } = await context.supabase
         .from("profiles")

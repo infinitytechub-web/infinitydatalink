@@ -30,21 +30,18 @@ const KycApprovedEmail = ({
       <Container style={container}>
         <Heading style={h1}>You're verified 🎉</Heading>
         <Text style={text}>
-          {memberName ? `Hi ${memberName},` : "Hello,"} good news — your KYC
-          verification for <strong>{siteName}</strong> has been approved.
+          {memberName ? `Hi ${memberName},` : "Hello,"} good news — your KYC verification for{" "}
+          <strong>{siteName}</strong> has been approved.
         </Text>
         <Text style={text}>
-          You now have full access to savings plans, loan applications, and all
-          member benefits.
+          You now have full access to savings plans, loan applications, and all member benefits.
         </Text>
         <Section style={{ textAlign: "center", margin: "28px 0" }}>
           <Button style={button} href={appUrl}>
             Open member portal
           </Button>
         </Section>
-        <Text style={footer}>
-          If you didn't expect this email, please contact support.
-        </Text>
+        <Text style={footer}>If you didn't expect this email, please contact support.</Text>
       </Container>
     </Body>
   </Html>

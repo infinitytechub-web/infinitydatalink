@@ -50,7 +50,11 @@ export function extensionOf(filename: string): string {
 export type FileValidation = { ok: true } | { ok: false; reasons: string[] };
 
 /** Type + extension + size validation shared by client and server. */
-export function validateUpload(input: { filename: string; mime: string; size: number }): FileValidation {
+export function validateUpload(input: {
+  filename: string;
+  mime: string;
+  size: number;
+}): FileValidation {
   const reasons: string[] = [];
   const allowed = ALLOWED_TYPES[input.mime];
   if (!allowed) reasons.push(`unsupported_type:${input.mime || "unknown"}`);

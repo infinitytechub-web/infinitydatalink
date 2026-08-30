@@ -78,10 +78,7 @@ export const listLoanProducts = createServerFn({ method: "GET" })
     z.object({ include_inactive: z.boolean().optional().default(false) }).parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<LoanProduct[]> => {
-    let q = context.supabase
-      .from("loan_products")
-      .select("*")
-      .order("name", { ascending: true });
+    let q = context.supabase.from("loan_products").select("*").order("name", { ascending: true });
     if (!data.include_inactive) q = q.eq("active", true);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -90,7 +87,12 @@ export const listLoanProducts = createServerFn({ method: "GET" })
 
 const productInput = z.object({
   id: z.string().uuid().optional(),
-  code: z.string().trim().min(2).max(24).regex(/^[A-Z0-9_-]+$/, "Use upper-case letters, digits, - or _"),
+  code: z
+    .string()
+    .trim()
+    .min(2)
+    .max(24)
+    .regex(/^[A-Z0-9_-]+$/, "Use upper-case letters, digits, - or _"),
   name: z.string().trim().min(2).max(80),
   description: z.string().trim().max(500).nullable().optional(),
   min_amount: z.number().positive().max(100_000_000),
@@ -115,8 +117,10 @@ export const upsertLoanProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => {
     const parsed = productInput.parse(d);
-    if (parsed.max_amount < parsed.min_amount) throw new Error("Max amount must be at least the min amount");
-    if (parsed.max_term_months < parsed.min_term_months) throw new Error("Max term must be at least the min term");
+    if (parsed.max_amount < parsed.min_amount)
+      throw new Error("Max amount must be at least the min amount");
+    if (parsed.max_term_months < parsed.min_term_months)
+      throw new Error("Max term must be at least the min term");
     if (parsed.requires_guarantor && parsed.min_guarantors < 1) {
       throw new Error("Set at least one required guarantor");
     }
@@ -129,7 +133,12 @@ export const upsertLoanProduct = createServerFn({ method: "POST" })
 
     const payload = { ...fields, description: fields.description ?? null };
     const query = id
-      ? (supabaseAdmin as any).from("loan_products").update(payload).eq("id", id).select("*").single()
+      ? (supabaseAdmin as any)
+          .from("loan_products")
+          .update(payload)
+          .eq("id", id)
+          .select("*")
+          .single()
       : (supabaseAdmin as any)
           .from("loan_products")
           .insert({ ...payload, created_by: context.userId })
@@ -154,9 +163,7 @@ export const upsertLoanProduct = createServerFn({ method: "POST" })
 
 export const setLoanProductActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), active: z.boolean() }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), active: z.boolean() }).parse(d))
   .handler(async ({ data, context }): Promise<LoanProduct> => {
     const role = await assertProductAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

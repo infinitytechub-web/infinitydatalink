@@ -34,9 +34,7 @@ export function PermissionMatrixEditor() {
   }, [data.rows, role]);
 
   const current = draft ?? saved;
-  const dirty = draft
-    ? draft.size !== saved.size || [...draft].some((c) => !saved.has(c))
-    : false;
+  const dirty = draft ? draft.size !== saved.size || [...draft].some((c) => !saved.has(c)) : false;
 
   const setRoleAndReset = (next: EditableRole) => {
     setRole(next);
@@ -80,8 +78,7 @@ export function PermissionMatrixEditor() {
   };
 
   const save = useMutation({
-    mutationFn: () =>
-      saveRolePermissions({ data: { role, capabilities: [...current] } }),
+    mutationFn: () => saveRolePermissions({ data: { role, capabilities: [...current] } }),
     onSuccess: async (res) => {
       toast.success(`${ROLE_LABELS[role]} updated — ${res.count} permissions active`);
       setDraft(null);

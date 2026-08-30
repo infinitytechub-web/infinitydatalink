@@ -30,18 +30,23 @@ function collectRoutes(dir = ROUTES_DIR, prefix = "") {
     }
     if (!/\.(tsx?|jsx?)$/.test(name)) continue;
     if (name.startsWith("__")) continue;
-    const base = (prefix + name)
-      .replace(/\.(tsx?|jsx?)$/, "")
-      .replace(/\[\.\]/g, ".");
+    const base = (prefix + name).replace(/\.(tsx?|jsx?)$/, "").replace(/\[\.\]/g, ".");
     // Skip server-only files under api/ or lovable/ (probed separately if needed)
-    if (base.startsWith("api/") || base.startsWith("lovable/") || base.startsWith("email/")) continue;
+    if (base.startsWith("api/") || base.startsWith("lovable/") || base.startsWith("email/"))
+      continue;
     const segments = base.split(/[./]/).filter(Boolean);
     const urlSegs = [];
     for (const seg of segments) {
       if (seg.startsWith("_")) continue;
       if (seg === "index") continue;
-      if (seg === "$") { urlSegs.push("smoke"); continue; }
-      if (seg.startsWith("$")) { urlSegs.push("smoke-id"); continue; }
+      if (seg === "$") {
+        urlSegs.push("smoke");
+        continue;
+      }
+      if (seg.startsWith("$")) {
+        urlSegs.push("smoke-id");
+        continue;
+      }
       urlSegs.push(seg);
     }
     const url = "/" + urlSegs.join("/");
@@ -58,10 +63,14 @@ async function waitForServer(url, timeoutMs) {
       const r = await fetch(url, { redirect: "manual" });
       // Any HTTP response (even 500) means the worker is up.
       if (typeof r.status === "number") return;
-    } catch (e) { lastErr = e; }
+    } catch (e) {
+      lastErr = e;
+    }
     await new Promise((r) => setTimeout(r, 500));
   }
-  throw new Error(`Worker at ${url} did not become ready in ${timeoutMs}ms (${lastErr?.message ?? "no response"})`);
+  throw new Error(
+    `Worker at ${url} did not become ready in ${timeoutMs}ms (${lastErr?.message ?? "no response"})`,
+  );
 }
 
 async function main() {
@@ -75,12 +84,30 @@ async function main() {
 
   const server = spawn(
     "npx",
-    ["-y", "wrangler", "dev", "--config", WORKER_CONFIG, "--port", String(PORT), "--ip", "127.0.0.1", "--local"],
+    [
+      "-y",
+      "wrangler",
+      "dev",
+      "--config",
+      WORKER_CONFIG,
+      "--port",
+      String(PORT),
+      "--ip",
+      "127.0.0.1",
+      "--local",
+    ],
     { stdio: ["ignore", "inherit", "inherit"], env: { ...process.env } },
   );
-  const cleanup = () => { try { server.kill("SIGTERM"); } catch {} };
+  const cleanup = () => {
+    try {
+      server.kill("SIGTERM");
+    } catch {}
+  };
   process.on("exit", cleanup);
-  process.on("SIGINT", () => { cleanup(); process.exit(130); });
+  process.on("SIGINT", () => {
+    cleanup();
+    process.exit(130);
+  });
 
   try {
     await waitForServer(HOST, READY_TIMEOUT_MS);

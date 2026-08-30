@@ -46,12 +46,13 @@ export const PRIORITY_LABELS: Record<SupportPriority, string> = {
 };
 
 /** First-response and resolution SLA targets, in hours, by priority. */
-export const SLA_TARGETS: Record<SupportPriority, { first_response_h: number; resolve_h: number }> = {
-  urgent: { first_response_h: 2, resolve_h: 8 },
-  high: { first_response_h: 4, resolve_h: 24 },
-  normal: { first_response_h: 12, resolve_h: 72 },
-  low: { first_response_h: 24, resolve_h: 120 },
-};
+export const SLA_TARGETS: Record<SupportPriority, { first_response_h: number; resolve_h: number }> =
+  {
+    urgent: { first_response_h: 2, resolve_h: 8 },
+    high: { first_response_h: 4, resolve_h: 24 },
+    normal: { first_response_h: 12, resolve_h: 72 },
+    low: { first_response_h: 24, resolve_h: 120 },
+  };
 
 export const REOPEN_WINDOW_DAYS = 7;
 

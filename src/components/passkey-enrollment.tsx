@@ -94,8 +94,8 @@ export function PasskeyEnrollmentCard() {
       </p>
       {supported === false ? (
         <p className="rounded border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-700">
-          This browser or device doesn't support platform biometrics. Try Chrome, Safari, or Edge
-          on a device with Face ID, Touch ID, or Windows Hello.
+          This browser or device doesn't support platform biometrics. Try Chrome, Safari, or Edge on
+          a device with Face ID, Touch ID, or Windows Hello.
         </p>
       ) : null}
 
@@ -163,7 +163,9 @@ export function PasskeyEnrollmentCard() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm("Remove this passkey? You won't be able to sign in with it anymore.")) {
+                    if (
+                      confirm("Remove this passkey? You won't be able to sign in with it anymore.")
+                    ) {
                       remove.mutate(p.id);
                     }
                   }}

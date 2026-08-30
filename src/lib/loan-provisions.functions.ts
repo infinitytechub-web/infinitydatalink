@@ -109,7 +109,10 @@ export const getProvisionReport = createServerFn({ method: "GET" })
       "finance, loan or audit",
     );
 
-    const rates = { ...DEFAULT_PROVISION_RATES, ...(data.rates ?? {}) } as Record<ArrearsBucket, number>;
+    const rates = { ...DEFAULT_PROVISION_RATES, ...(data.rates ?? {}) } as Record<
+      ArrearsBucket,
+      number
+    >;
 
     const { data: loans, error } = await context.supabase
       .from("loans")
@@ -122,7 +125,10 @@ export const getProvisionReport = createServerFn({ method: "GET" })
     const rows = (loans ?? []) as any[];
     const active = rows.filter((l) => String(l.status) === "active");
 
-    const bucketAgg = new Map<ArrearsBucket, { loans: number; outstanding: number; arrears: number }>();
+    const bucketAgg = new Map<
+      ArrearsBucket,
+      { loans: number; outstanding: number; arrears: number }
+    >();
     for (const b of ARREARS_BUCKETS) bucketAgg.set(b, { loans: 0, outstanding: 0, arrears: 0 });
     const productAgg = new Map<string, { loans: number; outstanding: number; provision: number }>();
 
@@ -175,7 +181,9 @@ export const getProvisionReport = createServerFn({ method: "GET" })
     exposures.sort((a, b) => b.provision - a.provision || b.outstanding - a.outstanding);
     const top = exposures.slice(0, data.top);
 
-    const memberIds = Array.from(new Set(top.map((e) => active.find((l) => l.id === e.id)?.user_id).filter(Boolean)));
+    const memberIds = Array.from(
+      new Set(top.map((e) => active.find((l) => l.id === e.id)?.user_id).filter(Boolean)),
+    );
     if (memberIds.length) {
       const { data: profiles } = await context.supabase
         .from("profiles")

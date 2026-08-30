@@ -79,7 +79,8 @@ function actionCategory(action: string) {
   if (a.startsWith("transfer")) return { label: "Transfer", color: "bg-sky-500" };
   if (a.startsWith("kyc")) return { label: "KYC", color: "bg-indigo-500" };
   if (a.startsWith("role") || a.includes("admin")) return { label: "Role", color: "bg-amber-500" };
-  if (a.startsWith("branding") || a.startsWith("settings")) return { label: "Settings", color: "bg-fuchsia-500" };
+  if (a.startsWith("branding") || a.startsWith("settings"))
+    return { label: "Settings", color: "bg-fuchsia-500" };
   if (a.startsWith("auth") || a.startsWith("user")) return { label: "Auth", color: "bg-rose-500" };
   return { label: "Event", color: "bg-slate-500" };
 }
@@ -108,7 +109,10 @@ function ActivityContent() {
             subtitle={`${data.total} events`}
             filename="admin_activity"
             columns={[
-              { header: "Timestamp", accessor: (e: ActivityEntry) => new Date(e.created_at).toISOString() },
+              {
+                header: "Timestamp",
+                accessor: (e: ActivityEntry) => new Date(e.created_at).toISOString(),
+              },
               { header: "Action", accessor: (e) => e.action },
               { header: "Target", accessor: (e) => e.target ?? "—" },
               { header: "Actor", accessor: (e) => e.actor_email ?? e.actor_id ?? "—" },
@@ -324,19 +328,13 @@ function groupByDay(rows: ActivityEntry[]) {
   return Array.from(groups.entries()).map(([date, entries]) => ({ date, entries }));
 }
 
-function DetailRow({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
+function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-4 rounded border border-emerald-deep/10 bg-card px-3 py-2 text-xs">
       <div className="text-muted-foreground">{label}</div>
-      <div className={`text-right text-emerald-deep/90 break-all ${mono ? "tabular font-mono" : ""}`}>
+      <div
+        className={`text-right text-emerald-deep/90 break-all ${mono ? "tabular font-mono" : ""}`}
+      >
         {value}
       </div>
     </div>

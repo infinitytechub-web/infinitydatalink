@@ -14,9 +14,8 @@ export const Route = createFileRoute("/api/public/hooks/guardian-consent-reminde
         if (denied) return denied;
 
         try {
-          const { runGuardianConsentReminders } = await import(
-            "@/lib/guardian-consent-reminders.server"
-          );
+          const { runGuardianConsentReminders } =
+            await import("@/lib/guardian-consent-reminders.server");
           const result = await runGuardianConsentReminders();
           return new Response(JSON.stringify({ success: true, ...result }), {
             headers: { "Content-Type": "application/json" },

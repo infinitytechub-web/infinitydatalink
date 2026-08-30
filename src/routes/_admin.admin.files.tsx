@@ -24,10 +24,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { exportCsv } from "@/lib/exports";
-import { FILE_CATEGORIES, FILE_CATEGORY_LABELS, humanBytes, isPreviewable } from "@/lib/files.shared";
-import { adminDeleteFile, adminListFiles, adminReviewFile, signFileUrl, type MemberFile } from "@/lib/files.functions";
+import {
+  FILE_CATEGORIES,
+  FILE_CATEGORY_LABELS,
+  humanBytes,
+  isPreviewable,
+} from "@/lib/files.shared";
+import {
+  adminDeleteFile,
+  adminListFiles,
+  adminReviewFile,
+  signFileUrl,
+  type MemberFile,
+} from "@/lib/files.functions";
 
 const SearchSchema = z.object({
   status: z.enum(["all", "pending", "approved", "rejected"]).default("pending"),
@@ -67,13 +84,18 @@ export const Route = createFileRoute("/_admin/admin/files")({
       { title: "File management — IT-360 CashApp Admin" },
       {
         name: "description",
-        content: "Review member documents, preview or download them, approve or reject with a note, and export the register.",
+        content:
+          "Review member documents, preview or download them, approve or reject with a note, and export the register.",
       },
       { name: "robots", content: "noindex" },
     ],
   }),
-  errorComponent: ({ error }) => <ErrorState title="File register unavailable" message={error.message} />,
-  notFoundComponent: () => <EmptyState title="Nothing here" hint="This file view does not exist." />,
+  errorComponent: ({ error }) => (
+    <ErrorState title="File register unavailable" message={error.message} />
+  ),
+  notFoundComponent: () => (
+    <EmptyState title="Nothing here" hint="This file view does not exist." />
+  ),
   component: AdminFilesPage,
 });
 
@@ -104,7 +126,10 @@ function FileRegister() {
   const review = useServerFn(adminReviewFile);
   const destroy = useServerFn(adminDeleteFile);
 
-  const [target, setTarget] = useState<{ file: MemberFile; mode: "approved" | "rejected" | "delete" } | null>(null);
+  const [target, setTarget] = useState<{
+    file: MemberFile;
+    mode: "approved" | "rejected" | "delete";
+  } | null>(null);
   const [note, setNote] = useState("");
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "files"] });
@@ -151,7 +176,10 @@ function FileRegister() {
             value={search.q}
             onChange={(e) => setSearch({ q: e.target.value })}
           />
-          <Select value={search.status} onValueChange={(v) => setSearch({ status: v as FileSearch["status"] })}>
+          <Select
+            value={search.status}
+            onValueChange={(v) => setSearch({ status: v as FileSearch["status"] })}
+          >
             <SelectTrigger className="h-9 w-36">
               <SelectValue />
             </SelectTrigger>
@@ -235,12 +263,16 @@ function FileRegister() {
                   <tr key={f.id}>
                     <td className="max-w-[180px] truncate py-2">{f.owner_label}</td>
                     <td className="max-w-[220px] truncate py-2 font-medium">{f.filename}</td>
-                    <td className="py-2">{FILE_CATEGORY_LABELS[f.category as never] ?? f.category}</td>
+                    <td className="py-2">
+                      {FILE_CATEGORY_LABELS[f.category as never] ?? f.category}
+                    </td>
                     <td className="py-2 tabular-nums">{humanBytes(f.size_bytes)}</td>
                     <td className="py-2">
                       <StatusPill status={REVIEW_PILL[f.review_status]} />
                       {f.review_note ? (
-                        <p className="mt-1 max-w-[220px] text-[11px] text-muted-foreground">{f.review_note}</p>
+                        <p className="mt-1 max-w-[220px] text-[11px] text-muted-foreground">
+                          {f.review_note}
+                        </p>
                       ) : null}
                     </td>
                     <td className="py-2 text-[11px] text-muted-foreground">
@@ -249,11 +281,19 @@ function FileRegister() {
                     <td className="py-2">
                       <div className="flex justify-end gap-1">
                         {isPreviewable(f.mime_type) ? (
-                          <Button size="sm" variant="ghost" onClick={() => void open(f.id, "preview")}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => void open(f.id, "preview")}
+                          >
                             <Eye className="size-3.5" />
                           </Button>
                         ) : null}
-                        <Button size="sm" variant="ghost" onClick={() => void open(f.id, "download")}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => void open(f.id, "download")}
+                        >
                           <Download className="size-3.5" />
                         </Button>
                         <Button
@@ -337,7 +377,8 @@ function FileRegister() {
             </p>
             <div className="space-y-1.5">
               <Label>
-                {target?.mode === "delete" ? "Reason for deletion" : "Decision note"} (min 10 characters)
+                {target?.mode === "delete" ? "Reason for deletion" : "Decision note"} (min 10
+                characters)
               </Label>
               <Textarea
                 value={note}

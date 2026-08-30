@@ -30,7 +30,9 @@ export const getLogRetention = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("runtime_log_retention")
-      .select("auto_purge_enabled, retention_error_days, retention_warning_days, retention_info_days, last_purge_at, last_purge_deleted, updated_at")
+      .select(
+        "auto_purge_enabled, retention_error_days, retention_warning_days, retention_info_days, last_purge_at, last_purge_deleted, updated_at",
+      )
       .eq("id", 1)
       .single();
     if (error) throw new Error(error.message);
@@ -50,10 +52,7 @@ export const updateLogRetention = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("runtime_log_retention")
-      .update(data)
-      .eq("id", 1);
+    const { error } = await context.supabase.from("runtime_log_retention").update(data).eq("id", 1);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -83,7 +82,9 @@ export const runManualLogPurge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ confirm: z.literal("PURGE") }).parse(d))
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("purge_runtime_error_logs", { _manual: true });
+    const { data, error } = await context.supabase.rpc("purge_runtime_error_logs", {
+      _manual: true,
+    });
     if (error) throw new Error(error.message);
     return { deleted: (data as number) ?? 0 };
   });

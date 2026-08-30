@@ -4,13 +4,26 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowLeft, PlayCircle, Save, Sparkles } from "lucide-react";
-import { ErrorState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  ErrorState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatMoney } from "@/lib/org-config";
 import {
   getInterestSettings,
@@ -28,7 +41,9 @@ const interestQuery = queryOptions({
 export const Route = createFileRoute("/_admin/admin/savings/interest")({
   component: InterestPage,
   errorComponent: ({ error }) => (
-    <div className="p-6"><ErrorState title="Failed to load interest settings" message={error.message} /></div>
+    <div className="p-6">
+      <ErrorState title="Failed to load interest settings" message={error.message} />
+    </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
@@ -104,13 +119,19 @@ function Body() {
         />
         <KPIStat
           label="Rate source"
-          value={form.rate_source === "flat" ? `${form.flat_rate_annual}% flat` : "Per savings plan"}
+          value={
+            form.rate_source === "flat" ? `${form.flat_rate_annual}% flat` : "Per savings plan"
+          }
           hint={form.exclude_held_funds ? "Held funds excluded" : "Held funds included"}
         />
         <KPIStat
           label="Last posting"
           value={lastRun ? <Money amount={lastRun.total_interest} /> : "—"}
-          hint={lastRun ? `${lastRun.accounts_credited} accounts · ${lastRun.period_start} → ${lastRun.period_end}` : "No posting yet"}
+          hint={
+            lastRun
+              ? `${lastRun.accounts_credited} accounts · ${lastRun.period_start} → ${lastRun.period_end}`
+              : "No posting yet"
+          }
           accent
         />
       </section>
@@ -139,24 +160,35 @@ function Body() {
 
           <div className="space-y-1.5">
             <Label>Posting frequency</Label>
-            <Select value={form.frequency} onValueChange={(v: any) => setForm({ ...form, frequency: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.frequency}
+              onValueChange={(v: any) => setForm({ ...form, frequency: v })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="monthly">Monthly</SelectItem>
                 <SelectItem value="quarterly">Quarterly</SelectItem>
                 <SelectItem value="annually">Annually</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">Annual rate is pro-rated across the period length.</p>
+            <p className="text-xs text-muted-foreground">
+              Annual rate is pro-rated across the period length.
+            </p>
           </div>
 
           <div className="space-y-1.5">
             <Label>Balance basis</Label>
             <Select value={form.basis} onValueChange={(v: any) => setForm({ ...form, basis: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="closing_balance">Closing balance</SelectItem>
-                <SelectItem value="average_balance">Average balance (opening + closing) / 2</SelectItem>
+                <SelectItem value="average_balance">
+                  Average balance (opening + closing) / 2
+                </SelectItem>
                 <SelectItem value="minimum_balance">Minimum balance in period</SelectItem>
               </SelectContent>
             </Select>
@@ -164,8 +196,13 @@ function Body() {
 
           <div className="space-y-1.5">
             <Label>Rate source</Label>
-            <Select value={form.rate_source} onValueChange={(v: any) => setForm({ ...form, rate_source: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.rate_source}
+              onValueChange={(v: any) => setForm({ ...form, rate_source: v })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="plan">Use each savings plan's rate</SelectItem>
                 <SelectItem value="flat">Use one flat institutional rate</SelectItem>
@@ -226,7 +263,9 @@ function Body() {
           <div className="flex items-center justify-between rounded-lg border border-border p-4 md:col-span-2">
             <div>
               <p className="text-sm font-medium">Exclude funds on hold</p>
-              <p className="text-xs text-muted-foreground">Active collateral holds are deducted before interest is calculated.</p>
+              <p className="text-xs text-muted-foreground">
+                Active collateral holds are deducted before interest is calculated.
+              </p>
             </div>
             <Switch
               checked={form.exclude_held_funds}
@@ -265,12 +304,20 @@ function Body() {
               <tbody className="divide-y divide-border">
                 {data.runs.map((r) => (
                   <tr key={r.id} className="hover:bg-muted/30">
-                    <td className="px-6 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleString()}</td>
-                    <td className="px-6 py-3">{r.period_start} → {r.period_end}</td>
-                    <td className="px-6 py-3 text-muted-foreground">{BASIS_LABEL[r.basis] ?? r.basis}</td>
+                    <td className="px-6 py-3 text-muted-foreground">
+                      {new Date(r.created_at).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-3">
+                      {r.period_start} → {r.period_end}
+                    </td>
+                    <td className="px-6 py-3 text-muted-foreground">
+                      {BASIS_LABEL[r.basis] ?? r.basis}
+                    </td>
                     <td className="px-6 py-3 text-right tabular-nums">{r.accounts_processed}</td>
                     <td className="px-6 py-3 text-right tabular-nums">{r.accounts_credited}</td>
-                    <td className="px-6 py-3 text-right tabular-nums">{formatMoney(r.total_interest)}</td>
+                    <td className="px-6 py-3 text-right tabular-nums">
+                      {formatMoney(r.total_interest)}
+                    </td>
                     <td className="px-6 py-3 text-xs uppercase tracking-wide text-muted-foreground">
                       {r.dry_run ? "Preview" : "Posted"}
                     </td>
@@ -292,7 +339,8 @@ function RunPanel() {
   const call = useServerFn(runInterestPosting);
 
   const mut = useMutation({
-    mutationFn: (dry: boolean) => call({ data: { period_end: periodEnd || null, dry_run: dry, note } }),
+    mutationFn: (dry: boolean) =>
+      call({ data: { period_end: periodEnd || null, dry_run: dry, note } }),
     onSuccess: async (r) => {
       toast.success(
         `${r.dry_run ? "Preview" : "Posted"}: ${formatMoney(r.total_interest)} across ${r.accounts_credited} of ${r.accounts_processed} accounts (${r.period_start} → ${r.period_end})`,
@@ -315,7 +363,12 @@ function RunPanel() {
       <div className="grid gap-4 p-6 md:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="period-end">Period end (optional)</Label>
-          <Input id="period-end" type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
+          <Input
+            id="period-end"
+            type="date"
+            value={periodEnd}
+            onChange={(e) => setPeriodEnd(e.target.value)}
+          />
           <p className="text-xs text-muted-foreground">
             Defaults to the end of last month. Statements are idempotent per account and period.
           </p>
@@ -331,7 +384,12 @@ function RunPanel() {
           />
         </div>
         <div className="flex flex-wrap gap-2 md:col-span-2">
-          <Button variant="outline" className="gap-1" disabled={mut.isPending} onClick={() => start(true)}>
+          <Button
+            variant="outline"
+            className="gap-1"
+            disabled={mut.isPending}
+            onClick={() => start(true)}
+          >
             <Sparkles className="h-3.5 w-3.5" /> Preview (no changes)
           </Button>
           <Button className="gap-1" disabled={mut.isPending} onClick={() => start(false)}>

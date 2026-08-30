@@ -102,7 +102,10 @@ export function StatementGenerator() {
         s.withdrawals_total,
       )} · Interest ${formatMoney(s.interest_credited)} · Closing ${formatMoney(s.closing_balance)}`;
       const columns = [
-        { header: "Date", accessor: (l: (typeof s.lines)[number]) => new Date(l.created_at).toLocaleDateString() },
+        {
+          header: "Date",
+          accessor: (l: (typeof s.lines)[number]) => new Date(l.created_at).toLocaleDateString(),
+        },
         { header: "Reference", accessor: (l: (typeof s.lines)[number]) => l.ref },
         { header: "Account", accessor: (l: (typeof s.lines)[number]) => l.account_label },
         { header: "Type", accessor: (l: (typeof s.lines)[number]) => l.kind.replace(/_/g, " ") },
@@ -209,11 +212,26 @@ export function StatementGenerator() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" onClick={() => download("pdf")} disabled={busy !== null} className="gap-1">
-                {busy === "pdf" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
+              <Button
+                size="sm"
+                onClick={() => download("pdf")}
+                disabled={busy !== null}
+                className="gap-1"
+              >
+                {busy === "pdf" ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <FileText className="h-3.5 w-3.5" />
+                )}
                 Download PDF
               </Button>
-              <Button size="sm" variant="outline" onClick={() => download("csv")} disabled={busy !== null} className="gap-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => download("csv")}
+                disabled={busy !== null}
+                className="gap-1"
+              >
                 <FileSpreadsheet className="h-3.5 w-3.5" /> CSV
               </Button>
               <span className="text-xs text-muted-foreground">
@@ -222,7 +240,10 @@ export function StatementGenerator() {
             </div>
 
             {data.lines.length === 0 ? (
-              <EmptyState title="No transactions in this period" hint="Try a wider date range or another account." />
+              <EmptyState
+                title="No transactions in this period"
+                hint="Try a wider date range or another account."
+              />
             ) : (
               <div className="max-h-80 overflow-auto rounded-lg border border-border">
                 <table className="w-full text-xs">

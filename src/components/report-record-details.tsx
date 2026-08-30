@@ -3,7 +3,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusPill } from "@/components/primitives";
 import { formatMoney } from "@/lib/org-config";

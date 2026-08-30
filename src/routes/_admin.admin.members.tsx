@@ -1,6 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useMutation,
+  useQueryClient,
+  useQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -10,7 +16,6 @@ import { MinorTag } from "@/components/biodata-fields";
 import { KycRecordActions } from "@/components/kyc-record-actions";
 import { useAuth } from "@/lib/auth";
 import { formatAge, resolveMinorStatus } from "@/lib/age";
-
 
 import {
   ErrorState,
@@ -23,7 +28,13 @@ import {
 import { ExportBar } from "@/components/export-bar";
 import { BUTTON_TONE } from "@/lib/theme-tokens";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   listKycQueue,
@@ -33,7 +44,6 @@ import {
   bulkDecideKyc,
   decideKyc,
   deleteKycReview,
-
   getKycResubmissionSettings,
   updateKycResubmissionSettings,
   type KycQueueRow,
@@ -53,7 +63,9 @@ import {
 const search = z.object({
   status: fallback(z.enum(["all", "pending", "active", "rejected"]), "pending").default("pending"),
   assignee: fallback(z.string(), "any").default("any"),
-  aging: fallback(z.enum(["any", "fresh", "due_soon", "overdue", "critical"]), "any").default("any"),
+  aging: fallback(z.enum(["any", "fresh", "due_soon", "overdue", "critical"]), "any").default(
+    "any",
+  ),
   q: fallback(z.string(), "").default(""),
   page: fallback(z.number().int().min(1), 1).default(1),
 });
@@ -95,7 +107,9 @@ export const Route = createFileRoute("/_admin/admin/members")({
   head: () => ({ meta: [{ title: "KYC queue — Admin" }, { name: "robots", content: "noindex" }] }),
   component: MembersPage,
   errorComponent: ({ error }) => (
-    <div className="p-6"><ErrorState title="Queue failed to load" message={error.message} /></div>
+    <div className="p-6">
+      <ErrorState title="Queue failed to load" message={error.message} />
+    </div>
   ),
 });
 
@@ -137,11 +151,14 @@ function SummaryCards() {
   const items = [
     { label: "Pending", value: data.pending, tone: "text-warning" },
     { label: "Assigned to me", value: data.assigned_to_me, tone: "text-success" },
-    { label: "SLA breached", value: data.breached, tone: data.breached > 0 ? "text-destructive" : "text-muted-foreground" },
+    {
+      label: "SLA breached",
+      value: data.breached,
+      tone: data.breached > 0 ? "text-destructive" : "text-muted-foreground",
+    },
     { label: `Oldest pending`, value: oldestLabel, tone: "text-foreground" },
     { label: "Unassigned", value: data.unassigned_pending, tone: "text-destructive" },
     { label: "Decided (24h)", value: data.decided_today, tone: "text-foreground" },
-
   ];
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
@@ -231,7 +248,6 @@ function QueueBody() {
   const [deleteTarget, setDeleteTarget] = useState<KycQueueRow | null>(null);
   const [deleteReason, setDeleteReason] = useState("");
 
-
   const setSearch = (patch: Partial<SearchInput>) => {
     setSelected(new Set());
     navigate({ search: (prev: SearchInput) => ({ ...prev, page: 1, ...patch }) });
@@ -265,7 +281,8 @@ function QueueBody() {
     }) => bulkDecideKyc({ data: args }),
     onSuccess: (res) => {
       const failed = res.failed.length;
-      if (failed === 0) toast.success(`${res.succeeded} member${res.succeeded === 1 ? "" : "s"} ${bulkDialog}`);
+      if (failed === 0)
+        toast.success(`${res.succeeded} member${res.succeeded === 1 ? "" : "s"} ${bulkDialog}`);
       else toast.warning(`${res.succeeded} succeeded · ${failed} failed`);
       setSelected(new Set());
       setBulkDialog(null);
@@ -303,7 +320,6 @@ function QueueBody() {
     invalidate();
   };
 
-
   const deleteMutation = useMutation({
     mutationFn: (args: { member_id: string; reason: string }) => removeReview({ data: args }),
     onSuccess: (res) => {
@@ -317,14 +333,14 @@ function QueueBody() {
     onError: (e: any) => toast.error(e?.message ?? "Delete failed"),
   });
 
-
-
   const archiveMutation = useMutation({
     mutationFn: (args: { member_ids: string[]; reason: string }) =>
       bulkArchiveKycReviews({ data: args }),
     onSuccess: (res) => {
       if (res.failed === 0)
-        toast.success(`${res.archived} KYC review${res.archived === 1 ? "" : "s"} archived to the vault`);
+        toast.success(
+          `${res.archived} KYC review${res.archived === 1 ? "" : "s"} archived to the vault`,
+        );
       else toast.warning(`${res.archived} archived · ${res.failed} failed`);
       for (const r of res.results.filter((x: any) => !x.ok)) {
         toast.error(`${r.member_id.slice(0, 8)}…: ${r.error}`);
@@ -338,7 +354,6 @@ function QueueBody() {
   });
 
   const selectedList = useMemo(() => Array.from(selected), [selected]);
-
 
   return (
     <>
@@ -374,7 +389,9 @@ function QueueBody() {
                   key={st}
                   onClick={() => setSearch({ status: st })}
                   className={`rounded px-2.5 py-1 font-bold ${
-                    s.status === st ? "bg-emerald-deep text-cream" : "text-muted-foreground hover:bg-cream/50"
+                    s.status === st
+                      ? "bg-emerald-deep text-cream"
+                      : "text-muted-foreground hover:bg-cream/50"
                   }`}
                 >
                   {st}
@@ -437,7 +454,6 @@ function QueueBody() {
               <th className="px-4 py-3 text-right font-medium">Last activity</th>
               <th className="px-4 py-3 text-right font-medium">KYC</th>
               <th className="px-4 py-3 text-right font-medium">Actions</th>
-
             </tr>
           </thead>
           <tbody className="divide-y divide-emerald-deep/5">
@@ -471,7 +487,10 @@ function QueueBody() {
                         {(() => {
                           const minor = resolveMinorStatus(m.date_of_birth, m.is_minor);
                           return minor.effective || minor.mismatch ? (
-                            <MinorTag mismatch={minor.mismatch} label={minor.effective ? "Under 18" : "18+"} />
+                            <MinorTag
+                              mismatch={minor.mismatch}
+                              label={minor.effective ? "Under 18" : "18+"}
+                            />
                           ) : null;
                         })()}
                       </div>
@@ -480,7 +499,6 @@ function QueueBody() {
                         {m.date_of_birth ? ` · ${formatAge(m.date_of_birth)}` : ""}
                       </div>
                     </Link>
-
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <Popover
@@ -558,22 +576,23 @@ function QueueBody() {
                         { label: "Pending documents", value: String(m.pending_docs) },
                         { label: "Assignee", value: m.kyc_assigned_name ?? "Unassigned" },
                       ]}
-                      onView={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
-                      onEdit={() => navigate({ to: "/admin/members/$id", params: { id: m.member_id } })}
+                      onView={() =>
+                        navigate({ to: "/admin/members/$id", params: { id: m.member_id } })
+                      }
+                      onEdit={() =>
+                        navigate({ to: "/admin/members/$id", params: { id: m.member_id } })
+                      }
                       onDecide={(decision, note, items) => rowDecision(m, decision, note, items)}
                       remediationOptions={ALL_REMEDIATION_ITEMS}
-
                       {...(canDeleteReview ? { onDelete: () => setDeleteTarget(m) } : {})}
                       noConfirm={["delete"]}
                       disabled={{ approve: m.kyc === "active", reject: m.kyc === "rejected" }}
                       className="justify-end"
                     />
-
                   </td>
                 </tr>
               ))
             )}
-
           </tbody>
         </table>
 
@@ -611,10 +630,10 @@ function QueueBody() {
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              Nothing is destroyed: each member's verification status, reviewer decision and uploaded
-              documents are snapshotted into the account vault for 30 days and their live review is
-              reset to pending. Every member gets their own audit entry, and any member that cannot be
-              archived is reported back.
+              Nothing is destroyed: each member's verification status, reviewer decision and
+              uploaded documents are snapshotted into the account vault for 30 days and their live
+              review is reset to pending. Every member gets their own audit entry, and any member
+              that cannot be archived is reported back.
             </p>
             <textarea
               value={archiveReason}
@@ -680,7 +699,10 @@ function QueueBody() {
                 </legend>
                 <div className="grid gap-1.5 sm:grid-cols-2">
                   {ALL_REMEDIATION_ITEMS.map((item) => (
-                    <label key={item.key} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <label
+                      key={item.key}
+                      className="flex items-center gap-2 text-xs text-muted-foreground"
+                    >
                       <input
                         type="checkbox"
                         checked={bulkItems.includes(item.key)}
@@ -716,7 +738,6 @@ function QueueBody() {
             </button>
             <button
               disabled={bulkMutation.isPending || bulkNotes.trim().length < 5}
-
               onClick={() =>
                 bulkDialog &&
                 bulkMutation.mutate({
@@ -729,7 +750,6 @@ function QueueBody() {
               className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${
                 bulkDialog === "approved" ? BUTTON_TONE.success : BUTTON_TONE.danger
               }`}
-
             >
               {bulkMutation.isPending
                 ? "Working…"
@@ -802,7 +822,6 @@ function QueueBody() {
         </DialogContent>
       </Dialog>
     </>
-
   );
 }
 
@@ -823,9 +842,7 @@ function SelectionToolbar({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-emerald-deep/5 bg-cream/40 px-6 py-3 text-xs">
-      <span className="font-semibold text-emerald-deep">
-        {count} selected
-      </span>
+      <span className="font-semibold text-emerald-deep">{count} selected</span>
       <Popover>
         <PopoverTrigger asChild>
           <button className="rounded border border-emerald-deep/15 bg-card px-3 py-1.5 text-xs uppercase tracking-widest hover:bg-cream">
@@ -833,7 +850,10 @@ function SelectionToolbar({
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-2 text-xs">
-          <button onClick={() => onAssign(null)} className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream">
+          <button
+            onClick={() => onAssign(null)}
+            className="block w-full rounded px-2 py-1.5 text-left hover:bg-cream"
+          >
             Unassign
           </button>
           <div className="my-1 border-t border-emerald-deep/10" />
@@ -895,7 +915,9 @@ function SlaCell({
   return (
     <div className="inline-flex flex-col items-end gap-0.5">
       {meta ? (
-        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${meta.tone}`}>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${meta.tone}`}
+        >
           <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
           {meta.short}
         </span>
@@ -908,7 +930,6 @@ function SlaCell({
     </div>
   );
 }
-
 
 const resubmissionSettingsQuery = queryOptions({
   queryKey: ["admin", "kyc-resubmission-settings"],
@@ -968,7 +989,6 @@ function ResubmissionRules() {
         },
       }),
 
-
     onSuccess: () => {
       toast.success("Resubmission rules saved");
       qc.invalidateQueries({ queryKey: ["admin", "kyc-resubmission-settings"] });
@@ -981,11 +1001,18 @@ function ResubmissionRules() {
   const leadNum = Number(lead);
   const lowNum = Number(lowLeft);
   const valid =
-    Number.isInteger(dayNum) && dayNum >= 1 && dayNum <= 365 &&
-    Number.isInteger(attemptNum) && attemptNum >= 1 && attemptNum <= 20 &&
-    Number.isInteger(leadNum) && leadNum >= 0 && leadNum <= 60 &&
-    Number.isInteger(lowNum) && lowNum >= 0 && lowNum <= 20;
-
+    Number.isInteger(dayNum) &&
+    dayNum >= 1 &&
+    dayNum <= 365 &&
+    Number.isInteger(attemptNum) &&
+    attemptNum >= 1 &&
+    attemptNum <= 20 &&
+    Number.isInteger(leadNum) &&
+    leadNum >= 0 &&
+    leadNum <= 60 &&
+    Number.isInteger(lowNum) &&
+    lowNum >= 0 &&
+    lowNum <= 20;
 
   return (
     <SectionCard title="Resubmission deadlines & attempt limits">
@@ -1092,7 +1119,6 @@ function ResubmissionRules() {
         receives a given notice only once.
         {data.updated_at ? ` Last changed ${new Date(data.updated_at).toLocaleString()}.` : ""}
       </p>
-
     </SectionCard>
   );
 }

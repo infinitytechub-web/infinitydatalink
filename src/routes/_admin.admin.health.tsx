@@ -2,11 +2,22 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
 import { useSuspenseQuery, queryOptions, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
-import { ErrorState, PageHeader, KPIStat, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
+import {
+  ErrorState,
+  PageHeader,
+  KPIStat,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { CacheResetButton } from "@/components/cache-reset-button";
 
-import { adminRunHealthCheck, type ProbeResult, type HealthReport } from "@/lib/admin-health.functions";
+import {
+  adminRunHealthCheck,
+  type ProbeResult,
+  type HealthReport,
+} from "@/lib/admin-health.functions";
 
 const healthQuery = queryOptions({
   queryKey: ["admin", "health"],
@@ -58,7 +69,12 @@ function Body() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <KPIStat label="Probes run" value={String(data.total)} hint={`As of ${ranAt}`} />
         <KPIStat label="Passed" value={String(data.passed)} hint="Reachable through PostgREST" />
-        <KPIStat label="Failed" value={String(data.failed)} hint={data.failed === 0 ? "All green" : "Needs attention"} accent={data.failed > 0} />
+        <KPIStat
+          label="Failed"
+          value={String(data.failed)}
+          hint={data.failed === 0 ? "All green" : "Needs attention"}
+          accent={data.failed > 0}
+        />
       </div>
 
       <div className="flex flex-wrap justify-end gap-2">
@@ -78,7 +94,6 @@ function Body() {
           <ProbeTable results={groups[cat] ?? []} />
         </SectionCard>
       ))}
-
     </div>
   );
 }
@@ -89,13 +104,19 @@ const LABELS: Record<ProbeResult["category"], string> = {
   rpc: "Privileged RPCs",
 };
 const DESCRIPTIONS: Record<ProbeResult["category"], string> = {
-  relationship: "Each row runs a PostgREST embed query against the named foreign key. A failure means the UI cannot join these tables.",
-  table: "A HEAD-count query per table proves the Data API grants and RLS policies permit reads for your role.",
+  relationship:
+    "Each row runs a PostgREST embed query against the named foreign key. A failure means the UI cannot join these tables.",
+  table:
+    "A HEAD-count query per table proves the Data API grants and RLS policies permit reads for your role.",
   rpc: "Verifies that SECURITY DEFINER helpers are exposed and callable.",
 };
 
 function groupByCategory(rows: ProbeResult[]): Record<ProbeResult["category"], ProbeResult[]> {
-  const out: Record<ProbeResult["category"], ProbeResult[]> = { relationship: [], table: [], rpc: [] };
+  const out: Record<ProbeResult["category"], ProbeResult[]> = {
+    relationship: [],
+    table: [],
+    rpc: [],
+  };
   for (const r of rows) out[r.category].push(r);
   return out;
 }
@@ -134,7 +155,6 @@ function ProbeTable({ results }: { results: ProbeResult[] }) {
               <td className="py-2 pr-4 text-muted-foreground">{r.detail}</td>
               <td className="py-2 pr-4 text-muted-foreground tabular-nums">{r.duration_ms} ms</td>
               <td className="py-2 text-destructive font-mono text-xs break-all">{r.error ?? ""}</td>
-
             </tr>
           ))}
         </tbody>

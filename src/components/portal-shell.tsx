@@ -23,7 +23,6 @@ export type { NavGroup, NavItem };
 
 const GROUP_ACCENTS = SIDEBAR_GROUP_CHIPS;
 
-
 const COLLAPSE_KEY = "it360:sidebar-collapsed";
 
 export function PortalShell({
@@ -273,11 +272,9 @@ export function PortalShell({
           )}
         </nav>
 
-
         <div className={cn("px-3 pb-3", collapsed && "lg:px-2")}>
           <SidebarOnlinePanel collapsed={collapsed} />
         </div>
-
 
         <div className={cn("border-t border-white/10 p-4", collapsed && "lg:p-2")}>
           <div className={cn("flex items-center gap-3", collapsed && "lg:justify-center")}>
@@ -333,9 +330,16 @@ export function PortalShell({
               className="hidden size-9 place-items-center rounded-md text-foreground transition-colors hover:bg-muted lg:grid"
               onClick={() => setCollapsed((c) => !c)}
             >
-              {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+              {collapsed ? (
+                <PanelLeftOpen className="size-4" />
+              ) : (
+                <PanelLeftClose className="size-4" />
+              )}
             </button>
-            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-sm font-medium">
+            <nav
+              aria-label="Breadcrumb"
+              className="flex min-w-0 items-center gap-2 text-sm font-medium"
+            >
               <span className="hidden truncate text-muted-foreground sm:inline">{displayName}</span>
               <span className="hidden text-muted-foreground sm:inline" aria-hidden="true">
                 /
@@ -346,7 +350,6 @@ export function PortalShell({
             </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-
             <UniversalClock />
             <OnlinePresencePill />
             <NotificationBell />
@@ -360,7 +363,6 @@ export function PortalShell({
           tabIndex={-1}
           className="mx-auto w-full max-w-7xl flex-1 animate-fade-in space-y-8 p-4 lg:p-8"
         >
-
           {children}
         </div>
 

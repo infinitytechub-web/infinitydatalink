@@ -3,7 +3,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertPermission } from "@/lib/permissions";
 import { recordDecision } from "@/lib/decision-audit";
-import { CHANGE_KINDS, CHANGE_STATUSES, type ChangeKind, type ChangeStatus } from "@/lib/change-approvals";
+import {
+  CHANGE_KINDS,
+  CHANGE_STATUSES,
+  type ChangeKind,
+  type ChangeStatus,
+} from "@/lib/change-approvals";
 
 type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
 
@@ -55,7 +60,11 @@ async function emailsFor(ids: string[]): Promise<Map<string, string>> {
   return out;
 }
 
-function toRow(r: Record<string, any>, emails: Map<string, string>, viewerId: string): ChangeRequestRow {
+function toRow(
+  r: Record<string, any>,
+  emails: Map<string, string>,
+  viewerId: string,
+): ChangeRequestRow {
   return {
     id: r["id"],
     kind: r["kind"],
@@ -67,7 +76,7 @@ function toRow(r: Record<string, any>, emails: Map<string, string>, viewerId: st
     requester_email: emails.get(r["requested_by"]) ?? null,
     reviewed_by: r["reviewed_by"] ?? null,
     reviewed_at: r["reviewed_at"] ?? null,
-    reviewer_email: r["reviewed_by"] ? emails.get(r["reviewed_by"]) ?? null : null,
+    reviewer_email: r["reviewed_by"] ? (emails.get(r["reviewed_by"]) ?? null) : null,
     review_note: r["review_note"] ?? null,
     applied_at: r["applied_at"] ?? null,
     error: r["error"] ?? null,
@@ -92,81 +101,88 @@ export const listChangeRequests = createServerFn({ method: "POST" })
       })
       .parse(data ?? {}),
   )
-  .handler(async ({ data, context }): Promise<{ rows: ChangeRequestRow[]; total: number; counts: Record<string, number> }> => {
-    await assertPermission(context.supabase, context.userId, "approvals", "view");
-    const offset = (data.page - 1) * data.pageSize;
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ rows: ChangeRequestRow[]; total: number; counts: Record<string, number> }> => {
+      await assertPermission(context.supabase, context.userId, "approvals", "view");
+      const offset = (data.page - 1) * data.pageSize;
 
-    let q = context.supabase
-      .from("settings_change_requests")
-      .select("*", { count: "exact" })
-      .order("requested_at", { ascending: data.sortDir === "asc" })
-      .range(offset, offset + data.pageSize - 1);
-    if (data.status !== "all") q = q.eq("status", data.status);
-    if (data.kind !== "all") q = q.eq("kind", data.kind);
-    if (data.from) q = q.gte("requested_at", data.from);
-    if (data.to) q = q.lte("requested_at", data.to);
-    if (data.search) q = q.ilike("summary", `%${data.search.replace(/[%_,]/g, "")}%`);
-
-    const { data: rows, error, count } = await q;
-    if (error) throw new Error(error.message);
-
-    const list = (rows ?? []) as Array<Record<string, any>>;
-    const emails = await emailsFor(list.flatMap((r) => [r["requested_by"], r["reviewed_by"]]));
-
-    // Status tallies for the KPI strip (unfiltered by status).
-    const counts: Record<string, number> = {};
-    for (const status of CHANGE_STATUSES) {
-      const { count: c } = await context.supabase
+      let q = context.supabase
         .from("settings_change_requests")
-        .select("id", { count: "exact", head: true })
-        .eq("status", status);
-      counts[status] = c ?? 0;
-    }
+        .select("*", { count: "exact" })
+        .order("requested_at", { ascending: data.sortDir === "asc" })
+        .range(offset, offset + data.pageSize - 1);
+      if (data.status !== "all") q = q.eq("status", data.status);
+      if (data.kind !== "all") q = q.eq("kind", data.kind);
+      if (data.from) q = q.gte("requested_at", data.from);
+      if (data.to) q = q.lte("requested_at", data.to);
+      if (data.search) q = q.ilike("summary", `%${data.search.replace(/[%_,]/g, "")}%`);
 
-    return {
-      rows: list.map((r) => toRow(r, emails, context.userId)),
-      total: count ?? list.length,
-      counts,
-    };
-  });
+      const { data: rows, error, count } = await q;
+      if (error) throw new Error(error.message);
+
+      const list = (rows ?? []) as Array<Record<string, any>>;
+      const emails = await emailsFor(list.flatMap((r) => [r["requested_by"], r["reviewed_by"]]));
+
+      // Status tallies for the KPI strip (unfiltered by status).
+      const counts: Record<string, number> = {};
+      for (const status of CHANGE_STATUSES) {
+        const { count: c } = await context.supabase
+          .from("settings_change_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("status", status);
+        counts[status] = c ?? 0;
+      }
+
+      return {
+        rows: list.map((r) => toRow(r, emails, context.userId)),
+        total: count ?? list.length,
+        counts,
+      };
+    },
+  );
 
 /** One request plus its own audit trail. */
 export const getChangeRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
-  .handler(async ({ data, context }): Promise<{ request: ChangeRequestRow; audit: ChangeAuditRow[] }> => {
-    await assertPermission(context.supabase, context.userId, "approvals", "view");
-    const { data: row, error } = await context.supabase
-      .from("settings_change_requests")
-      .select("*")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!row) throw new Error("Change request not found");
+  .handler(
+    async ({ data, context }): Promise<{ request: ChangeRequestRow; audit: ChangeAuditRow[] }> => {
+      await assertPermission(context.supabase, context.userId, "approvals", "view");
+      const { data: row, error } = await context.supabase
+        .from("settings_change_requests")
+        .select("*")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!row) throw new Error("Change request not found");
 
-    const r = row as Record<string, any>;
-    const emails = await emailsFor([r["requested_by"], r["reviewed_by"]]);
+      const r = row as Record<string, any>;
+      const emails = await emailsFor([r["requested_by"], r["reviewed_by"]]);
 
-    const { data: audit } = await context.supabase
-      .from("audit_log")
-      .select("id, created_at, actor_email, actor_role, action, target, meta")
-      .eq("target", data.id)
-      .order("created_at", { ascending: true })
-      .limit(100);
+      const { data: audit } = await context.supabase
+        .from("audit_log")
+        .select("id, created_at, actor_email, actor_role, action, target, meta")
+        .eq("target", data.id)
+        .order("created_at", { ascending: true })
+        .limit(100);
 
-    return {
-      request: toRow(r, emails, context.userId),
-      audit: ((audit ?? []) as Array<Record<string, any>>).map((a) => ({
-        id: a["id"],
-        created_at: a["created_at"],
-        actor_email: a["actor_email"] ?? null,
-        actor_role: a["actor_role"] ?? null,
-        action: a["action"],
-        target: a["target"] ?? null,
-        meta: a["meta"] ?? {},
-      })),
-    };
-  });
+      return {
+        request: toRow(r, emails, context.userId),
+        audit: ((audit ?? []) as Array<Record<string, any>>).map((a) => ({
+          id: a["id"],
+          created_at: a["created_at"],
+          actor_email: a["actor_email"] ?? null,
+          actor_role: a["actor_role"] ?? null,
+          action: a["action"],
+          target: a["target"] ?? null,
+          meta: a["meta"] ?? {},
+        })),
+      };
+    },
+  );
 
 /** Full audit history for the change-approval lifecycle. */
 export const listChangeAuditHistory = createServerFn({ method: "POST" })
@@ -191,8 +207,12 @@ export const listChangeAuditHistory = createServerFn({ method: "POST" })
       .select("id, created_at, actor_email, actor_role, action, target, meta", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(offset, offset + data.pageSize - 1);
-    q = data.action === "all" ? q.in("action", CHANGE_ACTIONS as unknown as string[]) : q.eq("action", data.action);
-    if (data.actorContains) q = q.ilike("actor_email", `%${data.actorContains.replace(/[%_,]/g, "")}%`);
+    q =
+      data.action === "all"
+        ? q.in("action", CHANGE_ACTIONS as unknown as string[])
+        : q.eq("action", data.action);
+    if (data.actorContains)
+      q = q.ilike("actor_email", `%${data.actorContains.replace(/[%_,]/g, "")}%`);
     if (data.from) q = q.gte("created_at", data.from);
     if (data.to) q = q.lte("created_at", data.to);
 
@@ -264,7 +284,10 @@ export const approveChangeRequest = createServerFn({ method: "POST" })
       note: data.note,
       meta: { kind: result["kind"] ?? null, status: result["status"] ?? null },
     });
-    return { status: (result["status"] ?? "applied") as ChangeStatus, error: result["error"] ?? null };
+    return {
+      status: (result["status"] ?? "applied") as ChangeStatus,
+      error: result["error"] ?? null,
+    };
   });
 
 /** Reject a pending request with a mandatory reason. */
@@ -316,7 +339,10 @@ export const applyChangeRequest = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     const result = (row ?? {}) as Record<string, any>;
-    return { status: (result["status"] ?? "applied") as ChangeStatus, error: result["error"] ?? null };
+    return {
+      status: (result["status"] ?? "applied") as ChangeStatus,
+      error: result["error"] ?? null,
+    };
   });
 
 export type BulkChangeMode = "approve" | "reject" | "apply";
@@ -379,7 +405,8 @@ export const bulkDecideChangeRequests = createServerFn({ method: "POST" })
         const { data: row, error } = await (context.supabase as any).rpc(rpc, args);
         if (error) throw new Error(error.message);
         const result = (row ?? {}) as Record<string, any>;
-        const status = (result["status"] ?? (data.mode === "reject" ? "rejected" : "applied")) as ChangeStatus;
+        const status = (result["status"] ??
+          (data.mode === "reject" ? "rejected" : "applied")) as ChangeStatus;
         const failure = (result["error"] ?? null) as string | null;
 
         if (data.mode !== "apply") {

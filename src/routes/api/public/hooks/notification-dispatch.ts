@@ -15,10 +15,13 @@ export const Route = createFileRoute("/api/public/hooks/notification-dispatch")(
             headers: { "Content-Type": "application/json" },
           });
         } catch (err: any) {
-          return new Response(JSON.stringify({ success: false, error: err?.message ?? String(err) }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ success: false, error: err?.message ?? String(err) }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
       },
     },

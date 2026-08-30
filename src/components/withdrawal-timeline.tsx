@@ -43,9 +43,7 @@ export function buildWithdrawalTimeline(r: WithdrawalRequest): Step[] {
         const who = byStaff
           ? `Cancelled by a ${r.cancelled_by_role!.replace(/_/g, " ")} on your behalf`
           : "You cancelled this request";
-        const why = r.cancellation_reason?.trim()
-          ? ` Reason: ${r.cancellation_reason.trim()}`
-          : "";
+        const why = r.cancellation_reason?.trim() ? ` Reason: ${r.cancellation_reason.trim()}` : "";
         return `${who}. The hold on your balance was released.${why}`;
       })(),
       icon: Ban,
@@ -59,10 +57,9 @@ export function buildWithdrawalTimeline(r: WithdrawalRequest): Step[] {
       label: "Rejected",
       state: "rejected",
       at: r.rejected_at,
-      message:
-        r.rejection_reason?.trim()
-          ? `A finance officer declined this request: ${r.rejection_reason}`
-          : "A finance officer declined this request. Contact support if you need more detail.",
+      message: r.rejection_reason?.trim()
+        ? `A finance officer declined this request: ${r.rejection_reason}`
+        : "A finance officer declined this request. Contact support if you need more detail.",
       icon: XCircle,
     });
     return steps;
@@ -104,7 +101,10 @@ const TONE: Record<StepState, { dot: string; text: string }> = {
   current: { dot: "bg-amber-500 text-white border-amber-500", text: "text-foreground" },
   rejected: { dot: "bg-destructive text-white border-destructive", text: "text-destructive" },
   cancelled: { dot: "bg-muted text-muted-foreground border-border", text: "text-muted-foreground" },
-  pending: { dot: "bg-background text-muted-foreground border-border", text: "text-muted-foreground" },
+  pending: {
+    dot: "bg-background text-muted-foreground border-border",
+    text: "text-muted-foreground",
+  },
 };
 
 export function WithdrawalTimeline({ request }: { request: WithdrawalRequest }) {

@@ -64,8 +64,7 @@ const PRESETS: { id: string; label: string; days: number | "ytd" | "mtd" }[] = [
 function presetRange(days: number | "ytd" | "mtd") {
   const now = new Date();
   if (days === "ytd") return { from: `${now.getUTCFullYear()}-01-01`, to: iso(now) };
-  if (days === "mtd")
-    return { from: `${iso(now).slice(0, 7)}-01`, to: iso(now) };
+  if (days === "mtd") return { from: `${iso(now).slice(0, 7)}-01`, to: iso(now) };
   return { from: iso(new Date(now.getTime() - days * 24 * 3600 * 1000)), to: iso(now) };
 }
 
@@ -325,7 +324,6 @@ function AnalyticsBody() {
         onClose={() => setDrilldown(null)}
       />
 
-
       {/* ---------------- Savings growth ---------------- */}
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <PremiumStatCard
@@ -394,7 +392,6 @@ function AnalyticsBody() {
         />
       </section>
 
-
       <SectionCard
         title="Savings growth"
         action={
@@ -406,7 +403,11 @@ function AnalyticsBody() {
             columns={[
               { header: "Bucket", accessor: (r: SavingsBucket) => r.bucket },
               { header: "Deposits", accessor: (r) => formatMoney(r.deposits), align: "right" },
-              { header: "Withdrawals", accessor: (r) => formatMoney(r.withdrawals), align: "right" },
+              {
+                header: "Withdrawals",
+                accessor: (r) => formatMoney(r.withdrawals),
+                align: "right",
+              },
               { header: "Net", accessor: (r) => formatMoney(r.net), align: "right" },
               { header: "Cumulative", accessor: (r) => formatMoney(r.cumulative), align: "right" },
             ]}
@@ -415,7 +416,9 @@ function AnalyticsBody() {
         }
       >
         {data.savings.series.length === 0 ? (
-          <div className="p-6"><EmptyState title="No savings activity in range" /></div>
+          <div className="p-6">
+            <EmptyState title="No savings activity in range" />
+          </div>
         ) : (
           <div className="p-4">
             <TrendChart
@@ -509,7 +512,6 @@ function AnalyticsBody() {
         />
       </section>
 
-
       <SectionCard
         title="Withdrawal trends"
         action={
@@ -532,7 +534,9 @@ function AnalyticsBody() {
         }
       >
         {data.withdrawals.series.length === 0 ? (
-          <div className="p-6"><EmptyState title="No withdrawal activity in range" /></div>
+          <div className="p-6">
+            <EmptyState title="No withdrawal activity in range" />
+          </div>
         ) : (
           <div className="p-4">
             <TrendChart
@@ -632,18 +636,35 @@ function AnalyticsBody() {
           }
           actionLabel="View underlying records"
           tooltip="Count of instalments past their due date and unpaid"
-          value={<span className="tabular">{data.loans.overdue_installments.toLocaleString()}</span>}
+          value={
+            <span className="tabular">{data.loans.overdue_installments.toLocaleString()}</span>
+          }
           hint="Instalments past their due date"
         />
       </section>
 
       <SectionCard title="Portfolio health" accent="sky">
         <div className="grid grid-cols-2 gap-6 p-6 sm:grid-cols-4">
-          <ProgressRing value={data.loans.on_time_rate} label="On-time repayment" tone={0} onActivate={() => open({ metric: "loan_repayments", label: "On-time repayment", context: "Instalments received", permission: "export:loans" })}
+          <ProgressRing
+            value={data.loans.on_time_rate}
+            label="On-time repayment"
+            tone={0}
+            onActivate={() =>
+              open({
+                metric: "loan_repayments",
+                label: "On-time repayment",
+                context: "Instalments received",
+                permission: "export:loans",
+              })
+            }
             tooltip="Instalments settled on or before their due date"
           />
           <ProgressRing
-            value={data.loans.disbursed_total > 0 ? data.loans.repaid_total / data.loans.disbursed_total : 0}
+            value={
+              data.loans.disbursed_total > 0
+                ? data.loans.repaid_total / data.loans.disbursed_total
+                : 0
+            }
             label="Repaid vs disbursed"
             tone={1}
             onActivate={() =>
@@ -656,7 +677,18 @@ function AnalyticsBody() {
             }
             tooltip="Repayments received against principal disbursed"
           />
-          <ProgressRing value={data.withdrawals.approval_rate} label="Withdrawal approvals" tone={2} onActivate={() => open({ metric: "withdrawal_requests", label: "Withdrawal approvals", context: "Withdrawal requests raised", permission: "export:savings" })}
+          <ProgressRing
+            value={data.withdrawals.approval_rate}
+            label="Withdrawal approvals"
+            tone={2}
+            onActivate={() =>
+              open({
+                metric: "withdrawal_requests",
+                label: "Withdrawal approvals",
+                context: "Withdrawal requests raised",
+                permission: "export:savings",
+              })
+            }
             tooltip="Approved share of decided withdrawal requests"
           />
           <ProgressRing
@@ -677,7 +709,6 @@ function AnalyticsBody() {
         </div>
       </SectionCard>
 
-
       <SectionCard
         title="Loan performance"
         action={
@@ -697,7 +728,9 @@ function AnalyticsBody() {
         }
       >
         {data.loans.series.length === 0 ? (
-          <div className="p-6"><EmptyState title="No loan activity in range" /></div>
+          <div className="p-6">
+            <EmptyState title="No loan activity in range" />
+          </div>
         ) : (
           <div className="p-4">
             <TrendChart
@@ -720,7 +753,11 @@ function AnalyticsBody() {
           <BarList rows={data.loans.status_mix} emptyLabel="No loans in range" />
         </SectionCard>
         <SectionCard title="Exposure by product">
-          <BarList rows={data.loans.product_mix} format={formatMoney} emptyLabel="No loans in range" />
+          <BarList
+            rows={data.loans.product_mix}
+            format={formatMoney}
+            emptyLabel="No loans in range"
+          />
         </SectionCard>
       </div>
 
@@ -741,7 +778,9 @@ function AnalyticsBody() {
           }
           actionLabel="View underlying records"
           tooltip="Withdrawal requests raised in the period"
-          value={<span className="tabular">{data.cancellations.total_requests.toLocaleString()}</span>}
+          value={
+            <span className="tabular">{data.cancellations.total_requests.toLocaleString()}</span>
+          }
           spark={data.cancellations.series.map((r) => r.total)}
         />
         <PremiumStatCard
@@ -759,7 +798,9 @@ function AnalyticsBody() {
           }
           actionLabel="View underlying records"
           tooltip="Requests cancelled before payout"
-          value={<span className="tabular">{data.cancellations.total_cancelled.toLocaleString()}</span>}
+          value={
+            <span className="tabular">{data.cancellations.total_cancelled.toLocaleString()}</span>
+          }
           spark={data.cancellations.series.map((r) => r.cancelled)}
         />
         <PremiumStatCard
@@ -802,7 +843,6 @@ function AnalyticsBody() {
         />
       </section>
 
-
       <SectionCard
         title="Batch cancellation rates"
         action={
@@ -824,7 +864,9 @@ function AnalyticsBody() {
         }
       >
         {data.cancellations.total_requests === 0 ? (
-          <div className="p-6"><EmptyState title="No withdrawal requests in range" /></div>
+          <div className="p-6">
+            <EmptyState title="No withdrawal requests in range" />
+          </div>
         ) : (
           <div className="p-4">
             <TrendChart

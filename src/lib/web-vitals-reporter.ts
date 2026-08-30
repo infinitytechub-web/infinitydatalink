@@ -20,30 +20,32 @@ export function installWebVitalsReporter() {
   if (installed || typeof window === "undefined") return;
   installed = true;
 
-  void import("web-vitals").then(({ onLCP, onINP, onCLS, onFCP, onTTFB }) => {
-    const report = (metric: { name: string; value: number; rating?: string; id: string }) => {
-      const threshold = THRESHOLDS[metric.name];
-      // Skip "good" metrics — we only want signal on slow pages.
-      if (threshold !== undefined && metric.value < threshold) return;
-      void logRuntimeError({
-        kind: "route",
-        severity: "info",
-        message: `web-vitals ${metric.name} ${Math.round(metric.value * 1000) / 1000}${metric.name === "CLS" ? "" : "ms"}`,
-        meta: {
-          web_vitals: true,
-          name: metric.name,
-          value: metric.value,
-          rating: metric.rating,
-          id: metric.id,
-        },
-      });
-    };
-    onLCP(report);
-    onINP(report);
-    onCLS(report);
-    onFCP(report);
-    onTTFB(report);
-  }).catch(() => {
-    // web-vitals failing to load is not fatal.
-  });
+  void import("web-vitals")
+    .then(({ onLCP, onINP, onCLS, onFCP, onTTFB }) => {
+      const report = (metric: { name: string; value: number; rating?: string; id: string }) => {
+        const threshold = THRESHOLDS[metric.name];
+        // Skip "good" metrics — we only want signal on slow pages.
+        if (threshold !== undefined && metric.value < threshold) return;
+        void logRuntimeError({
+          kind: "route",
+          severity: "info",
+          message: `web-vitals ${metric.name} ${Math.round(metric.value * 1000) / 1000}${metric.name === "CLS" ? "" : "ms"}`,
+          meta: {
+            web_vitals: true,
+            name: metric.name,
+            value: metric.value,
+            rating: metric.rating,
+            id: metric.id,
+          },
+        });
+      };
+      onLCP(report);
+      onINP(report);
+      onCLS(report);
+      onFCP(report);
+      onTTFB(report);
+    })
+    .catch(() => {
+      // web-vitals failing to load is not fatal.
+    });
 }

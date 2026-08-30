@@ -1,6 +1,12 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -26,7 +32,11 @@ export const Route = createFileRoute("/_admin/admin/finance/expenses")({
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Expenses failed to load" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Expenses failed to load"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -170,7 +180,9 @@ function ExpensesBody() {
         }
       >
         {expenses.length === 0 ? (
-          <div className="p-6"><EmptyState title="No expenses" hint="Nothing to show for this filter." /></div>
+          <div className="p-6">
+            <EmptyState title="No expenses" hint="Nothing to show for this filter." />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -190,8 +202,12 @@ function ExpensesBody() {
                     <td className="px-6 py-3 font-mono text-xs">{e.ref}</td>
                     <td className="px-6 py-3">{e.vendor}</td>
                     <td className="px-6 py-3 text-muted-foreground">{e.category_code}</td>
-                    <td className="px-6 py-3 text-right"><Money amount={Number(e.amount)} /></td>
-                    <td className="px-6 py-3"><StatusPill status={e.status as any} /></td>
+                    <td className="px-6 py-3 text-right">
+                      <Money amount={Number(e.amount)} />
+                    </td>
+                    <td className="px-6 py-3">
+                      <StatusPill status={e.status as any} />
+                    </td>
                     <td className="px-6 py-3 text-right">
                       {e.status === "pending" ? (
                         <div className="flex justify-end gap-1.5">

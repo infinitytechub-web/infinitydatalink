@@ -4,7 +4,14 @@ import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Download, FileText } from "lucide-react";
-import { EmptyState, ErrorState, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  EmptyState,
+  ErrorState,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getStatement, listMyStatements, type Statement } from "@/lib/savings-statements.functions";
@@ -21,14 +28,19 @@ export const Route = createFileRoute("/_member/app/savings/statements")({
   head: () => ({
     meta: [
       { title: "Savings statements — IT-360 CashApp" },
-      { name: "description", content: "Download monthly savings statements with interest and activity totals." },
+      {
+        name: "description",
+        content: "Download monthly savings statements with interest and activity totals.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(statementsQuery),
   component: StatementsPage,
   errorComponent: ({ error }) => (
-    <div className="p-6"><ErrorState title="Statements unavailable" message={error.message} /></div>
+    <div className="p-6">
+      <ErrorState title="Statements unavailable" message={error.message} />
+    </div>
   ),
 });
 
@@ -104,7 +116,10 @@ function Row({ s }: { s: Statement }) {
   return (
     <tr>
       <td className="px-6 py-3 text-sm">
-        {new Date(s.period_start).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
+        {new Date(s.period_start).toLocaleDateString(undefined, {
+          month: "short",
+          year: "numeric",
+        })}
         <div className="text-[11px] text-muted-foreground">
           {s.period_start} – {s.period_end}
         </div>
@@ -113,18 +128,32 @@ function Row({ s }: { s: Statement }) {
         <div className="font-semibold">{s.account_label}</div>
         <div className="text-[11px] text-muted-foreground">{s.plan_name}</div>
       </td>
-      <td className="px-6 py-3 text-right"><Money amount={s.opening_balance} /></td>
-      <td className="px-6 py-3 text-right"><Money amount={s.deposits_total} /></td>
-      <td className="px-6 py-3 text-right"><Money amount={s.withdrawals_total} /></td>
-      <td className="px-6 py-3 text-right text-emerald-mid"><Money amount={s.interest_credited} /></td>
-      <td className="px-6 py-3 text-right font-semibold"><Money amount={s.closing_balance} /></td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={s.opening_balance} />
+      </td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={s.deposits_total} />
+      </td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={s.withdrawals_total} />
+      </td>
+      <td className="px-6 py-3 text-right text-emerald-mid">
+        <Money amount={s.interest_credited} />
+      </td>
+      <td className="px-6 py-3 text-right font-semibold">
+        <Money amount={s.closing_balance} />
+      </td>
       <td className="px-6 py-3 text-right">
         <Button size="sm" variant="outline" className="gap-1" onClick={() => setOpen(true)}>
           <FileText className="h-3.5 w-3.5" /> View
         </Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>{s.account_label} — {s.period_start} to {s.period_end}</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>
+                {s.account_label} — {s.period_start} to {s.period_end}
+              </DialogTitle>
+            </DialogHeader>
             <StatementDetail id={s.id} />
           </DialogContent>
         </Dialog>
@@ -165,10 +194,14 @@ function StatementDetail({ id }: { id: string }) {
           <tbody className="divide-y divide-border">
             {lines.map((l) => (
               <tr key={l.id}>
-                <td className="px-3 py-1.5 text-muted-foreground">{new Date(l.created_at).toLocaleDateString()}</td>
+                <td className="px-3 py-1.5 text-muted-foreground">
+                  {new Date(l.created_at).toLocaleDateString()}
+                </td>
                 <td className="px-3 py-1.5 font-mono">{l.ref}</td>
                 <td className="px-3 py-1.5 capitalize">{l.kind}</td>
-                <td className="px-3 py-1.5 text-right"><Money amount={l.amount} /></td>
+                <td className="px-3 py-1.5 text-right">
+                  <Money amount={l.amount} />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -178,7 +211,11 @@ function StatementDetail({ id }: { id: string }) {
         <Button size="sm" onClick={() => downloadCSV(statement, lines)}>
           <Download className="mr-1 h-3.5 w-3.5" /> CSV
         </Button>
-        <Button size="sm" variant="outline" onClick={() => downloadPDF(statement, lines).catch((e) => toast.error(e.message))}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => downloadPDF(statement, lines).catch((e) => toast.error(e.message))}
+        >
           <Download className="mr-1 h-3.5 w-3.5" /> PDF
         </Button>
       </div>
@@ -190,7 +227,9 @@ function Stat({ label, val }: { label: string; val: number }) {
   return (
     <div>
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-      <div className="mt-0.5 font-semibold"><Money amount={val} /></div>
+      <div className="mt-0.5 font-semibold">
+        <Money amount={val} />
+      </div>
     </div>
   );
 }
@@ -201,7 +240,18 @@ function csvCell(v: string | number) {
   return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
 }
 
-function downloadCSV(s: Statement, lines: Array<{ ref: string; kind: string; amount: number; status: string; channel: string | null; note: string | null; created_at: string }>) {
+function downloadCSV(
+  s: Statement,
+  lines: Array<{
+    ref: string;
+    kind: string;
+    amount: number;
+    status: string;
+    channel: string | null;
+    note: string | null;
+    created_at: string;
+  }>,
+) {
   const rows = [
     ["Statement", s.account_label],
     ["Period", `${s.period_start} to ${s.period_end}`],
@@ -212,7 +262,15 @@ function downloadCSV(s: Statement, lines: Array<{ ref: string; kind: string; amo
     ["Closing", s.closing_balance],
     [],
     ["Date", "Ref", "Kind", "Amount", "Status", "Channel", "Note"],
-    ...lines.map((l) => [l.created_at, l.ref, l.kind, l.amount, l.status, l.channel ?? "", l.note ?? ""]),
+    ...lines.map((l) => [
+      l.created_at,
+      l.ref,
+      l.kind,
+      l.amount,
+      l.status,
+      l.channel ?? "",
+      l.note ?? "",
+    ]),
   ];
   const csv = rows.map((r) => r.map(csvCell).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -224,7 +282,10 @@ function downloadCSV(s: Statement, lines: Array<{ ref: string; kind: string; amo
   URL.revokeObjectURL(url);
 }
 
-async function downloadPDF(s: Statement, lines: Array<{ ref: string; kind: string; amount: number; created_at: string }>) {
+async function downloadPDF(
+  s: Statement,
+  lines: Array<{ ref: string; kind: string; amount: number; created_at: string }>,
+) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   doc.setFontSize(16);

@@ -86,7 +86,9 @@ export async function assertRestorable(
     .select("id", { count: "exact", head: true })
     .eq("member_id", entry.member_id);
   if ((count ?? 0) > 0) {
-    throw new Error("Member has re-submitted documents since deletion — restore would overwrite them");
+    throw new Error(
+      "Member has re-submitted documents since deletion — restore would overwrite them",
+    );
   }
   if (profile.kyc_submitted_at || profile.kyc_resubmitted_at) {
     throw new Error("Member has a newer submission in progress — restore blocked");
@@ -179,7 +181,8 @@ export async function restoreVaultEntry(
   try {
     const { notifyUser } = await import("@/lib/notify.server");
     const who =
-      actor.email ?? (actor.role ? `a ${String(actor.role).replace(/_/g, " ")}` : "an administrator");
+      actor.email ??
+      (actor.role ? `a ${String(actor.role).replace(/_/g, " ")}` : "an administrator");
     const docLine =
       restoredDocs.length > 0
         ? ` ${restoredDocs.length} document${restoredDocs.length === 1 ? "" : "s"} (${restoredDocs
@@ -256,10 +259,7 @@ export async function archiveKycReview(
     archivedDocs.push({ ...d, vault_path: mvErr ? null : to, original_path: from });
   }
   if ((docs ?? []).length > 0) {
-    const { error: delErr } = await admin
-      .from("kyc_documents")
-      .delete()
-      .eq("member_id", memberId);
+    const { error: delErr } = await admin.from("kyc_documents").delete().eq("member_id", memberId);
     if (delErr) throw new Error(delErr.message);
   }
 

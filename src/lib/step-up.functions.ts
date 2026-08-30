@@ -43,60 +43,61 @@ export const startStepUp = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ token: string; expires_at: string; method: string }> => {
-    const roles = await loadRoleSet(context.supabase, context.userId);
-    assertAnyRole(roles, ADMIN_ROLES, "admin");
+  .handler(
+    async ({ data, context }): Promise<{ token: string; expires_at: string; method: string }> => {
+      const roles = await loadRoleSet(context.supabase, context.userId);
+      assertAnyRole(roles, ADMIN_ROLES, "admin");
 
-    const claims = context.claims as any;
-    const email: string | null = claims?.email ?? null;
-    const aal: string | null = claims?.aal ?? null;
+      const claims = context.claims as any;
+      const email: string | null = claims?.email ?? null;
+      const aal: string | null = claims?.aal ?? null;
 
-    const { assertNotLockedOut, verifyPassword, issueStepUpSession } = await import(
-      "@/lib/step-up.server"
-    );
-    await assertNotLockedOut(context.userId);
+      const { assertNotLockedOut, verifyPassword, issueStepUpSession } =
+        await import("@/lib/step-up.server");
+      await assertNotLockedOut(context.userId);
 
-    if (data.method === "password") {
-      if (!email) throw new Error("No email on this account — use 2FA instead.");
-      if (!data.password) throw new Error("Password is required");
-      const ok = await verifyPassword(email, data.password);
-      if (!ok) {
+      if (data.method === "password") {
+        if (!email) throw new Error("No email on this account — use 2FA instead.");
+        if (!data.password) throw new Error("Password is required");
+        const ok = await verifyPassword(email, data.password);
+        if (!ok) {
+          await writeAudit({
+            actor_id: context.userId,
+            actor_email: email,
+            action: "security.step_up_failed",
+            target: context.userId,
+            meta: { method: "password", reason: data.reason ?? null },
+          });
+          throw new Error("Incorrect password");
+        }
+      } else if (aal !== "aal2") {
         await writeAudit({
           actor_id: context.userId,
           actor_email: email,
           action: "security.step_up_failed",
           target: context.userId,
-          meta: { method: "password", reason: data.reason ?? null },
+          meta: { method: "totp", aal },
         });
-        throw new Error("Incorrect password");
+        throw new Error("Complete the two-factor challenge before continuing.");
       }
-    } else if (aal !== "aal2") {
+
+      const session = await issueStepUpSession({
+        userId: context.userId,
+        method: data.method,
+        aal,
+      });
+
       await writeAudit({
         actor_id: context.userId,
         actor_email: email,
-        action: "security.step_up_failed",
+        action: "security.step_up_granted",
         target: context.userId,
-        meta: { method: "totp", aal },
+        meta: { method: data.method, reason: data.reason ?? null, expires_at: session.expires_at },
       });
-      throw new Error("Complete the two-factor challenge before continuing.");
-    }
 
-    const session = await issueStepUpSession({
-      userId: context.userId,
-      method: data.method,
-      aal,
-    });
-
-    await writeAudit({
-      actor_id: context.userId,
-      actor_email: email,
-      action: "security.step_up_granted",
-      target: context.userId,
-      meta: { method: data.method, reason: data.reason ?? null, expires_at: session.expires_at },
-    });
-
-    return session;
-  });
+      return session;
+    },
+  );
 
 export const endStepUp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

@@ -17,7 +17,8 @@ async function assertFinance(supabase: any, userId: string): Promise<string> {
 }
 async function assertView(supabase: any, userId: string) {
   const roles = await loadRoles(supabase, userId);
-  if (!roles.some((r) => VIEW_ROLES.has(r))) throw new Error("Forbidden: finance/audit role required");
+  if (!roles.some((r) => VIEW_ROLES.has(r)))
+    throw new Error("Forbidden: finance/audit role required");
 }
 
 // ============ Expenses ============
@@ -41,11 +42,20 @@ export type ExpenseRow = {
 export const listExpenses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ status: z.string().optional(), limit: z.number().int().min(1).max(200).default(100) }).parse(d),
+    z
+      .object({
+        status: z.string().optional(),
+        limit: z.number().int().min(1).max(200).default(100),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<ExpenseRow[]> => {
     await assertView(context.supabase, context.userId);
-    let q: any = context.supabase.from("expenses").select("*").order("created_at", { ascending: false }).limit(data.limit);
+    let q: any = context.supabase
+      .from("expenses")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
     if (data.status && data.status !== "all") q = q.eq("status", data.status);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -118,7 +128,8 @@ export const decideExpense = createServerFn({ method: "POST" })
       rpc = "approve_expense";
       args = { _expense_id: data.id, _actor_id: context.userId };
     } else if (data.action === "reject") {
-      if (!data.reason || data.reason.trim().length < 3) throw new Error("Rejection reason required");
+      if (!data.reason || data.reason.trim().length < 3)
+        throw new Error("Rejection reason required");
       rpc = "reject_expense";
       args = { _expense_id: data.id, _reason: data.reason, _actor_id: context.userId };
     } else {
@@ -145,7 +156,8 @@ export const decideExpense = createServerFn({ method: "POST" })
       actorEmail: (context.claims as any)?.email ?? null,
       actorRole,
       module: "expense",
-      outcome: data.action === "approve" ? "approved" : data.action === "reject" ? "rejected" : "paid",
+      outcome:
+        data.action === "approve" ? "approved" : data.action === "reject" ? "rejected" : "paid",
       target: data.id,
       note: data.reason ?? null,
       reference: expense?.ref ?? null,
@@ -177,11 +189,20 @@ export type TransferRow = {
 export const listTransfers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ status: z.string().optional(), limit: z.number().int().min(1).max(200).default(100) }).parse(d),
+    z
+      .object({
+        status: z.string().optional(),
+        limit: z.number().int().min(1).max(200).default(100),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<TransferRow[]> => {
     await assertView(context.supabase, context.userId);
-    let q: any = context.supabase.from("transfers").select("*").order("created_at", { ascending: false }).limit(data.limit);
+    let q: any = context.supabase
+      .from("transfers")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
     if (data.status && data.status !== "all") q = q.eq("status", data.status);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -241,7 +262,10 @@ export const clearTransfer = createServerFn({ method: "POST" })
       target: data.id,
       reference: tr?.ref ?? null,
       amount: tr?.amount == null ? null : Number(tr.amount),
-      meta: { from_account_id: tr?.from_account_id ?? null, to_account_id: tr?.to_account_id ?? null },
+      meta: {
+        from_account_id: tr?.from_account_id ?? null,
+        to_account_id: tr?.to_account_id ?? null,
+      },
     });
     return { ok: true };
   });
@@ -293,7 +317,9 @@ export type AdjustmentRow = {
 
 export const listAdjustments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ limit: z.number().int().min(1).max(200).default(100) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(200).default(100) }).parse(d),
+  )
   .handler(async ({ data, context }): Promise<AdjustmentRow[]> => {
     await assertView(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
@@ -360,11 +386,20 @@ export const getFinanceSummary = createServerFn({ method: "GET" })
       sb.from("savings_accounts").select("balance"),
       sb.from("loans").select("outstanding_principal,status"),
     ]);
-    const txns = (txnRes.data ?? []) as Array<{ kind: string; amount: number; status: string; created_at: string }>;
+    const txns = (txnRes.data ?? []) as Array<{
+      kind: string;
+      amount: number;
+      status: string;
+      created_at: string;
+    }>;
     const isIn = (k: string) => k === "deposit" || k === "loan_repayment";
     const isOut = (k: string) => k === "withdrawal" || k === "loan_disbursement" || k === "expense";
-    const cash_in_30d = txns.filter((t) => t.status === "cleared" && isIn(t.kind)).reduce((s, t) => s + Number(t.amount), 0);
-    const cash_out_30d = txns.filter((t) => t.status === "cleared" && isOut(t.kind)).reduce((s, t) => s + Number(t.amount), 0);
+    const cash_in_30d = txns
+      .filter((t) => t.status === "cleared" && isIn(t.kind))
+      .reduce((s, t) => s + Number(t.amount), 0);
+    const cash_out_30d = txns
+      .filter((t) => t.status === "cleared" && isOut(t.kind))
+      .reduce((s, t) => s + Number(t.amount), 0);
 
     const buckets = new Map<string, { inc: number; out: number }>();
     for (let i = 29; i >= 0; i--) {
@@ -380,15 +415,25 @@ export const getFinanceSummary = createServerFn({ method: "GET" })
       else if (isOut(t.kind)) b.out += Number(t.amount);
     }
     const income_series = Array.from(buckets.entries()).map(([day, b]) => ({ day, amount: b.inc }));
-    const expense_series = Array.from(buckets.entries()).map(([day, b]) => ({ day, amount: b.out }));
+    const expense_series = Array.from(buckets.entries()).map(([day, b]) => ({
+      day,
+      amount: b.out,
+    }));
 
     const expenses = (expRes.data ?? []) as Array<{ status: string; amount: number }>;
     const expenses_pending = expenses.filter((e) => e.status === "pending").length;
-    const expenses_pending_amount = expenses.filter((e) => e.status === "pending").reduce((s, e) => s + Number(e.amount), 0);
+    const expenses_pending_amount = expenses
+      .filter((e) => e.status === "pending")
+      .reduce((s, e) => s + Number(e.amount), 0);
     const transfers = (transRes.data ?? []) as Array<{ status: string; amount: number }>;
     const transfers_pending = transfers.filter((t) => t.status === "pending").length;
-    const aum = ((savingsRes.data ?? []) as Array<{ balance: number }>).reduce((s, r) => s + Number(r.balance), 0);
-    const outstanding_loans = ((loansRes.data ?? []) as Array<{ outstanding_principal: number; status: string }>)
+    const aum = ((savingsRes.data ?? []) as Array<{ balance: number }>).reduce(
+      (s, r) => s + Number(r.balance),
+      0,
+    );
+    const outstanding_loans = (
+      (loansRes.data ?? []) as Array<{ outstanding_principal: number; status: string }>
+    )
       .filter((l) => l.status === "active")
       .reduce((s, l) => s + Number(l.outstanding_principal), 0);
 
@@ -421,7 +466,9 @@ export const listSavingsForFinance = createServerFn({ method: "GET" })
     await assertView(context.supabase, context.userId);
     const { data, error } = await (context.supabase as any)
       .from("savings_accounts")
-      .select("id,user_id,balance,savings_plans(name),profiles!savings_accounts_user_id_profiles_fkey!inner(full_name,member_no)")
+      .select(
+        "id,user_id,balance,savings_plans(name),profiles!savings_accounts_user_id_profiles_fkey!inner(full_name,member_no)",
+      )
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw new Error(error.message);
@@ -470,9 +517,7 @@ export const listTransferAudit = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
     z
       .object({
-        action: z
-          .enum(["all", "cleared", "rejected", "requested"])
-          .default("all"),
+        action: z.enum(["all", "cleared", "rejected", "requested"]).default("all"),
         search: z.string().trim().max(120).optional(),
         from: z.string().optional(),
         to: z.string().optional(),
@@ -488,10 +533,10 @@ export const listTransferAudit = createServerFn({ method: "GET" })
       data.action === "cleared"
         ? ["transfer.cleared"]
         : data.action === "rejected"
-        ? ["transfer.rejected"]
-        : data.action === "requested"
-        ? ["transfer.requested", "transfer.created"]
-        : ["transfer.requested", "transfer.created", "transfer.cleared", "transfer.rejected"];
+          ? ["transfer.rejected"]
+          : data.action === "requested"
+            ? ["transfer.requested", "transfer.created"]
+            : ["transfer.requested", "transfer.created", "transfer.cleared", "transfer.rejected"];
 
     const fromIdx = (data.page - 1) * data.pageSize;
     const toIdx = fromIdx + data.pageSize - 1;
@@ -513,10 +558,7 @@ export const listTransferAudit = createServerFn({ method: "GET" })
     const transferIds = Array.from(
       new Set(((rows ?? []) as any[]).map((r) => r.target).filter(Boolean)),
     ) as string[];
-    const transferMap = new Map<
-      string,
-      { from_account_id: string; to_account_id: string }
-    >();
+    const transferMap = new Map<string, { from_account_id: string; to_account_id: string }>();
     if (transferIds.length) {
       const { data: trs } = await (context.supabase as any)
         .from("transfers")
@@ -543,10 +585,7 @@ export const listTransferAudit = createServerFn({ method: "GET" })
       }
     }
 
-    const acctMap = new Map<
-      string,
-      { member_name: string | null; member_no: string | null }
-    >();
+    const acctMap = new Map<string, { member_name: string | null; member_no: string | null }>();
     if (acctIds.size) {
       const { data: accts } = await (context.supabase as any)
         .from("savings_accounts")
@@ -563,10 +602,8 @@ export const listTransferAudit = createServerFn({ method: "GET" })
     let entries: TransferAuditEntry[] = ((rows ?? []) as any[]).map((r) => {
       const meta = (r.meta ?? {}) as Record<string, any>;
       const tr = r.target ? transferMap.get(r.target) : undefined;
-      const fromAcct =
-        (typeof meta.from === "string" && meta.from) || tr?.from_account_id || null;
-      const toAcct =
-        (typeof meta.to === "string" && meta.to) || tr?.to_account_id || null;
+      const fromAcct = (typeof meta.from === "string" && meta.from) || tr?.from_account_id || null;
+      const toAcct = (typeof meta.to === "string" && meta.to) || tr?.to_account_id || null;
       const fromInfo = fromAcct ? acctMap.get(fromAcct) : undefined;
       const toInfo = toAcct ? acctMap.get(toAcct) : undefined;
       return {

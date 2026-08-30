@@ -20,8 +20,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL =
-  process.env.VITE_SUPABASE_URL ?? "https://xypqvwkfldpjgejhgrjo.supabase.co";
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? "https://xypqvwkfldpjgejhgrjo.supabase.co";
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "";
 
 const MEMBER_EMAIL = process.env.E2E_MEMBER_EMAIL;

@@ -142,7 +142,10 @@ export const getOperationsBoard = createServerFn({ method: "GET" })
       .limit(5000);
     const sumBy = (kinds: string[]) => {
       const rows = (txns ?? []).filter((t: any) => kinds.includes(t.kind) && t.status !== "failed");
-      return { amount: rows.reduce((s: number, t: any) => s + Number(t.amount ?? 0), 0), count: rows.length };
+      return {
+        amount: rows.reduce((s: number, t: any) => s + Number(t.amount ?? 0), 0),
+        count: rows.length,
+      };
     };
     const deposits = sumBy(["deposit", "transfer_in"]);
     const withdrawals = sumBy(["withdrawal", "transfer_out"]);
@@ -161,10 +164,30 @@ export const getOperationsBoard = createServerFn({ method: "GET" })
 
     const money: MoneyTile[] = [
       { key: "deposits", label: "Deposits today", amount: deposits.amount, count: deposits.count },
-      { key: "withdrawals", label: "Withdrawals today", amount: withdrawals.amount, count: withdrawals.count },
-      { key: "repayments", label: "Repayments today", amount: repayments.amount, count: repayments.count },
-      { key: "disbursed", label: "Disbursed today", amount: disbursed.amount, count: disbursed.count },
-      { key: "till", label: "Open teller tills", amount: cashPosition, count: (tills ?? []).length },
+      {
+        key: "withdrawals",
+        label: "Withdrawals today",
+        amount: withdrawals.amount,
+        count: withdrawals.count,
+      },
+      {
+        key: "repayments",
+        label: "Repayments today",
+        amount: repayments.amount,
+        count: repayments.count,
+      },
+      {
+        key: "disbursed",
+        label: "Disbursed today",
+        amount: disbursed.amount,
+        count: disbursed.count,
+      },
+      {
+        key: "till",
+        label: "Open teller tills",
+        amount: cashPosition,
+        count: (tills ?? []).length,
+      },
     ];
 
     // ---- activity feed ----
@@ -195,7 +218,10 @@ export const getOperationsBoard = createServerFn({ method: "GET" })
         .from("savings_recurring_contributions")
         .select("id", { count: "exact", head: true })
         .eq("last_run_status", "failed"),
-      sb.from("notification_outbox").select("id", { count: "exact", head: true }).eq("status", "failed"),
+      sb
+        .from("notification_outbox")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "failed"),
       sb
         .from("runtime_error_logs")
         .select("id", { count: "exact", head: true })
@@ -205,7 +231,11 @@ export const getOperationsBoard = createServerFn({ method: "GET" })
         .from("presence_sessions")
         .select("token", { count: "exact", head: true })
         .gte("created_at", new Date(Date.now() - 120_000).toISOString()),
-      sb.from("cron_job_runs").select("job, status, finished_at").order("created_at", { ascending: false }).limit(20),
+      sb
+        .from("cron_job_runs")
+        .select("job, status, finished_at")
+        .order("created_at", { ascending: false })
+        .limit(20),
     ]);
 
     const newestRun = (lastRuns ?? [])[0] as any;
@@ -216,7 +246,8 @@ export const getOperationsBoard = createServerFn({ method: "GET" })
         key: "recurring",
         label: "Failed recurring contributions",
         value: String(failedRecurring ?? 0),
-        detail: (failedRecurring ?? 0) > 0 ? "Needs a retry or member contact" : "All schedules healthy",
+        detail:
+          (failedRecurring ?? 0) > 0 ? "Needs a retry or member contact" : "All schedules healthy",
         status: (failedRecurring ?? 0) > 0 ? "warn" : "ok",
         link: "/admin/savings",
       },
@@ -240,9 +271,7 @@ export const getOperationsBoard = createServerFn({ method: "GET" })
         key: "jobs",
         label: "Scheduled jobs",
         value: failedRun ? "Attention" : "Healthy",
-        detail: newestRun
-          ? `Last: ${newestRun.job} · ${newestRun.status}`
-          : "No runs recorded yet",
+        detail: newestRun ? `Last: ${newestRun.job} · ${newestRun.status}` : "No runs recorded yet",
         status: failedRun ? "bad" : "ok",
         link: "/admin/health",
       },

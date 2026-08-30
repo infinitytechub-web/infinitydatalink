@@ -79,7 +79,10 @@ export async function runGuardianConsentReminders(): Promise<GuardianConsentRemi
   const ids = rows.map((r) => r.id as string);
 
   const [{ data: nok }, { data: docs }] = await Promise.all([
-    sb.from("next_of_kin").select("id, member_id, full_name, relationship, phone").in("member_id", ids),
+    sb
+      .from("next_of_kin")
+      .select("id, member_id, full_name, relationship, phone")
+      .in("member_id", ids),
     sb
       .from("kyc_documents")
       .select("member_id, doc_type")
@@ -104,7 +107,8 @@ export async function runGuardianConsentReminders(): Promise<GuardianConsentRemi
   for (const member of rows) {
     const memberId = member.id as string;
     const label =
-      [member.full_name, member.member_no].filter(Boolean).join(" · ") || `Member ${memberId.slice(0, 8)}`;
+      [member.full_name, member.member_no].filter(Boolean).join(" · ") ||
+      `Member ${memberId.slice(0, 8)}`;
 
     const guardians = eligibleGuardians(nokByMember.get(memberId) ?? []);
     const attached = docsByMember.get(memberId) ?? new Set<string>();

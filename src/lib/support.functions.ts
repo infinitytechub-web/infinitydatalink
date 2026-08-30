@@ -70,13 +70,19 @@ const COLS =
 
 const STAFF_ROLES = ["super_admin", "admin", "manager", "support_officer"] as const;
 
-async function labelMap(sb: any, ids: string[]): Promise<Map<string, { label: string; member_no: string | null }>> {
+async function labelMap(
+  sb: any,
+  ids: string[],
+): Promise<Map<string, { label: string; member_no: string | null }>> {
   const map = new Map<string, { label: string; member_no: string | null }>();
   const unique = [...new Set(ids.filter(Boolean))];
   if (unique.length === 0) return map;
   const { data } = await sb.from("profiles").select("id, full_name, member_no").in("id", unique);
   for (const p of (data ?? []) as any[]) {
-    map.set(p.id, { label: p.full_name || p.member_no || "Member", member_no: p.member_no ?? null });
+    map.set(p.id, {
+      label: p.full_name || p.member_no || "Member",
+      member_no: p.member_no ?? null,
+    });
   }
   return map;
 }
@@ -228,7 +234,12 @@ export const replyToTicket = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!ticket) throw new Error("Ticket not found");
-    const t = ticket as unknown as { id: string; ref: string; status: SupportStatus; assignee_id: string | null };
+    const t = ticket as unknown as {
+      id: string;
+      ref: string;
+      status: SupportStatus;
+      assignee_id: string | null;
+    };
     if (t.status === "closed") throw new Error("This ticket is closed — reopen it to add a reply.");
 
     const { error: msgErr } = await context.supabase.from("support_messages").insert({
@@ -276,7 +287,12 @@ export const setMyTicketState = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!ticket) throw new Error("Ticket not found");
-    const t = ticket as unknown as { id: string; ref: string; status: SupportStatus; closed_at: string | null };
+    const t = ticket as unknown as {
+      id: string;
+      ref: string;
+      status: SupportStatus;
+      closed_at: string | null;
+    };
 
     const now = new Date().toISOString();
     const patch: Record<string, unknown> =
@@ -285,12 +301,15 @@ export const setMyTicketState = createServerFn({ method: "POST" })
         : { status: "open", closed_at: null, reopened_at: now };
 
     if (data.action === "reopen") {
-      if (t.status !== "closed" && t.status !== "resolved") throw new Error("Ticket is already open.");
+      if (t.status !== "closed" && t.status !== "resolved")
+        throw new Error("Ticket is already open.");
       const ref = t.closed_at ?? t.status;
       if (t.closed_at) {
         const days = (Date.now() - new Date(t.closed_at).getTime()) / 86_400_000;
         if (days > REOPEN_WINDOW_DAYS) {
-          throw new Error(`Tickets can only be reopened within ${REOPEN_WINDOW_DAYS} days — please raise a new ticket.`);
+          throw new Error(
+            `Tickets can only be reopened within ${REOPEN_WINDOW_DAYS} days — please raise a new ticket.`,
+          );
         }
       }
       void ref;
@@ -335,7 +354,13 @@ export type AdminTicketList = {
   total: number;
   page: number;
   page_size: number;
-  counts: { open: number; in_progress: number; awaiting_member: number; resolved: number; closed: number };
+  counts: {
+    open: number;
+    in_progress: number;
+    awaiting_member: number;
+    resolved: number;
+    closed: number;
+  };
   mine: number;
 };
 
@@ -360,7 +385,11 @@ export const adminListTickets = createServerFn({ method: "POST" })
     }
 
     const from = (data.page - 1) * data.page_size;
-    const { data: rows, count, error } = await q
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q
       .order(data.sort_by, { ascending: data.sort_dir === "asc" })
       .range(from, from + data.page_size - 1);
     if (error) throw new Error(error.message);
@@ -378,7 +407,8 @@ export const adminListTickets = createServerFn({ method: "POST" })
     let mine = 0;
     for (const r of (allStatus ?? []) as any[]) {
       if (r.status in counts) counts[r.status as keyof typeof counts] += 1;
-      if (r.assignee_id === context.userId && r.status !== "closed" && r.status !== "resolved") mine += 1;
+      if (r.assignee_id === context.userId && r.status !== "closed" && r.status !== "resolved")
+        mine += 1;
     }
 
     return {
@@ -554,7 +584,10 @@ export const adminUpdateTicket = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = { last_staff_activity_at: now };
 
     if (data.status && data.status !== t.status) {
-      if ((data.status === "resolved" || data.status === "closed") && (data.note ?? "").length < 10) {
+      if (
+        (data.status === "resolved" || data.status === "closed") &&
+        (data.note ?? "").length < 10
+      ) {
         throw new Error("A resolution note of at least 10 characters is required.");
       }
       patch.status = data.status;
@@ -574,7 +607,11 @@ export const adminUpdateTicket = createServerFn({ method: "POST" })
     if (data.priority && data.priority !== t.priority) patch.priority = data.priority;
     if (data.assign_to !== undefined) {
       patch.assignee_id =
-        data.assign_to === "me" ? context.userId : data.assign_to === "none" ? null : data.assign_to;
+        data.assign_to === "me"
+          ? context.userId
+          : data.assign_to === "none"
+            ? null
+            : data.assign_to;
     }
 
     const { error: upErr } = await context.supabase
@@ -618,7 +655,10 @@ export const adminListAssignees = createServerFn({ method: "GET" })
       .select("user_id, role")
       .in("role", ["super_admin", "admin", "manager", "support_officer"]);
     const rows = (data ?? []) as Array<{ user_id: string; role: string }>;
-    const people = await labelMap(context.supabase, rows.map((r) => r.user_id));
+    const people = await labelMap(
+      context.supabase,
+      rows.map((r) => r.user_id),
+    );
     const seen = new Set<string>();
     const out: Array<{ id: string; label: string; role: string }> = [];
     for (const r of rows) {

@@ -28,10 +28,14 @@ export const Route = createFileRoute("/_admin/admin/savings/pots")({
       { title: "Group savings pots — IT-360 CashApp" },
       {
         name: "description",
-        content: "Oversee group and susu savings pots, pooled balances and scheduled payout rotations.",
+        content:
+          "Oversee group and susu savings pots, pooled balances and scheduled payout rotations.",
       },
       { property: "og:title", content: "Group savings pots — IT-360 CashApp" },
-      { property: "og:description", content: "Group susu pot balances, cycles and payout releases." },
+      {
+        property: "og:description",
+        content: "Group susu pot balances, cycles and payout releases.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -84,13 +88,20 @@ function Body({ stepUp }: { stepUp: ReturnType<typeof useStepUp> }) {
       <section className="grid gap-6 md:grid-cols-3">
         <KPIStat label="Pooled balance" value={<Money amount={data.pooled} />} />
         <KPIStat label="Active pots" value={<span className="tabular">{data.pots.length}</span>} />
-        <KPIStat label="Scheduled payouts" value={<span className="tabular">{scheduled.length}</span>} accent />
+        <KPIStat
+          label="Scheduled payouts"
+          value={<span className="tabular">{scheduled.length}</span>}
+          accent
+        />
       </section>
 
       <SectionCard title="Pots">
         {data.pots.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No group pots" hint="Create a pot from an approved entity to start susu savings." />
+            <EmptyState
+              title="No group pots"
+              hint="Create a pot from an approved entity to start susu savings."
+            />
           </div>
         ) : (
           <table className="w-full">
@@ -156,7 +167,9 @@ function Body({ stepUp }: { stepUp: ReturnType<typeof useStepUp> }) {
                       </Button>
                     )}
                     {p.status === "paid" && p.paid_at && (
-                      <span className="text-xs text-muted-foreground">{new Date(p.paid_at).toLocaleDateString()}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(p.paid_at).toLocaleDateString()}
+                      </span>
                     )}
                   </td>
                 </tr>

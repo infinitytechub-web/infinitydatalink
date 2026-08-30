@@ -15,8 +15,7 @@ export const SIDEBAR_WIDGET_PADDING = "p-2";
 export const SIDEBAR_ITEM_BASE =
   "nav-3d-item group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm outline-none will-change-transform lg:py-2 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-0";
 export const SIDEBAR_ITEM_IDLE = "text-white/80 hover:bg-white/10 hover:text-white";
-export const SIDEBAR_ITEM_ACTIVE =
-  "nav-3d-item-active bg-white/15 text-white ring-1 ring-white/25";
+export const SIDEBAR_ITEM_ACTIVE = "nav-3d-item-active bg-white/15 text-white ring-1 ring-white/25";
 
 /** Group container — renders the padded card unless the rail is collapsed. */
 export function SidebarWidget({
@@ -42,7 +41,6 @@ export function SidebarWidget({
   );
 }
 
-
 /** Group label with the coloured accent dot. Hidden while collapsed. */
 export function SidebarWidgetHeader({
   label,
@@ -63,9 +61,7 @@ export function SidebarWidgetHeader({
           accent,
         )}
       />
-      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/70">
-        {label}
-      </div>
+      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/70">{label}</div>
     </header>
   );
 }
@@ -97,7 +93,6 @@ export function SidebarNavItem({
   );
   const inner = (
     <>
-
       <span
         aria-hidden="true"
         className={cn(
@@ -115,9 +110,7 @@ export function SidebarNavItem({
         )}
       </span>
       {!collapsed && (
-        <span
-          className={cn("nav-3d-label min-w-0 truncate", active && "font-semibold")}
-        >
+        <span className={cn("nav-3d-label min-w-0 truncate", active && "font-semibold")}>
           {item.label}
         </span>
       )}
@@ -129,10 +122,7 @@ export function SidebarNavItem({
       {active && !collapsed ? (
         <span
           aria-hidden="true"
-          className={cn(
-            "absolute inset-y-1 left-0 w-1 rounded-r-full bg-linear-to-b",
-            accent,
-          )}
+          className={cn("absolute inset-y-1 left-0 w-1 rounded-r-full bg-linear-to-b", accent)}
         />
       ) : null}
     </>
@@ -158,7 +148,6 @@ export function SidebarNavItem({
     >
       {inner}
     </Link>
-
   );
 }
 

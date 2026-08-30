@@ -43,8 +43,8 @@ const AccountAlertEmail = ({
           </Button>
         </Section>
         <Text style={footer}>
-          You are receiving this because of activity on your {siteName} account.
-          You can change alert settings in the member portal.
+          You are receiving this because of activity on your {siteName} account. You can change
+          alert settings in the member portal.
         </Text>
       </Container>
     </Body>

@@ -47,7 +47,11 @@ class ErrorBoundary extends Component<
       kind: "route",
       message: error.message,
       stack: error.stack,
-      meta: { boundary: "async_boundary", name: this.props.name, componentStack: info.componentStack },
+      meta: {
+        boundary: "async_boundary",
+        name: this.props.name,
+        componentStack: info.componentStack,
+      },
     });
   }
 
@@ -99,7 +103,9 @@ function DefaultError({ error, retry, className }: FallbackProps & { className?:
     >
       <AlertTriangle className="size-6 text-destructive" aria-hidden="true" />
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-foreground">Something went wrong loading this section.</p>
+        <p className="text-sm font-semibold text-foreground">
+          Something went wrong loading this section.
+        </p>
         <p className="max-w-md text-xs text-muted-foreground break-words">
           {error.message || "An unexpected error occurred."}
         </p>
@@ -141,12 +147,18 @@ export function AsyncBoundary({
             onRetry?.();
           }}
           fallback={({ error, retry }) =>
-            errorFallback
-              ? errorFallback({ error, retry })
-              : <DefaultError error={error} retry={retry} className={className} />
+            errorFallback ? (
+              errorFallback({ error, retry })
+            ) : (
+              <DefaultError error={error} retry={retry} className={className} />
+            )
           }
         >
-          <Suspense fallback={pendingFallback ?? <DefaultPending label={loadingLabel} className={className} />}>
+          <Suspense
+            fallback={
+              pendingFallback ?? <DefaultPending label={loadingLabel} className={className} />
+            }
+          >
             {children}
           </Suspense>
         </ErrorBoundary>

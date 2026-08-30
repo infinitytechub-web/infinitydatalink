@@ -64,10 +64,7 @@ function ApprovalsInner() {
   const rejectFn = useServerFn(rejectSettingsChange);
   const qc = useQueryClient();
 
-  const args = useMemo(
-    () => ({ status, kind, limit: LIMIT, offset }),
-    [status, kind, offset],
-  );
+  const args = useMemo(() => ({ status, kind, limit: LIMIT, offset }), [status, kind, offset]);
 
   const { data, isFetching } = useQuery({
     queryKey: ["settings-change-requests", args],
@@ -260,7 +257,9 @@ function RequestRow({
         </td>
         <td className="px-6 py-3 text-xs">{row.requester_email ?? row.requested_by}</td>
         <td className="px-6 py-3">
-          <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusTone(row.status)}`}>
+          <span
+            className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusTone(row.status)}`}
+          >
             {row.status}
           </span>
         </td>
@@ -268,7 +267,11 @@ function RequestRow({
           {row.status === "pending" ? (
             <div className="flex gap-2">
               <Button size="sm" onClick={onApprove} disabled={busy}>
-                {busy ? <Loader2 className="mr-1 size-3 animate-spin" /> : <CheckCircle2 className="mr-1 size-3" />}
+                {busy ? (
+                  <Loader2 className="mr-1 size-3 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="mr-1 size-3" />
+                )}
                 Approve
               </Button>
               <Button size="sm" variant="outline" onClick={onReject} disabled={busy}>
@@ -288,8 +291,16 @@ function RequestRow({
         <tr className="border-t border-border/40 bg-muted/20">
           <td colSpan={6} className="px-6 py-4">
             <div className="grid gap-2 text-xs">
-              {row.review_note ? <div><b>Review note:</b> {row.review_note}</div> : null}
-              {row.error ? <div className="text-rose-500"><b>Error:</b> {row.error}</div> : null}
+              {row.review_note ? (
+                <div>
+                  <b>Review note:</b> {row.review_note}
+                </div>
+              ) : null}
+              {row.error ? (
+                <div className="text-rose-500">
+                  <b>Error:</b> {row.error}
+                </div>
+              ) : null}
               <div>
                 <b>Payload:</b>
                 <pre className="mt-1 max-h-80 overflow-auto rounded bg-background/60 p-3 text-[11px]">

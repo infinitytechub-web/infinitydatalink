@@ -27,7 +27,10 @@ export function calculateAge(
   return age;
 }
 
-export function isMinor(dateOfBirth: string | Date | null | undefined, on: Date = new Date()): boolean {
+export function isMinor(
+  dateOfBirth: string | Date | null | undefined,
+  on: Date = new Date(),
+): boolean {
   const age = calculateAge(dateOfBirth, on);
   return age !== null && age < MINOR_AGE_THRESHOLD;
 }
@@ -45,13 +48,14 @@ export function daysToNextBirthday(dateOfBirth: string | null | undefined): numb
   const dob = new Date(`${dateOfBirth}T00:00:00Z`);
   if (Number.isNaN(dob.getTime())) return null;
   const now = new Date();
-  const next = new Date(
-    Date.UTC(now.getUTCFullYear(), dob.getUTCMonth(), dob.getUTCDate()),
-  );
+  const next = new Date(Date.UTC(now.getUTCFullYear(), dob.getUTCMonth(), dob.getUTCDate()));
   if (next.getTime() < Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) {
     next.setUTCFullYear(next.getUTCFullYear() + 1);
   }
-  return Math.round((next.getTime() - Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) / 86_400_000);
+  return Math.round(
+    (next.getTime() - Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) /
+      86_400_000,
+  );
 }
 
 /** Validation guard for DOB inputs (no future dates, sane range). */

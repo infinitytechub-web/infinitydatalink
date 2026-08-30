@@ -23,7 +23,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   TELLER_KINDS,
   TELLER_KIND_LABELS,
@@ -50,13 +56,18 @@ export const Route = createFileRoute("/_admin/admin/teller")({
       { title: "Teller mode — IT-360 CashApp Admin" },
       {
         name: "description",
-        content: "Open a till, post counter deposits, withdrawals and loan repayments, and reconcile at close of day.",
+        content:
+          "Open a till, post counter deposits, withdrawals and loan repayments, and reconcile at close of day.",
       },
       { name: "robots", content: "noindex" },
     ],
   }),
-  errorComponent: ({ error }) => <ErrorState title="Teller mode unavailable" message={error.message} />,
-  notFoundComponent: () => <EmptyState title="Nothing here" hint="This teller view does not exist." />,
+  errorComponent: ({ error }) => (
+    <ErrorState title="Teller mode unavailable" message={error.message} />
+  ),
+  notFoundComponent: () => (
+    <EmptyState title="Nothing here" hint="This teller view does not exist." />
+  ),
   component: TellerModePage,
 });
 
@@ -90,7 +101,8 @@ function TellerWorkspace() {
   const [receipt, setReceipt] = useState<TellerReceipt | null>(null);
 
   const openMut = useMutation({
-    mutationFn: () => openSession({ data: { opening_float: Number(float) || 0, note: openNote || undefined } }),
+    mutationFn: () =>
+      openSession({ data: { opening_float: Number(float) || 0, note: openNote || undefined } }),
     onSuccess: () => {
       toast.success("Till opened");
       setOpenNote("");
@@ -110,7 +122,9 @@ function TellerWorkspace() {
       }),
     onSuccess: (s) => {
       toast.success(
-        s.variance === 0 ? "Till closed and balanced" : `Till closed with a variance of ${s.variance?.toFixed(2)}`,
+        s.variance === 0
+          ? "Till closed and balanced"
+          : `Till closed with a variance of ${s.variance?.toFixed(2)}`,
       );
       setCounted("");
       setCloseNote("");
@@ -129,7 +143,11 @@ function TellerWorkspace() {
           </label>
           <label className="space-y-1 text-xs uppercase tracking-widest text-muted-foreground">
             Note (optional)
-            <Input value={openNote} onChange={(e) => setOpenNote(e.target.value)} placeholder="Shift, branch, till id…" />
+            <Input
+              value={openNote}
+              onChange={(e) => setOpenNote(e.target.value)}
+              placeholder="Shift, branch, till id…"
+            />
           </label>
           <Button onClick={() => openMut.mutate()} disabled={openMut.isPending}>
             <Unlock className="mr-2 h-4 w-4" /> Open till
@@ -151,10 +169,18 @@ function TellerWorkspace() {
                 {data.recent_sessions.map((s) => (
                   <tr key={s.id} className="border-t border-border/60">
                     <td className="py-2">{new Date(s.opened_at).toLocaleString()}</td>
-                    <td className="py-2">{s.closed_at ? new Date(s.closed_at).toLocaleString() : "—"}</td>
-                    <td className="py-2 text-right">{s.expected_close === null ? "—" : <Money amount={s.expected_close} />}</td>
-                    <td className="py-2 text-right">{s.counted_close === null ? "—" : <Money amount={s.counted_close} />}</td>
-                    <td className="py-2 text-right">{s.variance === null ? "—" : <Money amount={s.variance} signed />}</td>
+                    <td className="py-2">
+                      {s.closed_at ? new Date(s.closed_at).toLocaleString() : "—"}
+                    </td>
+                    <td className="py-2 text-right">
+                      {s.expected_close === null ? "—" : <Money amount={s.expected_close} />}
+                    </td>
+                    <td className="py-2 text-right">
+                      {s.counted_close === null ? "—" : <Money amount={s.counted_close} />}
+                    </td>
+                    <td className="py-2 text-right">
+                      {s.variance === null ? "—" : <Money amount={s.variance} signed />}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -168,7 +194,12 @@ function TellerWorkspace() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KPIStat label="Drawer position" value={<Money amount={data.totals.drawer} />} tone="teal" hint="Cash on hand" />
+        <KPIStat
+          label="Drawer position"
+          value={<Money amount={data.totals.drawer} />}
+          tone="teal"
+          hint="Cash on hand"
+        />
         <KPIStat label="Cash in" value={<Money amount={data.totals.cash_in} />} tone="royal" />
         <KPIStat label="Cash out" value={<Money amount={data.totals.cash_out} />} tone="gold" />
         <KPIStat
@@ -179,11 +210,19 @@ function TellerWorkspace() {
         />
       </div>
 
-      <PostingPanel onPosted={(r) => { setReceipt(r); void invalidate(); }} />
+      <PostingPanel
+        onPosted={(r) => {
+          setReceipt(r);
+          void invalidate();
+        }}
+      />
 
       <SectionCard title="Session postings">
         {data.transactions.length === 0 ? (
-          <EmptyState title="No postings yet" hint="Captured transactions appear here with their receipt reference." />
+          <EmptyState
+            title="No postings yet"
+            hint="Captured transactions appear here with their receipt reference."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -204,7 +243,9 @@ function TellerWorkspace() {
                     <td className="py-2 font-mono text-xs">{t.reference}</td>
                     <td className="py-2">
                       {t.member_name ?? "—"}
-                      <span className="ml-1 text-xs text-muted-foreground">{t.member_no ?? ""}</span>
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        {t.member_no ?? ""}
+                      </span>
                     </td>
                     <td className="py-2">{TELLER_KIND_LABELS[t.kind] ?? t.kind}</td>
                     <td className="py-2 capitalize">{t.method.replace("_", " ")}</td>
@@ -223,19 +264,32 @@ function TellerWorkspace() {
         <div className="grid gap-4 sm:grid-cols-[200px_1fr_auto] sm:items-end">
           <label className="space-y-1 text-xs uppercase tracking-widest text-muted-foreground">
             Counted cash
-            <Input value={counted} onChange={(e) => setCounted(e.target.value)} inputMode="decimal" placeholder="0.00" />
+            <Input
+              value={counted}
+              onChange={(e) => setCounted(e.target.value)}
+              inputMode="decimal"
+              placeholder="0.00"
+            />
           </label>
           <label className="space-y-1 text-xs uppercase tracking-widest text-muted-foreground">
             Reconciliation note
-            <Input value={closeNote} onChange={(e) => setCloseNote(e.target.value)} placeholder="Explain any variance" />
+            <Input
+              value={closeNote}
+              onChange={(e) => setCloseNote(e.target.value)}
+              placeholder="Explain any variance"
+            />
           </label>
-          <Button variant="secondary" onClick={() => closeMut.mutate()} disabled={closeMut.isPending || counted === ""}>
+          <Button
+            variant="secondary"
+            onClick={() => closeMut.mutate()}
+            disabled={closeMut.isPending || counted === ""}
+          >
             <Lock className="mr-2 h-4 w-4" /> Close till
           </Button>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          Expected drawer per system: <Money amount={data.totals.drawer} />. Variances are stored on the session and
-          written to the audit trail.
+          Expected drawer per system: <Money amount={data.totals.drawer} />. Variances are stored on
+          the session and written to the audit trail.
         </p>
       </SectionCard>
 
@@ -331,7 +385,9 @@ function PostingPanel({ onPosted }: { onPosted: (r: TellerReceipt) => void }) {
                 setLoanId(r.loans[0]?.id ?? "");
               }}
               className={`rounded border px-3 py-2 text-left text-xs ${
-                member?.id === r.id ? "border-primary bg-primary/10" : "border-border hover:bg-muted"
+                member?.id === r.id
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:bg-muted"
               }`}
             >
               <span className="block font-semibold">{r.full_name ?? "Unnamed member"}</span>
@@ -411,27 +467,49 @@ function PostingPanel({ onPosted }: { onPosted: (r: TellerReceipt) => void }) {
             )}
             <label className="space-y-1 text-xs uppercase tracking-widest text-muted-foreground">
               Amount
-              <Input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0.00" />
+              <Input
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                inputMode="decimal"
+                placeholder="0.00"
+              />
             </label>
           </div>
           <div className="space-y-3">
             <label className="space-y-1 text-xs uppercase tracking-widest text-muted-foreground">
               Note
-              <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} placeholder="Counter narrative, cheque number…" />
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={4}
+                placeholder="Counter narrative, cheque number…"
+              />
             </label>
-            <Button onClick={() => postMut.mutate()} disabled={!canPost || postMut.isPending} className="w-full">
+            <Button
+              onClick={() => postMut.mutate()}
+              disabled={!canPost || postMut.isPending}
+              className="w-full"
+            >
               Post transaction
             </Button>
           </div>
         </div>
       ) : (
-        <p className="mt-4 text-xs text-muted-foreground">Search and select a member to begin capturing.</p>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Search and select a member to begin capturing.
+        </p>
       )}
     </SectionCard>
   );
 }
 
-function ReceiptDialog({ receipt, onClose }: { receipt: TellerReceipt | null; onClose: () => void }) {
+function ReceiptDialog({
+  receipt,
+  onClose,
+}: {
+  receipt: TellerReceipt | null;
+  onClose: () => void;
+}) {
   return (
     <Dialog open={Boolean(receipt)} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
@@ -440,7 +518,10 @@ function ReceiptDialog({ receipt, onClose }: { receipt: TellerReceipt | null; on
         </DialogHeader>
         {receipt ? (
           <dl className="space-y-2 text-sm">
-            <Row label="Member" value={`${receipt.member_name ?? "—"} ${receipt.member_no ?? ""}`} />
+            <Row
+              label="Member"
+              value={`${receipt.member_name ?? "—"} ${receipt.member_no ?? ""}`}
+            />
             <Row label="Type" value={TELLER_KIND_LABELS[receipt.kind]} />
             <Row label="Method" value={receipt.method.replace("_", " ")} />
             <Row label="Amount" value={receipt.amount.toFixed(2)} />

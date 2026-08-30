@@ -45,7 +45,9 @@ export const DOC_FORMATS = {
 } as const;
 
 export function formatLabel(mime: string): string {
-  return (DOC_FORMATS as Record<string, string>)[mime] ?? mime.split("/").pop()?.toUpperCase() ?? "FILE";
+  return (
+    (DOC_FORMATS as Record<string, string>)[mime] ?? mime.split("/").pop()?.toUpperCase() ?? "FILE"
+  );
 }
 
 async function assertSuperAdmin(supabase: any, userId: string) {
@@ -69,10 +71,7 @@ const listSchema = z.object({
   dir: z.enum(["asc", "desc"]).default("desc"),
 });
 
-async function collectDocuments(
-  sb: any,
-  source: "all" | DocSource,
-): Promise<ManagedDocument[]> {
+async function collectDocuments(sb: any, source: "all" | DocSource): Promise<ManagedDocument[]> {
   const collected: ManagedDocument[] = [];
 
   if (source === "all" || source === "kyc") {
@@ -137,7 +136,12 @@ async function collectDocuments(
 
 function applyFilters(
   rows: ManagedDocument[],
-  f: { search?: string | undefined; format?: string | undefined; sort: string; dir: "asc" | "desc" },
+  f: {
+    search?: string | undefined;
+    format?: string | undefined;
+    sort: string;
+    dir: "asc" | "desc";
+  },
 ) {
   let filtered = rows;
   if (f.search) {
@@ -217,7 +221,6 @@ export const exportManagedDocuments = createServerFn({ method: "POST" })
     return { rows, truncated: filtered.length > MAX };
   });
 
-
 const refSchema = z.object({
   source: z.enum(["kyc", "entity"]),
   id: z.string().uuid(),
@@ -249,8 +252,11 @@ export const getManagedDocumentUrl = createServerFn({ method: "POST" })
 
     const { data: signed, error } = await sb.storage
       .from(bucket)
-      .createSignedUrl(doc.storage_path, 300,
-        data.intent === "download" ? { download: baseName(doc.storage_path) } : undefined);
+      .createSignedUrl(
+        doc.storage_path,
+        300,
+        data.intent === "download" ? { download: baseName(doc.storage_path) } : undefined,
+      );
     if (error) throw new Error(error.message);
 
     await writeAudit({

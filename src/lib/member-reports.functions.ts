@@ -124,9 +124,11 @@ export const runMyReport = createServerFn({ method: "POST" })
         if (status) q = q.eq("status", status);
         return q;
       };
-      const { data: rows, count, error } = await build(true)
-        .order(dateColumn, { ascending: false })
-        .range(from, to);
+      const {
+        data: rows,
+        count,
+        error,
+      } = await build(true).order(dateColumn, { ascending: false }).range(from, to);
       if (error) throw new Error(error.message);
       const { data: all, error: allErr } = await build(false).limit(2000);
       if (allErr) throw new Error(allErr.message);
@@ -156,7 +158,11 @@ export const runMyReport = createServerFn({ method: "POST" })
       }));
       summary = [
         { label: "Accounts", value: r.all.length },
-        { label: "Total balance", value: r.all.reduce((s, a) => s + num(a.balance), 0), money: true },
+        {
+          label: "Total balance",
+          value: r.all.reduce((s, a) => s + num(a.balance), 0),
+          money: true,
+        },
       ];
     } else if (data.dataset === "loans") {
       const r = await paged(
@@ -246,7 +252,11 @@ export const runMyReport = createServerFn({ method: "POST" })
       }));
       summary = [
         { label: "Requests", value: r.all.length },
-        { label: "Requested value", value: r.all.reduce((s, w) => s + num(w.amount), 0), money: true },
+        {
+          label: "Requested value",
+          value: r.all.reduce((s, w) => s + num(w.amount), 0),
+          money: true,
+        },
         {
           label: "Paid out",
           value: r.all.filter((w) => w.status === "paid").reduce((s, w) => s + num(w.amount), 0),
@@ -266,9 +276,11 @@ export const runMyReport = createServerFn({ method: "POST" })
         if (b.lte) q = q.lte("issued_at", b.lte);
         return q;
       };
-      const { data: page, count, error } = await build(true)
-        .order("issued_at", { ascending: false })
-        .range(from, to);
+      const {
+        data: page,
+        count,
+        error,
+      } = await build(true).order("issued_at", { ascending: false }).range(from, to);
       if (error) throw new Error(error.message);
       const { data: all, error: allErr } = await build(false).limit(2000);
       if (allErr) throw new Error(allErr.message);

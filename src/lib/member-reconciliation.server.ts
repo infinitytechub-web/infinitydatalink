@@ -71,7 +71,9 @@ export async function buildMemberReconciliation(
   // Receipts for the member, resolved through their payment intents.
   const receiptsRes = await sb
     .from("payment_receipts")
-    .select("id, receipt_no, amount_minor, issued_at, payment_intents!inner(reference, member_id, status)")
+    .select(
+      "id, receipt_no, amount_minor, issued_at, payment_intents!inner(reference, member_id, status)",
+    )
     .eq("payment_intents.member_id", uid)
     .gte("issued_at", fromIso)
     .lte("issued_at", toIso)

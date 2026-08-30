@@ -44,7 +44,18 @@ const PAGE_SIZE = 50;
 
 const listQuery = (s: Search) =>
   queryOptions({
-    queryKey: ["admin", "decision-audit", s.module, s.outcome, s.actor, s.subject, s.q, s.from, s.to, s.page],
+    queryKey: [
+      "admin",
+      "decision-audit",
+      s.module,
+      s.outcome,
+      s.actor,
+      s.subject,
+      s.q,
+      s.from,
+      s.to,
+      s.page,
+    ],
     queryFn: () =>
       listDecisionAudit({
         data: {
@@ -135,15 +146,27 @@ function Body() {
             permission="export:audit"
             rows={data.rows}
             columns={[
-              { header: "Timestamp", accessor: (r: DecisionRow) => new Date(r.created_at).toISOString() },
+              {
+                header: "Timestamp",
+                accessor: (r: DecisionRow) => new Date(r.created_at).toISOString(),
+              },
               { header: "Module", accessor: (r: DecisionRow) => r.module },
               { header: "Decision", accessor: (r: DecisionRow) => r.outcome },
               { header: "Reference", accessor: (r: DecisionRow) => r.reference ?? "" },
               { header: "Record", accessor: (r: DecisionRow) => r.target ?? "" },
-              { header: "Member", accessor: (r: DecisionRow) => r.subject_name ?? r.subject_id ?? "" },
-              { header: "Officer", accessor: (r: DecisionRow) => r.actor_email ?? r.actor_id ?? "" },
+              {
+                header: "Member",
+                accessor: (r: DecisionRow) => r.subject_name ?? r.subject_id ?? "",
+              },
+              {
+                header: "Officer",
+                accessor: (r: DecisionRow) => r.actor_email ?? r.actor_id ?? "",
+              },
               { header: "Role", accessor: (r: DecisionRow) => r.actor_role ?? "" },
-              { header: "Amount", accessor: (r: DecisionRow) => (r.amount == null ? "" : String(r.amount)) },
+              {
+                header: "Amount",
+                accessor: (r: DecisionRow) => (r.amount == null ? "" : String(r.amount)),
+              },
               { header: "Note", accessor: (r: DecisionRow) => r.note ?? "" },
             ]}
           />
@@ -153,11 +176,15 @@ function Body() {
           <div className="space-y-1">
             <Label className="text-[10px] uppercase tracking-widest">Module</Label>
             <Select value={search.module} onValueChange={(v) => update({ module: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All modules</SelectItem>
                 {DECISION_MODULES.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -165,11 +192,15 @@ function Body() {
           <div className="space-y-1">
             <Label className="text-[10px] uppercase tracking-widest">Decision</Label>
             <Select value={search.outcome} onValueChange={(v) => update({ outcome: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All decisions</SelectItem>
                 {DECISION_OUTCOMES.map((o) => (
-                  <SelectItem key={o} value={o}>{o}</SelectItem>
+                  <SelectItem key={o} value={o}>
+                    {o}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -192,7 +223,11 @@ function Body() {
           </div>
           <div className="space-y-1">
             <Label className="text-[10px] uppercase tracking-widest">From</Label>
-            <Input type="date" value={search.from} onChange={(e) => update({ from: e.target.value })} />
+            <Input
+              type="date"
+              value={search.from}
+              onChange={(e) => update({ from: e.target.value })}
+            />
           </div>
           <div className="space-y-1">
             <Label className="text-[10px] uppercase tracking-widest">To</Label>
@@ -265,7 +300,9 @@ function Body() {
                     }}
                     className="cursor-pointer border-t border-border/50 hover:bg-muted/40 focus:bg-muted/50 focus:outline-none"
                   >
-                    <td className="p-3 font-mono text-[11px]">{new Date(r.created_at).toLocaleString()}</td>
+                    <td className="p-3 font-mono text-[11px]">
+                      {new Date(r.created_at).toLocaleString()}
+                    </td>
                     <td className="p-3 capitalize">{r.module}</td>
                     <td className="p-3">
                       <StatusPill status={pillStatus(r.outcome)} />
@@ -295,7 +332,12 @@ function Body() {
 
         <div className="flex items-center justify-end gap-2 border-t border-border/60 p-3 text-xs text-muted-foreground">
           Page {search.page} / {totalPages} · {data.total} decisions
-          <Button size="sm" variant="ghost" disabled={search.page <= 1} onClick={() => update({ page: search.page - 1 })}>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={search.page <= 1}
+            onClick={() => update({ page: search.page - 1 })}
+          >
             Prev
           </Button>
           <Button
@@ -334,7 +376,10 @@ function pillStatus(outcome: string): PillStatus {
 
 function DecisionDetails({ row, onClose }: { row: DecisionRow; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -365,11 +410,17 @@ function DecisionDetails({ row, onClose }: { row: DecisionRow; onClose: () => vo
           <Field label="Amount" value={row.amount == null ? null : row.amount.toFixed(2)} />
         </dl>
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Decision note</p>
-          <p className="mt-1 whitespace-pre-wrap rounded bg-muted/40 p-3 text-xs">{row.note ?? "— no note recorded —"}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Decision note
+          </p>
+          <p className="mt-1 whitespace-pre-wrap rounded bg-muted/40 p-3 text-xs">
+            {row.note ?? "— no note recorded —"}
+          </p>
         </div>
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Full metadata</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Full metadata
+          </p>
           <pre className="mt-1 max-h-[240px] overflow-auto whitespace-pre-wrap rounded bg-muted/40 p-3 font-mono text-[11px]">
             {JSON.stringify(row.meta, null, 2)}
           </pre>
@@ -394,7 +445,9 @@ function Field({ label, value, mono }: { label: string; value: string | null; mo
       <dt className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
         {label}
       </dt>
-      <dd className={`min-w-0 flex-1 break-words ${mono ? "font-mono text-[11px]" : ""}`}>{value ?? "—"}</dd>
+      <dd className={`min-w-0 flex-1 break-words ${mono ? "font-mono text-[11px]" : ""}`}>
+        {value ?? "—"}
+      </dd>
     </div>
   );
 }

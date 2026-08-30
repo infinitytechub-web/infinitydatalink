@@ -4,7 +4,13 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { AlertTriangle, CheckCircle2, Copy, PlugZap, ShieldCheck, XCircle } from "lucide-react";
-import { EmptyState, KPIStat, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  EmptyState,
+  KPIStat,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +18,12 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth";
-import { PROVIDER_TEMPLATES, PROVIDER_MODES, defaultWebhookPath, type ProviderMode } from "@/lib/payment-providers";
+import {
+  PROVIDER_TEMPLATES,
+  PROVIDER_MODES,
+  defaultWebhookPath,
+  type ProviderMode,
+} from "@/lib/payment-providers";
 import {
   getPaymentConfig,
   getPaymentReadiness,
@@ -23,7 +34,6 @@ import {
   type ReadinessReport,
   type SelfTestResult,
 } from "@/lib/payment-config.functions";
-
 
 export const Route = createFileRoute("/_admin/admin/payment-config")({
   head: () => ({
@@ -78,8 +88,15 @@ function Body({ canManage }: { canManage: boolean }) {
   return (
     <>
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Providers configured" value={<span className="tabular">{data.providers.length}</span>} />
-        <KPIStat label="Enabled rails" value={<span className="tabular">{activeCount}</span>} accent />
+        <KPIStat
+          label="Providers configured"
+          value={<span className="tabular">{data.providers.length}</span>}
+        />
+        <KPIStat
+          label="Enabled rails"
+          value={<span className="tabular">{activeCount}</span>}
+          accent
+        />
         <KPIStat
           label="Callbacks verified"
           value={<span className="tabular">{verified}</span>}
@@ -111,7 +128,9 @@ function Body({ canManage }: { canManage: boolean }) {
                     <span
                       className={
                         "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest " +
-                        (row.enabled ? "bg-emerald-mid/15 text-emerald-mid" : "bg-emerald-deep/10 text-muted-foreground")
+                        (row.enabled
+                          ? "bg-emerald-mid/15 text-emerald-mid"
+                          : "bg-emerald-deep/10 text-muted-foreground")
                       }
                     >
                       {row.enabled ? row.mode : "disabled"}
@@ -135,11 +154,13 @@ function Body({ canManage }: { canManage: boolean }) {
 
       <ReadinessPanel code={selected} canManage={canManage} label={template.label} />
 
-
       <SectionCard title="Recent webhook callbacks">
         {data.events.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No callbacks received yet" hint="Run the readiness test to journal a simulated event." />
+            <EmptyState
+              title="No callbacks received yet"
+              hint="Run the readiness test to journal a simulated event."
+            />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -157,9 +178,13 @@ function Body({ canManage }: { canManage: boolean }) {
               <tbody className="divide-y divide-emerald-deep/5">
                 {data.events.map((e) => (
                   <tr key={e.id}>
-                    <td className="px-6 py-3 text-[11px] text-muted-foreground">{new Date(e.created_at).toLocaleString()}</td>
+                    <td className="px-6 py-3 text-[11px] text-muted-foreground">
+                      {new Date(e.created_at).toLocaleString()}
+                    </td>
                     <td className="px-6 py-3 text-sm font-semibold">{e.provider_code}</td>
-                    <td className="px-6 py-3 text-sm text-muted-foreground">{e.event_type ?? "—"}</td>
+                    <td className="px-6 py-3 text-sm text-muted-foreground">
+                      {e.event_type ?? "—"}
+                    </td>
                     <td className="px-6 py-3 text-sm">
                       {e.signature_verified ? (
                         <span className="inline-flex items-center gap-1 text-emerald-mid">
@@ -174,7 +199,9 @@ function Body({ canManage }: { canManage: boolean }) {
                     <td className="px-6 py-3 text-[11px] text-muted-foreground">
                       {e.processed_at ? new Date(e.processed_at).toLocaleString() : "pending"}
                     </td>
-                    <td className="px-6 py-3 text-[11px] text-muted-foreground">{e.error ?? "—"}</td>
+                    <td className="px-6 py-3 text-[11px] text-muted-foreground">
+                      {e.error ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -219,18 +246,24 @@ function RailsPanel({ rails, canManage }: { rails: RailConfigRow[]; canManage: b
     >
       <div className="space-y-6 p-6">
         <p className="text-xs text-muted-foreground">
-          A rail becomes selectable for members once it is switched on here and a provider that supports it is enabled with
-          credentials. Turning a rail off blocks new intents immediately without changing any provider credentials.
+          A rail becomes selectable for members once it is switched on here and a provider that
+          supports it is enabled with credentials. Turning a rail off blocks new intents immediately
+          without changing any provider credentials.
         </p>
         {groups.map((g) => {
           const items = rails.filter((r) => r.kind === g.kind);
           if (items.length === 0) return null;
           return (
             <div key={g.kind} className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{g.label}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {g.label}
+              </p>
               <ul className="divide-y divide-emerald-deep/5 rounded-lg border border-emerald-deep/10">
                 {items.map((r) => (
-                  <li key={r.rail} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <li
+                    key={r.rail}
+                    className="flex flex-wrap items-center justify-between gap-3 p-4"
+                  >
                     <div className="min-w-0">
                       <p className="flex items-center gap-2 text-sm font-semibold">
                         {r.label}
@@ -251,7 +284,9 @@ function RailsPanel({ rails, canManage }: { rails: RailConfigRow[]; canManage: b
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">{r.note}</p>
                       {r.providerCode && (
-                        <p className="mt-1 font-mono text-[11px] text-muted-foreground">provider: {r.providerCode}</p>
+                        <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                          provider: {r.providerCode}
+                        </p>
                       )}
                     </div>
                     <Switch
@@ -269,14 +304,17 @@ function RailsPanel({ rails, canManage }: { rails: RailConfigRow[]; canManage: b
             </div>
           );
         })}
-        {!canManage && <p className="text-xs text-muted-foreground">Read-only — payments.manage required to change rails.</p>}
+        {!canManage && (
+          <p className="text-xs text-muted-foreground">
+            Read-only — payments.manage required to change rails.
+          </p>
+        )}
       </div>
     </SectionCard>
   );
 }
 
 type SavedProvider = {
-
   code: string;
   label: string;
   mode: string;
@@ -337,7 +375,10 @@ function ProviderForm({
     <SectionCard
       title={`${template.label} settings`}
       action={
-        <Link to="/admin/console/approvals" className="text-[11px] font-semibold uppercase tracking-widest text-emerald-mid hover:underline">
+        <Link
+          to="/admin/console/approvals"
+          className="text-[11px] font-semibold uppercase tracking-widest text-emerald-mid hover:underline"
+        >
           Change approvals →
         </Link>
       }
@@ -355,20 +396,32 @@ function ProviderForm({
       >
         <div className="rounded-lg border border-emerald-deep/10 bg-cream/40 p-4 text-xs text-muted-foreground">
           <p className="flex items-center gap-2 font-semibold text-emerald-deep">
-            <ShieldCheck className="h-4 w-4 text-emerald-mid" /> Credentials are stored as backend secrets
+            <ShieldCheck className="h-4 w-4 text-emerald-mid" /> Credentials are stored as backend
+            secrets
           </p>
           <p className="mt-2">
             Secret keys never touch the database. This provider reads{" "}
-            <code className="rounded bg-emerald-deep/10 px-1 py-0.5 font-mono">{template.secretEnv}</code> for API calls and{" "}
-            <code className="rounded bg-emerald-deep/10 px-1 py-0.5 font-mono">{template.webhookSecretEnv}</code> to verify
-            callback signatures. Only the non-secret identifiers below are persisted.
+            <code className="rounded bg-emerald-deep/10 px-1 py-0.5 font-mono">
+              {template.secretEnv}
+            </code>{" "}
+            for API calls and{" "}
+            <code className="rounded bg-emerald-deep/10 px-1 py-0.5 font-mono">
+              {template.webhookSecretEnv}
+            </code>{" "}
+            to verify callback signatures. Only the non-secret identifiers below are persisted.
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label htmlFor="provider-label">Display label</Label>
-            <Input id="provider-label" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} disabled={!canManage} />
+            <Input
+              id="provider-label"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              maxLength={80}
+              disabled={!canManage}
+            />
           </div>
           <div>
             <Label htmlFor="provider-mode">Environment</Label>
@@ -404,7 +457,12 @@ function ProviderForm({
           ))}
           <div className="md:col-span-2">
             <Label htmlFor="webhook-path">Callback path</Label>
-            <Input id="webhook-path" value={webhookPath} onChange={(e) => setWebhookPath(e.target.value)} disabled={!canManage} />
+            <Input
+              id="webhook-path"
+              value={webhookPath}
+              onChange={(e) => setWebhookPath(e.target.value)}
+              disabled={!canManage}
+            />
             <p className="mt-1 text-[11px] text-muted-foreground">
               Signed callbacks are accepted at this path and journalled for reconciliation.
             </p>
@@ -414,7 +472,9 @@ function ProviderForm({
         <div className="flex items-center justify-between rounded-lg border border-emerald-deep/10 p-4">
           <div>
             <p className="text-sm font-semibold">Enable this rail</p>
-            <p className="text-xs text-muted-foreground">Disabled providers reject intents and callbacks.</p>
+            <p className="text-xs text-muted-foreground">
+              Disabled providers reject intents and callbacks.
+            </p>
           </div>
           <Switch checked={enabled} onCheckedChange={setEnabled} disabled={!canManage} />
         </div>
@@ -432,7 +492,11 @@ function ProviderForm({
         </div>
 
         <div className="flex items-center justify-end gap-3">
-          {!canManage && <span className="text-xs text-muted-foreground">Read-only — payments.manage required.</span>}
+          {!canManage && (
+            <span className="text-xs text-muted-foreground">
+              Read-only — payments.manage required.
+            </span>
+          )}
           <Button type="submit" disabled={!canManage || mut.isPending}>
             {mut.isPending ? "Submitting…" : "Submit for approval"}
           </Button>
@@ -442,7 +506,15 @@ function ProviderForm({
   );
 }
 
-function ReadinessPanel({ code, label, canManage }: { code: string; label: string; canManage: boolean }) {
+function ReadinessPanel({
+  code,
+  label,
+  canManage,
+}: {
+  code: string;
+  label: string;
+  canManage: boolean;
+}) {
   const readiness = useServerFn(getPaymentReadiness);
   const selfTest = useServerFn(runPaymentSelfTest);
   const qc = useQueryClient();
@@ -469,7 +541,12 @@ function ReadinessPanel({ code, label, canManage }: { code: string; label: strin
       title={`Readiness — ${label}`}
       action={
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => check.mutate()} disabled={check.isPending}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => check.mutate()}
+            disabled={check.isPending}
+          >
             <PlugZap className="mr-1 h-3.5 w-3.5" /> Check configuration
           </Button>
           <Button size="sm" onClick={() => run.mutate()} disabled={!canManage || run.isPending}>
@@ -540,7 +617,10 @@ function ReadinessPanel({ code, label, canManage }: { code: string; label: strin
         )}
 
         {!report && !test && !check.isPending && (
-          <EmptyState title="No readiness data yet" hint="Run a configuration check to see credential and callback status." />
+          <EmptyState
+            title="No readiness data yet"
+            hint="Run a configuration check to see credential and callback status."
+          />
         )}
       </div>
     </SectionCard>

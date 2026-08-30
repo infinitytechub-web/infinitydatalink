@@ -95,9 +95,7 @@ function Body() {
   const qc = useQueryClient();
 
   const active = useMemo(() => accounts.filter((a) => a.status === "active"), [accounts]);
-  const [accountId, setAccountId] = useState<string>(
-    () => search.account ?? active[0]?.id ?? "",
-  );
+  const [accountId, setAccountId] = useState<string>(() => search.account ?? active[0]?.id ?? "");
   const [amount, setAmount] = useState("");
   const [channel, setChannel] = useState("mobile_money");
   const [reference, setReference] = useState("");
@@ -117,9 +115,10 @@ function Body() {
           account_id: accountId,
           amount: numeric,
           channel,
-          note: [reference.trim() ? `Ref: ${reference.trim()}` : "", note.trim()]
-            .filter(Boolean)
-            .join(" · ") || null,
+          note:
+            [reference.trim() ? `Ref: ${reference.trim()}` : "", note.trim()]
+              .filter(Boolean)
+              .join(" · ") || null,
         },
       }),
     onSuccess: async (r) => {
@@ -232,7 +231,9 @@ function Body() {
               />
               <p id="dep-amount-hint" className="mt-1 text-[11px] text-muted-foreground">
                 {min > 0 ? (
-                  <>Minimum contribution for this plan: <Money amount={min} />.</>
+                  <>
+                    Minimum contribution for this plan: <Money amount={min} />.
+                  </>
                 ) : (
                   "Enter any amount greater than zero."
                 )}
@@ -306,10 +307,16 @@ function Body() {
               <Row label="Account" value={account ? account.nickname || account.plan_name : "—"} />
               <Row label="Plan" value={account?.plan_name ?? "—"} />
               <Row label="Amount" value={<Money amount={numeric} />} strong />
-              <Row label="Channel" value={CHANNELS.find((c) => c.value === channel)?.label ?? channel} />
+              <Row
+                label="Channel"
+                value={CHANNELS.find((c) => c.value === channel)?.label ?? channel}
+              />
               <Row label="Reference" value={reference || "—"} />
               <Row label="Note" value={note || "—"} />
-              <Row label="Balance after clearing" value={<Money amount={(account?.balance ?? 0) + numeric} />} />
+              <Row
+                label="Balance after clearing"
+                value={<Money amount={(account?.balance ?? 0) + numeric} />}
+              />
             </dl>
             <p className="rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
               The deposit is written to your transaction ledger straight away with a{" "}
@@ -337,9 +344,17 @@ function Body() {
                 <span className="font-semibold">Recorded in ledger</span>
               </div>
               <dl className="divide-y divide-border rounded-lg border border-border">
-                <Row label="Reference" value={<span className="font-mono text-xs">{receipt.ref}</span>} />
+                <Row
+                  label="Reference"
+                  value={<span className="font-mono text-xs">{receipt.ref}</span>}
+                />
                 <Row label="Amount" value={<Money amount={receipt.amount} />} strong />
-                <Row label="Status" value={<StatusPill status={receipt.status === "cleared" ? "cleared" : "pending"} />} />
+                <Row
+                  label="Status"
+                  value={
+                    <StatusPill status={receipt.status === "cleared" ? "cleared" : "pending"} />
+                  }
+                />
                 <Row label="Logged" value={new Date(receipt.created_at).toLocaleString()} />
               </dl>
               <div className="flex flex-wrap gap-2">

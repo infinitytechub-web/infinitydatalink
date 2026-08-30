@@ -35,7 +35,6 @@ const searchSchema = z.object({
   selected: z.string().optional(),
 });
 
-
 export const Route = createFileRoute("/_admin/admin/super-admins/history")({
   head: () => ({
     meta: [
@@ -118,9 +117,7 @@ function HistoryBody() {
     }),
   ).data;
 
-  const selected = search.selected
-    ? rows.find((r) => r.id === search.selected) ?? null
-    : null;
+  const selected = search.selected ? (rows.find((r) => r.id === search.selected) ?? null) : null;
 
   const totalPages = Math.max(1, Math.ceil(total / search.pageSize));
 
@@ -314,9 +311,7 @@ function HistoryBody() {
                 {rows.map((r) => (
                   <tr
                     key={r.id}
-                    onClick={() =>
-                      navigate({ search: (s: any) => ({ ...s, selected: r.id }) })
-                    }
+                    onClick={() => navigate({ search: (s: any) => ({ ...s, selected: r.id }) })}
                     className="cursor-pointer border-b border-emerald-deep/5 hover:bg-emerald-deep/[0.02]"
                   >
                     <td className="px-6 py-3 tabular">{fmt(r.occurred_at)}</td>
@@ -325,19 +320,17 @@ function HistoryBody() {
                     </td>
                     <td className="px-6 py-3">
                       <div className="tabular">{r.target_email ?? "—"}</div>
-                      <div className="text-xs text-muted-foreground">{r.target_user_id.slice(0, 8)}…</div>
+                      <div className="text-xs text-muted-foreground">
+                        {r.target_user_id.slice(0, 8)}…
+                      </div>
                     </td>
                     <td className="px-6 py-3">
                       <div className="tabular">{r.actor_email ?? "system"}</div>
                       <div className="text-xs text-muted-foreground">{r.actor_role ?? "—"}</div>
                     </td>
-                    <td className="px-6 py-3 text-muted-foreground">
-                      {r.note ?? r.reason ?? "—"}
-                    </td>
+                    <td className="px-6 py-3 text-muted-foreground">{r.note ?? r.reason ?? "—"}</td>
                     <td className="px-6 py-3">
-                      <StatusPill
-                        status={r.currently_super_admin ? "active" : "closed"}
-                      />
+                      <StatusPill status={r.currently_super_admin ? "active" : "closed"} />
                     </td>
                   </tr>
                 ))}
@@ -362,9 +355,7 @@ function HistoryBody() {
             </button>
             <button
               disabled={search.page >= totalPages}
-              onClick={() =>
-                navigate({ search: (s: any) => ({ ...s, page: search.page + 1 }) })
-              }
+              onClick={() => navigate({ search: (s: any) => ({ ...s, page: search.page + 1 }) })}
               className="rounded border border-emerald-deep/15 px-3 py-1 uppercase tracking-widest disabled:opacity-40"
             >
               Next
@@ -461,9 +452,7 @@ function DetailsDialog({ entry, onClose }: { entry: RoleHistoryRow | null; onClo
                   Open member profile
                 </Link>
                 <button
-                  onClick={() =>
-                    void navigator.clipboard.writeText(JSON.stringify(entry, null, 2))
-                  }
+                  onClick={() => void navigator.clipboard.writeText(JSON.stringify(entry, null, 2))}
                   className="rounded border border-emerald-deep/15 px-3 py-1 text-xs uppercase tracking-widest hover:bg-emerald-deep/5"
                 >
                   Copy JSON

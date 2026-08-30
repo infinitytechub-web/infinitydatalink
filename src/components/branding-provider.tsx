@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { applyBrandPalette } from "@/lib/brand-theme";
@@ -64,7 +57,13 @@ export const BRANDING_QUERY_KEY = ["branding"] as const;
 
 function hexToRgb(hex: string): string | null {
   const m = hex.replace("#", "");
-  const full = m.length === 3 ? m.split("").map((c) => c + c).join("") : m;
+  const full =
+    m.length === 3
+      ? m
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : m;
   if (full.length !== 6) return null;
   const n = parseInt(full, 16);
   if (Number.isNaN(n)) return null;
@@ -168,7 +167,6 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     () => (contactsQuery.data ? { ...base, ...contactsQuery.data } : base),
     [base, contactsQuery.data],
   );
-
 
   // Lightweight version poll: whenever an admin uploads or clears a logo /
   // favicon, the version counter bumps and every open device refetches full

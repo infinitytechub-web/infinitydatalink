@@ -75,56 +75,185 @@ const SECTIONS: Section[] = [
     title: "Branding & Appearance",
     description: "Public identity, theming, and login presentation. Edits are staged for approval.",
     tiles: [
-      { to: "/admin/branding", label: "Branding settings", description: "Name, logo, colors, favicon, login hero, footer.", icon: Palette, allowedRoles: SUPER },
-      { to: "/admin/settings", label: "Institution settings", description: "Country preset, currency, national ID, providers.", icon: Settings2, allowedRoles: SUPER },
-      { to: "/admin/console/approvals", label: "Change approvals", description: "Review staged setting edits before they go live.", icon: ClipboardList, allowedRoles: SUPER, badge: "2-person rule" },
-      { to: "/admin/console/snapshots", label: "Backup & restore", description: "Download settings snapshots and restore safely.", icon: Save, allowedRoles: SUPER },
+      {
+        to: "/admin/branding",
+        label: "Branding settings",
+        description: "Name, logo, colors, favicon, login hero, footer.",
+        icon: Palette,
+        allowedRoles: SUPER,
+      },
+      {
+        to: "/admin/settings",
+        label: "Institution settings",
+        description: "Country preset, currency, national ID, providers.",
+        icon: Settings2,
+        allowedRoles: SUPER,
+      },
+      {
+        to: "/admin/console/approvals",
+        label: "Change approvals",
+        description: "Review staged setting edits before they go live.",
+        icon: ClipboardList,
+        allowedRoles: SUPER,
+        badge: "2-person rule",
+      },
+      {
+        to: "/admin/console/snapshots",
+        label: "Backup & restore",
+        description: "Download settings snapshots and restore safely.",
+        icon: Save,
+        allowedRoles: SUPER,
+      },
     ],
   },
   {
     title: "Access & Governance",
     description: "Who can do what, and how it is monitored.",
     tiles: [
-      { to: "/admin/super-admins", label: "Super Admins", description: "Grant, revoke and audit super admin access.", icon: Crown, allowedRoles: SUPER },
-      { to: "/admin/super-admins/history", label: "Grant history", description: "Timeline of super-admin grants and revocations.", icon: ClipboardCheck, allowedRoles: SUPER },
-      { to: "/admin/roles", label: "Roles & permissions", description: "Assign staff roles and view effective permissions.", icon: KeyRound, allowedRoles: SUPER },
-      { to: "/admin/security", label: "Security centre", description: "Scanner findings, passkeys, lockouts.", icon: ShieldAlert, allowedRoles: SUPER },
-      { to: "/admin/health", label: "Integration health", description: "Live schema probes and RPC checks.", icon: Activity, allowedRoles: SUPER },
+      {
+        to: "/admin/super-admins",
+        label: "Super Admins",
+        description: "Grant, revoke and audit super admin access.",
+        icon: Crown,
+        allowedRoles: SUPER,
+      },
+      {
+        to: "/admin/super-admins/history",
+        label: "Grant history",
+        description: "Timeline of super-admin grants and revocations.",
+        icon: ClipboardCheck,
+        allowedRoles: SUPER,
+      },
+      {
+        to: "/admin/roles",
+        label: "Roles & permissions",
+        description: "Assign staff roles and view effective permissions.",
+        icon: KeyRound,
+        allowedRoles: SUPER,
+      },
+      {
+        to: "/admin/security",
+        label: "Security centre",
+        description: "Scanner findings, passkeys, lockouts.",
+        icon: ShieldAlert,
+        allowedRoles: SUPER,
+      },
+      {
+        to: "/admin/health",
+        label: "Integration health",
+        description: "Live schema probes and RPC checks.",
+        icon: Activity,
+        allowedRoles: SUPER,
+      },
     ],
   },
   {
     title: "Membership",
     description: "Onboarding gates and member records.",
     tiles: [
-      { to: "/admin/approvals", label: "User approvals", description: "Verify or reject pending sign-ups.", icon: UserCheck, allowedRoles: COMPLIANCE },
-      { to: "/admin/members", label: "KYC queue", description: "Review individual verification submissions.", icon: Users, allowedRoles: COMPLIANCE },
-      { to: "/admin/entities", label: "Entities registry", description: "Groups, departments, institutions.", icon: Building2, allowedRoles: COMPLIANCE },
-      { to: "/admin/vault", label: "Account vault", description: "Restore deleted member KYC records within 30 days.", icon: Archive, allowedRoles: VAULT, badge: "Restore" },
+      {
+        to: "/admin/approvals",
+        label: "User approvals",
+        description: "Verify or reject pending sign-ups.",
+        icon: UserCheck,
+        allowedRoles: COMPLIANCE,
+      },
+      {
+        to: "/admin/members",
+        label: "KYC queue",
+        description: "Review individual verification submissions.",
+        icon: Users,
+        allowedRoles: COMPLIANCE,
+      },
+      {
+        to: "/admin/entities",
+        label: "Entities registry",
+        description: "Groups, departments, institutions.",
+        icon: Building2,
+        allowedRoles: COMPLIANCE,
+      },
+      {
+        to: "/admin/vault",
+        label: "Account vault",
+        description: "Restore deleted member KYC records within 30 days.",
+        icon: Archive,
+        allowedRoles: VAULT,
+        badge: "Restore",
+      },
     ],
-
   },
   {
     title: "Operations",
     description: "Day-to-day product surfaces.",
     tiles: [
-      { to: "/admin/loans", label: "Loans & approvals", description: "Application review, approval and disbursement.", icon: BadgeDollarSign, allowedRoles: LOAN },
-      { to: "/admin/recurring", label: "Recurring schedules", description: "Retry, cancel or inspect scheduled deposits.", icon: RefreshCw, allowedRoles: FINANCE },
-      { to: "/admin/payments", label: "Payments", description: "Payment providers and gateways.", icon: CreditCard, allowedRoles: FINANCE },
-      { to: "/admin/finance", label: "Financial dashboard", description: "Cash flow, income, expenses, transfers.", icon: Wallet, allowedRoles: FINANCE },
+      {
+        to: "/admin/loans",
+        label: "Loans & approvals",
+        description: "Application review, approval and disbursement.",
+        icon: BadgeDollarSign,
+        allowedRoles: LOAN,
+      },
+      {
+        to: "/admin/recurring",
+        label: "Recurring schedules",
+        description: "Retry, cancel or inspect scheduled deposits.",
+        icon: RefreshCw,
+        allowedRoles: FINANCE,
+      },
+      {
+        to: "/admin/payments",
+        label: "Payments",
+        description: "Payment providers and gateways.",
+        icon: CreditCard,
+        allowedRoles: FINANCE,
+      },
+      {
+        to: "/admin/finance",
+        label: "Financial dashboard",
+        description: "Cash flow, income, expenses, transfers.",
+        icon: Wallet,
+        allowedRoles: FINANCE,
+      },
     ],
   },
   {
     title: "Audit & Compliance",
     description: "Trails, retention, and communications.",
     tiles: [
-      { to: "/admin/audit", label: "Audit & activity", description: "Full audit log with filters and details.", icon: History, allowedRoles: AUDIT },
-      { to: "/admin/audit/transfers", label: "Transfer audit", description: "Detailed member-to-member transfer trail.", icon: ArrowLeftRight, allowedRoles: AUDIT },
-      { to: "/admin/reports", label: "Reports", description: "Period P&L, exports, reconciliation.", icon: FileBarChart, allowedRoles: AUDIT },
+      {
+        to: "/admin/audit",
+        label: "Audit & activity",
+        description: "Full audit log with filters and details.",
+        icon: History,
+        allowedRoles: AUDIT,
+      },
+      {
+        to: "/admin/audit/transfers",
+        label: "Transfer audit",
+        description: "Detailed member-to-member transfer trail.",
+        icon: ArrowLeftRight,
+        allowedRoles: AUDIT,
+      },
+      {
+        to: "/admin/reports",
+        label: "Reports",
+        description: "Period P&L, exports, reconciliation.",
+        icon: FileBarChart,
+        allowedRoles: AUDIT,
+      },
     ],
   },
 ];
 
-function ConsoleTile({ tile, allowed, pendingCount }: { tile: Tile; allowed: boolean; pendingCount?: number }) {
+function ConsoleTile({
+  tile,
+  allowed,
+  pendingCount,
+}: {
+  tile: Tile;
+  allowed: boolean;
+  pendingCount?: number;
+}) {
   const Icon = tile.icon;
   const showPending =
     tile.to === "/admin/console/approvals" && typeof pendingCount === "number" && pendingCount > 0;

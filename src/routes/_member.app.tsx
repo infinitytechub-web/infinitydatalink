@@ -31,7 +31,6 @@ import {
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
 
-
 /**
  * Member information architecture, grouped by the task the member came to do
  * rather than by the table behind it. While KYC is still under review every
@@ -89,7 +88,12 @@ function buildGroups(kycApproved: boolean): NavGroup[] {
       items: [
         { to: "/app/profile", label: "Profile", icon: <UserCircle2 /> },
         { to: "/app/kyc", label: "Verification status", icon: <ShieldCheck /> },
-        { to: "/app/entities/register", label: "Register organization", icon: <Building2 />, ...locked },
+        {
+          to: "/app/entities/register",
+          label: "Register organization",
+          icon: <Building2 />,
+          ...locked,
+        },
       ],
     },
     {
@@ -102,7 +106,6 @@ function buildGroups(kycApproved: boolean): NavGroup[] {
     },
   ];
 }
-
 
 const CRUMBS: Record<string, string> = {
   "/app": "Financial Summary",
@@ -141,7 +144,13 @@ export const Route = createFileRoute("/_member/app")({
 });
 
 // Pages a member may always reach while KYC is incomplete.
-const KYC_ALLOWED_PATHS = ["/app/kyc", "/app/profile", "/app/notifications", "/app/inbox", "/app/support"];
+const KYC_ALLOWED_PATHS = [
+  "/app/kyc",
+  "/app/profile",
+  "/app/notifications",
+  "/app/inbox",
+  "/app/support",
+];
 
 function MemberLayout() {
   const { user, loading, isAdmin } = useAuth();
@@ -155,7 +164,6 @@ function MemberLayout() {
   });
   // Reviewer decisions land instantly instead of waiting for a refetch.
   useKycRealtime(!isAdmin && user?.status === "approved" ? user?.id : undefined);
-
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth" />;
@@ -193,11 +201,7 @@ function MemberLayout() {
       <Outlet />
     </PortalShell>
   );
-
 }
-
-
-
 
 function PendingApprovalGate() {
   const { user, signOut } = useAuth();
@@ -217,8 +221,7 @@ function PendingApprovalGate() {
           }
         : {
             title: "Awaiting administrator approval",
-            body:
-              "Thanks for signing up. An administrator will review and approve your account shortly. You'll be notified by email once you're approved.",
+            body: "Thanks for signing up. An administrator will review and approve your account shortly. You'll be notified by email once you're approved.",
           };
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-6 px-6 text-center">

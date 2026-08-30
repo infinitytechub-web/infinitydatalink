@@ -22,7 +22,9 @@ function ChartSkeleton({ height, className }: { height: number; className?: stri
   );
 }
 
-export function TrendChart<T extends Record<string, unknown>>(props: TrendChartProps<T>): ReactNode {
+export function TrendChart<T extends Record<string, unknown>>(
+  props: TrendChartProps<T>,
+): ReactNode {
   const height = props.height ?? 320;
   return (
     <Suspense fallback={<ChartSkeleton height={height} className={props.className} />}>
@@ -98,11 +100,12 @@ export function BarList({
             <span className="tabular text-right font-semibold text-foreground">
               {format ? format(row.value) : row.value}
             </span>
-            {row.hint ? <span className="col-span-3 text-xs text-muted-foreground">{row.hint}</span> : null}
+            {row.hint ? (
+              <span className="col-span-3 text-xs text-muted-foreground">{row.hint}</span>
+            ) : null}
           </li>
         );
       })}
     </ul>
   );
 }
-

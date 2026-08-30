@@ -19,7 +19,11 @@ import type { RailAvailability } from "@/lib/payment-rails";
 
 export type { IntentRow, ReceiptRow, RefundRow, CreateIntentResult, ReconciliationSummary };
 
-const dateStr = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).nullish();
+const dateStr = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .nullish();
 
 function email(claims: unknown): string | null {
   return (claims as { email?: string } | null)?.email ?? null;
@@ -118,15 +122,21 @@ export const getMyPayments = createServerFn({ method: "POST" })
 /** One payment + receipt + refunds. Member sees only their own. */
 export const getPaymentDetail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ reference: z.string().trim().min(4).max(60) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ reference: z.string().trim().min(4).max(60) }).parse(d),
+  )
   .handler(async ({ data, context }) => {
-    const { getIntentByReference, listReceipts, listRefunds } = await import("@/lib/payments.server");
+    const { getIntentByReference, listReceipts, listRefunds } =
+      await import("@/lib/payments.server");
     const { hasCapability } = await import("@/lib/capability-guard.server");
     const intent = await getIntentByReference(data.reference);
     if (!intent) throw new Error("Payment not found");
     const staff = await hasCapability(context.supabase, "payments", "view");
     if (!staff && intent.member_id !== context.userId) throw new Error("Payment not found");
-    const [receipts, refunds] = await Promise.all([listReceipts([intent.id]), listRefunds([intent.id])]);
+    const [receipts, refunds] = await Promise.all([
+      listReceipts([intent.id]),
+      listRefunds([intent.id]),
+    ]);
     return { intent, receipt: receipts[0] ?? null, refunds, staff };
   });
 
@@ -204,14 +214,15 @@ export const getAdminPayments = createServerFn({ method: "POST" })
 
 export const getPaymentReconciliation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ date_from: dateStr, date_to: dateStr }).parse(d ?? {}),
-  )
+  .inputValidator((d: unknown) => z.object({ date_from: dateStr, date_to: dateStr }).parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { assertCapability } = await import("@/lib/capability-guard.server");
     await assertCapability(context.supabase, "payments", "view");
     const { buildReconciliation } = await import("@/lib/payments.server");
-    const { summary, rows, receipts } = await buildReconciliation(data.date_from ?? null, data.date_to ?? null);
+    const { summary, rows, receipts } = await buildReconciliation(
+      data.date_from ?? null,
+      data.date_to ?? null,
+    );
     return { summary, rows, receipts };
   });
 
@@ -222,7 +233,11 @@ export const confirmManualPayment = createServerFn({ method: "POST" })
     z
       .object({
         reference: z.string().trim().min(4).max(60),
-        note: z.string().trim().min(10, "Describe how the funds were received (min 10 chars)").max(400),
+        note: z
+          .string()
+          .trim()
+          .min(10, "Describe how the funds were received (min 10 chars)")
+          .max(400),
         provider_reference: z.string().trim().max(120).nullish(),
       })
       .parse(d),

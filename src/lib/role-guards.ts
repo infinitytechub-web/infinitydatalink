@@ -26,12 +26,38 @@ export const ADMIN_ROLES: readonly Role[] = [
   "support_officer",
 ];
 
-export const TELLER_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "finance_officer", "teller"];
-export const SUPPORT_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "support_officer"];
+export const TELLER_ROLES: readonly Role[] = [
+  "super_admin",
+  "admin",
+  "manager",
+  "finance_officer",
+  "teller",
+];
+export const SUPPORT_ROLES: readonly Role[] = [
+  "super_admin",
+  "admin",
+  "manager",
+  "support_officer",
+];
 
-export const KYC_ADMIN_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "compliance_officer"];
-export const FINANCE_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "finance_officer"];
-export const LOAN_DECISION_ROLES: readonly Role[] = ["super_admin", "admin", "manager", "loan_officer"];
+export const KYC_ADMIN_ROLES: readonly Role[] = [
+  "super_admin",
+  "admin",
+  "manager",
+  "compliance_officer",
+];
+export const FINANCE_ROLES: readonly Role[] = [
+  "super_admin",
+  "admin",
+  "manager",
+  "finance_officer",
+];
+export const LOAN_DECISION_ROLES: readonly Role[] = [
+  "super_admin",
+  "admin",
+  "manager",
+  "loan_officer",
+];
 export const SUPER_ADMIN_ONLY: readonly Role[] = ["super_admin"];
 
 export type RoleSet = ReadonlySet<Role>;

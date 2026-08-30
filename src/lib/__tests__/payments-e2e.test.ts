@@ -87,7 +87,11 @@ async function deliverWebhook(args: {
   const rawBody = JSON.stringify({
     id: args.eventId,
     event: `charge.${args.status}`,
-    data: { reference: args.reference, status: args.status, provider_reference: `PSP-${args.eventId}` },
+    data: {
+      reference: args.reference,
+      status: args.status,
+      provider_reference: `PSP-${args.eventId}`,
+    },
   });
   const signature = signWebhookBody(args.tamper ? "wrong-secret" : args.secret, rawBody, args.algo);
   return processPaymentWebhook({ providerCode: args.providerCode, rawBody, signature });
@@ -127,12 +131,18 @@ describe("mobile-number validation and network detection", () => {
     await expect(createFor("momo_mtn", { payerPhone: NUMBERS["telecel"] })).rejects.toThrow(
       /cannot be used on the MTN Mobile Money rail/i,
     );
-    await expect(createFor("momo_telecel", { payerPhone: NUMBERS["mtn"] })).rejects.toThrow(/pick the matching rail/i);
-    await expect(createFor("momo_at", { payerPhone: NUMBERS["glo"] })).rejects.toThrow(/matching rail/i);
+    await expect(createFor("momo_telecel", { payerPhone: NUMBERS["mtn"] })).rejects.toThrow(
+      /pick the matching rail/i,
+    );
+    await expect(createFor("momo_at", { payerPhone: NUMBERS["glo"] })).rejects.toThrow(
+      /matching rail/i,
+    );
   });
 
   it("requires a valid number on mobile-money rails and ignores it elsewhere", async () => {
-    await expect(createFor("momo_mtn", { payerPhone: "0241" })).rejects.toThrow(/Mobile money number invalid/i);
+    await expect(createFor("momo_mtn", { payerPhone: "0241" })).rejects.toThrow(
+      /Mobile money number invalid/i,
+    );
     const cash = await createFor("cash", { payerPhone: "not-a-number" });
     expect(cash.intent.payer_phone).toBeNull();
     expect(cash.intent.payer_network).toBeNull();
@@ -156,7 +166,9 @@ describe("intent creation and idempotency for every pathway", () => {
       expect(first.intent.reference).toMatch(/^IW-\d{8}-[A-Z0-9]{8}$/);
       expect(first.intent.currency).toBe("GHS");
       await expect(createFor(spec.code, { amountMinor: 0 })).rejects.toThrow(/greater than zero/i);
-      await expect(createFor(spec.code, { amountMinor: 12.5 })).rejects.toThrow(/greater than zero/i);
+      await expect(createFor(spec.code, { amountMinor: 12.5 })).rejects.toThrow(
+        /greater than zero/i,
+      );
     }
     expect(db.rows("payment_intents")).toHaveLength(RAIL_SPECS.length);
   });
@@ -267,10 +279,17 @@ describe("state transitions", () => {
   it("rejects unsigned callbacks and unknown providers", async () => {
     const { processPaymentWebhook } = await import("@/lib/payment-webhooks.server");
     expect(
-      (await processPaymentWebhook({ providerCode: "hubtel", rawBody: "{}", signature: null })).status,
+      (await processPaymentWebhook({ providerCode: "hubtel", rawBody: "{}", signature: null }))
+        .status,
     ).toBe(401);
     expect(
-      (await processPaymentWebhook({ providerCode: "not_a_provider", rawBody: "{}", signature: "x" })).status,
+      (
+        await processPaymentWebhook({
+          providerCode: "not_a_provider",
+          rawBody: "{}",
+          signature: "x",
+        })
+      ).status,
     ).toBe(404);
   });
 
@@ -311,11 +330,20 @@ describe("state transitions", () => {
       cancelIntent({ reference: open.intent.reference, actorId: ACTOR, reason: "again" }),
     ).rejects.toThrow(/only an open payment/i);
     await expect(
-      requestRefundRow({ reference: open.intent.reference, actorId: ACTOR, amountMinor: 100, reason: "n/a" }),
+      requestRefundRow({
+        reference: open.intent.reference,
+        actorId: ACTOR,
+        amountMinor: 100,
+        reason: "n/a",
+      }),
     ).rejects.toThrow(/only a settled payment/i);
 
     const paid = await createFor("cash", { clientKey: "paid" });
-    await settleManually({ reference: paid.intent.reference, actorId: ACTOR, note: "Cash received" });
+    await settleManually({
+      reference: paid.intent.reference,
+      actorId: ACTOR,
+      note: "Cash received",
+    });
     const refund = await requestRefundRow({
       reference: paid.intent.reference,
       actorId: ACTOR,
@@ -324,7 +352,12 @@ describe("state transitions", () => {
     });
     expect(refund.status).toBe("requested");
     await expect(
-      requestRefundRow({ reference: paid.intent.reference, actorId: ACTOR, amountMinor: 99_999, reason: "too much" }),
+      requestRefundRow({
+        reference: paid.intent.reference,
+        actorId: ACTOR,
+        amountMinor: 99_999,
+        reason: "too much",
+      }),
     ).rejects.toThrow(/exceeds the amount paid/i);
   });
 
@@ -332,7 +365,12 @@ describe("state transitions", () => {
     const { cancelIntent } = await svc();
     const { intent } = await createFor("cash");
     await expect(
-      cancelIntent({ reference: intent.reference, actorId: ACTOR, reason: "x", memberScope: "someone-else" }),
+      cancelIntent({
+        reference: intent.reference,
+        actorId: ACTOR,
+        reason: "x",
+        memberScope: "someone-else",
+      }),
     ).rejects.toThrow(/not found/i);
   });
 });
@@ -358,12 +396,27 @@ describe("receipt generation", () => {
     }
 
     // Provider pathways settle through the webhook, then the receipt is issued.
-    const providerCases: { rail: Rail; provider: string; secretEnv: string; algo: "sha256" | "sha512" }[] = [
+    const providerCases: {
+      rail: Rail;
+      provider: string;
+      secretEnv: string;
+      algo: "sha256" | "sha512";
+    }[] = [
       { rail: "momo_mtn", provider: "hubtel", secretEnv: "HUBTEL_WEBHOOK_SECRET", algo: "sha256" },
-      { rail: "momo_telecel", provider: "hubtel", secretEnv: "HUBTEL_WEBHOOK_SECRET", algo: "sha256" },
+      {
+        rail: "momo_telecel",
+        provider: "hubtel",
+        secretEnv: "HUBTEL_WEBHOOK_SECRET",
+        algo: "sha256",
+      },
       { rail: "momo_at", provider: "hubtel", secretEnv: "HUBTEL_WEBHOOK_SECRET", algo: "sha256" },
       { rail: "card_visa", provider: "paystack", secretEnv: "PAYSTACK_SECRET_KEY", algo: "sha512" },
-      { rail: "card_mastercard", provider: "paystack", secretEnv: "PAYSTACK_SECRET_KEY", algo: "sha512" },
+      {
+        rail: "card_mastercard",
+        provider: "paystack",
+        secretEnv: "PAYSTACK_SECRET_KEY",
+        algo: "sha512",
+      },
     ];
     for (const [i, c] of providerCases.entries()) {
       const { intent } = await createFor(c.rail);
@@ -412,6 +465,8 @@ describe("receipt generation", () => {
     expect(summary.manual_confirmed).toBe(1);
     expect(summary.provider_confirmed).toBe(1);
     expect(summary.awaiting_provider).toBe(1);
-    expect(summary.mismatches.some((m) => /Receipt exists but status is pending/.test(m.issue))).toBe(true);
+    expect(
+      summary.mismatches.some((m) => /Receipt exists but status is pending/.test(m.issue)),
+    ).toBe(true);
   });
 });

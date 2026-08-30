@@ -52,11 +52,27 @@ function Content() {
 /* ---------------------------------------------------------------- policy */
 
 const TOGGLES: { key: keyof SecuritySettings; label: string; hint: string }[] = [
-  { key: "firewall_enabled", label: "Application firewall", hint: "Evaluate IP rules on every request" },
-  { key: "ip_allowlist_only", label: "Allowlist only", hint: "Deny every address that is not explicitly allowed" },
+  {
+    key: "firewall_enabled",
+    label: "Application firewall",
+    hint: "Evaluate IP rules on every request",
+  },
+  {
+    key: "ip_allowlist_only",
+    label: "Allowlist only",
+    hint: "Deny every address that is not explicitly allowed",
+  },
   { key: "rate_limiting_enabled", label: "Rate limiting", hint: "Apply the scope limits below" },
-  { key: "upload_scanning_enabled", label: "Upload scanning", hint: "Scan every uploaded file before storage" },
-  { key: "block_executables", label: "Block executables", hint: "Reject scripts, binaries and archives with executables" },
+  {
+    key: "upload_scanning_enabled",
+    label: "Upload scanning",
+    hint: "Scan every uploaded file before storage",
+  },
+  {
+    key: "block_executables",
+    label: "Block executables",
+    hint: "Reject scripts, binaries and archives with executables",
+  },
 ];
 
 function PolicyCard({ view, onSaved }: { view: FirewallView; onSaved: () => void }) {
@@ -178,7 +194,9 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
   const add = async () => {
     setBusy(true);
     try {
-      await upsertIpRule({ data: { cidr: cidr.trim(), mode, note: note.trim() || undefined, enabled: true } });
+      await upsertIpRule({
+        data: { cidr: cidr.trim(), mode, note: note.trim() || undefined, enabled: true },
+      });
       toast.success(`${mode === "allow" ? "Allow" : "Deny"} rule added`);
       setCidr("");
       setNote("");
@@ -190,9 +208,15 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
     }
   };
 
-  const toggle = async (id: string, enabled: boolean, rule: { cidr: string; mode: "allow" | "deny"; note: string | null }) => {
+  const toggle = async (
+    id: string,
+    enabled: boolean,
+    rule: { cidr: string; mode: "allow" | "deny"; note: string | null },
+  ) => {
     try {
-      await upsertIpRule({ data: { id, cidr: rule.cidr, mode: rule.mode, note: rule.note ?? undefined, enabled } });
+      await upsertIpRule({
+        data: { id, cidr: rule.cidr, mode: rule.mode, note: rule.note ?? undefined, enabled },
+      });
       onChanged();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Update failed");
@@ -212,7 +236,11 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
   return (
     <SectionCard
       title="IP firewall rules"
-      action={<span className="text-[10px] uppercase tracking-widest text-emerald-deep/45">{view.ip_rules.length} rule(s)</span>}
+      action={
+        <span className="text-[10px] uppercase tracking-widest text-emerald-deep/45">
+          {view.ip_rules.length} rule(s)
+        </span>
+      }
     >
       {!disabled ? (
         <div className="flex flex-wrap items-end gap-3 border-b border-emerald-deep/5 px-6 py-4">
@@ -227,16 +255,29 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Mode
-            <select className={field} value={mode} onChange={(e) => setMode(e.target.value as "allow" | "deny")}>
+            <select
+              className={field}
+              value={mode}
+              onChange={(e) => setMode(e.target.value as "allow" | "deny")}
+            >
               <option value="deny">Deny</option>
               <option value="allow">Allow</option>
             </select>
           </label>
           <label className="flex flex-1 flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Note
-            <input className={field} placeholder="Reason for this rule" value={note} onChange={(e) => setNote(e.target.value)} />
+            <input
+              className={field}
+              placeholder="Reason for this rule"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </label>
-          <button className={btn} disabled={busy || cidr.trim().length < 3} onClick={() => void add()}>
+          <button
+            className={btn}
+            disabled={busy || cidr.trim().length < 3}
+            onClick={() => void add()}
+          >
             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
             Add rule
           </button>
@@ -244,7 +285,10 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
       ) : null}
 
       {view.ip_rules.length === 0 ? (
-        <EmptyState title="No IP rules" hint="Add an allow or deny rule to start filtering traffic." />
+        <EmptyState
+          title="No IP rules"
+          hint="Add an allow or deny rule to start filtering traffic."
+        />
       ) : (
         <table className="w-full">
           <thead>
@@ -263,14 +307,18 @@ function IpRulesCard({ view, onChanged }: { view: FirewallView; onChanged: () =>
                 <td className="px-6 py-4">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                      r.mode === "allow" ? "bg-emerald-mid/10 text-emerald-mid" : "bg-destructive/10 text-destructive"
+                      r.mode === "allow"
+                        ? "bg-emerald-mid/10 text-emerald-mid"
+                        : "bg-destructive/10 text-destructive"
                     }`}
                   >
                     {r.mode}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-muted-foreground">{r.note ?? "—"}</td>
-                <td className="px-6 py-4 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-xs text-muted-foreground">
+                  {new Date(r.created_at).toLocaleDateString()}
+                </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-3">
                     <input
@@ -306,7 +354,10 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
   const [draft, setDraft] = useState({ scope: "", window_seconds: 60, max_requests: 60, note: "" });
   const [busy, setBusy] = useState(false);
 
-  const saveRow = async (row: FirewallView["rate_limits"][number], patch: Partial<FirewallView["rate_limits"][number]>) => {
+  const saveRow = async (
+    row: FirewallView["rate_limits"][number],
+    patch: Partial<FirewallView["rate_limits"][number]>,
+  ) => {
     try {
       await upsertRateLimit({
         data: {
@@ -388,9 +439,17 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
           </label>
           <label className="flex flex-1 flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Note
-            <input className={field} value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} />
+            <input
+              className={field}
+              value={draft.note}
+              onChange={(e) => setDraft({ ...draft, note: e.target.value })}
+            />
           </label>
-          <button className={btn} disabled={busy || draft.scope.trim().length < 3} onClick={() => void add()}>
+          <button
+            className={btn}
+            disabled={busy || draft.scope.trim().length < 3}
+            onClick={() => void add()}
+          >
             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
             Add limit
           </button>
@@ -398,7 +457,10 @@ function RateLimitsCard({ view, onChanged }: { view: FirewallView; onChanged: ()
       ) : null}
 
       {view.rate_limits.length === 0 ? (
-        <EmptyState title="No rate limits configured" hint="Add a scope key to throttle a sensitive endpoint." />
+        <EmptyState
+          title="No rate limits configured"
+          hint="Add a scope key to throttle a sensitive endpoint."
+        />
       ) : (
         <table className="w-full">
           <thead>

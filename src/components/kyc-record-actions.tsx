@@ -126,7 +126,6 @@ export function KycRecordActions({
     }
   };
 
-
   return (
     <>
       <RecordActions
@@ -208,7 +207,6 @@ export function KycRecordActions({
               type="button"
               disabled={busy || note.trim().length < noteMin || (needsItems && items.length === 0)}
               onClick={() => void submit()}
-
               className={`rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-widest disabled:opacity-40 ${
                 decision === "approved" ? BUTTON_TONE.success : BUTTON_TONE.danger
               }`}

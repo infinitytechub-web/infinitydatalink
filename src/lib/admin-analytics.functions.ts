@@ -74,11 +74,18 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       pendingApprovalsRes,
     ] = await Promise.all([
       sb.from("profiles").select("id", { count: "exact", head: true }),
-      sb.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo),
+      sb
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", thirtyDaysAgo),
       sb.from("savings_accounts").select("balance"),
       sb.from("loans").select("amount, status, decided_at, created_at"),
       sb.from("loans").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      sb.from("transactions").select("amount, kind").eq("status", "cleared").gte("created_at", monthStart),
+      sb
+        .from("transactions")
+        .select("amount, kind")
+        .eq("status", "cleared")
+        .gte("created_at", monthStart),
       sb
         .from("transactions")
         .select("amount, kind")
@@ -121,17 +128,29 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       .filter((l: any) => l.status === "approved" || l.status === "active")
       .reduce((s: number, l: any) => s + Number(l.amount ?? 0), 0);
 
-    const approved = loans.filter((l: any) => l.status === "approved" || l.status === "active" || l.status === "closed");
-    const loans_on_time_rate = approved.length === 0 ? 1 : approved.filter((l: any) => l.status !== "rejected").length / approved.length;
+    const approved = loans.filter(
+      (l: any) => l.status === "approved" || l.status === "active" || l.status === "closed",
+    );
+    const loans_on_time_rate =
+      approved.length === 0
+        ? 1
+        : approved.filter((l: any) => l.status !== "rejected").length / approved.length;
 
-    const pendingUserIds = Array.from(new Set((pendingApprovalsRes.data ?? []).map((l: any) => l.user_id)));
+    const pendingUserIds = Array.from(
+      new Set((pendingApprovalsRes.data ?? []).map((l: any) => l.user_id)),
+    );
     let profileMap = new Map<string, { full_name: string | null; member_no: string | null }>();
     if (pendingUserIds.length) {
       const { data: profiles } = await sb
         .from("profiles")
         .select("id, full_name, member_no")
         .in("id", pendingUserIds);
-      profileMap = new Map((profiles ?? []).map((p: any) => [p.id, { full_name: p.full_name, member_no: p.member_no }]));
+      profileMap = new Map(
+        (profiles ?? []).map((p: any) => [
+          p.id,
+          { full_name: p.full_name, member_no: p.member_no },
+        ]),
+      );
     }
 
     return {
@@ -202,7 +221,9 @@ function bucketKey(iso: string, granularity: "day" | "week" | "month") {
   }
   // week: Monday of ISO week (UTC)
   const day = d.getUTCDay() || 7;
-  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - (day - 1)));
+  const monday = new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - (day - 1)),
+  );
   return monday.toISOString().slice(0, 10);
 }
 
@@ -269,7 +290,13 @@ export const getReport = createServerFn({ method: "GET" })
     }
     const add = (iso: string, field: keyof Omit<ReportBucket, "bucket">, value: number) => {
       const k = bucketKey(iso, data.granularity);
-      const row = map.get(k) ?? { bucket: k, new_members: 0, contributions: 0, disbursements: 0, repayments: 0 };
+      const row = map.get(k) ?? {
+        bucket: k,
+        new_members: 0,
+        contributions: 0,
+        disbursements: 0,
+        repayments: 0,
+      };
       row[field] = row[field] + value;
       map.set(k, row);
     };
@@ -283,7 +310,11 @@ export const getReport = createServerFn({ method: "GET" })
     }
     for (const l of loansRes.data ?? []) {
       const amt = Number((l as any).amount ?? 0);
-      if ((l as any).status === "approved" || (l as any).status === "active" || (l as any).status === "closed") {
+      if (
+        (l as any).status === "approved" ||
+        (l as any).status === "active" ||
+        (l as any).status === "closed"
+      ) {
         const when = (l as any).decided_at ?? (l as any).created_at;
         if (when) add(when, "disbursements", amt);
       }

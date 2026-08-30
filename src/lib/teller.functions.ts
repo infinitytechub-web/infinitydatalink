@@ -84,7 +84,10 @@ function mapSession(r: any): TellerSession {
   };
 }
 
-function mapTxn(r: any, names: Map<string, { full_name: string | null; member_no: string | null }>): TellerTxn {
+function mapTxn(
+  r: any,
+  names: Map<string, { full_name: string | null; member_no: string | null }>,
+): TellerTxn {
   const p = names.get(r.member_id);
   return {
     id: r.id,
@@ -110,8 +113,12 @@ async function attachNames(supabase: any, rows: any[]) {
   const ids = [...new Set(rows.map((r) => r.member_id))];
   const names = new Map<string, { full_name: string | null; member_no: string | null }>();
   if (ids.length > 0) {
-    const { data } = await supabase.from("profiles").select("id, full_name, member_no").in("id", ids);
-    for (const p of (data ?? []) as any[]) names.set(p.id, { full_name: p.full_name, member_no: p.member_no });
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, full_name, member_no")
+      .in("id", ids);
+    for (const p of (data ?? []) as any[])
+      names.set(p.id, { full_name: p.full_name, member_no: p.member_no });
   }
   return rows.map((r) => mapTxn(r, names));
 }
@@ -180,7 +187,10 @@ export const openTellerSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
-      .object({ opening_float: z.number().min(0).max(10_000_000), note: z.string().max(500).optional() })
+      .object({
+        opening_float: z.number().min(0).max(10_000_000),
+        note: z.string().max(500).optional(),
+      })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -193,7 +203,10 @@ export const openTellerSession = createServerFn({ method: "POST" })
       .eq("teller_id", context.userId)
       .eq("status", "open")
       .maybeSingle();
-    if (existing) throw new Error("You already have an open teller session. Close it before opening a new one.");
+    if (existing)
+      throw new Error(
+        "You already have an open teller session. Close it before opening a new one.",
+      );
 
     const { data: row, error } = await (supabaseAdmin as any)
       .from("teller_sessions")
@@ -237,7 +250,8 @@ export const closeTellerSession = createServerFn({ method: "POST" })
       .maybeSingle();
     if (sErr) throw new Error(sErr.message);
     if (!session) throw new Error("Session not found");
-    if ((session as any).teller_id !== context.userId) throw new Error("Forbidden: not your teller session");
+    if ((session as any).teller_id !== context.userId)
+      throw new Error("Forbidden: not your teller session");
     if ((session as any).status !== "open") throw new Error("Session is already closed");
 
     const { data: txns } = await supabaseAdmin
@@ -296,7 +310,10 @@ export const lookupTellerMember = createServerFn({ method: "POST" })
     const term = data.query.trim().replace(/[%,()*\\]/g, "");
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(term);
 
-    let query = sb.from("profiles").select("id, member_no, full_name, phone, status, kyc").limit(10);
+    let query = sb
+      .from("profiles")
+      .select("id, member_no, full_name, phone, status, kyc")
+      .limit(10);
     query = isUuid
       ? query.eq("id", term)
       : query.or(`member_no.ilike.%${term}%,full_name.ilike.%${term}%,phone.ilike.%${term}%`);
@@ -311,7 +328,11 @@ export const lookupTellerMember = createServerFn({ method: "POST" })
         .from("savings_accounts")
         .select("id, user_id, nickname, balance, status, savings_plans(name)")
         .in("user_id", ids),
-      sb.from("loans").select("id, user_id, product, outstanding, status").in("user_id", ids).in("status", ["active", "approved"]),
+      sb
+        .from("loans")
+        .select("id, user_id, product, outstanding, status")
+        .in("user_id", ids)
+        .in("status", ["active", "approved"]),
     ]);
 
     return ((rows ?? []) as any[]).map((p) => ({
@@ -389,7 +410,10 @@ export const postTellerTransaction = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!session) throw new Error("Open a teller session before posting transactions");
 
-    const reference = `TLR-${data.idempotency_key.replace(/[^a-zA-Z0-9-]/g, "").slice(0, 40).toUpperCase()}`;
+    const reference = `TLR-${data.idempotency_key
+      .replace(/[^a-zA-Z0-9-]/g, "")
+      .slice(0, 40)
+      .toUpperCase()}`;
 
     // Duplicate protection: the same key never posts twice.
     const { data: dupe } = await supabaseAdmin
@@ -437,7 +461,8 @@ export const postTellerTransaction = createServerFn({ method: "POST" })
         .select("id, user_id")
         .eq("id", data.loan_id)
         .maybeSingle();
-      if (!loan || (loan as any).user_id !== data.member_id) throw new Error("Loan does not belong to this member");
+      if (!loan || (loan as any).user_id !== data.member_id)
+        throw new Error("Loan does not belong to this member");
       const { error } = await (supabaseAdmin as any).rpc("record_loan_repayment", {
         _loan_id: data.loan_id,
         _amount: data.amount,
@@ -569,9 +594,11 @@ export const listTellerActivity = createServerFn({ method: "POST" })
     if (data.kind) q = q.eq("kind", data.kind);
 
     const from = (data.page - 1) * data.page_size;
-    const { data: rows, error, count } = await q
-      .order("created_at", { ascending: false })
-      .range(from, from + data.page_size - 1);
+    const {
+      data: rows,
+      error,
+      count,
+    } = await q.order("created_at", { ascending: false }).range(from, from + data.page_size - 1);
     if (error) throw new Error(error.message);
 
     const mapped = await attachNames(sb, (rows ?? []) as any[]);
@@ -586,11 +613,17 @@ export const listTellerActivity = createServerFn({ method: "POST" })
 export const listTellerSessions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ status: z.enum(["open", "closed", "all"]).optional().default("all") }).parse(d ?? {}),
+    z
+      .object({ status: z.enum(["open", "closed", "all"]).optional().default("all") })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "teller", "view");
-    let q = context.supabase.from("teller_sessions").select(SESSION_COLS).order("opened_at", { ascending: false }).limit(100);
+    let q = context.supabase
+      .from("teller_sessions")
+      .select(SESSION_COLS)
+      .order("opened_at", { ascending: false })
+      .limit(100);
     if (data.status !== "all") q = q.eq("status", data.status);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -599,7 +632,10 @@ export const listTellerSessions = createServerFn({ method: "POST" })
     const ids = [...new Set(sessions.map((s) => s.teller_id))];
     const names = new Map<string, string | null>();
     if (ids.length) {
-      const { data: profs } = await context.supabase.from("profiles").select("id, full_name").in("id", ids);
+      const { data: profs } = await context.supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", ids);
       for (const p of (profs ?? []) as any[]) names.set(p.id, p.full_name);
     }
     return sessions.map((s) => ({ ...s, teller_name: names.get(s.teller_id) ?? null }));

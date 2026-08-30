@@ -8,7 +8,8 @@ export const Route = createFileRoute("/_admin/admin/loan-calculator")({
       { title: "Loan calculator — IT-360 CashApp Admin" },
       {
         name: "description",
-        content: "Model instalments, interest and amortisation schedules for member loan enquiries.",
+        content:
+          "Model instalments, interest and amortisation schedules for member loan enquiries.",
       },
       { name: "robots", content: "noindex" },
     ],

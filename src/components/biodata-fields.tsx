@@ -18,17 +18,20 @@ import {
   resolveMinorStatus,
   validateDateOfBirth,
 } from "@/lib/age";
-import {
-  DEFAULT_RELATIONSHIPS,
-  listRelationshipTypes,
-} from "@/lib/relationship-types.functions";
+import { DEFAULT_RELATIONSHIPS, listRelationshipTypes } from "@/lib/relationship-types.functions";
 
 const labelCls =
   "flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground";
 const controlCls =
   "min-h-[44px] rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm font-normal normal-case tracking-normal text-emerald-deep outline-none focus:border-emerald-mid disabled:bg-cream/50 disabled:text-muted-foreground";
 
-function Hint({ children, tone = "muted" }: { children: React.ReactNode; tone?: "muted" | "error" }) {
+function Hint({
+  children,
+  tone = "muted",
+}: {
+  children: React.ReactNode;
+  tone?: "muted" | "error";
+}) {
   return (
     <span
       className={`text-[10px] font-normal normal-case tracking-normal ${
@@ -101,7 +104,11 @@ export function RegionDistrictFields({
             </option>
           ))}
         </select>
-        {districts.length > 0 ? <Hint>{districts.length} districts in {region}</Hint> : null}
+        {districts.length > 0 ? (
+          <Hint>
+            {districts.length} districts in {region}
+          </Hint>
+        ) : null}
       </label>
     </>
   );
@@ -281,14 +288,21 @@ export function AgeBadge({
 }) {
   const { age, effective, mismatch } = resolveMinorStatus(dateOfBirth, storedIsMinor);
   if (age === null) {
-    return effective ? <MinorTag mismatch={false} /> : <span className="text-muted-foreground">—</span>;
+    return effective ? (
+      <MinorTag mismatch={false} />
+    ) : (
+      <span className="text-muted-foreground">—</span>
+    );
   }
   return (
     <span className="inline-flex items-center gap-1.5">
       <span className="tabular">{age} yrs</span>
       {effective ? <MinorTag mismatch={mismatch} /> : null}
       {mismatch && !effective ? (
-        <span title={MINOR_MISMATCH_HINT} className="text-[9px] font-bold uppercase tracking-widest text-destructive">
+        <span
+          title={MINOR_MISMATCH_HINT}
+          className="text-[9px] font-bold uppercase tracking-widest text-destructive"
+        >
           flag stale
         </span>
       ) : null}
@@ -297,12 +311,20 @@ export function AgeBadge({
 }
 
 /** Shared visual for the under-18 chip so every surface matches. */
-export function MinorTag({ mismatch = false, label = "Under 18" }: { mismatch?: boolean; label?: string }) {
+export function MinorTag({
+  mismatch = false,
+  label = "Under 18",
+}: {
+  mismatch?: boolean;
+  label?: string;
+}) {
   return (
     <span
       title={mismatch ? MINOR_MISMATCH_HINT : undefined}
       className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${
-        mismatch ? "bg-destructive/15 text-destructive" : "bg-gold/15 text-brand-gold-ink dark:text-brand-gold"
+        mismatch
+          ? "bg-destructive/15 text-destructive"
+          : "bg-gold/15 text-brand-gold-ink dark:text-brand-gold"
       }`}
     >
       {label}

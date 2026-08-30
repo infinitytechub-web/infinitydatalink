@@ -22,7 +22,13 @@ import {
 import { purgeAllLogEntries } from "@/lib/log-purge.functions";
 import { useAuth } from "@/lib/auth";
 
-type PurgeKind = "notifications" | "read-notifications" | "audit" | "audit-all" | "system" | "recycle";
+type PurgeKind =
+  | "notifications"
+  | "read-notifications"
+  | "audit"
+  | "audit-all"
+  | "system"
+  | "recycle";
 type NoteScope = "read" | "unread" | "all" | "system";
 
 const NOTE_SCOPES: { value: NoteScope; label: string; hint: string }[] = [
@@ -63,7 +69,8 @@ export function PurgeControlsWidget() {
       if (open === "notifications")
         return {
           label: "notifications moved to the recycle bin",
-          n: (await nFn({ data: { scope: noteScope, retention_days: 30, confirm: "PURGE" } })).deleted,
+          n: (await nFn({ data: { scope: noteScope, retention_days: 30, confirm: "PURGE" } }))
+            .deleted,
         };
       if (open === "read-notifications")
         return {
@@ -83,7 +90,10 @@ export function PurgeControlsWidget() {
           n: r.archived,
         };
       }
-      return { label: "recycle-bin entries", n: (await rFn({ data: { all: true, confirm: "PURGE" } })).deleted };
+      return {
+        label: "recycle-bin entries",
+        n: (await rFn({ data: { all: true, confirm: "PURGE" } })).deleted,
+      };
     },
 
     onSuccess: (r) => {
@@ -178,7 +188,6 @@ export function PurgeControlsWidget() {
               An audit entry will be recorded for the action.
             </p>
             {open === "audit" ? (
-
               <div>
                 <Label className="text-xs">Older than (days)</Label>
                 <Input
@@ -215,7 +224,11 @@ export function PurgeControlsWidget() {
               <Label className="text-xs">
                 Type <span className="font-mono">PURGE</span> to confirm
               </Label>
-              <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="PURGE" />
+              <Input
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="PURGE"
+              />
             </div>
           </div>
           <DialogFooter>

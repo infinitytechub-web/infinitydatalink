@@ -136,8 +136,7 @@ export function LogRetentionWidget() {
   }
 
   const dirty = !!draft;
-  const patch = (p: Partial<RetentionPolicy>) =>
-    setDraft({ ...(draft ?? policyQ.data!), ...p });
+  const patch = (p: Partial<RetentionPolicy>) => setDraft({ ...(draft ?? policyQ.data!), ...p });
   const preview = (previewQ.data ?? []) as RetentionPreviewRow[];
 
   return (
@@ -211,7 +210,9 @@ export function LogRetentionWidget() {
                   <td className="p-2 text-right text-rose-600">
                     {Number(r.rows_to_delete).toLocaleString()}
                   </td>
-                  <td className="p-2 text-right text-rose-600">{fmtBytes(Number(r.bytes_to_delete))}</td>
+                  <td className="p-2 text-right text-rose-600">
+                    {fmtBytes(Number(r.bytes_to_delete))}
+                  </td>
                   <td className="p-2 text-right">{fmtBytes(Number(r.bytes_to_keep))}</td>
                 </tr>
               ))}
@@ -243,11 +244,7 @@ export function LogRetentionWidget() {
           >
             <Trash2 className="mr-1 size-3.5" /> Run purge now
           </Button>
-          <Button
-            size="sm"
-            disabled={!dirty || saveMut.isPending}
-            onClick={() => saveMut.mutate()}
-          >
+          <Button size="sm" disabled={!dirty || saveMut.isPending} onClick={() => saveMut.mutate()}>
             <Save className="mr-1 size-3.5" /> {dirty ? "Save policy" : "Saved"}
           </Button>
         </div>
@@ -269,7 +266,11 @@ export function LogRetentionWidget() {
               <Label className="text-xs">
                 Type <span className="font-mono">PURGE</span> to confirm
               </Label>
-              <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="PURGE" />
+              <Input
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="PURGE"
+              />
             </div>
           </div>
           <DialogFooter>

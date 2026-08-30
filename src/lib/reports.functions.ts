@@ -411,9 +411,7 @@ export const runReport = createServerFn({ method: "POST" })
 
     const build = (selectCols: string, withCount: boolean) => {
       const sb = context.supabase as any;
-      let q = sb
-        .from(spec.table)
-        .select(selectCols, withCount ? { count: "exact" } : undefined);
+      let q = sb.from(spec.table).select(selectCols, withCount ? { count: "exact" } : undefined);
       if (spec.narrow) q = spec.narrow(q);
       if (bounds.gte) q = q.gte(spec.dateColumn, bounds.gte);
       if (bounds.lte) q = q.lte(spec.dateColumn, bounds.lte);
@@ -426,7 +424,11 @@ export const runReport = createServerFn({ method: "POST" })
     };
 
     const from = (data.page - 1) * data.page_size;
-    const { data: rows, count, error } = await build(spec.select, true)
+    const {
+      data: rows,
+      count,
+      error,
+    } = await build(spec.select, true)
       .order(spec.dateColumn, { ascending: false })
       .range(from, from + data.page_size - 1);
     if (error) throw new Error(error.message);

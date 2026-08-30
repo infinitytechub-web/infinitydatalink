@@ -163,7 +163,8 @@ function AdminSupportPage() {
               defaultValue={search.search ?? ""}
               placeholder="Subject or TKT reference"
               onKeyDown={(e) => {
-                if (e.key === "Enter") set({ search: (e.target as HTMLInputElement).value || undefined });
+                if (e.key === "Enter")
+                  set({ search: (e.target as HTMLInputElement).value || undefined });
               }}
             />
           </div>
@@ -175,7 +176,10 @@ function AdminSupportPage() {
           <p className="p-5 text-xs text-muted-foreground">Loading queue…</p>
         ) : (query.data?.rows ?? []).length === 0 ? (
           <div className="p-5">
-            <EmptyState title="No tickets match these filters" hint="Try widening the status filter." />
+            <EmptyState
+              title="No tickets match these filters"
+              hint="Try widening the status filter."
+            />
           </div>
         ) : (
           <>
@@ -186,11 +190,32 @@ function AdminSupportPage() {
                     <th className="px-6 py-3 text-left font-medium">Ref</th>
                     <th className="px-6 py-3 text-left font-medium">Member</th>
                     <th className="px-6 py-3 text-left font-medium">Subject</th>
-                    <SortHeader label="Priority" field="priority" sort={sort} onSort={(n) => set({ sort_by: n.sortBy as Search["sort_by"], sort_dir: n.sortDir })} />
-                    <SortHeader label="Status" field="status" sort={sort} onSort={(n) => set({ sort_by: n.sortBy as Search["sort_by"], sort_dir: n.sortDir })} />
+                    <SortHeader
+                      label="Priority"
+                      field="priority"
+                      sort={sort}
+                      onSort={(n) =>
+                        set({ sort_by: n.sortBy as Search["sort_by"], sort_dir: n.sortDir })
+                      }
+                    />
+                    <SortHeader
+                      label="Status"
+                      field="status"
+                      sort={sort}
+                      onSort={(n) =>
+                        set({ sort_by: n.sortBy as Search["sort_by"], sort_dir: n.sortDir })
+                      }
+                    />
                     <th className="px-6 py-3 text-left font-medium">SLA</th>
                     <th className="px-6 py-3 text-left font-medium">Owner</th>
-                    <SortHeader label="Opened" field="created_at" sort={sort} onSort={(n) => set({ sort_by: n.sortBy as Search["sort_by"], sort_dir: n.sortDir })} />
+                    <SortHeader
+                      label="Opened"
+                      field="created_at"
+                      sort={sort}
+                      onSort={(n) =>
+                        set({ sort_by: n.sortBy as Search["sort_by"], sort_dir: n.sortDir })
+                      }
+                    />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
@@ -290,7 +315,10 @@ function TicketWorkspace({
   const updateFn = useServerFn(adminUpdateTicket);
   const assigneesFn = useServerFn(adminListAssignees);
 
-  const query = useQuery({ queryKey: ["admin-ticket", id], queryFn: () => getFn({ data: { id } }) });
+  const query = useQuery({
+    queryKey: ["admin-ticket", id],
+    queryFn: () => getFn({ data: { id } }),
+  });
   const assignees = useQuery({ queryKey: ["support-assignees"], queryFn: () => assigneesFn() });
 
   const [body, setBody] = useState("");
@@ -357,7 +385,9 @@ function TicketWorkspace({
                 value={body}
                 maxLength={4000}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder={internal ? "Internal note — never shown to the member." : "Reply to the member…"}
+                placeholder={
+                  internal ? "Internal note — never shown to the member." : "Reply to the member…"
+                }
               />
               <div className="flex flex-wrap items-center gap-3">
                 <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -372,7 +402,11 @@ function TicketWorkspace({
                   disabled={body.trim().length < 2 || replyMutation.isPending}
                   onClick={() => replyMutation.mutate()}
                 >
-                  {replyMutation.isPending ? "Saving…" : internal ? "Add internal note" : "Send reply"}
+                  {replyMutation.isPending
+                    ? "Saving…"
+                    : internal
+                      ? "Add internal note"
+                      : "Send reply"}
                 </Button>
               </div>
             </div>
@@ -384,11 +418,18 @@ function TicketWorkspace({
                 Member context
               </p>
               <p className="text-sm font-medium text-foreground">{t.member_label}</p>
-              {t.member_no ? <p className="text-muted-foreground">Member no. {t.member_no}</p> : null}
-              {t.member_context?.email ? <p className="text-muted-foreground">{t.member_context.email}</p> : null}
-              {t.member_context?.phone ? <p className="text-muted-foreground">{t.member_context.phone}</p> : null}
+              {t.member_no ? (
+                <p className="text-muted-foreground">Member no. {t.member_no}</p>
+              ) : null}
+              {t.member_context?.email ? (
+                <p className="text-muted-foreground">{t.member_context.email}</p>
+              ) : null}
+              {t.member_context?.phone ? (
+                <p className="text-muted-foreground">{t.member_context.phone}</p>
+              ) : null}
               <p className="mt-2 text-muted-foreground">
-                KYC: {t.member_context?.kyc_status ?? "—"} · Account: {t.member_context?.status ?? "—"}
+                KYC: {t.member_context?.kyc_status ?? "—"} · Account:{" "}
+                {t.member_context?.status ?? "—"}
               </p>
             </div>
 
@@ -406,7 +447,9 @@ function TicketWorkspace({
               options={[
                 ["none", "Unassigned"],
                 ["me", "Assign to me"],
-                ...(assignees.data ?? []).map((a) => [a.id, `${a.label} (${a.role.replace(/_/g, " ")})`] as [string, string]),
+                ...(assignees.data ?? []).map(
+                  (a) => [a.id, `${a.label} (${a.role.replace(/_/g, " ")})`] as [string, string],
+                ),
               ]}
             />
 

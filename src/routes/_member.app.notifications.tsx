@@ -3,7 +3,13 @@ import { Suspense, useEffect, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { BellRing, Mail, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader, SectionCard, SectionCardSkeleton, StatusPill, EmptyState } from "@/components/primitives";
+import {
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+  EmptyState,
+} from "@/components/primitives";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,10 +22,7 @@ import {
 
 export const Route = createFileRoute("/_member/app/notifications")({
   head: () => ({
-    meta: [
-      { title: "Alert settings — IT-360 CashApp" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Alert settings — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: NotificationsPage,
 });
@@ -92,14 +95,19 @@ function NotificationsContent() {
           <ChannelRow
             icon={<MessageSquare className="h-4 w-4" />}
             label="SMS alerts"
-            hint={data.hasPhone ? "Sent to the phone number on your profile." : "Add a phone number to your profile to receive SMS."}
+            hint={
+              data.hasPhone
+                ? "Sent to the phone number on your profile."
+                : "Add a phone number to your profile to receive SMS."
+            }
             checked={prefs.sms}
             onChange={(v) => setPrefs((p) => ({ ...p, sms: v }))}
           />
           {prefs.sms && !data.hasPhone ? (
             <Alert>
               <AlertDescription className="text-xs">
-                No phone number is saved on your profile, so SMS alerts will be skipped until you add one.
+                No phone number is saved on your profile, so SMS alerts will be skipped until you
+                add one.
               </AlertDescription>
             </Alert>
           ) : null}
@@ -130,7 +138,10 @@ function NotificationsContent() {
 
       <SectionCard title="Recent deliveries">
         {data.deliveries.length === 0 ? (
-          <EmptyState title="No deliveries yet" hint="Email and SMS alerts will appear here once events occur." />
+          <EmptyState
+            title="No deliveries yet"
+            hint="Email and SMS alerts will appear here once events occur."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -151,8 +162,18 @@ function NotificationsContent() {
                     </td>
                     <td className="py-2 uppercase text-xs">{d.channel}</td>
                     <td className="py-2">
-                      <StatusPill status={d.status === "sent" ? "cleared" : d.status === "skipped" ? "rejected" : "pending"} />
-                      {d.error ? <div className="mt-1 text-xs text-muted-foreground">{d.error}</div> : null}
+                      <StatusPill
+                        status={
+                          d.status === "sent"
+                            ? "cleared"
+                            : d.status === "skipped"
+                              ? "rejected"
+                              : "pending"
+                        }
+                      />
+                      {d.error ? (
+                        <div className="mt-1 text-xs text-muted-foreground">{d.error}</div>
+                      ) : null}
                     </td>
                     <td className="py-2 text-xs text-muted-foreground">
                       {new Date(d.sent_at ?? d.created_at).toLocaleString()}

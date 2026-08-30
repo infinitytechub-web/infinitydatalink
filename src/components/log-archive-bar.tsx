@@ -115,8 +115,8 @@ export function LogArchiveBar({
               <p className="flex items-start gap-2 rounded-lg border border-emerald-deep/10 p-3 text-xs text-muted-foreground">
                 <Undo2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
-                  <strong>Undo window:</strong> a full snapshot of each row is kept for 2 years
-                  (730 days) and can be restored any time from the{" "}
+                  <strong>Undo window:</strong> a full snapshot of each row is kept for 2 years (730
+                  days) and can be restored any time from the{" "}
                   <Link to="/admin/log-recycle-bin" className="underline">
                     log recycle bin
                   </Link>

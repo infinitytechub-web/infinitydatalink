@@ -21,7 +21,13 @@ import {
   type MyTransferRow,
 } from "@/lib/member-transfers.functions";
 import { formatMoney } from "@/lib/org-config";
-import { deleteSweep, listMySweeps, setSweepStatus, submitOwnAccountTransfer, type Sweep } from "@/lib/savings-sweeps.functions";
+import {
+  deleteSweep,
+  listMySweeps,
+  setSweepStatus,
+  submitOwnAccountTransfer,
+  type Sweep,
+} from "@/lib/savings-sweeps.functions";
 import { SweepDialog } from "@/components/sweep-dialog";
 import { Button } from "@/components/ui/button";
 import { Pause, Play, Trash2, Zap } from "lucide-react";
@@ -43,7 +49,10 @@ export const Route = createFileRoute("/_member/app/transfers")({
   head: () => ({
     meta: [
       { title: "Transfers — IT-360 CashApp" },
-      { name: "description", content: "Move funds between your accounts or send to another member." },
+      {
+        name: "description",
+        content: "Move funds between your accounts or send to another member.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -52,7 +61,11 @@ export const Route = createFileRoute("/_member/app/transfers")({
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Transfers unavailable" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Transfers unavailable"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -92,8 +105,14 @@ function TransfersBody({
   const { data: transfers } = useSuspenseQuery(myTransfersQuery(status));
   const qc = useQueryClient();
 
-  const pendingCount = useMemo(() => transfers.filter((t) => t.status === "pending").length, [transfers]);
-  const clearedCount = useMemo(() => transfers.filter((t) => t.status === "cleared").length, [transfers]);
+  const pendingCount = useMemo(
+    () => transfers.filter((t) => t.status === "pending").length,
+    [transfers],
+  );
+  const clearedCount = useMemo(
+    () => transfers.filter((t) => t.status === "cleared").length,
+    [transfers],
+  );
 
   return (
     <div className="mt-6 space-y-8">
@@ -110,7 +129,10 @@ function TransfersBody({
         </div>
       </section>
 
-      <NewTransferForm accounts={accounts} onDone={() => qc.invalidateQueries({ queryKey: ["member", "transfers"] })} />
+      <NewTransferForm
+        accounts={accounts}
+        onDone={() => qc.invalidateQueries({ queryKey: ["member", "transfers"] })}
+      />
 
       <SweepsSection accounts={accounts} />
 
@@ -118,7 +140,9 @@ function TransfersBody({
         title="My transfers"
         action={
           <div className="flex items-center gap-2">
-            <label className="sr-only" htmlFor="mt-status">Filter status</label>
+            <label className="sr-only" htmlFor="mt-status">
+              Filter status
+            </label>
             <select
               id="mt-status"
               value={status}
@@ -134,7 +158,12 @@ function TransfersBody({
         }
       >
         {transfers.length === 0 ? (
-          <div className="p-6"><EmptyState title="No transfers yet" hint="Create one above and watch it move through pending → cleared." /></div>
+          <div className="p-6">
+            <EmptyState
+              title="No transfers yet"
+              hint="Create one above and watch it move through pending → cleared."
+            />
+          </div>
         ) : (
           <TransfersTable rows={transfers} />
         )}
@@ -150,12 +179,24 @@ function TransfersTable({ rows }: { rows: MyTransferRow[] }) {
         <caption className="sr-only">My recent transfers</caption>
         <thead className="border-b border-border bg-muted/40 text-[11px] uppercase tracking-widest text-muted-foreground">
           <tr>
-            <th scope="col" className="px-6 py-3 text-left">Ref</th>
-            <th scope="col" className="px-6 py-3 text-left">When</th>
-            <th scope="col" className="px-6 py-3 text-left">Direction</th>
-            <th scope="col" className="px-6 py-3 text-left">Counterparty</th>
-            <th scope="col" className="px-6 py-3 text-right">Amount</th>
-            <th scope="col" className="px-6 py-3 text-left">Status</th>
+            <th scope="col" className="px-6 py-3 text-left">
+              Ref
+            </th>
+            <th scope="col" className="px-6 py-3 text-left">
+              When
+            </th>
+            <th scope="col" className="px-6 py-3 text-left">
+              Direction
+            </th>
+            <th scope="col" className="px-6 py-3 text-left">
+              Counterparty
+            </th>
+            <th scope="col" className="px-6 py-3 text-right">
+              Amount
+            </th>
+            <th scope="col" className="px-6 py-3 text-left">
+              Status
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -165,7 +206,9 @@ function TransfersTable({ rows }: { rows: MyTransferRow[] }) {
               <td className="px-6 py-3 text-xs text-muted-foreground">
                 {new Date(r.created_at).toLocaleString()}
                 {r.cleared_at ? (
-                  <div className="text-[10px]">cleared {new Date(r.cleared_at).toLocaleString()}</div>
+                  <div className="text-[10px]">
+                    cleared {new Date(r.cleared_at).toLocaleString()}
+                  </div>
                 ) : null}
               </td>
               <td className="px-6 py-3 text-xs">
@@ -183,7 +226,9 @@ function TransfersTable({ rows }: { rows: MyTransferRow[] }) {
               <td className="px-6 py-3 text-right">
                 <Money amount={r.amount} signed />
               </td>
-              <td className="px-6 py-3"><StatusPill status={r.status as any} /></td>
+              <td className="px-6 py-3">
+                <StatusPill status={r.status as any} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -221,7 +266,12 @@ function NewTransferForm({
   const mutate = useMutation({
     mutationFn: () =>
       requestFn({
-        data: { from_account_id: from, to_account_id: toAccount, amount: Number(amount), note: note || null },
+        data: {
+          from_account_id: from,
+          to_account_id: toAccount,
+          amount: Number(amount),
+          note: note || null,
+        },
       }),
     onSuccess: (row) => {
       toast.success(`Transfer ${row.ref} submitted — awaiting clearance`);
@@ -248,7 +298,9 @@ function NewTransferForm({
         }}
       >
         <label className="text-xs">
-          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">From account</span>
+          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
+            From account
+          </span>
           <select
             required
             value={from}
@@ -265,7 +317,9 @@ function NewTransferForm({
         </label>
 
         <label className="text-xs">
-          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">Amount</span>
+          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
+            Amount
+          </span>
           <input
             required
             type="number"
@@ -275,11 +329,15 @@ function NewTransferForm({
             onChange={(e) => setAmount(e.target.value)}
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
           />
-          {overBalance ? <span className="mt-1 block text-[11px] text-destructive">Exceeds source balance.</span> : null}
+          {overBalance ? (
+            <span className="mt-1 block text-[11px] text-destructive">Exceeds source balance.</span>
+          ) : null}
         </label>
 
         <div className="md:col-span-2">
-          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">Destination account</span>
+          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
+            Destination account
+          </span>
           <input
             type="search"
             placeholder="Search member name or number"
@@ -288,7 +346,12 @@ function NewTransferForm({
             className="mb-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
             aria-label="Search destination accounts"
           />
-          <div className="max-h-56 overflow-y-auto rounded-md border border-border" role="listbox" aria-label="Destination accounts" aria-busy={isFetching}>
+          <div
+            className="max-h-56 overflow-y-auto rounded-md border border-border"
+            role="listbox"
+            aria-label="Destination accounts"
+            aria-busy={isFetching}
+          >
             {candidates.length === 0 ? (
               <p className="p-3 text-xs text-muted-foreground">No matching accounts.</p>
             ) : (
@@ -306,11 +369,19 @@ function NewTransferForm({
                       }
                     >
                       <span>
-                        <span className="font-medium">{c.member_name ?? c.member_no ?? "Member"}</span>
+                        <span className="font-medium">
+                          {c.member_name ?? c.member_no ?? "Member"}
+                        </span>
                         <span className="ml-2 text-muted-foreground">{c.plan_name}</span>
-                        {c.is_self ? <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px]">You</span> : null}
+                        {c.is_self ? (
+                          <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px]">
+                            You
+                          </span>
+                        ) : null}
                       </span>
-                      <span className="font-mono text-[10px] text-muted-foreground">{c.account_id.slice(0, 8)}</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {c.account_id.slice(0, 8)}
+                      </span>
                     </button>
                   </li>
                 ))}
@@ -320,7 +391,9 @@ function NewTransferForm({
         </div>
 
         <label className="text-xs md:col-span-2">
-          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">Note (optional)</span>
+          <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
+            Note (optional)
+          </span>
           <input
             type="text"
             maxLength={500}
@@ -339,7 +412,8 @@ function NewTransferForm({
             {mutate.isPending ? "Submitting…" : "Submit transfer"}
           </button>
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Transfers are queued as <strong>pending</strong> and settle atomically once staff clear them.
+            Transfers are queued as <strong>pending</strong> and settle atomically once staff clear
+            them.
           </p>
         </div>
       </form>
@@ -353,9 +427,17 @@ const sweepsQuery = queryOptions({
   staleTime: 15_000,
 });
 
-function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listMyTransferAccounts>> }) {
+function SweepsSection({
+  accounts,
+}: {
+  accounts: Awaited<ReturnType<typeof listMyTransferAccounts>>;
+}) {
   const { data: sweeps = [] } = useSuspenseQuery(sweepsQuery);
-  const own = accounts.map((a) => ({ id: a.id, label: `${a.plan_name ?? "Savings"} · ${formatMoney(a.balance)}`, balance: a.balance }));
+  const own = accounts.map((a) => ({
+    id: a.id,
+    label: `${a.plan_name ?? "Savings"} · ${formatMoney(a.balance)}`,
+    balance: a.balance,
+  }));
   const qc = useQueryClient();
   const owner = useServerFn(submitOwnAccountTransfer);
   const [openQuick, setOpenQuick] = useState(false);
@@ -363,7 +445,10 @@ function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listM
   const [to, setTo] = useState(own[1]?.id ?? "");
   const [amt, setAmt] = useState("");
   const quick = useMutation({
-    mutationFn: () => owner({ data: { from_account_id: from, to_account_id: to, amount: Number(amt), note: null } }),
+    mutationFn: () =>
+      owner({
+        data: { from_account_id: from, to_account_id: to, amount: Number(amt), note: null },
+      }),
     onSuccess: async () => {
       toast.success("Transfer completed");
       setAmt("");
@@ -385,16 +470,41 @@ function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listM
               <Zap className="h-3.5 w-3.5" /> Quick own-account transfer (auto-clears)
             </div>
             <div className="grid gap-2 md:grid-cols-4">
-              <select value={from} onChange={(e) => setFrom(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
-                {own.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+              <select
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                {own.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
               </select>
-              <select value={to} onChange={(e) => setTo(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
-                {own.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+              <select
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                {own.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
               </select>
-              <input type="number" min="0" step="0.01" value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={amt}
+                onChange={(e) => setAmt(e.target.value)}
+                placeholder="Amount"
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
               <Button
                 onClick={() => {
-                  if (!from || !to || from === to || !amt || Number(amt) <= 0) return toast.error("Fill all fields");
+                  if (!from || !to || from === to || !amt || Number(amt) <= 0)
+                    return toast.error("Fill all fields");
                   quick.mutate();
                 }}
                 disabled={quick.isPending}
@@ -405,11 +515,16 @@ function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listM
             </div>
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">Enroll in a second savings plan to enable own-account transfers and sweeps.</p>
+          <p className="text-xs text-muted-foreground">
+            Enroll in a second savings plan to enable own-account transfers and sweeps.
+          </p>
         )}
 
         {sweeps.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No scheduled sweeps yet. Use "Schedule sweep" to automate transfers between your accounts.</p>
+          <p className="text-xs text-muted-foreground">
+            No scheduled sweeps yet. Use "Schedule sweep" to automate transfers between your
+            accounts.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -425,7 +540,9 @@ function SweepsSection({ accounts }: { accounts: Awaited<ReturnType<typeof listM
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {sweeps.map((s) => <SweepRow key={s.id} s={s} />)}
+                {sweeps.map((s) => (
+                  <SweepRow key={s.id} s={s} />
+                ))}
               </tbody>
             </table>
           </div>
@@ -440,7 +557,8 @@ function SweepRow({ s }: { s: Sweep }) {
   const statusFn = useServerFn(setSweepStatus);
   const delFn = useServerFn(deleteSweep);
   const toggle = useMutation({
-    mutationFn: () => statusFn({ data: { id: s.id, status: s.status === "active" ? "paused" : "active" } }),
+    mutationFn: () =>
+      statusFn({ data: { id: s.id, status: s.status === "active" ? "paused" : "active" } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["member", "sweeps"] }),
     onError: (e: Error) => toast.error(e.message),
   });
@@ -454,33 +572,75 @@ function SweepRow({ s }: { s: Sweep }) {
   });
   return (
     <tr>
-      <td className="px-3 py-2">{s.from_label} → {s.to_label}</td>
-      <td className="px-3 py-2 text-right"><Money amount={s.amount} /></td>
+      <td className="px-3 py-2">
+        {s.from_label} → {s.to_label}
+      </td>
+      <td className="px-3 py-2 text-right">
+        <Money amount={s.amount} />
+      </td>
       <td className="px-3 py-2 text-[11px] text-muted-foreground">
-        <div>Keep ≥ <Money amount={s.min_balance} /></div>
-        <div>{s.max_amount != null ? <>Cap <Money amount={s.max_amount} /></> : "No cap"}</div>
+        <div>
+          Keep ≥ <Money amount={s.min_balance} />
+        </div>
+        <div>
+          {s.max_amount != null ? (
+            <>
+              Cap <Money amount={s.max_amount} />
+            </>
+          ) : (
+            "No cap"
+          )}
+        </div>
       </td>
       <td className="px-3 py-2 capitalize">{s.frequency}</td>
-      <td className="px-3 py-2 text-muted-foreground">{new Date(s.next_run_at).toLocaleString()}</td>
+      <td className="px-3 py-2 text-muted-foreground">
+        {new Date(s.next_run_at).toLocaleString()}
+      </td>
       <td className="px-3 py-2">
-        <span className={"rounded px-2 py-0.5 text-[10px] " + (s.status === "active" ? "bg-emerald-mid/10 text-emerald-mid" : "bg-muted text-muted-foreground")}>
+        <span
+          className={
+            "rounded px-2 py-0.5 text-[10px] " +
+            (s.status === "active"
+              ? "bg-emerald-mid/10 text-emerald-mid"
+              : "bg-muted text-muted-foreground")
+          }
+        >
           {s.status}
         </span>
         {s.last_run_status === "skipped" ? (
-          <div className="mt-1 text-[10px] text-amber-600">Last run skipped — balance below minimum</div>
+          <div className="mt-1 text-[10px] text-amber-600">
+            Last run skipped — balance below minimum
+          </div>
         ) : s.last_run_error ? (
           <div className="mt-1 text-[10px] text-destructive">Last: {s.last_run_error}</div>
         ) : s.last_run_amount != null ? (
-          <div className="mt-1 text-[10px] text-muted-foreground">Last swept <Money amount={s.last_run_amount} /></div>
+          <div className="mt-1 text-[10px] text-muted-foreground">
+            Last swept <Money amount={s.last_run_amount} />
+          </div>
         ) : null}
       </td>
       <td className="px-3 py-2 text-right">
         <div className="inline-flex gap-1">
           <SweepDialog accounts={[]} sweep={s} />
-          <Button size="sm" variant="outline" onClick={() => toggle.mutate()} disabled={toggle.isPending}>
-            {s.status === "active" ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => toggle.mutate()}
+            disabled={toggle.isPending}
+          >
+            {s.status === "active" ? (
+              <Pause className="h-3.5 w-3.5" />
+            ) : (
+              <Play className="h-3.5 w-3.5" />
+            )}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => del.mutate()} disabled={del.isPending} className="text-destructive">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => del.mutate()}
+            disabled={del.isPending}
+            className="text-destructive"
+          >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>

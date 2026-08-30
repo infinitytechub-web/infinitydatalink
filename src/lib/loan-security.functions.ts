@@ -27,7 +27,6 @@ async function assertWrite(supabase: any, userId: string) {
   }
 }
 
-
 export type GuarantorRow = {
   id: string;
   loan_id: string;
@@ -61,39 +60,50 @@ export type CollateralRow = {
 export const getLoanSecurity = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ loan_id: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<{ guarantors: GuarantorRow[]; collateral: CollateralRow[] }> => {
-    const roles = await assertRead(context.supabase, context.userId);
-    // Guarantor phone/email are revoked from `authenticated` at the column
-    // level, so they are read through the privileged client *after* the role
-    // check, and masked for roles that only need identification (auditors).
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { canSeeRawContacts, maskEmail, maskPhone } = await import("@/lib/pii-mask");
-    const showRaw = canSeeRawContacts(roles);
-    const [g, c] = await Promise.all([
-      (supabaseAdmin as any)
-        .from("loan_guarantors")
-        .select("id, loan_id, member_id, full_name, relationship, phone, email, guaranteed_amount, consent, consent_at, consent_note, created_at")
-        .eq("loan_id", data.loan_id)
-        .order("created_at", { ascending: true }),
-      context.supabase
-        .from("loan_collateral")
-        .select("id, loan_id, kind, description, estimated_value, currency, reference_no, savings_hold_id, status, released_at, release_note, created_at")
-        .eq("loan_id", data.loan_id)
-        .order("created_at", { ascending: true }),
-    ]);
-    if (g.error) throw new Error(g.error.message);
-    if (c.error) throw new Error(c.error.message);
-    return {
-      guarantors: (g.data ?? []).map((r: any) => ({
-        ...r,
-        guaranteed_amount: Number(r.guaranteed_amount ?? 0),
-        phone: showRaw ? r.phone : maskPhone(r.phone),
-        email: showRaw ? r.email : maskEmail(r.email),
-      })),
-      collateral: (c.data ?? []).map((r: any) => ({ ...r, estimated_value: Number(r.estimated_value ?? 0) })),
-    };
-
-  });
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ guarantors: GuarantorRow[]; collateral: CollateralRow[] }> => {
+      const roles = await assertRead(context.supabase, context.userId);
+      // Guarantor phone/email are revoked from `authenticated` at the column
+      // level, so they are read through the privileged client *after* the role
+      // check, and masked for roles that only need identification (auditors).
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { canSeeRawContacts, maskEmail, maskPhone } = await import("@/lib/pii-mask");
+      const showRaw = canSeeRawContacts(roles);
+      const [g, c] = await Promise.all([
+        (supabaseAdmin as any)
+          .from("loan_guarantors")
+          .select(
+            "id, loan_id, member_id, full_name, relationship, phone, email, guaranteed_amount, consent, consent_at, consent_note, created_at",
+          )
+          .eq("loan_id", data.loan_id)
+          .order("created_at", { ascending: true }),
+        context.supabase
+          .from("loan_collateral")
+          .select(
+            "id, loan_id, kind, description, estimated_value, currency, reference_no, savings_hold_id, status, released_at, release_note, created_at",
+          )
+          .eq("loan_id", data.loan_id)
+          .order("created_at", { ascending: true }),
+      ]);
+      if (g.error) throw new Error(g.error.message);
+      if (c.error) throw new Error(c.error.message);
+      return {
+        guarantors: (g.data ?? []).map((r: any) => ({
+          ...r,
+          guaranteed_amount: Number(r.guaranteed_amount ?? 0),
+          phone: showRaw ? r.phone : maskPhone(r.phone),
+          email: showRaw ? r.email : maskEmail(r.email),
+        })),
+        collateral: (c.data ?? []).map((r: any) => ({
+          ...r,
+          estimated_value: Number(r.estimated_value ?? 0),
+        })),
+      };
+    },
+  );
 
 export const addLoanGuarantor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -177,7 +187,11 @@ export const releaseLoanCollateral = createServerFn({ method: "POST" })
     z
       .object({
         collateral_id: z.string().uuid(),
-        note: z.string().trim().min(5, "A release reason of at least 5 characters is required").max(500),
+        note: z
+          .string()
+          .trim()
+          .min(5, "A release reason of at least 5 characters is required")
+          .max(500),
       })
       .parse(d),
   )
@@ -211,11 +225,12 @@ export const listMyGuarantees = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await (supabaseAdmin as any)
       .from("loan_guarantors")
-      .select("id, loan_id, member_id, full_name, relationship, phone, email, guaranteed_amount, consent, consent_at, consent_note, created_at")
+      .select(
+        "id, loan_id, member_id, full_name, relationship, phone, email, guaranteed_amount, consent, consent_at, consent_note, created_at",
+      )
       .eq("member_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-
 
     const loanIds = Array.from(new Set((rows ?? []).map((r: any) => r.loan_id)));
     let loans = new Map<string, any>();
@@ -229,7 +244,10 @@ export const listMyGuarantees = createServerFn({ method: "GET" })
       loans = new Map((l ?? []).map((row: any) => [row.id, row]));
       const userIds = Array.from(new Set((l ?? []).map((row: any) => row.user_id)));
       if (userIds.length) {
-        const { data: p } = await (supabaseAdmin as any).from("profiles").select("id, full_name").in("id", userIds);
+        const { data: p } = await (supabaseAdmin as any)
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
         profiles = new Map((p ?? []).map((row: any) => [row.id, row]));
       }
     }

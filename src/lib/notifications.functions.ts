@@ -50,7 +50,6 @@ export const listNotifications = createServerFn({ method: "GET" })
     };
   });
 
-
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))

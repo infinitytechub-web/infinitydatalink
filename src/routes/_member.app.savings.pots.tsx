@@ -1,6 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { HandCoins, Users } from "lucide-react";
 import {
@@ -13,11 +19,22 @@ import {
   SectionCardSkeleton,
 } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { listMyAccounts } from "@/lib/savings.functions";
-import { contributeToPot, getPotDetail, listMyPots, type GroupPot } from "@/lib/savings-modules.functions";
+import {
+  contributeToPot,
+  getPotDetail,
+  listMyPots,
+  type GroupPot,
+} from "@/lib/savings-modules.functions";
 
 const potsQuery = queryOptions({
   queryKey: ["member", "pots"],
@@ -36,10 +53,14 @@ export const Route = createFileRoute("/_member/app/savings/pots")({
       { title: "Group & susu savings — IT-360 CashApp" },
       {
         name: "description",
-        content: "Contribute to shared group savings pots and follow the payout rotation for your group.",
+        content:
+          "Contribute to shared group savings pots and follow the payout rotation for your group.",
       },
       { property: "og:title", content: "Group & susu savings — IT-360 CashApp" },
-      { property: "og:description", content: "Shared savings pots with contributions and payout rotations." },
+      {
+        property: "og:description",
+        content: "Shared savings pots with contributions and payout rotations.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -150,7 +171,9 @@ function Body() {
         ))}
       </div>
 
-      {contributeFor && <ContributeDialog pot={contributeFor} onClose={() => setContributeFor(null)} />}
+      {contributeFor && (
+        <ContributeDialog pot={contributeFor} onClose={() => setContributeFor(null)} />
+      )}
       {selected && <ActivityDialog pot={selected} onClose={() => setSelected(null)} />}
     </div>
   );
@@ -205,7 +228,12 @@ function ContributeDialog({ pot, onClose }: { pot: GroupPot; onClose: () => void
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pot-amount">Amount</Label>
-            <Input id="pot-amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <Input
+              id="pot-amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pot-note">Note (optional)</Label>
@@ -216,7 +244,10 @@ function ContributeDialog({ pot, onClose }: { pot: GroupPot; onClose: () => void
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || Number(amount) <= 0}>
+          <Button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || Number(amount) <= 0}
+          >
             {mutation.isPending ? "Sending…" : "Contribute"}
           </Button>
         </DialogFooter>
@@ -246,7 +277,10 @@ function ActivityDialog({ pot, onClose }: { pot: GroupPot; onClose: () => void }
               </h4>
               <ul className="space-y-2 text-sm">
                 {data.payouts.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between rounded border border-border px-3 py-2">
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between rounded border border-border px-3 py-2"
+                  >
                     <span>
                       Cycle {p.cycle} · {p.member_name ?? "Member"}
                     </span>
@@ -255,7 +289,9 @@ function ActivityDialog({ pot, onClose }: { pot: GroupPot; onClose: () => void }
                     </span>
                   </li>
                 ))}
-                {data.payouts.length === 0 && <li className="text-xs text-muted-foreground">No payouts scheduled.</li>}
+                {data.payouts.length === 0 && (
+                  <li className="text-xs text-muted-foreground">No payouts scheduled.</li>
+                )}
               </ul>
             </div>
             <div>
@@ -264,7 +300,10 @@ function ActivityDialog({ pot, onClose }: { pot: GroupPot; onClose: () => void }
               </h4>
               <ul className="space-y-2 text-sm">
                 {data.contributions.slice(0, 10).map((c) => (
-                  <li key={c.id} className="flex items-center justify-between rounded border border-border px-3 py-2">
+                  <li
+                    key={c.id}
+                    className="flex items-center justify-between rounded border border-border px-3 py-2"
+                  >
                     <span>{c.member_name ?? "Member"}</span>
                     <span className="tabular text-xs">
                       <Money amount={c.amount} /> · {new Date(c.created_at).toLocaleDateString()}

@@ -15,7 +15,8 @@ export const Route = createFileRoute("/_admin/admin/change-approvals")({
       { property: "og:title", content: "Change Approvals — IT-360 Admin" },
       {
         property: "og:description",
-        content: "Two-person change control for branding, roles, permissions and payment configuration.",
+        content:
+          "Two-person change control for branding, roles, permissions and payment configuration.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

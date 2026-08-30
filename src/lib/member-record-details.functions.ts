@@ -168,7 +168,11 @@ export const getMyRecordDetail = createServerFn({ method: "POST" })
           { label: "Approved", at: row.approved_at ?? null, note: row.approval_note ?? null },
           { label: "Rejected", at: row.rejected_at ?? null, note: row.rejection_reason ?? null },
           { label: "Paid", at: row.paid_at ?? null },
-          { label: "Cancelled", at: row.cancelled_at ?? null, note: row.cancellation_reason ?? null },
+          {
+            label: "Cancelled",
+            at: row.cancelled_at ?? null,
+            note: row.cancellation_reason ?? null,
+          },
         ],
         raw: row,
         link: "/app/withdrawals",
@@ -178,7 +182,9 @@ export const getMyRecordDetail = createServerFn({ method: "POST" })
     if (data.dataset === "receipts") {
       const { data: row, error } = await sb
         .from("payment_receipts")
-        .select("*, payment_intents!inner(id, reference, purpose, status, member_id, provider_code, created_at)")
+        .select(
+          "*, payment_intents!inner(id, reference, purpose, status, member_id, provider_code, created_at)",
+        )
         .eq("id", data.record_id)
         .eq("payment_intents.member_id", uid)
         .maybeSingle();

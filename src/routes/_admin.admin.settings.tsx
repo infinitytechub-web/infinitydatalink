@@ -12,7 +12,11 @@ function SettingsPage() {
   const [preset, setPreset] = useState(cfg.id);
   return (
     <>
-      <PageHeader eyebrow="Administrator" title="Institution settings" description="Country preset, currency, national ID and payment providers." />
+      <PageHeader
+        eyebrow="Administrator"
+        title="Institution settings"
+        description="Country preset, currency, national ID and payment providers."
+      />
 
       <SectionCard title="Region preset">
         <div className="grid gap-4 p-6 md:grid-cols-2">
@@ -37,9 +41,16 @@ function SettingsPage() {
             </select>
           </div>
           <div className="rounded border border-emerald-deep/5 bg-cream/40 p-4 text-xs">
-            <p><span className="font-semibold">Currency:</span> {cfg.currency.symbol} {cfg.currency.code}</p>
-            <p><span className="font-semibold">National ID:</span> {cfg.nationalId.label}</p>
-            <p><span className="font-semibold">MoMo:</span> {cfg.momoProviders.join(", ") || "—"}</p>
+            <p>
+              <span className="font-semibold">Currency:</span> {cfg.currency.symbol}{" "}
+              {cfg.currency.code}
+            </p>
+            <p>
+              <span className="font-semibold">National ID:</span> {cfg.nationalId.label}
+            </p>
+            <p>
+              <span className="font-semibold">MoMo:</span> {cfg.momoProviders.join(", ") || "—"}
+            </p>
           </div>
         </div>
       </SectionCard>

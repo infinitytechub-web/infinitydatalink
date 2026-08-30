@@ -3,16 +3,31 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { AlertTriangle, RefreshCw, ShieldAlert, Bug, Radio } from "lucide-react";
-import { ErrorState, KPIStat, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  ErrorState,
+  KPIStat,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { LogRetentionWidget } from "@/components/log-retention-widget";
 import { LogArchiveBar } from "@/components/log-archive-bar";
 
 const SearchSchema = z.object({
-  kind: z.enum(["all", "route", "api", "rbac", "render", "network", "server", "other"]).catch("all").default("all"),
+  kind: z
+    .enum(["all", "route", "api", "rbac", "render", "network", "server", "other"])
+    .catch("all")
+    .default("all"),
   severity: z.enum(["all", "error", "warning", "info"]).catch("all").default("all"),
   q: z.string().max(200).optional().catch(undefined),
   page: z.coerce.number().int().min(1).catch(1).default(1),
@@ -78,10 +93,7 @@ const kpiQuery = queryOptions({
 
 export const Route = createFileRoute("/_admin/admin/logs")({
   head: () => ({
-    meta: [
-      { title: "Runtime Error Logs — Administrator" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Runtime Error Logs — Administrator" }, { name: "robots", content: "noindex" }],
   }),
   validateSearch: (s) => SearchSchema.parse(s),
   loaderDeps: ({ search }) => search,
@@ -93,7 +105,9 @@ export const Route = createFileRoute("/_admin/admin/logs")({
   },
   component: Page,
   errorComponent: ({ error }) => (
-    <div className="p-6"><ErrorState title="Failed to load logs" message={error.message} /></div>
+    <div className="p-6">
+      <ErrorState title="Failed to load logs" message={error.message} />
+    </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
@@ -161,8 +175,6 @@ function Body() {
         <LogRetentionWidget />
       </div>
 
-
-
       <SectionCard
         title="Live event feed"
         action={
@@ -196,25 +208,50 @@ function Body() {
             onChange={(e) => update({ q: e.target.value || undefined })}
           />
           <Select value={search.kind} onValueChange={(v) => update({ kind: v as Search["kind"] })}>
-            <SelectTrigger><SelectValue placeholder="Kind" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Kind" />
+            </SelectTrigger>
             <SelectContent>
               {["all", "route", "api", "rbac", "render", "network", "server", "other"].map((k) => (
-                <SelectItem key={k} value={k}>{k}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {k}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={search.severity} onValueChange={(v) => update({ severity: v as Search["severity"] })}>
-            <SelectTrigger><SelectValue placeholder="Severity" /></SelectTrigger>
+          <Select
+            value={search.severity}
+            onValueChange={(v) => update({ severity: v as Search["severity"] })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Severity" />
+            </SelectTrigger>
             <SelectContent>
               {["all", "error", "warning", "info"].map((k) => (
-                <SelectItem key={k} value={k}>{k}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {k}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
             Page {search.page} / {totalPages} · {list.total} total
-            <Button size="sm" variant="ghost" disabled={search.page <= 1} onClick={() => update({ page: search.page - 1 })}>Prev</Button>
-            <Button size="sm" variant="ghost" disabled={search.page >= totalPages} onClick={() => update({ page: search.page + 1 })}>Next</Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={search.page <= 1}
+              onClick={() => update({ page: search.page - 1 })}
+            >
+              Prev
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={search.page >= totalPages}
+              onClick={() => update({ page: search.page + 1 })}
+            >
+              Next
+            </Button>
           </div>
         </div>
 
@@ -240,7 +277,11 @@ function Body() {
             </thead>
             <tbody>
               {list.rows.length === 0 ? (
-                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No events match the filters.</td></tr>
+                <tr>
+                  <td colSpan={7} className="p-6 text-center text-muted-foreground">
+                    No events match the filters.
+                  </td>
+                </tr>
               ) : (
                 list.rows.map((row) => (
                   <tr
@@ -255,17 +296,29 @@ function Body() {
                         checked={picked.includes(row.id)}
                         onChange={(e) =>
                           setPicked((prev) =>
-                            e.target.checked ? [...prev, row.id] : prev.filter((id) => id !== row.id),
+                            e.target.checked
+                              ? [...prev, row.id]
+                              : prev.filter((id) => id !== row.id),
                           )
                         }
                       />
                     </td>
 
-                    <td className="p-3 font-mono text-[11px]">{new Date(row.occurred_at).toLocaleString()}</td>
-                    <td className="p-3"><Badge tone={kindTone(row.kind)}>{row.kind}</Badge></td>
-                    <td className="p-3"><Badge tone={severityTone(row.severity)}>{row.severity}</Badge></td>
-                    <td className="p-3 font-mono text-[11px] text-muted-foreground">{row.route ?? "—"}</td>
-                    <td className="p-3">{row.user_email ?? <span className="text-muted-foreground">anonymous</span>}</td>
+                    <td className="p-3 font-mono text-[11px]">
+                      {new Date(row.occurred_at).toLocaleString()}
+                    </td>
+                    <td className="p-3">
+                      <Badge tone={kindTone(row.kind)}>{row.kind}</Badge>
+                    </td>
+                    <td className="p-3">
+                      <Badge tone={severityTone(row.severity)}>{row.severity}</Badge>
+                    </td>
+                    <td className="p-3 font-mono text-[11px] text-muted-foreground">
+                      {row.route ?? "—"}
+                    </td>
+                    <td className="p-3">
+                      {row.user_email ?? <span className="text-muted-foreground">anonymous</span>}
+                    </td>
                     <td className="p-3 max-w-[420px] truncate">{row.message}</td>
                   </tr>
                 ))
@@ -289,7 +342,9 @@ function Badge({ tone, children }: { tone: BadgeTone; children: React.ReactNode 
     negative: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200",
   };
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${cls[tone]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${cls[tone]}`}
+    >
       {children}
     </span>
   );
@@ -309,17 +364,26 @@ function severityTone(s: string): "positive" | "neutral" | "warning" | "negative
 function DetailsPanel({ row, onClose }: { row: LogRow; onClose: () => void }) {
   const metaJson = useMemo(() => JSON.stringify(row.meta ?? {}, null, 2), [row.meta]);
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-end bg-emerald-deep/40 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-end bg-emerald-deep/40 p-4"
+      onClick={onClose}
+    >
       <div
         className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-lg border border-emerald-deep/15 bg-card p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="font-serif text-lg text-emerald-deep">{row.kind} · {row.severity}</h2>
-            <p className="mt-1 text-[11px] font-mono text-muted-foreground">{new Date(row.occurred_at).toISOString()}</p>
+            <h2 className="font-serif text-lg text-emerald-deep">
+              {row.kind} · {row.severity}
+            </h2>
+            <p className="mt-1 text-[11px] font-mono text-muted-foreground">
+              {new Date(row.occurred_at).toISOString()}
+            </p>
           </div>
-          <Button size="sm" variant="ghost" onClick={onClose}>Close</Button>
+          <Button size="sm" variant="ghost" onClick={onClose}>
+            Close
+          </Button>
         </div>
         <dl className="mt-4 grid grid-cols-1 gap-2 text-xs">
           <Field label="Route" value={row.route} mono />
@@ -328,18 +392,30 @@ function DetailsPanel({ row, onClose }: { row: LogRow; onClose: () => void }) {
           <Field label="User agent" value={row.user_agent} mono />
         </dl>
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Message</p>
-          <pre className="mt-1 whitespace-pre-wrap rounded bg-cream/40 p-3 text-xs">{row.message}</pre>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Message
+          </p>
+          <pre className="mt-1 whitespace-pre-wrap rounded bg-cream/40 p-3 text-xs">
+            {row.message}
+          </pre>
         </div>
         {row.stack && (
           <div className="mt-4">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stack</p>
-            <pre className="mt-1 max-h-[240px] overflow-auto whitespace-pre-wrap rounded bg-cream/40 p-3 text-[11px] font-mono">{row.stack}</pre>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Stack
+            </p>
+            <pre className="mt-1 max-h-[240px] overflow-auto whitespace-pre-wrap rounded bg-cream/40 p-3 text-[11px] font-mono">
+              {row.stack}
+            </pre>
           </div>
         )}
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Meta</p>
-          <pre className="mt-1 max-h-[200px] overflow-auto whitespace-pre-wrap rounded bg-cream/40 p-3 text-[11px] font-mono">{metaJson}</pre>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Meta
+          </p>
+          <pre className="mt-1 max-h-[200px] overflow-auto whitespace-pre-wrap rounded bg-cream/40 p-3 text-[11px] font-mono">
+            {metaJson}
+          </pre>
         </div>
         <div className="mt-4 flex justify-end">
           <Button
@@ -358,8 +434,12 @@ function DetailsPanel({ row, onClose }: { row: LogRow; onClose: () => void }) {
 function Field({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <div className="flex items-baseline gap-2">
-      <dt className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</dt>
-      <dd className={`min-w-0 flex-1 break-words ${mono ? "font-mono text-[11px]" : ""}`}>{value ?? "—"}</dd>
+      <dt className="w-28 shrink-0 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </dt>
+      <dd className={`min-w-0 flex-1 break-words ${mono ? "font-mono text-[11px]" : ""}`}>
+        {value ?? "—"}
+      </dd>
     </div>
   );
 }

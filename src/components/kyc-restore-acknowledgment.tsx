@@ -15,8 +15,7 @@ import {
   type RestoreAcknowledgment,
 } from "@/lib/member-kyc.functions";
 
-const prettify = (v: string | null | undefined) =>
-  v ? String(v).replace(/_/g, " ") : null;
+const prettify = (v: string | null | undefined) => (v ? String(v).replace(/_/g, " ") : null);
 
 export function KycRestoreAcknowledgment() {
   const listFn = useServerFn(getMyRestoreAcknowledgments);
@@ -76,7 +75,9 @@ function RestoreRow({ item }: { item: RestoreAcknowledgment }) {
           <p className="text-[12px]">
             Restored on {new Date(item.restored_at).toLocaleString()} by{" "}
             {item.restored_by_email ?? who}
-            {item.restored_kyc ? ` · verification status set to "${prettify(item.restored_kyc)}"` : ""}
+            {item.restored_kyc
+              ? ` · verification status set to "${prettify(item.restored_kyc)}"`
+              : ""}
           </p>
           <p className="text-[12px]">Documents restored: {docs}</p>
           {item.reason ? (
@@ -102,8 +103,8 @@ function RestoreRow({ item }: { item: RestoreAcknowledgment }) {
               onChange={(e) => setConfirmed(e.target.checked)}
             />
             <span>
-              I confirm I have reviewed my restored verification details and documents, and that they
-              are correct.
+              I confirm I have reviewed my restored verification details and documents, and that
+              they are correct.
             </span>
           </label>
           <button

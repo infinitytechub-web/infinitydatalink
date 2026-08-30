@@ -18,7 +18,8 @@ function isPreviewLikeHost(): boolean {
   if (hostname === "localhost" || hostname === "127.0.0.1") return true;
   if (hostname.startsWith("id-preview--") || hostname.startsWith("preview--")) return true;
   if (hostname === "lovableproject.com" || hostname.endsWith(".lovableproject.com")) return true;
-  if (hostname === "lovableproject-dev.com" || hostname.endsWith(".lovableproject-dev.com")) return true;
+  if (hostname === "lovableproject-dev.com" || hostname.endsWith(".lovableproject-dev.com"))
+    return true;
   if (hostname === "beta.lovable.dev" || hostname.endsWith(".beta.lovable.dev")) return true;
   return false;
 }

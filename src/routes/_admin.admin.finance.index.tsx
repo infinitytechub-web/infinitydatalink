@@ -25,7 +25,11 @@ export const Route = createFileRoute("/_admin/admin/finance/")({
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Finance failed to load" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Finance failed to load"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -64,7 +68,11 @@ function FinanceBody() {
         <KPIStat
           label="AUM"
           value={<Money amount={s.aum} />}
-          hint={<>Outstanding loans: <Money amount={s.outstanding_loans} /></>}
+          hint={
+            <>
+              Outstanding loans: <Money amount={s.outstanding_loans} />
+            </>
+          }
         />
       </section>
 
@@ -72,16 +80,38 @@ function FinanceBody() {
         <KPIStat
           label="Pending expenses"
           value={<span className="tabular">{s.expenses_pending}</span>}
-          hint={<>Total: <Money amount={s.expenses_pending_amount} /></>}
+          hint={
+            <>
+              Total: <Money amount={s.expenses_pending_amount} />
+            </>
+          }
         />
-        <KPIStat label="Pending transfers" value={<span className="tabular">{s.transfers_pending}</span>} />
+        <KPIStat
+          label="Pending transfers"
+          value={<span className="tabular">{s.transfers_pending}</span>}
+        />
         <KPIStat
           label="Quick actions"
           value={
             <div className="flex flex-wrap gap-2 text-xs">
-              <Link to="/admin/finance/expenses" className="rounded-md border border-border bg-background px-3 py-1.5 hover:bg-muted">Expenses</Link>
-              <Link to="/admin/finance/transfers" className="rounded-md border border-border bg-background px-3 py-1.5 hover:bg-muted">Transfers</Link>
-              <Link to="/admin/finance/adjustments" className="rounded-md border border-border bg-background px-3 py-1.5 hover:bg-muted">Adjustments</Link>
+              <Link
+                to="/admin/finance/expenses"
+                className="rounded-md border border-border bg-background px-3 py-1.5 hover:bg-muted"
+              >
+                Expenses
+              </Link>
+              <Link
+                to="/admin/finance/transfers"
+                className="rounded-md border border-border bg-background px-3 py-1.5 hover:bg-muted"
+              >
+                Transfers
+              </Link>
+              <Link
+                to="/admin/finance/adjustments"
+                className="rounded-md border border-border bg-background px-3 py-1.5 hover:bg-muted"
+              >
+                Adjustments
+              </Link>
             </div>
           }
         />
@@ -90,10 +120,22 @@ function FinanceBody() {
       <SectionCard title="Cash flow — last 30 days">
         <div className="grid gap-6 p-6 md:grid-cols-2">
           <div>
-            <TrendChart data={s.income_series} xKey="day" title="Income" series={[{ key: "amount", label: "Income" }]} height={200} />
+            <TrendChart
+              data={s.income_series}
+              xKey="day"
+              title="Income"
+              series={[{ key: "amount", label: "Income" }]}
+              height={200}
+            />
           </div>
           <div>
-            <TrendChart data={s.expense_series} xKey="day" title="Expenses & payouts" series={[{ key: "amount", label: "Cash out", color: "var(--destructive)" }]} height={200} />
+            <TrendChart
+              data={s.expense_series}
+              xKey="day"
+              title="Expenses & payouts"
+              series={[{ key: "amount", label: "Cash out", color: "var(--destructive)" }]}
+              height={200}
+            />
           </div>
         </div>
       </SectionCard>

@@ -156,12 +156,7 @@ export default function TrendChartImpl<T extends Record<string, unknown>>({
   const margin = { top: 8, right: 12, bottom: 4, left: -8 };
 
   return (
-    <div
-      className={cn("w-full", className)}
-      style={{ height }}
-      role="img"
-      aria-label={title}
-    >
+    <div className={cn("w-full", className)} style={{ height }} role="img" aria-label={title}>
       <ChartA11ySummary title={title} data={data} series={colored} xKey={xKey} />
       <ResponsiveContainer width="100%" height="100%">
         {variant === "area" ? (
@@ -215,4 +210,3 @@ export default function TrendChartImpl<T extends Record<string, unknown>>({
     </div>
   );
 }
-

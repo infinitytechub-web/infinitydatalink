@@ -18,7 +18,10 @@ const FINANCE_PASSWORD = process.env.E2E_FINANCE_PASSWORD;
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/auth");
   await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).first().fill(password);
+  await page
+    .getByLabel(/password/i)
+    .first()
+    .fill(password);
   await Promise.all([
     page.waitForLoadState("networkidle"),
     page.getByRole("button", { name: /sign in/i }).click(),

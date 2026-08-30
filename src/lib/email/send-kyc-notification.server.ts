@@ -81,8 +81,7 @@ export async function sendKycDecisionEmail(
   if (!entry) {
     return { ok: false, error: `template ${templateName} not registered` };
   }
-  const subject =
-    typeof entry.subject === "function" ? entry.subject({}) : entry.subject;
+  const subject = typeof entry.subject === "function" ? entry.subject({}) : entry.subject;
 
   const props =
     input.decision === "approved"

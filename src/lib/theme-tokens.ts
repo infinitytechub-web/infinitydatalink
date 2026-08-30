@@ -102,8 +102,6 @@ export const KPI_TONES: Record<ToneName, ToneStyle> = {
   amber: BASE_TONES.gold,
 };
 
-
-
 /** Deterministic tone rotation for lists of cards / nav groups. */
 export const TONE_CYCLE: ToneName[] = [
   "royal",
@@ -123,9 +121,7 @@ export const SECTION_ACCENT = (tone: ToneName | "none"): string =>
   tone === "none" ? "hidden" : KPI_TONES[tone].bar;
 
 /** Sidebar per-group tint (chip gradient + dot). */
-export const SIDEBAR_GROUP_CHIPS: string[] = TONE_CYCLE.map(
-  (t) => KPI_TONES[t].chip,
-);
+export const SIDEBAR_GROUP_CHIPS: string[] = TONE_CYCLE.map((t) => KPI_TONES[t].chip);
 
 /** Backwards-compat: keep old tone names ("teal", "indigo", "amber") mapping
  *  to the closest new tones so existing consumers keep working. */

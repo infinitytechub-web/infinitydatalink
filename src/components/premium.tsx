@@ -193,7 +193,9 @@ export function PremiumStatCard({
       <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-1 opacity-90", t.bar)} />
 
       <div className="relative flex items-start justify-between gap-3">
-        <p className={cn("text-[10.5px] font-semibold uppercase tracking-[0.16em]", t.label)}>{label}</p>
+        <p className={cn("text-[10.5px] font-semibold uppercase tracking-[0.16em]", t.label)}>
+          {label}
+        </p>
         {icon ? (
           <span
             aria-hidden="true"
@@ -219,7 +221,12 @@ export function PremiumStatCard({
 
       {typeof delta === "number" ? (
         <div className="relative mt-2">
-          <DeltaBadge value={delta} label={deltaLabel} invert={deltaInvert} onDark={tone !== "gold"} />
+          <DeltaBadge
+            value={delta}
+            label={deltaLabel}
+            invert={deltaInvert}
+            onDark={tone !== "gold"}
+          />
         </div>
       ) : null}
 
@@ -238,7 +245,9 @@ export function PremiumStatCard({
         </div>
       ) : null}
 
-      {hint ? <div className={cn("relative mt-3 text-[11px] font-medium", t.hint)}>{hint}</div> : null}
+      {hint ? (
+        <div className={cn("relative mt-3 text-[11px] font-medium", t.hint)}>{hint}</div>
+      ) : null}
     </div>
   );
 }
@@ -276,7 +285,11 @@ export function ProgressRing({
   return (
     <Wrapper
       {...(interactive
-        ? { type: "button", onClick: onActivate, "aria-label": `${label} ${(pct * 100).toFixed(1)}% — view details` }
+        ? {
+            type: "button",
+            onClick: onActivate,
+            "aria-label": `${label} ${(pct * 100).toFixed(1)}% — view details`,
+          }
         : {})}
       title={tooltip}
       className={cn(
@@ -310,7 +323,9 @@ export function ProgressRing({
           {(pct * 100).toFixed(1)}%
         </span>
       </div>
-      <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </p>
       {caption ? <p className="text-[11px] text-muted-foreground">{caption}</p> : null}
     </Wrapper>
   );
@@ -352,16 +367,23 @@ export function PremiumWidget({
           {icon ? (
             <span
               aria-hidden="true"
-              className={cn("grid size-9 place-items-center rounded-xl bg-linear-to-br text-white shadow-sm", t.chip)}
+              className={cn(
+                "grid size-9 place-items-center rounded-xl bg-linear-to-br text-white shadow-sm",
+                t.chip,
+              )}
             >
               {icon}
             </span>
           ) : null}
           <div className="min-w-0">
             {eyebrow ? (
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {eyebrow}
+              </p>
             ) : null}
-            <h3 className="truncate font-display text-base font-semibold tracking-tight text-foreground">{title}</h3>
+            <h3 className="truncate font-display text-base font-semibold tracking-tight text-foreground">
+              {title}
+            </h3>
           </div>
         </div>
         {action}
@@ -385,8 +407,14 @@ export function MiniStat({
   const color = CHART_PALETTE[tone % CHART_PALETTE.length];
   return (
     <div className="relative overflow-hidden rounded-xl border border-border/70 bg-card px-4 py-3">
-      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1" style={{ background: color }} />
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <span
+        aria-hidden="true"
+        className="absolute inset-y-0 left-0 w-1"
+        style={{ background: color }}
+      />
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-1 font-display text-lg font-bold tabular-nums text-foreground">{value}</p>
       {hint ? <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p> : null}
     </div>

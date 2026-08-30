@@ -21,13 +21,14 @@ export const Route = createFileRoute("/_admin/admin/relationships")({
   }),
   component: RelationshipTypesPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Unable to load relationship types: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">
+      Unable to load relationship types: {error.message}
+    </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm">Not found.</div>,
 });
 
-const inputCls =
-  "min-h-[44px] rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm";
+const inputCls = "min-h-[44px] rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm";
 const labelCls =
   "flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground";
 
@@ -94,11 +95,16 @@ function RelationshipTypesPage() {
               <Skeleton className="h-48 w-full" />
             </div>
           ) : rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted-foreground">No relationship types configured yet.</p>
+            <p className="p-6 text-sm text-muted-foreground">
+              No relationship types configured yet.
+            </p>
           ) : (
             <ul className="divide-y divide-emerald-deep/5">
               {rows.map((r) => (
-                <li key={r.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
+                <li
+                  key={r.id}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3"
+                >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">
                       {r.label}

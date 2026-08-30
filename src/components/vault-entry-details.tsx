@@ -134,9 +134,7 @@ export function VaultEntryDetailsDialog({
           <Row label="Reviewer note" value={review?.kyc_notes ?? "—"} />
           <Row
             label="Outstanding items"
-            value={
-              review?.remediation_items?.length ? review.remediation_items.join(", ") : "None"
-            }
+            value={review?.remediation_items?.length ? review.remediation_items.join(", ") : "None"}
           />
         </div>
 

@@ -81,7 +81,9 @@ export const listMyKycReminderEvents = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: outbox, error: outboxError } = await supabaseAdmin
       .from("notification_outbox")
-      .select("id, channel, category, title, body, link, status, attempts, error, sent_at, created_at")
+      .select(
+        "id, channel, category, title, body, link, status, attempts, error, sent_at, created_at",
+      )
       .eq("user_id", context.userId)
       .in("category", categories)
       .order("created_at", { ascending: false })

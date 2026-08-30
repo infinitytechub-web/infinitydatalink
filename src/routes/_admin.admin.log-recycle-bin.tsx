@@ -5,12 +5,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { toast } from "sonner";
 import { RotateCcw, Trash2 } from "lucide-react";
-import {
-  EmptyState,
-  PageHeader,
-  SectionCard,
-  SectionCardSkeleton,
-} from "@/components/primitives";
+import { EmptyState, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/table-controls";
@@ -36,7 +31,6 @@ import {
   deleteLogEntriesForever,
   type LogBinRow,
 } from "@/lib/log-recycle-bin.functions";
-
 
 const search = z.object({
   kind: fallback(z.enum(["all", "audit_log", "runtime_error_logs"]), "all").default("all"),
@@ -128,7 +122,6 @@ function BinTable() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
 
-
   const canRestore = hasRole("super_admin");
   const update = (patch: Partial<Search>) => {
     setPicked([]);
@@ -171,9 +164,7 @@ function BinTable() {
       const res = await deleteLogEntriesForever({
         data: { ids: picked, confirm: "DELETE" },
       });
-      toast.success(
-        `${res.deleted} snapshot${res.deleted === 1 ? "" : "s"} permanently deleted`,
-      );
+      toast.success(`${res.deleted} snapshot${res.deleted === 1 ? "" : "s"} permanently deleted`);
       setPicked([]);
       setConfirmOpen(false);
       setConfirmText("");
@@ -198,7 +189,6 @@ function BinTable() {
             <Link to="/admin/logs" search={{ kind: "all", severity: "all", page: 1 }}>
               Event log
             </Link>
-
           </Button>
           {canRestore ? (
             <>
@@ -230,8 +220,8 @@ function BinTable() {
           <DialogHeader>
             <DialogTitle>Permanently delete {picked.length} snapshot(s)?</DialogTitle>
             <DialogDescription>
-              This is irreversible — the selected purged log entries can never be restored.
-              A final audit entry recording this deletion will be written.
+              This is irreversible — the selected purged log entries can never be restored. A final
+              audit entry recording this deletion will be written.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
@@ -259,7 +249,6 @@ function BinTable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
 
       <div className="grid gap-3 border-b border-emerald-deep/10 p-4 md:grid-cols-4">
         <Select value={s.kind} onValueChange={(v) => update({ kind: v as Search["kind"] })}>
@@ -309,9 +298,7 @@ function BinTable() {
                     type="checkbox"
                     aria-label="Select all snapshots on this page"
                     checked={picked.length === data.rows.length}
-                    onChange={(e) =>
-                      setPicked(e.target.checked ? data.rows.map((r) => r.id) : [])
-                    }
+                    onChange={(e) => setPicked(e.target.checked ? data.rows.map((r) => r.id) : [])}
                   />
                 </th>
                 <th className="p-3 text-left">Log</th>
@@ -331,9 +318,7 @@ function BinTable() {
                       checked={picked.includes(row.id)}
                       onChange={(e) =>
                         setPicked((prev) =>
-                          e.target.checked
-                            ? [...prev, row.id]
-                            : prev.filter((id) => id !== row.id),
+                          e.target.checked ? [...prev, row.id] : prev.filter((id) => id !== row.id),
                         )
                       }
                     />

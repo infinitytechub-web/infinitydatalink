@@ -30,7 +30,12 @@ const BOUNDARY_CASES: Array<{ dob: string; asOf: string; minor: boolean; why: st
   { dob: "2008-08-02", asOf: "2026-08-01", minor: true, why: "day before 18th birthday" },
   { dob: "2008-08-02", asOf: "2026-08-02", minor: false, why: "18th birthday itself" },
   { dob: "2008-08-02", asOf: "2026-08-03", minor: false, why: "day after 18th birthday" },
-  { dob: "2008-02-29", asOf: "2026-02-28", minor: true, why: "leap birth, non-leap year, day before" },
+  {
+    dob: "2008-02-29",
+    asOf: "2026-02-28",
+    minor: true,
+    why: "leap birth, non-leap year, day before",
+  },
   { dob: "2008-02-29", asOf: "2026-03-01", minor: false, why: "leap birth turns 18 on 1 March" },
   { dob: "2012-02-29", asOf: "2030-02-28", minor: true, why: "leap birth, 18th year non-leap" },
   { dob: "2012-02-29", asOf: "2030-03-01", minor: false, why: "leap birth, 18 on 1 March" },

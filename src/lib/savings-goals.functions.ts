@@ -66,7 +66,9 @@ export const getGoalProgress = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<GoalProgress> => {
     const { data: acct, error } = await context.supabase
       .from("savings_accounts")
-      .select("id, balance, goal_amount, goal_target_date, goal_started_at, goal_completed_at, last_milestone_pct")
+      .select(
+        "id, balance, goal_amount, goal_target_date, goal_started_at, goal_completed_at, last_milestone_pct",
+      )
       .eq("id", data.account_id)
       .eq("user_id", context.userId)
       .maybeSingle();
@@ -217,7 +219,8 @@ export const listMyGoals = createServerFn({ method: "GET" })
         }
         const all = byAccount.get(a.id) ?? [];
         const since = a.goal_started_at ? new Date(a.goal_started_at).getTime() : null;
-        const linked = since == null ? all : all.filter((c) => new Date(c.created_at).getTime() >= since);
+        const linked =
+          since == null ? all : all.filter((c) => new Date(c.created_at).getTime() >= since);
         const contributed = linked.reduce((s, c) => s + c.amount, 0);
         return {
           account_id: a.id,
@@ -247,4 +250,3 @@ export const listMyGoals = createServerFn({ method: "GET" })
       };
     },
   );
-

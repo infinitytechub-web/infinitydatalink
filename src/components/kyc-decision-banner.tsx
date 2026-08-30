@@ -66,7 +66,9 @@ export function KycDecisionBanner({ status }: { status: MyKycStatus }) {
                 : `Resubmit once every item is fixed (${status.resubmission.attempts_left} attempt(s) left).`,
         ]
       : status.review_state === "in_review"
-        ? ["A compliance officer is reviewing your submission. Full access unlocks once it is approved."]
+        ? [
+            "A compliance officer is reviewing your submission. Full access unlocks once it is approved.",
+          ]
         : [
             status.profile_missing_fields.length
               ? "Complete your personal details on the profile page."
@@ -78,7 +80,10 @@ export function KycDecisionBanner({ status }: { status: MyKycStatus }) {
 
   const cta = approved
     ? { to: "/app", label: "Go to dashboard" }
-    : { to: status.next_action?.link ?? "/app/kyc", label: rejected ? "Fix and resubmit" : "Continue verification" };
+    : {
+        to: status.next_action?.link ?? "/app/kyc",
+        label: rejected ? "Fix and resubmit" : "Continue verification",
+      };
 
   return (
     <div className={`relative mb-4 rounded-xl border p-4 ${tone}`}>

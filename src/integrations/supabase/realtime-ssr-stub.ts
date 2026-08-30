@@ -19,16 +19,38 @@ const noop = () => {};
 const asyncOk = async () => "ok";
 
 class StubChannel {
-  constructor(public topic: string, public params: unknown = {}) {}
-  on() { return this; }
-  subscribe(cb?: (status: string) => void) { cb?.("SUBSCRIBED"); return this; }
-  unsubscribe() { return asyncOk(); }
-  send() { return asyncOk(); }
-  track() { return asyncOk(); }
-  untrack() { return asyncOk(); }
-  presenceState() { return {}; }
-  push() { return this; }
-  receive() { return this; }
+  constructor(
+    public topic: string,
+    public params: unknown = {},
+  ) {}
+  on() {
+    return this;
+  }
+  subscribe(cb?: (status: string) => void) {
+    cb?.("SUBSCRIBED");
+    return this;
+  }
+  unsubscribe() {
+    return asyncOk();
+  }
+  send() {
+    return asyncOk();
+  }
+  track() {
+    return asyncOk();
+  }
+  untrack() {
+    return asyncOk();
+  }
+  presenceState() {
+    return {};
+  }
+  push() {
+    return this;
+  }
+  receive() {
+    return this;
+  }
   off = noop;
   teardown = noop;
 }
@@ -36,21 +58,38 @@ class StubChannel {
 export class RealtimeClient {
   channels: StubChannel[] = [];
   accessTokenValue: string | null = null;
-  constructor(public endPoint: string = "", public options: unknown = {}) {}
+  constructor(
+    public endPoint: string = "",
+    public options: unknown = {},
+  ) {}
   connect() {}
-  disconnect() { return { error: null, data: {} }; }
+  disconnect() {
+    return { error: null, data: {} };
+  }
   channel(topic: string, params?: unknown) {
     const ch = new StubChannel(topic, params);
     this.channels.push(ch);
     return ch;
   }
-  getChannels() { return this.channels; }
-  removeChannel() { return asyncOk(); }
-  removeAllChannels() { return asyncOk(); }
-  setAuth(token: string | null) { this.accessTokenValue = token; }
-  isConnected() { return false; }
+  getChannels() {
+    return this.channels;
+  }
+  removeChannel() {
+    return asyncOk();
+  }
+  removeAllChannels() {
+    return asyncOk();
+  }
+  setAuth(token: string | null) {
+    this.accessTokenValue = token;
+  }
+  isConnected() {
+    return false;
+  }
   log = noop;
-  endPointURL() { return this.endPoint; }
+  endPointURL() {
+    return this.endPoint;
+  }
 }
 
 export default RealtimeClient;

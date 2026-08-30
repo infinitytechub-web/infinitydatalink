@@ -33,7 +33,10 @@ export const Route = createFileRoute("/_admin/admin/loan-provisions")({
           "Expected credit loss provisioning by aging bucket and product, with configurable provision rates and coverage ratios.",
       },
       { property: "og:title", content: "Loan Loss Provisioning" },
-      { property: "og:description", content: "Provision rates, coverage ratios and net exposure across the loan book." },
+      {
+        property: "og:description",
+        content: "Provision rates, coverage ratios and net exposure across the loan book.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -46,7 +49,11 @@ function PageError({ error }: { error: Error }) {
   const router = useRouter();
   return (
     <div className="p-6">
-      <ErrorState title="Provisioning report failed to load" message={error.message} onRetry={() => router.invalidate()} />
+      <ErrorState
+        title="Provisioning report failed to load"
+        message={error.message}
+        onRetry={() => router.invalidate()}
+      />
     </div>
   );
 }
@@ -125,10 +132,23 @@ function Body({ rates }: { rates: Rates }) {
   return (
     <>
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Gross outstanding" value={formatMoney(t.outstanding)} hint={`${t.loans} active loans`} />
-        <KPIStat label="Required provision" value={formatMoney(t.provision)} accent hint={`Coverage ${t.coverage_pct}%`} />
+        <KPIStat
+          label="Gross outstanding"
+          value={formatMoney(t.outstanding)}
+          hint={`${t.loans} active loans`}
+        />
+        <KPIStat
+          label="Required provision"
+          value={formatMoney(t.provision)}
+          accent
+          hint={`Coverage ${t.coverage_pct}%`}
+        />
         <KPIStat label="Net exposure" value={formatMoney(t.net_exposure)} hint="After provisions" />
-        <KPIStat label="Portfolio at risk" value={`${t.par_pct}%`} hint={`Arrears ${formatMoney(t.arrears)} · written off ${formatMoney(t.written_off)}`} />
+        <KPIStat
+          label="Portfolio at risk"
+          value={`${t.par_pct}%`}
+          hint={`Arrears ${formatMoney(t.arrears)} · written off ${formatMoney(t.written_off)}`}
+        />
       </section>
 
       <SectionCard
@@ -190,7 +210,10 @@ function Body({ rates }: { rates: Rates }) {
 
       <SectionCard title="Provision by product">
         {data.products.length === 0 ? (
-          <EmptyState title="No active loans" hint="Provisioning appears once loans are disbursed." />
+          <EmptyState
+            title="No active loans"
+            hint="Provisioning appears once loans are disbursed."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -233,7 +256,10 @@ function Body({ rates }: { rates: Rates }) {
         }
       >
         {data.exposures.length === 0 ? (
-          <EmptyState title="Nothing to provision" hint="No active loans carry provisionable exposure." />
+          <EmptyState
+            title="Nothing to provision"
+            hint="No active loans carry provisionable exposure."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -263,7 +289,9 @@ function Body({ rates }: { rates: Rates }) {
                     <td className="px-4 py-3 text-right">{e.days_past_due}</td>
                     <td className="px-4 py-3 text-right">{formatMoney(e.outstanding)}</td>
                     <td className="px-4 py-3 text-right">{formatMoney(e.arrears)}</td>
-                    <td className="px-4 py-3 text-right font-semibold">{formatMoney(e.provision)}</td>
+                    <td className="px-4 py-3 text-right font-semibold">
+                      {formatMoney(e.provision)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

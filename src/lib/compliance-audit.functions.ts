@@ -2,11 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ADMIN_ROLES, assertAnyRole, loadRoleSet } from "@/lib/role-guards";
-import {
-  DECISION_ACTIONS,
-  DECISION_MODULES,
-  DECISION_OUTCOMES,
-} from "@/lib/decision-audit";
+import { DECISION_ACTIONS, DECISION_MODULES, DECISION_OUTCOMES } from "@/lib/decision-audit";
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue };
 
@@ -68,8 +64,12 @@ export const listDecisionAudit = createServerFn({ method: "GET" })
     const roles = await loadRoleSet(context.supabase, context.userId);
     assertAnyRole(roles, ADMIN_ROLES, "admin");
 
-    const module = (DECISION_MODULES as readonly string[]).includes(data.module) ? data.module : "all";
-    const outcome = (DECISION_OUTCOMES as readonly string[]).includes(data.outcome) ? data.outcome : "all";
+    const module = (DECISION_MODULES as readonly string[]).includes(data.module)
+      ? data.module
+      : "all";
+    const outcome = (DECISION_OUTCOMES as readonly string[]).includes(data.outcome)
+      ? data.outcome
+      : "all";
     const actions = actionsFor(module, outcome);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -94,7 +94,11 @@ export const listDecisionAudit = createServerFn({ method: "GET" })
     };
 
     const from = (data.page - 1) * data.pageSize;
-    const { data: rows, count, error } = await base()
+    const {
+      data: rows,
+      count,
+      error,
+    } = await base()
       .order("created_at", { ascending: false })
       .range(from, from + data.pageSize - 1);
     if (error) throw new Error(error.message);
@@ -132,11 +136,7 @@ export const listDecisionAudit = createServerFn({ method: "GET" })
 
     // Backfill actor emails for legacy rows written without one.
     const missingActors = Array.from(
-      new Set(
-        list
-          .filter((r) => !r.actor_email && r.actor_id)
-          .map((r) => r.actor_id as string),
-      ),
+      new Set(list.filter((r) => !r.actor_email && r.actor_id).map((r) => r.actor_id as string)),
     ).slice(0, 25);
     const actorEmails = new Map<string, string>();
     for (const id of missingActors) {
@@ -168,7 +168,7 @@ export const listDecisionAudit = createServerFn({ method: "GET" })
           subject_name: prof?.full_name ?? null,
           subject_member_no: prof?.member_no ?? null,
           actor_id: r.actor_id,
-          actor_email: r.actor_email ?? (r.actor_id ? actorEmails.get(r.actor_id) ?? null : null),
+          actor_email: r.actor_email ?? (r.actor_id ? (actorEmails.get(r.actor_id) ?? null) : null),
           actor_role: r.actor_role,
           meta,
         } satisfies DecisionRow;

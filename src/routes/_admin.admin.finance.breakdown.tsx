@@ -42,7 +42,11 @@ export const Route = createFileRoute("/_admin/admin/finance/breakdown")({
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Expenses failed to load" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Expenses failed to load"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -63,11 +67,21 @@ function BreakdownPage() {
           <div className="flex flex-wrap items-end gap-2">
             <label className="text-[11px] uppercase tracking-widest text-muted-foreground">
               From
-              <input type="date" value={from} onChange={(e) => setField("from", e.target.value)} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
+              <input
+                type="date"
+                value={from}
+                onChange={(e) => setField("from", e.target.value)}
+                className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm"
+              />
             </label>
             <label className="text-[11px] uppercase tracking-widest text-muted-foreground">
               To
-              <input type="date" value={to} onChange={(e) => setField("to", e.target.value)} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
+              <input
+                type="date"
+                value={to}
+                onChange={(e) => setField("to", e.target.value)}
+                className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm"
+              />
             </label>
           </div>
         }
@@ -86,7 +100,6 @@ function BreakdownPage() {
   );
 }
 
-
 function BreakdownBody({ from, to }: { from: string; to: string }) {
   const { data } = useSuspenseQuery(expenseQuery(from, to));
   return (
@@ -102,7 +115,12 @@ function BreakdownBody({ from, to }: { from: string; to: string }) {
             <>
               {data.by_category[0] ? <Money amount={data.by_category[0].amount} /> : null}
               <br />
-              <Link to="/admin/finance/expenses" className="text-primary underline-offset-2 hover:underline">Expense ledger →</Link>
+              <Link
+                to="/admin/finance/expenses"
+                className="text-primary underline-offset-2 hover:underline"
+              >
+                Expense ledger →
+              </Link>
             </>
           }
         />
@@ -114,7 +132,14 @@ function BreakdownBody({ from, to }: { from: string; to: string }) {
             data={data.daily}
             xKey="day"
             title="Paid expenses"
-            series={[{ key: "amount", label: "Paid", color: "var(--destructive)", format: (v) => formatMoney(v) }]}
+            series={[
+              {
+                key: "amount",
+                label: "Paid",
+                color: "var(--destructive)",
+                format: (v) => formatMoney(v),
+              },
+            ]}
             height={220}
           />
         </div>
@@ -123,14 +148,22 @@ function BreakdownBody({ from, to }: { from: string; to: string }) {
       <div className="grid gap-6 md:grid-cols-2">
         <SectionCard title="By category">
           <BarList
-            rows={data.by_category.map((r) => ({ label: r.label, value: r.amount, hint: `${r.count} entries` }))}
+            rows={data.by_category.map((r) => ({
+              label: r.label,
+              value: r.amount,
+              hint: `${r.count} entries`,
+            }))}
             format={(v) => formatMoney(v)}
             emptyLabel="No expenses in this window"
           />
         </SectionCard>
         <SectionCard title="Top vendors">
           <BarList
-            rows={data.top_vendors.map((r) => ({ label: r.vendor, value: r.amount, hint: `${r.count} entries` }))}
+            rows={data.top_vendors.map((r) => ({
+              label: r.vendor,
+              value: r.amount,
+              hint: `${r.count} entries`,
+            }))}
             format={(v) => formatMoney(v)}
             emptyLabel="No vendors in this window"
           />

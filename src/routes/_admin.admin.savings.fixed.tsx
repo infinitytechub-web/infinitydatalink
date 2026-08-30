@@ -30,7 +30,8 @@ export const Route = createFileRoute("/_admin/admin/savings/fixed")({
       { title: "Fixed deposits book — IT-360 CashApp" },
       {
         name: "description",
-        content: "Monitor the term deposit book, upcoming maturities and run the maturity settlement job.",
+        content:
+          "Monitor the term deposit book, upcoming maturities and run the maturity settlement job.",
       },
       { property: "og:title", content: "Fixed deposits book — IT-360 CashApp" },
       { property: "og:description", content: "Term deposit book, maturities and rollovers." },
@@ -98,7 +99,10 @@ function Body({ status }: { status: FdFilter }) {
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-3">
         <KPIStat label="Active principal" value={<Money amount={data.principal_active} />} accent />
-        <KPIStat label="Deposits shown" value={<span className="tabular">{data.rows.length}</span>} />
+        <KPIStat
+          label="Deposits shown"
+          value={<span className="tabular">{data.rows.length}</span>}
+        />
         <KPIStat label="Total records" value={<span className="tabular">{data.total}</span>} />
       </section>
 
@@ -135,7 +139,9 @@ function Body({ status }: { status: FdFilter }) {
                   <td className="px-6 py-3 text-right tabular">
                     <Money amount={d.status === "active" ? d.interest_expected : d.interest_paid} />
                   </td>
-                  <td className="px-6 py-3 text-xs">{new Date(d.maturity_date).toLocaleDateString()}</td>
+                  <td className="px-6 py-3 text-xs">
+                    {new Date(d.maturity_date).toLocaleDateString()}
+                  </td>
                   <td className="px-6 py-3 text-xs capitalize">{d.status}</td>
                 </tr>
               ))}

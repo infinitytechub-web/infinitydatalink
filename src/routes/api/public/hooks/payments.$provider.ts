@@ -25,7 +25,12 @@ export const Route = createFileRoute("/api/public/hooks/payments/$provider")({
         });
 
         const { processPaymentWebhook } = await import("@/lib/payment-webhooks.server");
-        const outcome = await processPaymentWebhook({ providerCode: code, rawBody, signature, headers });
+        const outcome = await processPaymentWebhook({
+          providerCode: code,
+          rawBody,
+          signature,
+          headers,
+        });
         return Response.json(outcome.body, { status: outcome.status });
       },
     },

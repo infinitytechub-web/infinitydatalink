@@ -60,7 +60,9 @@ export function NotificationBell() {
     mutationFn: () => clearRead({}),
     onSuccess: (r) => {
       toast.success(
-        r.deleted > 0 ? `Cleared ${r.deleted} read notification(s)` : "No read notifications to clear",
+        r.deleted > 0
+          ? `Cleared ${r.deleted} read notification(s)`
+          : "No read notifications to clear",
       );
       void qc.invalidateQueries({ queryKey: ["notification-bell"] });
       void qc.invalidateQueries({ queryKey: ["my-notifications"] });
@@ -105,12 +107,16 @@ export function NotificationBell() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {rows.length === 0 ? (
-          <div className="px-2 py-6 text-center text-xs text-muted-foreground">You are all caught up.</div>
+          <div className="px-2 py-6 text-center text-xs text-muted-foreground">
+            You are all caught up.
+          </div>
         ) : (
           rows.map((n: any) => (
             <DropdownMenuItem key={n.id} asChild className="flex-col items-start gap-0.5">
               <a href={n.link || "/app/inbox"} className="w-full">
-                <span className={cn("text-xs font-semibold", !n.read_at && "text-primary")}>{n.title}</span>
+                <span className={cn("text-xs font-semibold", !n.read_at && "text-primary")}>
+                  {n.title}
+                </span>
                 {n.body ? (
                   <span className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</span>
                 ) : null}

@@ -64,12 +64,17 @@ export const Route = createFileRoute("/api/public/hooks/loan-arrears")({
           // The routine records the failure in cron_job_runs before re-raising,
           // so the ledger stays accurate and the same run_key can be retried.
           console.error(`[cron:${JOB}] run ${runKey} FAILED after ${elapsed}ms:`, error.message);
-          return json({ success: false, run_key: runKey, duration_ms: elapsed, error: error.message }, 500);
+          return json(
+            { success: false, run_key: runKey, duration_ms: elapsed, error: error.message },
+            500,
+          );
         }
 
         const result: any = data ?? {};
         if (result.skipped) {
-          console.log(`[cron:${JOB}] run ${runKey} already succeeded — replaying metrics, no fees re-posted.`);
+          console.log(
+            `[cron:${JOB}] run ${runKey} already succeeded — replaying metrics, no fees re-posted.`,
+          );
         } else {
           const m = result.metrics ?? {};
           console.log(

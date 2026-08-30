@@ -9,7 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
   getMyAccountDetail,
@@ -27,7 +34,8 @@ const detailQuery = (id: string) =>
   });
 
 export const Route = createFileRoute("/_member/app/savings/$accountId")({
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(detailQuery(params.accountId)),
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(detailQuery(params.accountId)),
   component: AccountPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">Failed to load account: {error.message}</div>
@@ -35,7 +43,9 @@ export const Route = createFileRoute("/_member/app/savings/$accountId")({
   notFoundComponent: () => (
     <div className="p-6 text-sm text-muted-foreground">
       Account not found.{" "}
-      <Link to="/app/savings" className="underline">Back to savings</Link>
+      <Link to="/app/savings" className="underline">
+        Back to savings
+      </Link>
     </div>
   ),
 });
@@ -71,7 +81,9 @@ function Body({ accountId }: { accountId: string }) {
         <SectionCard title="Overview">
           <div className="grid gap-6 p-6 md:grid-cols-3">
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Current balance</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Current balance
+              </div>
               <div className="mt-1 text-3xl font-semibold tabular text-emerald-deep">
                 <Money amount={a.balance} />
               </div>
@@ -80,18 +92,25 @@ function Body({ accountId }: { accountId: string }) {
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Goal</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Goal
+              </div>
               {a.goal_amount ? (
                 <>
                   <div className="mt-1 text-lg font-semibold text-emerald-deep tabular">
                     <Money amount={a.goal_amount} />
                   </div>
                   <div className="mt-2 h-2 rounded-full bg-emerald-deep/10">
-                    <div className="h-2 rounded-full bg-emerald-mid" style={{ width: `${a.progress_pct ?? 0}%` }} />
+                    <div
+                      className="h-2 rounded-full bg-emerald-mid"
+                      style={{ width: `${a.progress_pct ?? 0}%` }}
+                    />
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground">
                     {a.progress_pct ?? 0}% funded
-                    {a.goal_target_date ? ` · target ${new Date(a.goal_target_date).toLocaleDateString()}` : ""}
+                    {a.goal_target_date
+                      ? ` · target ${new Date(a.goal_target_date).toLocaleDateString()}`
+                      : ""}
                   </div>
                 </>
               ) : (
@@ -99,8 +118,12 @@ function Body({ accountId }: { accountId: string }) {
               )}
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Opened</div>
-              <div className="mt-1 text-sm text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Opened
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                {new Date(a.created_at).toLocaleDateString()}
+              </div>
               <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
                 <PiggyBank className="h-3.5 w-3.5" /> {a.plan_schedule} contributions
               </div>
@@ -113,7 +136,13 @@ function Body({ accountId }: { accountId: string }) {
           action={
             <Link
               to="/app/savings/ledger"
-              search={{ account: a.id, sortBy: "created_at", sortDir: "desc", page: 1, pageSize: 25 }}
+              search={{
+                account: a.id,
+                sortBy: "created_at",
+                sortDir: "desc",
+                page: 1,
+                pageSize: 25,
+              }}
               className="text-xs font-semibold underline-offset-2 hover:underline"
             >
               View full ledger →
@@ -121,7 +150,9 @@ function Body({ accountId }: { accountId: string }) {
           }
         >
           {data.transactions.length === 0 ? (
-            <div className="p-6 text-sm text-muted-foreground">No transactions yet — add your first contribution to get going.</div>
+            <div className="p-6 text-sm text-muted-foreground">
+              No transactions yet — add your first contribution to get going.
+            </div>
           ) : (
             <table className="w-full">
               <thead>
@@ -155,13 +186,19 @@ function TxnRow({ t }: { t: SavingsTxn }) {
       <td className="px-6 py-3 font-mono text-[11px] text-muted-foreground">{t.ref}</td>
       <td className="px-6 py-3">
         <div className="flex items-center gap-2 text-sm capitalize">
-          <Icon className={`h-3.5 w-3.5 ${isDeposit ? "text-emerald-mid" : "text-brand-gold-ink dark:text-brand-gold"}`} />
+          <Icon
+            className={`h-3.5 w-3.5 ${isDeposit ? "text-emerald-mid" : "text-brand-gold-ink dark:text-brand-gold"}`}
+          />
           {t.kind}
         </div>
       </td>
       <td className="px-6 py-3 text-sm text-muted-foreground">{t.channel ?? "—"}</td>
-      <td className="px-6 py-3 text-right"><Money amount={t.amount} signed={!isDeposit} /></td>
-      <td className="px-6 py-3 text-right"><StatusPill status={t.status} /></td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={t.amount} signed={!isDeposit} />
+      </td>
+      <td className="px-6 py-3 text-right">
+        <StatusPill status={t.status} />
+      </td>
       <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">
         {new Date(t.created_at).toLocaleString()}
       </td>
@@ -178,7 +215,10 @@ function ContributionDialog({ accountId }: { accountId: string }) {
   const router = useRouter();
   const call = useServerFn(submitContribution);
   const mut = useMutation({
-    mutationFn: () => call({ data: { account_id: accountId, amount: Number(amount), channel, note: note || null } }),
+    mutationFn: () =>
+      call({
+        data: { account_id: accountId, amount: Number(amount), channel, note: note || null },
+      }),
     onSuccess: async () => {
       toast.success("Contribution submitted — pending finance approval.");
       setOpen(false);
@@ -192,10 +232,14 @@ function ContributionDialog({ accountId }: { accountId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="bg-emerald-deep text-cream hover:bg-emerald-mid">Add contribution</Button>
+        <Button size="sm" className="bg-emerald-deep text-cream hover:bg-emerald-mid">
+          Add contribution
+        </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Add contribution</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Add contribution</DialogTitle>
+        </DialogHeader>
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -206,7 +250,15 @@ function ContributionDialog({ accountId }: { accountId: string }) {
         >
           <div>
             <Label htmlFor="c-amt">Amount</Label>
-            <Input id="c-amt" type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+            <Input
+              id="c-amt"
+              type="number"
+              min="0"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
           </div>
           <div>
             <Label htmlFor="c-ch">Channel</Label>
@@ -227,8 +279,12 @@ function ContributionDialog({ accountId }: { accountId: string }) {
             <Textarea id="c-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Submitting…" : "Submit"}</Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={mut.isPending}>
+              {mut.isPending ? "Submitting…" : "Submit"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -245,7 +301,10 @@ function WithdrawalDialog({ accountId, balance }: { accountId: string; balance: 
   const router = useRouter();
   const call = useServerFn(submitWithdrawal);
   const mut = useMutation({
-    mutationFn: () => call({ data: { account_id: accountId, amount: Number(amount), channel, note: note || null } }),
+    mutationFn: () =>
+      call({
+        data: { account_id: accountId, amount: Number(amount), channel, note: note || null },
+      }),
     onSuccess: async () => {
       toast.success("Withdrawal requested — pending finance approval.");
       setOpen(false);
@@ -259,10 +318,14 @@ function WithdrawalDialog({ accountId, balance }: { accountId: string; balance: 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">Request withdrawal</Button>
+        <Button size="sm" variant="outline">
+          Request withdrawal
+        </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Request withdrawal</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Request withdrawal</DialogTitle>
+        </DialogHeader>
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -274,11 +337,23 @@ function WithdrawalDialog({ accountId, balance }: { accountId: string; balance: 
           }}
         >
           <div className="rounded border border-emerald-deep/10 bg-cream/40 p-3 text-[11px] text-muted-foreground">
-            Available balance: <span className="font-semibold tabular"><Money amount={balance} /></span>
+            Available balance:{" "}
+            <span className="font-semibold tabular">
+              <Money amount={balance} />
+            </span>
           </div>
           <div>
             <Label htmlFor="w-amt">Amount</Label>
-            <Input id="w-amt" type="number" min="0" max={balance} step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+            <Input
+              id="w-amt"
+              type="number"
+              min="0"
+              max={balance}
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
           </div>
           <div>
             <Label htmlFor="w-ch">Payout channel</Label>
@@ -298,8 +373,12 @@ function WithdrawalDialog({ accountId, balance }: { accountId: string; balance: 
             <Textarea id="w-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Submitting…" : "Submit request"}</Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={mut.isPending}>
+              {mut.isPending ? "Submitting…" : "Submit request"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

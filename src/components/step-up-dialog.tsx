@@ -128,7 +128,8 @@ export function StepUpDialog({
     setError(null);
     try {
       if (tab === "totp") {
-        if (!factorId) throw new Error("No verified authenticator app is enrolled on this account.");
+        if (!factorId)
+          throw new Error("No verified authenticator app is enrolled on this account.");
         const { error: mfaError } = await supabase.auth.mfa.challengeAndVerify({
           factorId,
           code: code.trim(),
@@ -136,7 +137,10 @@ export function StepUpDialog({
         if (mfaError) throw new Error(mfaError.message);
       }
       const res = await start({
-        data: tab === "password" ? { method: "password", password, reason: label } : { method: "totp", reason: label },
+        data:
+          tab === "password"
+            ? { method: "password", password, reason: label }
+            : { method: "totp", reason: label },
       });
       setStepUpToken(res.token, res.expires_at);
       onDone(res.token);
