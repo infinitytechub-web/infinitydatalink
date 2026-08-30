@@ -109,7 +109,7 @@ export async function fetchDrilldown(
     const { data, error } = await inScope(
       supabase
         .from("transactions")
-        .select("id, user_id, amount, kind, status, reference, created_at")
+        .select("id, user_id, amount, kind, status, ref, note, created_at")
         .eq("status", "cleared")
         .in("kind", kinds)
         .gte("created_at", fromISO)
@@ -127,7 +127,7 @@ export async function fetchDrilldown(
       category: String(r.kind),
       status: String(r.status),
       amount: num(r.amount),
-      detail: String(r.reference ?? "—"),
+      detail: String(r.note ?? r.ref ?? "—"),
     }));
   } else if (
     metric === "withdrawal_requests" ||
@@ -137,7 +137,7 @@ export async function fetchDrilldown(
     let q: any = supabase
       .from("savings_withdrawal_requests")
       .select(
-        "id, user_id, amount, channel, status, reason, cancellation_reason, cancelled_by_role, created_at, paid_at, cancelled_at",
+        "id, user_id, amount, channel, status, reason, ref, cancellation_reason, cancelled_by_role, created_at, paid_at, cancelled_at",
       )
       .gte("created_at", fromISO)
       .lte("created_at", toISO)
@@ -159,13 +159,13 @@ export async function fetchDrilldown(
       detail:
         metric === "cancellations"
           ? `${String(r.cancellation_reason ?? "Unspecified")} (${String(r.cancelled_by_role ?? "member")})`
-          : String(r.reason ?? "—"),
+          : `${String(r.ref ?? "—")} · ${String(r.reason ?? "no reason given")}`,
     }));
   } else if (metric === "loans" || metric === "loan_disbursements") {
     let q: any = supabase
       .from("loans")
       .select(
-        "id, user_id, amount, product, status, purpose, outstanding_principal, created_at, disbursed_at",
+        "id, user_id, amount, product, status, purpose, ref, outstanding_principal, created_at, disbursed_at",
       )
       .order("created_at", { ascending: false })
       .limit(MAX_ROWS + 1);
@@ -185,7 +185,7 @@ export async function fetchDrilldown(
       category: String(r.product ?? "Unknown"),
       status: String(r.status),
       amount: num(r.amount),
-      detail: `Outstanding ${num(r.outstanding_principal).toFixed(2)}`,
+      detail: `${String(r.ref ?? "—")} · outstanding ${num(r.outstanding_principal).toFixed(2)}`,
     }));
   } else {
     // Repayment-derived metrics: instalments joined back to their loan owner.
