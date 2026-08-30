@@ -205,12 +205,17 @@ export type MyGuaranteeRow = GuarantorRow & {
 export const listMyGuarantees = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<MyGuaranteeRow[]> => {
-    const { data: rows, error } = await context.supabase
+    // Own guarantee records only — contact columns are revoked from
+    // `authenticated`, so the read runs through the privileged client with a
+    // hard `member_id = self` filter.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await (supabaseAdmin as any)
       .from("loan_guarantors")
       .select("id, loan_id, member_id, full_name, relationship, phone, email, guaranteed_amount, consent, consent_at, consent_note, created_at")
       .eq("member_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
+
 
     const loanIds = Array.from(new Set((rows ?? []).map((r: any) => r.loan_id)));
     let loans = new Map<string, any>();
