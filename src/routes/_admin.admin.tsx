@@ -326,6 +326,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/security/alerts": "Alert notifications",
   "/admin/logs": "Runtime Logs",
   "/admin/log-recycle-bin": "Log Recycle Bin",
+  "/admin/recycle-bin": "Recycle Bin & Restore Points",
   "/admin/health": "Integration Health",
   "/admin/cron-runs": "Scheduled Job Runs",
 
