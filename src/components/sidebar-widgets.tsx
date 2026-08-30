@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Inbox } from "lucide-react";
+import { Inbox, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/components/portal-shell.types";
 
