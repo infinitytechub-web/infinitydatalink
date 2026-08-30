@@ -99,6 +99,12 @@ const groups: NavGroup[] = [
     ],
   },
   {
+    label: "Counter",
+    items: [
+      { to: "/admin/teller", label: "Teller Mode", icon: <Calculator />, cap: "teller.view" },
+    ],
+  },
+  {
     label: "Governance",
     items: [
       { to: "/admin/compliance/approvals", label: "Approval Audit Trail", icon: <ShieldCheck /> },
@@ -151,6 +157,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/loans": "Loans & Approvals",
   "/admin/loan-products": "Loan products & eligibility",
   "/admin/loan-calculator": "Loan Calculator",
+  "/admin/teller": "Teller Mode",
   "/admin/loan-arrears": "Arrears & delinquency",
   "/admin/loan-workouts": "Workouts & write-offs",
   "/admin/loan-settlements": "Early settlement approvals",
