@@ -153,7 +153,7 @@ export async function buildBiSnapshot(supabase: Client, windowDays = 90): Promis
     queues: {
       pendingLoans: countBy(loanRows, "pending"),
       pendingWithdrawals: countBy(withdrawalRows, "pending"),
-      pendingKyc: profileRows.filter((p) => p.kyc === "pending" || p.kyc === "submitted").length,
+      pendingKyc: profileRows.filter((p) => p.kyc === "pending").length,
       openTickets: (tickets.data ?? []).filter(
         (t) => t.status !== "closed" && t.status !== "resolved",
       ).length,
