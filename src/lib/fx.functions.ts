@@ -326,7 +326,8 @@ export const getFxHistory = createServerFn({ method: "POST" })
       })
       .parse(d ?? {}),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAnyRole(await loadRoleSet(context.supabase, context.userId), ADMIN_ROLES, "staff");
     const base = data.base.toUpperCase();
     const range = (Object.keys(FX_RANGES).includes(data.range) ? data.range : "30D") as FxRangeKey;
     const quotes = Array.from(
