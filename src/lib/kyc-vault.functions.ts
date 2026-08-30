@@ -390,3 +390,118 @@ export const getKycVaultEntry = createServerFn({ method: "GET" })
       restore_blocker,
     };
   });
+
+/**
+ * Permanently destroy several vault entries in one pass.
+ *
+ * Safety checks, all enforced server-side and independent of the UI:
+ *  - requires the `kyc.delete` capability plus a super_admin/admin role,
+ *  - requires an explicit `confirm: "PURGE"` literal and a written reason,
+ *  - caps the batch at BULK_LIMIT entries,
+ *  - refuses entries that are still inside their retention window unless the
+ *    caller is a super_admin (retention purge is otherwise automatic),
+ *  - deletes archived documents from storage before dropping the snapshot,
+ *  - writes one audit row per member; a failure never aborts the batch.
+ */
+export const bulkPurgeKycVault = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        ids: z.array(z.string().uuid()).min(1).max(BULK_LIMIT),
+        reason: z.string().trim().min(10).max(500),
+        confirm: z.literal("PURGE"),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { admin, actorRole, email } = await ctx(context, "delete");
+    const isSuper = actorRole === "super_admin";
+
+    const { data: rows, error } = await admin
+      .from("recycle_bin")
+      .select("*")
+      .eq("entity_table", "kyc_review")
+      .in("id", data.ids);
+    if (error) throw new Error(error.message);
+
+    const byId = new Map<string, any>((rows ?? []).map((r: any) => [r.id, r]));
+    const results: {
+      id: string;
+      ok: boolean;
+      member_id?: string;
+      member_name?: string | null;
+      documents_purged?: number;
+      error?: string;
+    }[] = [];
+
+    for (const id of data.ids) {
+      const row = byId.get(id);
+      if (!row) {
+        results.push({ id, ok: false, error: "Vault entry not found" });
+        continue;
+      }
+      const entry = toEntry(row);
+      try {
+        const retained = row.purge_after ? new Date(row.purge_after) > new Date() : false;
+        if (retained && !isSuper) {
+          throw new Error(
+            `Still under retention until ${new Date(row.purge_after).toLocaleDateString()} — only a super admin can purge early`,
+          );
+        }
+
+        const paths = entry.documents.map((d) => d.vault_path).filter(Boolean) as string[];
+        if (paths.length > 0) await admin.storage.from(BUCKET).remove(paths);
+
+        const { error: dErr } = await admin.from("recycle_bin").delete().eq("id", id);
+        if (dErr) throw new Error(dErr.message);
+
+        await writeAudit({
+          actor_id: context.userId,
+          actor_email: email,
+          actor_role: actorRole,
+          action: "kyc.vault_purged",
+          target: entry.member_id,
+          meta: {
+            vault_id: id,
+            member_id: entry.member_id,
+            member_no: entry.member_no,
+            documents_purged: paths.length,
+            reason: data.reason,
+            bulk: true,
+            batch_size: data.ids.length,
+          },
+        });
+
+        results.push({
+          id,
+          ok: true,
+          member_id: entry.member_id,
+          member_name: entry.member_name,
+          documents_purged: paths.length,
+        });
+      } catch (err: any) {
+        results.push({
+          id,
+          ok: false,
+          member_id: entry.member_id,
+          member_name: entry.member_name,
+          error: err?.message ?? "Purge failed",
+        });
+        await writeAudit({
+          actor_id: context.userId,
+          actor_email: email,
+          actor_role: actorRole,
+          action: "kyc.vault_purge_blocked",
+          target: entry.member_id,
+          meta: { vault_id: id, reason: data.reason, error: err?.message ?? "unknown" },
+        });
+      }
+    }
+
+    return {
+      purged: results.filter((r) => r.ok).length,
+      failed: results.filter((r) => !r.ok).length,
+      results,
+    };
+  });
