@@ -3926,6 +3926,122 @@ export type Database = {
           },
         ]
       }
+      statement_job_lease: {
+        Row: {
+          id: string
+          locked_until: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          locked_until?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          locked_until?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      statement_runs: {
+        Row: {
+          channels: string[]
+          created_at: string
+          error: string | null
+          id: string
+          period_end: string
+          period_start: string
+          row_count: number
+          schedule_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          error?: string | null
+          id?: string
+          period_end: string
+          period_start: string
+          row_count?: number
+          schedule_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          error?: string | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          row_count?: number
+          schedule_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statement_runs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "statement_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      statement_schedules: {
+        Row: {
+          active: boolean
+          created_at: string
+          dataset: string
+          email: boolean
+          failure_count: number
+          frequency: string
+          id: string
+          last_error: string | null
+          last_run_at: string | null
+          last_status: string | null
+          next_run_at: string
+          sms: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          dataset: string
+          email?: boolean
+          failure_count?: number
+          frequency: string
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          next_run_at?: string
+          sms?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          dataset?: string
+          email?: boolean
+          failure_count?: number
+          frequency?: string
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          next_run_at?: string
+          sms?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       super_admin_seed_emails: {
         Row: {
           created_at: string
@@ -4925,6 +5041,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      claim_statement_job_lease: {
+        Args: { _minutes?: number }
+        Returns: boolean
       }
       clear_transfer: {
         Args: { _actor_id: string; _transfer_id: string }
@@ -5972,6 +6092,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      release_statement_job_lease: { Args: never; Returns: undefined }
       remove_loan_guarantor: {
         Args: { _actor_id: string; _guarantor_id: string }
         Returns: boolean
