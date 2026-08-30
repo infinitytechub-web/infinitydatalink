@@ -3,9 +3,26 @@ import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Lock } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowDownToLine,
+  BadgeCheck,
+  Ban,
+  HandCoins,
+  Landmark,
+  Lock,
+  PercentCircle,
+  PiggyBank,
+  ShieldAlert,
+  Sparkles,
+  Timer,
+  TrendingUp,
+  Wallet,
+  XCircle,
+} from "lucide-react";
 import { TrendChart, BarList } from "@/components/charts";
-import { EmptyState, KPIStat, PageHeader, SectionCard } from "@/components/primitives";
+import { EmptyState, PageHeader, SectionCard } from "@/components/primitives";
+import { PremiumStatCard, ProgressRing } from "@/components/premium";
 import { ExportBar } from "@/components/export-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/org-config";
