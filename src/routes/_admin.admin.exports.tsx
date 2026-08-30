@@ -67,7 +67,15 @@ export const Route = createFileRoute("/_admin/admin/exports")({
 });
 
 function ExportsPage() {
-  const s = Route.useSearch();
+  const s = Route.useSearch() as {
+    dataset: ReportDataset;
+    from: string;
+    to: string;
+    status: string;
+    q: string;
+    page: number;
+    page_size: number;
+  };
   const navigate = useNavigate({ from: Route.fullPath });
   const { user, loading, hasPermission } = useAuth();
   const fetchReport = useServerFn(runReport);
@@ -150,7 +158,7 @@ function ExportsPage() {
         <>
           <SectionCard
             title="Filters"
-            hint={
+            action={
               <Link to="/admin/reports" search={{ from: s.from, to: s.to, granularity: "day" as const }} className="text-primary underline-offset-2 hover:underline">
                 Analytics view →
               </Link>
@@ -216,7 +224,7 @@ function ExportsPage() {
 
           <SectionCard
             title={DATASET_LABELS[s.dataset]}
-            hint={
+            action={
               result && result.rows.length > 0 ? (
                 <ExportBar
                   title={DATASET_LABELS[s.dataset]}
@@ -251,7 +259,7 @@ function ExportsPage() {
               <EmptyState
                 icon={<FileBarChart className="h-5 w-5" />}
                 title="No records for this filter"
-                description="Widen the date range or clear the status filter."
+                hint="Widen the date range or clear the status filter."
               />
             ) : (
               <>

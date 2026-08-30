@@ -410,7 +410,8 @@ export const runReport = createServerFn({ method: "POST" })
     const bounds = dateBounds(data.date_from, data.date_to);
 
     const build = (selectCols: string, withCount: boolean) => {
-      let q = context.supabase
+      const sb = context.supabase as any;
+      let q = sb
         .from(spec.table)
         .select(selectCols, withCount ? { count: "exact" } : undefined);
       if (spec.narrow) q = spec.narrow(q);
@@ -439,7 +440,7 @@ export const runReport = createServerFn({ method: "POST" })
     if (spec.join) {
       const ids = [...new Set(pageRows.map((r) => r[spec.join!.fromColumn]).filter(Boolean))];
       if (ids.length > 0) {
-        const { data: joined } = await context.supabase
+        const { data: joined } = await (context.supabase as any)
           .from(spec.join.table)
           .select(spec.join.select)
           .in(spec.join.idColumn ?? "id", ids);
