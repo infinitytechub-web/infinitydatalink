@@ -39,7 +39,7 @@ export type IntentRow = {
   cancel_reason: string | null;
   settled_at: string | null;
   settled_by: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, Json>;
   created_by: string | null;
   created_at: string;
   updated_at: string;
