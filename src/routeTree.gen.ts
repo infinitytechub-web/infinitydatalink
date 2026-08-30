@@ -16,6 +16,7 @@ import { Route as MemberRouteImport } from './routes/_member'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as BlogChoosingCreditUnionSoftwareRouteImport } from './routes/blog.choosing-credit-union-software'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
 import { Route as MemberAppRouteImport } from './routes/_member.app'
@@ -169,6 +170,12 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogChoosingCreditUnionSoftwareRoute =
+  BlogChoosingCreditUnionSoftwareRouteImport.update({
+    id: '/blog/choosing-credit-union-software',
+    path: '/blog/choosing-credit-union-software',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthResetRoute = AuthResetRouteImport.update({
   id: '/reset',
   path: '/reset',
@@ -820,6 +827,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof MemberAppRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/blog/choosing-credit-union-software': typeof BlogChoosingCreditUnionSoftwareRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/activity': typeof AdminAdminActivityRoute
   '/admin/analytics': typeof AdminAdminAnalyticsRoute
@@ -944,6 +952,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/blog/choosing-credit-union-software': typeof BlogChoosingCreditUnionSoftwareRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/activity': typeof AdminAdminActivityRoute
   '/admin/analytics': typeof AdminAdminAnalyticsRoute
@@ -1068,6 +1077,7 @@ export interface FileRoutesById {
   '/_member/app': typeof MemberAppRouteWithChildren
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/reset': typeof AuthResetRoute
+  '/blog/choosing-credit-union-software': typeof BlogChoosingCreditUnionSoftwareRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_admin/admin/activity': typeof AdminAdminActivityRoute
   '/_admin/admin/analytics': typeof AdminAdminAnalyticsRoute
@@ -1196,6 +1206,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth/forgot'
     | '/auth/reset'
+    | '/blog/choosing-credit-union-software'
     | '/email/unsubscribe'
     | '/admin/activity'
     | '/admin/analytics'
@@ -1320,6 +1331,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/auth/forgot'
     | '/auth/reset'
+    | '/blog/choosing-credit-union-software'
     | '/email/unsubscribe'
     | '/admin/activity'
     | '/admin/analytics'
@@ -1443,6 +1455,7 @@ export interface FileRouteTypes {
     | '/_member/app'
     | '/auth/forgot'
     | '/auth/reset'
+    | '/blog/choosing-credit-union-software'
     | '/email/unsubscribe'
     | '/_admin/admin/activity'
     | '/_admin/admin/analytics'
@@ -1568,6 +1581,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  BlogChoosingCreditUnionSoftwareRoute: typeof BlogChoosingCreditUnionSoftwareRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksChangeApprovalSlaRoute: typeof ApiPublicHooksChangeApprovalSlaRoute
@@ -1636,6 +1650,13 @@ declare module '@tanstack/react-router' {
       path: '/email/unsubscribe'
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/choosing-credit-union-software': {
+      id: '/blog/choosing-credit-union-software'
+      path: '/blog/choosing-credit-union-software'
+      fullPath: '/blog/choosing-credit-union-software'
+      preLoaderRoute: typeof BlogChoosingCreditUnionSoftwareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/reset': {
@@ -2860,6 +2881,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  BlogChoosingCreditUnionSoftwareRoute: BlogChoosingCreditUnionSoftwareRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksChangeApprovalSlaRoute: ApiPublicHooksChangeApprovalSlaRoute,
