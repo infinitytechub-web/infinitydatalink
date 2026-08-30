@@ -107,6 +107,33 @@ function VaultPage() {
     onError: (e: any) => toast.error(e?.message ?? "Bulk restore failed"),
   });
 
+  const bulkPurgeMut = useMutation({
+    mutationFn: async () =>
+      await bulkPurgeFn({
+        data: {
+          ids: Array.from(selected),
+          reason: purgeReason.trim(),
+          confirm: "PURGE" as const,
+        },
+      }),
+    onSuccess: (res) => {
+      if (res.failed === 0)
+        toast.success(`${res.purged} record${res.purged === 1 ? "" : "s"} permanently deleted`);
+      else toast.warning(`${res.purged} deleted · ${res.failed} blocked`);
+      for (const r of res.results.filter((x) => !x.ok)) {
+        toast.error(`${r.member_name ?? r.id.slice(0, 8)}: ${r.error}`);
+      }
+      setSelected(new Set());
+      setPurgeOpen(false);
+      setPurgeReason("");
+      setPurgeConfirm("");
+      void qc.invalidateQueries();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Bulk delete failed"),
+  });
+
+
+
   const entries = data?.entries ?? [];
   const total = data?.total ?? 0;
   const allChecked = entries.length > 0 && entries.every((e) => selected.has(e.id));
