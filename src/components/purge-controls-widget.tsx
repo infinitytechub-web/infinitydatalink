@@ -117,10 +117,37 @@ export function PurgeControlsWidget() {
           danger
         />
         <PurgeTile
+          label="Read messages"
+          hint="Clear every alert recipients already opened"
+          onClick={() => {
+            setOpen("read-notifications");
+            setConfirm("");
+          }}
+          danger
+        />
+        <PurgeTile
           label="Audit trail"
           hint="Delete entries older than N days"
           onClick={() => {
             setOpen("audit");
+            setConfirm("");
+          }}
+          danger
+        />
+        <PurgeTile
+          label="Audit trail — all"
+          hint="Archive every audit entry (restorable)"
+          onClick={() => {
+            setOpen("audit-all");
+            setConfirm("");
+          }}
+          danger
+        />
+        <PurgeTile
+          label="System logs"
+          hint="Archive every runtime/system log entry"
+          onClick={() => {
+            setOpen("system");
             setConfirm("");
           }}
           danger
@@ -139,22 +166,19 @@ export function PurgeControlsWidget() {
       <Dialog open={!!open} onOpenChange={(o) => !o && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {open === "audit"
-                ? "Purge audit log"
-                : open === "recycle"
-                  ? "Empty recycle bin"
-                  : "Clear notifications"}
-            </DialogTitle>
+            <DialogTitle>{open ? TITLES[open] : "Purge"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              {open === "notifications"
+              {open === "notifications" || open === "read-notifications"
                 ? "Selected notifications move to the recycle bin and can be restored for 30 days."
-                : "This is irreversible."}{" "}
+                : open === "audit-all" || open === "system"
+                  ? "Entries are snapshotted into the log recycle bin before deletion, in batches of 500 (up to 10,000 per click)."
+                  : "This is irreversible."}{" "}
               An audit entry will be recorded for the action.
             </p>
             {open === "audit" ? (
+
               <div>
                 <Label className="text-xs">Older than (days)</Label>
                 <Input
