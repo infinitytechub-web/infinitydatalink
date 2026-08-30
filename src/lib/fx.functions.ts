@@ -316,6 +316,7 @@ async function backfill(base: string, dates: string[]): Promise<HistoryRow[]> {
 }
 
 export const getFxHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
