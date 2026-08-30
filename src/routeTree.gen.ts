@@ -58,6 +58,7 @@ import { Route as AdminAdminLoanWorkoutsRouteImport } from './routes/_admin.admi
 import { Route as AdminAdminLoanSettlementsRouteImport } from './routes/_admin.admin.loan-settlements'
 import { Route as AdminAdminLoanProvisionsRouteImport } from './routes/_admin.admin.loan-provisions'
 import { Route as AdminAdminLoanProductsRouteImport } from './routes/_admin.admin.loan-products'
+import { Route as AdminAdminLoanCalculatorRouteImport } from './routes/_admin.admin.loan-calculator'
 import { Route as AdminAdminLoanArrearsRouteImport } from './routes/_admin.admin.loan-arrears'
 import { Route as AdminAdminLiveUsersRouteImport } from './routes/_admin.admin.live-users'
 import { Route as AdminAdminInvestmentsRouteImport } from './routes/_admin.admin.investments'
@@ -384,6 +385,12 @@ const AdminAdminLoanProductsRoute = AdminAdminLoanProductsRouteImport.update({
   path: '/loan-products',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminLoanCalculatorRoute =
+  AdminAdminLoanCalculatorRouteImport.update({
+    id: '/loan-calculator',
+    path: '/loan-calculator',
+    getParentRoute: () => AdminAdminRoute,
+  } as any)
 const AdminAdminLoanArrearsRoute = AdminAdminLoanArrearsRouteImport.update({
   id: '/loan-arrears',
   path: '/loan-arrears',
@@ -851,6 +858,7 @@ export interface FileRoutesByFullPath {
   '/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
   '/admin/live-users': typeof AdminAdminLiveUsersRoute
   '/admin/loan-arrears': typeof AdminAdminLoanArrearsRoute
+  '/admin/loan-calculator': typeof AdminAdminLoanCalculatorRoute
   '/admin/loan-products': typeof AdminAdminLoanProductsRoute
   '/admin/loan-provisions': typeof AdminAdminLoanProvisionsRoute
   '/admin/loan-settlements': typeof AdminAdminLoanSettlementsRoute
@@ -974,6 +982,7 @@ export interface FileRoutesByTo {
   '/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
   '/admin/live-users': typeof AdminAdminLiveUsersRoute
   '/admin/loan-arrears': typeof AdminAdminLoanArrearsRoute
+  '/admin/loan-calculator': typeof AdminAdminLoanCalculatorRoute
   '/admin/loan-products': typeof AdminAdminLoanProductsRoute
   '/admin/loan-provisions': typeof AdminAdminLoanProvisionsRoute
   '/admin/loan-settlements': typeof AdminAdminLoanSettlementsRoute
@@ -1103,6 +1112,7 @@ export interface FileRoutesById {
   '/_admin/admin/investments': typeof AdminAdminInvestmentsRouteWithChildren
   '/_admin/admin/live-users': typeof AdminAdminLiveUsersRoute
   '/_admin/admin/loan-arrears': typeof AdminAdminLoanArrearsRoute
+  '/_admin/admin/loan-calculator': typeof AdminAdminLoanCalculatorRoute
   '/_admin/admin/loan-products': typeof AdminAdminLoanProductsRoute
   '/_admin/admin/loan-provisions': typeof AdminAdminLoanProvisionsRoute
   '/_admin/admin/loan-settlements': typeof AdminAdminLoanSettlementsRoute
@@ -1233,6 +1243,7 @@ export interface FileRouteTypes {
     | '/admin/investments'
     | '/admin/live-users'
     | '/admin/loan-arrears'
+    | '/admin/loan-calculator'
     | '/admin/loan-products'
     | '/admin/loan-provisions'
     | '/admin/loan-settlements'
@@ -1356,6 +1367,7 @@ export interface FileRouteTypes {
     | '/admin/investments'
     | '/admin/live-users'
     | '/admin/loan-arrears'
+    | '/admin/loan-calculator'
     | '/admin/loan-products'
     | '/admin/loan-provisions'
     | '/admin/loan-settlements'
@@ -1484,6 +1496,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/investments'
     | '/_admin/admin/live-users'
     | '/_admin/admin/loan-arrears'
+    | '/_admin/admin/loan-calculator'
     | '/_admin/admin/loan-products'
     | '/_admin/admin/loan-provisions'
     | '/_admin/admin/loan-settlements'
@@ -1956,6 +1969,13 @@ declare module '@tanstack/react-router' {
       path: '/loan-products'
       fullPath: '/admin/loan-products'
       preLoaderRoute: typeof AdminAdminLoanProductsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/loan-calculator': {
+      id: '/_admin/admin/loan-calculator'
+      path: '/loan-calculator'
+      fullPath: '/admin/loan-calculator'
+      preLoaderRoute: typeof AdminAdminLoanCalculatorRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/loan-arrears': {
@@ -2710,6 +2730,7 @@ interface AdminAdminRouteChildren {
   AdminAdminInvestmentsRoute: typeof AdminAdminInvestmentsRouteWithChildren
   AdminAdminLiveUsersRoute: typeof AdminAdminLiveUsersRoute
   AdminAdminLoanArrearsRoute: typeof AdminAdminLoanArrearsRoute
+  AdminAdminLoanCalculatorRoute: typeof AdminAdminLoanCalculatorRoute
   AdminAdminLoanProductsRoute: typeof AdminAdminLoanProductsRoute
   AdminAdminLoanProvisionsRoute: typeof AdminAdminLoanProvisionsRoute
   AdminAdminLoanSettlementsRoute: typeof AdminAdminLoanSettlementsRoute
@@ -2751,6 +2772,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminInvestmentsRoute: AdminAdminInvestmentsRouteWithChildren,
   AdminAdminLiveUsersRoute: AdminAdminLiveUsersRoute,
   AdminAdminLoanArrearsRoute: AdminAdminLoanArrearsRoute,
+  AdminAdminLoanCalculatorRoute: AdminAdminLoanCalculatorRoute,
   AdminAdminLoanProductsRoute: AdminAdminLoanProductsRoute,
   AdminAdminLoanProvisionsRoute: AdminAdminLoanProvisionsRoute,
   AdminAdminLoanSettlementsRoute: AdminAdminLoanSettlementsRoute,
