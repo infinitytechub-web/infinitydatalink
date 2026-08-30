@@ -38,6 +38,7 @@ import {
   PlugZap,
   Calculator,
 
+  LifeBuoy,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 
