@@ -1,3 +1,5 @@
+import { checkGhPhone } from "@/lib/gh-phone";
+
 /**
  * Shared registration biodata helpers (client-safe).
  *
