@@ -43,22 +43,38 @@ export function PortalShell({
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, signOut, can, hasRole } = useAuth();
+  const [filter, setFilter] = useState("");
   // RBAC: drop nav items whose capability the signed-in user lacks, then drop
-  // groups that end up empty. Super admins always see everything.
+  // groups that end up empty. Super admins always see everything; `roles`
+  // widens a gate for destinations the capability matrix does not model.
   const visibleGroups = useMemo(() => {
-    const allow = (item: NavItem) =>
-      !item.cap ||
-      hasRole("super_admin") ||
-      (() => {
-        const [m, a] = item.cap.split(".") as [Parameters<typeof can>[0], Parameters<typeof can>[1]];
-        return can(m, a);
-      })();
+    const allow = (item: NavItem) => {
+      if (hasRole("super_admin")) return true;
+      if (item.roles?.some((r) => hasRole(r))) return true;
+      if (!item.cap) return true;
+      const [m, a] = item.cap.split(".") as [Parameters<typeof can>[0], Parameters<typeof can>[1]];
+      return can(m, a);
+    };
     return groups
       .map((g) => ({ ...g, items: g.items.filter(allow) }))
       .filter((g) => g.items.length > 0);
   }, [groups, can, hasRole]);
+  // Quick-find keeps deep back-office rails usable without endless scrolling.
+  const navGroups = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    if (!q) return visibleGroups;
+    return visibleGroups
+      .map((g) => ({
+        ...g,
+        items: g.items.filter(
+          (i) => i.label.toLowerCase().includes(q) || g.label.toLowerCase().includes(q),
+        ),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [visibleGroups, filter]);
   const [open, setOpen] = useState(false); // mobile drawer
   const [collapsed, setCollapsed] = useState(false); // desktop rail
+
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { branding } = useBranding();
@@ -125,7 +141,14 @@ export function PortalShell({
   };
 
   return (
-    <div className="flex min-h-dvh bg-background font-sans text-foreground">
+    <div className="flex min-h-dvh overflow-x-hidden bg-background font-sans text-foreground">
+      <a
+        href="#portal-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
+
       {/* Mobile scrim */}
       {open ? (
         <button
@@ -151,13 +174,13 @@ export function PortalShell({
       >
         <div
           className={cn(
-            "flex items-center border-b border-white/10 p-4",
+            "flex items-center overflow-hidden border-b border-white/10 p-4",
             collapsed ? "lg:justify-center lg:p-3" : "justify-between p-6",
           )}
         >
           <Link
             to="/"
-            className="flex items-center gap-2 font-serif text-xl tracking-tight text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]"
+            className="flex min-w-0 items-center gap-2 overflow-hidden font-serif text-lg tracking-tight text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]"
           >
             {branding.logo_url ? (
               <img
@@ -170,7 +193,7 @@ export function PortalShell({
                 IT
               </span>
             )}
-            {!collapsed && <span className="truncate lg:inline">{displayName}</span>}
+            {!collapsed && <span className="min-w-0 truncate lg:inline">{displayName}</span>}
           </Link>
           <button
             type="button"
@@ -182,6 +205,25 @@ export function PortalShell({
           </button>
         </div>
 
+        {!collapsed && !loading ? (
+          <div className="px-3 pt-3">
+            <label className="sr-only" htmlFor="nav-filter">
+              Filter navigation
+            </label>
+            <div className="flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 focus-within:border-white/40">
+              <Search className="size-3.5 shrink-0 text-white/70" aria-hidden="true" />
+              <input
+                id="nav-filter"
+                type="search"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Find a page…"
+                className="min-w-0 flex-1 bg-transparent text-xs text-white placeholder:text-white/60 focus:outline-none"
+              />
+            </div>
+          </div>
+        ) : null}
+
         <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-busy={loading || undefined}>
           {loading ? (
             <>
@@ -189,14 +231,14 @@ export function PortalShell({
               <SidebarWidgetSkeleton rows={5} collapsed={collapsed} />
               <SidebarWidgetSkeleton rows={3} collapsed={collapsed} />
             </>
-          ) : visibleGroups.length === 0 ? (
+          ) : navGroups.length === 0 ? (
             <SidebarWidgetEmpty
               label="Navigation"
-              message="No sections available"
+              message={filter ? "No matching pages" : "No sections available"}
               collapsed={collapsed}
             />
           ) : (
-            visibleGroups.map((g, gi) => {
+            navGroups.map((g, gi) => {
               const accent = GROUP_ACCENTS[gi % GROUP_ACCENTS.length];
               return (
                 <SidebarWidget key={g.label} collapsed={collapsed}>
@@ -204,7 +246,7 @@ export function PortalShell({
                   {g.items.length === 0 ? (
                     <SidebarWidgetEmpty message="No items" collapsed={collapsed} />
                   ) : (
-                    <div className="space-y-1">
+                    <ul className="space-y-1">
                       {g.items.map((item) => {
                         const active =
                           pathname === item.to ||
@@ -212,23 +254,25 @@ export function PortalShell({
                             item.to !== "/admin" &&
                             pathname.startsWith(item.to));
                         return (
-                          <SidebarNavItem
-                            key={item.to}
-                            item={item}
-                            accent={accent}
-                            active={active}
-                            collapsed={collapsed}
-                            onNavigate={handleNavClick}
-                          />
+                          <li key={item.to}>
+                            <SidebarNavItem
+                              item={item}
+                              accent={accent}
+                              active={active}
+                              collapsed={collapsed}
+                              onNavigate={handleNavClick}
+                            />
+                          </li>
                         );
                       })}
-                    </div>
+                    </ul>
                   )}
                 </SidebarWidget>
               );
             })
           )}
         </nav>
+
 
         <div className={cn("px-3 pb-3", collapsed && "lg:px-2")}>
           <SidebarOnlinePanel collapsed={collapsed} />
@@ -291,17 +335,18 @@ export function PortalShell({
             >
               {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
             </button>
-            <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
+            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-sm font-medium">
               <span className="hidden truncate text-muted-foreground sm:inline">{displayName}</span>
-              <span className="hidden text-muted-foreground sm:inline">/</span>
-              <span className="truncate">{breadcrumb}</span>
-            </div>
+              <span className="hidden text-muted-foreground sm:inline" aria-hidden="true">
+                /
+              </span>
+              <span aria-current="page" className="truncate">
+                {breadcrumb}
+              </span>
+            </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden h-9 w-56 items-center gap-2 rounded-full border border-border bg-muted/60 px-4 text-xs text-muted-foreground backdrop-blur md:flex">
-              <Search className="size-3.5" />
-              <span>Search…</span>
-            </div>
+
             <UniversalClock />
             <OnlinePresencePill />
             <NotificationBell />
@@ -310,7 +355,12 @@ export function PortalShell({
           </div>
         </header>
 
-        <div className="mx-auto w-full max-w-7xl flex-1 animate-fade-in space-y-8 p-4 lg:p-8">
+        <div
+          id="portal-content"
+          tabIndex={-1}
+          className="mx-auto w-full max-w-7xl flex-1 animate-fade-in space-y-8 p-4 lg:p-8"
+        >
+
           {children}
         </div>
 

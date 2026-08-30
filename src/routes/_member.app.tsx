@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyKycStatus } from "@/lib/member-kyc.functions";
@@ -22,42 +22,87 @@ import {
   Handshake as HandshakeIcon,
   Calculator,
   FileBarChart,
+  Target,
+  Lock,
+  HandCoins,
+  BanknoteArrowDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
 
-const groups: NavGroup[] = [
-  {
-    label: "Member Portal",
-    items: [
-      { to: "/app", label: "Overview", icon: <LayoutDashboard /> },
-      { to: "/app/savings", label: "My Savings", icon: <PiggyBank /> },
-      { to: "/app/loans", label: "Active Loans", icon: <Landmark /> },
-      { to: "/app/repayments", label: "Loan Repayments", icon: <ReceiptText /> },
-      { to: "/app/loan-calculator", label: "Loan Calculator", icon: <Calculator /> },
-      { to: "/app/guarantees", label: "My Guarantees", icon: <HandshakeIcon /> },
-      { to: "/app/investments", label: "Investments", icon: <TrendingUp /> },
-      { to: "/app/withdrawals", label: "Withdrawals", icon: <ArrowLeftRight /> },
-      { to: "/app/files", label: "My Documents", icon: <ReceiptText /> },
-      { to: "/app/reports", label: "Reports & Statements", icon: <FileBarChart /> },
-      { to: "/app/transactions", label: "Transactions", icon: <ArrowLeftRight /> },
 
-      { to: "/app/payments", label: "Payments", icon: <CreditCard /> },
-      { to: "/app/transfers", label: "Transfers", icon: <Send /> },
-      { to: "/app/profile", label: "Profile & KYC", icon: <UserCircle2 /> },
-      { to: "/app/kyc", label: "Verification status", icon: <ShieldCheck /> },
-      { to: "/app/entities/register", label: "Register organization", icon: <Building2 /> },
-    ],
-  },
-  {
-    label: "Support",
-    items: [
-      { to: "/app/inbox", label: "Notifications", icon: <BellRing /> },
-      { to: "/app/notifications", label: "Alert settings", icon: <BellRing /> },
-      { to: "/app/support", label: "Help Centre", icon: <LifeBuoy /> },
-    ],
-  },
-];
+/**
+ * Member information architecture, grouped by the task the member came to do
+ * rather than by the table behind it. While KYC is still under review every
+ * money-moving destination is rendered inert with an explanatory hint instead
+ * of vanishing, so the portal stays predictable and the reason is visible.
+ */
+function buildGroups(kycApproved: boolean): NavGroup[] {
+  const locked = kycApproved
+    ? {}
+    : { disabled: true, hint: "Available once your identity verification is approved" };
+  return [
+    {
+      label: "Overview",
+      items: [
+        { to: "/app", label: "Dashboard", icon: <LayoutDashboard /> },
+        { to: "/app/transactions", label: "Transactions", icon: <ArrowLeftRight />, ...locked },
+      ],
+    },
+    {
+      label: "Save",
+      items: [
+        { to: "/app/savings", label: "My savings", icon: <PiggyBank />, ...locked },
+        { to: "/app/savings/goals", label: "Savings goals", icon: <Target />, ...locked },
+        { to: "/app/savings/fixed", label: "Fixed deposits", icon: <Lock />, ...locked },
+        { to: "/app/savings/pots", label: "Group & susu pots", icon: <HandCoins />, ...locked },
+        { to: "/app/withdrawals", label: "Withdrawals", icon: <BanknoteArrowDown />, ...locked },
+      ],
+    },
+    {
+      label: "Borrow",
+      items: [
+        { to: "/app/loans", label: "My loans", icon: <Landmark />, ...locked },
+        { to: "/app/repayments", label: "Repayments", icon: <ReceiptText />, ...locked },
+        { to: "/app/guarantees", label: "My guarantees", icon: <HandshakeIcon />, ...locked },
+        { to: "/app/loan-calculator", label: "Loan calculator", icon: <Calculator /> },
+      ],
+    },
+    {
+      label: "Money",
+      items: [
+        { to: "/app/payments", label: "Payments", icon: <CreditCard />, ...locked },
+        { to: "/app/transfers", label: "Transfers", icon: <Send />, ...locked },
+        { to: "/app/investments", label: "Investments & shares", icon: <TrendingUp />, ...locked },
+      ],
+    },
+    {
+      label: "Records",
+      items: [
+        { to: "/app/reports", label: "Reports & statements", icon: <FileBarChart />, ...locked },
+        { to: "/app/files", label: "My documents", icon: <ReceiptText />, ...locked },
+      ],
+    },
+    {
+      label: "Account",
+      items: [
+        { to: "/app/profile", label: "Profile", icon: <UserCircle2 /> },
+        { to: "/app/kyc", label: "Verification status", icon: <ShieldCheck /> },
+        { to: "/app/entities/register", label: "Register organization", icon: <Building2 />, ...locked },
+      ],
+    },
+    {
+      label: "Support",
+      items: [
+        { to: "/app/inbox", label: "Notifications", icon: <BellRing /> },
+        { to: "/app/notifications", label: "Alert settings", icon: <SlidersHorizontal /> },
+        { to: "/app/support", label: "Help centre", icon: <LifeBuoy /> },
+      ],
+    },
+  ];
+}
+
 
 const CRUMBS: Record<string, string> = {
   "/app": "Financial Summary",
@@ -131,18 +176,24 @@ function MemberLayout() {
   return (
     <PortalShell
       brand="IT-360 CashApp"
-      groups={groups}
+      groups={buildGroups(kycApproved)}
       breadcrumb={breadcrumb}
       action={
-        <button className="rounded bg-emerald-deep px-4 py-2 text-xs font-semibold uppercase tracking-widest text-cream shadow-sm hover:bg-emerald-mid">
-          New Transaction
-        </button>
+        kycApproved ? (
+          <Link
+            to="/app/transfers"
+            className="inline-flex min-h-11 items-center rounded-md bg-emerald-deep px-4 text-xs font-semibold uppercase tracking-widest text-cream shadow-sm hover:bg-emerald-mid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            New transfer
+          </Link>
+        ) : null
       }
     >
       {kyc ? <KycDecisionBanner status={kyc} /> : null}
       <Outlet />
     </PortalShell>
   );
+
 }
 
 

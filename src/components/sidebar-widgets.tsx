@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Inbox } from "lucide-react";
+import { Inbox, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/components/portal-shell.types";
 
@@ -85,18 +85,19 @@ export function SidebarNavItem({
   collapsed?: boolean;
   onNavigate?: () => void;
 }) {
-  return (
-    <Link
-      to={item.to}
-      onClick={onNavigate}
-      aria-current={active ? "page" : undefined}
-      title={collapsed ? item.label : undefined}
-      className={cn(
-        SIDEBAR_ITEM_BASE,
-        collapsed && "lg:justify-center lg:px-1.5",
-        active ? SIDEBAR_ITEM_ACTIVE : SIDEBAR_ITEM_IDLE,
-      )}
-    >
+  const label = item.hint ? `${item.label} — ${item.hint}` : item.label;
+  const rowClass = cn(
+    SIDEBAR_ITEM_BASE,
+    collapsed && "lg:justify-center lg:px-1.5",
+    item.disabled
+      ? "cursor-not-allowed text-white/45"
+      : active
+        ? SIDEBAR_ITEM_ACTIVE
+        : SIDEBAR_ITEM_IDLE,
+  );
+  const inner = (
+    <>
+
       <span
         aria-hidden="true"
         className={cn(
@@ -121,6 +122,10 @@ export function SidebarNavItem({
         </span>
       )}
 
+      {item.disabled && !collapsed ? (
+        <Lock className="ml-auto size-3 shrink-0 text-white/50" aria-hidden="true" />
+      ) : null}
+
       {active && !collapsed ? (
         <span
           aria-hidden="true"
@@ -130,7 +135,30 @@ export function SidebarNavItem({
           )}
         />
       ) : null}
+    </>
+  );
+
+  // Locked rows stay visible (so the portal shape is predictable) but are inert
+  // and announce why via the accessible name.
+  if (item.disabled) {
+    return (
+      <span aria-disabled="true" title={label} aria-label={label} className={rowClass}>
+        {inner}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      to={item.to}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      title={collapsed || item.hint ? label : undefined}
+      className={rowClass}
+    >
+      {inner}
     </Link>
+
   );
 }
 
