@@ -71,6 +71,7 @@ import { Route as AdminAdminHealthRouteImport } from './routes/_admin.admin.heal
 import { Route as AdminAdminFxRouteImport } from './routes/_admin.admin.fx'
 import { Route as AdminAdminFinanceRouteImport } from './routes/_admin.admin.finance'
 import { Route as AdminAdminFilesRouteImport } from './routes/_admin.admin.files'
+import { Route as AdminAdminExportsRouteImport } from './routes/_admin.admin.exports'
 import { Route as AdminAdminEntitiesRouteImport } from './routes/_admin.admin.entities'
 import { Route as AdminAdminDocumentsRouteImport } from './routes/_admin.admin.documents'
 import { Route as AdminAdminCronRunsRouteImport } from './routes/_admin.admin.cron-runs'
@@ -455,6 +456,11 @@ const AdminAdminFinanceRoute = AdminAdminFinanceRouteImport.update({
 const AdminAdminFilesRoute = AdminAdminFilesRouteImport.update({
   id: '/files',
   path: '/files',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminExportsRoute = AdminAdminExportsRouteImport.update({
+  id: '/exports',
+  path: '/exports',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminEntitiesRoute = AdminAdminEntitiesRouteImport.update({
@@ -888,6 +894,7 @@ export interface FileRoutesByFullPath {
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
   '/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
+  '/admin/exports': typeof AdminAdminExportsRoute
   '/admin/files': typeof AdminAdminFilesRoute
   '/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/admin/fx': typeof AdminAdminFxRoute
@@ -1019,6 +1026,7 @@ export interface FileRoutesByTo {
   '/admin/console': typeof AdminAdminConsoleRouteWithChildren
   '/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/admin/documents': typeof AdminAdminDocumentsRoute
+  '/admin/exports': typeof AdminAdminExportsRoute
   '/admin/files': typeof AdminAdminFilesRoute
   '/admin/fx': typeof AdminAdminFxRoute
   '/admin/health': typeof AdminAdminHealthRoute
@@ -1154,6 +1162,7 @@ export interface FileRoutesById {
   '/_admin/admin/cron-runs': typeof AdminAdminCronRunsRoute
   '/_admin/admin/documents': typeof AdminAdminDocumentsRoute
   '/_admin/admin/entities': typeof AdminAdminEntitiesRouteWithChildren
+  '/_admin/admin/exports': typeof AdminAdminExportsRoute
   '/_admin/admin/files': typeof AdminAdminFilesRoute
   '/_admin/admin/finance': typeof AdminAdminFinanceRouteWithChildren
   '/_admin/admin/fx': typeof AdminAdminFxRoute
@@ -1291,6 +1300,7 @@ export interface FileRouteTypes {
     | '/admin/cron-runs'
     | '/admin/documents'
     | '/admin/entities'
+    | '/admin/exports'
     | '/admin/files'
     | '/admin/finance'
     | '/admin/fx'
@@ -1422,6 +1432,7 @@ export interface FileRouteTypes {
     | '/admin/console'
     | '/admin/cron-runs'
     | '/admin/documents'
+    | '/admin/exports'
     | '/admin/files'
     | '/admin/fx'
     | '/admin/health'
@@ -1556,6 +1567,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/cron-runs'
     | '/_admin/admin/documents'
     | '/_admin/admin/entities'
+    | '/_admin/admin/exports'
     | '/_admin/admin/files'
     | '/_admin/admin/finance'
     | '/_admin/admin/fx'
@@ -2132,6 +2144,13 @@ declare module '@tanstack/react-router' {
       path: '/files'
       fullPath: '/admin/files'
       preLoaderRoute: typeof AdminAdminFilesRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/exports': {
+      id: '/_admin/admin/exports'
+      path: '/exports'
+      fullPath: '/admin/exports'
+      preLoaderRoute: typeof AdminAdminExportsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/entities': {
@@ -2838,6 +2857,7 @@ interface AdminAdminRouteChildren {
   AdminAdminCronRunsRoute: typeof AdminAdminCronRunsRoute
   AdminAdminDocumentsRoute: typeof AdminAdminDocumentsRoute
   AdminAdminEntitiesRoute: typeof AdminAdminEntitiesRouteWithChildren
+  AdminAdminExportsRoute: typeof AdminAdminExportsRoute
   AdminAdminFilesRoute: typeof AdminAdminFilesRoute
   AdminAdminFinanceRoute: typeof AdminAdminFinanceRouteWithChildren
   AdminAdminFxRoute: typeof AdminAdminFxRoute
@@ -2884,6 +2904,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminCronRunsRoute: AdminAdminCronRunsRoute,
   AdminAdminDocumentsRoute: AdminAdminDocumentsRoute,
   AdminAdminEntitiesRoute: AdminAdminEntitiesRouteWithChildren,
+  AdminAdminExportsRoute: AdminAdminExportsRoute,
   AdminAdminFilesRoute: AdminAdminFilesRoute,
   AdminAdminFinanceRoute: AdminAdminFinanceRouteWithChildren,
   AdminAdminFxRoute: AdminAdminFxRoute,
