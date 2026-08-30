@@ -142,7 +142,10 @@ async function recordTodayHistory(rows: FxRate[]) {
 
 // POST so responses are never served from an HTTP cache — a manual refresh must
 // always reach the handler.
+// Staff-only: rate reads trigger outbound provider calls and privileged DB
+// writes, and the stored data is restricted to finance/compliance staff.
 export const getFxRates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
