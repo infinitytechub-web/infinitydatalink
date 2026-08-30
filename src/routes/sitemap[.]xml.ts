@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = "https://infinity-wealth360.lovable.app";
+const BASE_URL = "https://infinitydatalink.lovable.app";
 
 interface SitemapEntry {
   path: string;
@@ -15,6 +15,11 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
+          {
+            path: "/blog/choosing-credit-union-software",
+            changefreq: "monthly",
+            priority: "0.7",
+          },
         ];
 
         const urls = entries.map((e) =>

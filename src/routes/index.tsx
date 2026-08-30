@@ -171,7 +171,12 @@ function Landing() {
       <footer className="border-t border-emerald-deep/10 bg-cream">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-[11px] text-muted-foreground">
           <span>© {new Date().getFullYear()} IT-360 CashApp</span>
-          <span>Institutional-grade · Confidential</span>
+          <span className="flex items-center gap-4">
+            <Link to="/blog/choosing-credit-union-software" className="hover:underline">
+              Guide: choosing credit union software
+            </Link>
+            <span>Institutional-grade · Confidential</span>
+          </span>
         </div>
       </footer>
     </div>
