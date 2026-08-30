@@ -38,7 +38,9 @@ const groups: NavGroup[] = [
       { to: "/app/investments", label: "Investments", icon: <TrendingUp /> },
       { to: "/app/withdrawals", label: "Withdrawals", icon: <ArrowLeftRight /> },
       { to: "/app/files", label: "My Documents", icon: <ReceiptText /> },
+      { to: "/app/reports", label: "Reports & Statements", icon: <FileBarChart /> },
       { to: "/app/transactions", label: "Transactions", icon: <ArrowLeftRight /> },
+
       { to: "/app/payments", label: "Payments", icon: <CreditCard /> },
       { to: "/app/transfers", label: "Transfers", icon: <Send /> },
       { to: "/app/profile", label: "Profile & KYC", icon: <UserCircle2 /> },
