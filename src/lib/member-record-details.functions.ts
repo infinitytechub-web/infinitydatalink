@@ -98,7 +98,7 @@ export const getMyRecordDetail = createServerFn({ method: "POST" })
           { label: "Applied", at: row.created_at },
           { label: "Decision", at: row.decided_at ?? null, note: row.decision_note ?? null },
           { label: "Disbursed", at: row.disbursed_at ?? null },
-          { label: "Closed", at: row.closed_at ?? null },
+          { label: "Written off", at: row.written_off_at ?? null },
         ],
         raw: row,
         link: `/app/loans/${row.id}`,
@@ -161,13 +161,14 @@ export const getMyRecordDetail = createServerFn({ method: "POST" })
           { label: "Channel", value: pretty(row.channel) },
           { label: "Reason", value: row.reason ?? "—" },
           { label: "Requested", value: day(row.created_at) },
-          { label: "Decision note", value: row.decision_note ?? row.review_note ?? "—" },
+          { label: "Decision note", value: row.approval_note ?? row.rejection_reason ?? "—" },
         ],
         timeline: [
           { label: "Requested", at: row.created_at },
-          { label: "Reviewed", at: row.reviewed_at ?? row.decided_at ?? null, note: row.decision_note ?? null },
+          { label: "Approved", at: row.approved_at ?? null, note: row.approval_note ?? null },
+          { label: "Rejected", at: row.rejected_at ?? null, note: row.rejection_reason ?? null },
           { label: "Paid", at: row.paid_at ?? null },
-          { label: "Cancelled", at: row.cancelled_at ?? null, note: row.cancel_reason ?? null },
+          { label: "Cancelled", at: row.cancelled_at ?? null, note: row.cancellation_reason ?? null },
         ],
         raw: row,
         link: "/app/withdrawals",
@@ -177,7 +178,7 @@ export const getMyRecordDetail = createServerFn({ method: "POST" })
     if (data.dataset === "receipts") {
       const { data: row, error } = await sb
         .from("payment_receipts")
-        .select("*, payment_intents!inner(id, reference, purpose, status, member_id, provider, created_at)")
+        .select("*, payment_intents!inner(id, reference, purpose, status, member_id, provider_code, created_at)")
         .eq("id", data.record_id)
         .eq("payment_intents.member_id", uid)
         .maybeSingle();
@@ -194,7 +195,7 @@ export const getMyRecordDetail = createServerFn({ method: "POST" })
           { label: "Amount", value: (num(row.amount_minor) / 100).toFixed(2), money: true },
           { label: "Currency", value: row.currency ?? "GHS" },
           { label: "Purpose", value: pretty(intent.purpose) },
-          { label: "Provider", value: pretty(intent.provider) },
+          { label: "Provider", value: pretty(intent.provider_code) },
           { label: "Payment reference", value: intent.reference ?? "—" },
           { label: "Issued", value: day(row.issued_at) },
         ],
