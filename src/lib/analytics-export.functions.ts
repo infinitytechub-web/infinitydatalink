@@ -37,7 +37,10 @@ export const logAnalyticsExport = createServerFn({ method: "POST" })
         data.surface === "drilldown"
           ? "report.export.analytics_drilldown"
           : "report.export.analytics_dashboard",
-      target: data.surface === "drilldown" ? `drilldown:${data.metric ?? "unknown"}` : "analytics_dashboard",
+      target:
+        data.surface === "drilldown"
+          ? `drilldown:${data.metric ?? "unknown"}`
+          : "analytics_dashboard",
       meta: {
         surface: data.surface,
         metric: data.metric ?? null,
