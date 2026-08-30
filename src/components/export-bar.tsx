@@ -19,6 +19,8 @@ type Props<T> = {
   rows: T[];
   /** Required RBAC permission. If the current session lacks it, controls are locked. */
   permission: Permission;
+  /** Extra server-side condition (e.g. a granular capability) that must also hold. */
+  alsoRequire?: boolean;
   /** Fired after an allowed download starts; used by callers to write an audit entry. */
   onExport?: (format: "csv" | "excel" | "pdf" | "print") => void;
 };
@@ -30,10 +32,11 @@ export function ExportBar<T>({
   columns,
   rows,
   permission,
+  alsoRequire = true,
   onExport,
 }: Props<T>) {
   const { user, hasPermission } = useAuth();
-  const allowed = hasPermission(permission);
+  const allowed = hasPermission(permission) && alsoRequire;
   // Column selection applies to CSV & Excel only; PDF/Print always render the full column set.
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(columns.map((c) => c.header)),

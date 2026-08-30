@@ -7,6 +7,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useAuth } from "@/lib/auth";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,8 @@ import { EmptyState } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { BarList } from "@/components/charts";
 import { formatMoney } from "@/lib/org-config";
+import { logAnalyticsExport } from "@/lib/analytics-export.functions";
+import { toast } from "sonner";
 import type { Permission } from "@/lib/auth";
 import {
   getInsightDrilldown,
@@ -53,6 +56,8 @@ export function DrilldownDialog({
   onClose: () => void;
 }) {
   const fetchFn = useServerFn(getInsightDrilldown);
+  const auditExport = useServerFn(logAnalyticsExport);
+  const { can } = useAuth();
   const enabled = Boolean(target);
 
   const { data, isPending, error } = useQuery({
@@ -113,6 +118,7 @@ export function DrilldownDialog({
               <div className="ml-auto">
                 <ExportBar
                   permission={target!.permission}
+                  alsoRequire={can("reports", "export")}
                   title={`${data.title} — ${target!.label}`}
                   subtitle={`${target!.from} to ${target!.to} · ${entityLabel}`}
                   filename={`${data.metric}_${target!.from}_to_${target!.to}`}
@@ -134,6 +140,24 @@ export function DrilldownDialog({
                     { header: "Detail", accessor: (r: DrilldownRow) => r.detail },
                   ]}
                   rows={data.rows}
+                  onExport={(format) => {
+                    void auditExport({
+                      data: {
+                        surface: "drilldown",
+                        metric: data.metric,
+                        format,
+                        rows: data.rows.length,
+                        sections: 1,
+                        date_from: target!.from,
+                        date_to: target!.to,
+                        granularity: "day",
+                        entity,
+                        entity_label: entityLabel,
+                      },
+                    }).catch(() =>
+                      toast.warning("Download completed but the audit entry could not be written"),
+                    );
+                  }}
                 />
               </div>
             </div>

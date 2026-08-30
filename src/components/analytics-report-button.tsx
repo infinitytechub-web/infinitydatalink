@@ -29,8 +29,10 @@ type Props = {
  * the export RBAC permission; each download writes an audit entry.
  */
 export function AnalyticsReportButton({ data, from, to, granularity, entity, entityLabel }: Props) {
-  const { hasPermission } = useAuth();
-  const allowed = hasPermission(EXPORT_PERMISSION);
+  const { hasPermission, can } = useAuth();
+  // Mirror the server check exactly: the server function asserts the granular
+  // `reports.export` capability, so the button must require both.
+  const allowed = hasPermission(EXPORT_PERMISSION) && can("reports", "export");
   const audit = useServerFn(logAnalyticsExport);
   const [busy, setBusy] = useState<"csv" | "pdf" | null>(null);
 
@@ -71,6 +73,8 @@ export function AnalyticsReportButton({ data, from, to, granularity, entity, ent
             date_to: to,
             granularity,
             entity,
+            entity_label: entityLabel,
+            surface: "dashboard",
           },
         });
       } catch {
