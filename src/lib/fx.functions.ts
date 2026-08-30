@@ -166,6 +166,7 @@ export const getFxRates = createServerFn({ method: "POST" })
   });
 
 export const convertFx = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
