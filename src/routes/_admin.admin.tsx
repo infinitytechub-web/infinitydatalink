@@ -181,6 +181,8 @@ const CRUMBS: Record<string, string> = {
   "/admin/documents": "Document Management",
   "/admin/files": "Member Files",
   "/admin/operations": "Operations Dashboard",
+  "/admin/support": "Support Queue",
+
   "/admin/relationships": "Relationship Types",
   "/admin/super-admins": "Super Admins",
 
