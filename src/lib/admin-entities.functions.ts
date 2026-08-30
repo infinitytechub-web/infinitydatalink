@@ -85,7 +85,11 @@ export const listEntities = createServerFn({ method: "GET" })
     const pageSize = data.limit ?? data.pageSize;
     const from = (data.page - 1) * pageSize;
     const to = from + pageSize - 1;
-    let q: any = context.supabase
+    // Contact / tax / KYC-note columns are revoked from `authenticated` at the
+    // column level, so staff reads run through the privileged client *after*
+    // the role check above.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q: any = (supabaseAdmin as any)
       .from("entities")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false });
@@ -98,6 +102,7 @@ export const listEntities = createServerFn({ method: "GET" })
     q = q.range(from, to);
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
+
     const ids = (rows ?? []).map((r: any) => r.id);
     if (ids.length === 0) return { rows: [], total: count ?? 0 };
     const { data: em } = await context.supabase
