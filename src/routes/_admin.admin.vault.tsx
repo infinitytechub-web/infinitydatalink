@@ -22,6 +22,7 @@ import {
   restoreKycVault,
   purgeKycVaultEntry,
   bulkRestoreKycVault,
+  bulkPurgeKycVault,
 } from "@/lib/kyc-vault.functions";
 import type { VaultEntry } from "@/lib/kyc-vault.shared";
 import { VaultRetentionPanel } from "@/components/vault-retention-panel";
