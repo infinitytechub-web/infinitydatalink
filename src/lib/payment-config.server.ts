@@ -37,12 +37,49 @@ export type WebhookEventRow = {
   created_at: string;
 };
 
+export type RailSettingRow = {
+  rail: string;
+  enabled: boolean;
+  note: string | null;
+  updated_at: string | null;
+};
+
+/** Rail availability enriched with the admin on/off switch. */
+export type RailConfigRow = RailAvailability & {
+  rail_enabled: boolean;
+  rail_note: string | null;
+  rail_updated_at: string | null;
+};
+
 export type PaymentConfigView = {
   providers: ProviderRow[];
   events: WebhookEventRow[];
   intent_counts: { status: string; count: number }[];
+  rails: RailConfigRow[];
   can_manage: boolean;
 };
+
+/** Flip a rail on/off. Caller must already hold payments.manage. */
+export async function setRailEnabled(input: {
+  rail: string;
+  enabled: boolean;
+  note: string | null;
+  actorId: string;
+}): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.from("payment_rail_settings").upsert(
+    {
+      rail: input.rail,
+      enabled: input.enabled,
+      note: input.note,
+      updated_at: new Date().toISOString(),
+      updated_by: input.actorId,
+    } as never,
+    { onConflict: "rail" },
+  );
+  if (error) throw new Error(error.message);
+}
+
 
 export type ReadinessCheck = {
   key: string;
