@@ -12,11 +12,12 @@ async function roleSet(supabase: any, userId: string): Promise<Set<string>> {
   return new Set((data ?? []).map((r: any) => String(r.role)));
 }
 
-async function assertRead(supabase: any, userId: string) {
+async function assertRead(supabase: any, userId: string): Promise<Set<string>> {
   const roles = await roleSet(supabase, userId);
   if (!Array.from(roles).some((r) => SECURITY_ROLES.has(r))) {
     throw new Error("Forbidden: loan, finance or audit role required");
   }
+  return roles;
 }
 
 async function assertWrite(supabase: any, userId: string) {
@@ -25,6 +26,7 @@ async function assertWrite(supabase: any, userId: string) {
     throw new Error("Forbidden: super admin or loan officer role required");
   }
 }
+
 
 export type GuarantorRow = {
   id: string;
