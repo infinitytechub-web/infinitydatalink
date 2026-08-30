@@ -168,12 +168,40 @@ function AnalyticsBody() {
       </SectionCard>
 
       {/* ---------------- Savings growth ---------------- */}
-      <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Opening balance" value={<span className="tabular">{formatMoney(data.savings.opening_balance)}</span>} />
-        <KPIStat label="Closing balance" value={<span className="tabular">{formatMoney(data.savings.closing_balance)}</span>} />
-        <KPIStat label="Deposits in range" value={<span className="tabular">{formatMoney(data.savings.deposits_total)}</span>} />
-        <KPIStat label="Growth" value={<span className="tabular">{pctText(data.savings.growth_rate)}</span>} />
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <PremiumStatCard
+          tone="royal"
+          icon={<PiggyBank className="size-4" />}
+          label="Opening balance"
+          value={<span className="tabular">{formatMoney(data.savings.opening_balance)}</span>}
+          hint={`As at ${s.from}`}
+        />
+        <PremiumStatCard
+          tone="emerald"
+          icon={<TrendingUp className="size-4" />}
+          label="Closing balance"
+          value={<span className="tabular">{formatMoney(data.savings.closing_balance)}</span>}
+          delta={data.savings.growth_rate}
+          deltaLabel="in range"
+          spark={data.savings.series.map((r) => r.cumulative)}
+        />
+        <PremiumStatCard
+          tone="sky"
+          icon={<ArrowDownToLine className="size-4" />}
+          label="Deposits in range"
+          value={<span className="tabular">{formatMoney(data.savings.deposits_total)}</span>}
+          spark={data.savings.series.map((r) => r.deposits)}
+        />
+        <PremiumStatCard
+          tone="gold"
+          icon={<Sparkles className="size-4" />}
+          label="Growth"
+          value={<span className="tabular">{pctText(data.savings.growth_rate)}</span>}
+          progress={Math.min(1, Math.abs(data.savings.growth_rate))}
+          hint="Net balance movement over the period"
+        />
       </section>
+
 
       <SectionCard
         title="Savings growth"
