@@ -104,6 +104,15 @@ export async function loadPaymentConfig(): Promise<PaymentConfigView> {
     counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
   }
 
+  const { loadRailAvailability } = await import("@/lib/payments.server");
+  const rails = await loadRailAvailability();
+  const { data: railRows } = await supabaseAdmin
+    .from("payment_rail_settings")
+    .select("rail, enabled, note, updated_at");
+  const railMeta = new Map(
+    ((railRows ?? []) as RailSettingRow[]).map((r) => [r.rail, r]),
+  );
+
   return {
     providers: ((providers.data ?? []) as ProviderRow[]).map((p) => ({
       ...p,
@@ -111,7 +120,17 @@ export async function loadPaymentConfig(): Promise<PaymentConfigView> {
     })),
     events: (events.data ?? []) as WebhookEventRow[],
     intent_counts: [...counts.entries()].map(([status, count]) => ({ status, count })),
+    rails: rails.map((r) => {
+      const meta = railMeta.get(r.rail) ?? null;
+      return {
+        ...r,
+        rail_enabled: meta?.enabled ?? true,
+        rail_note: meta?.note ?? null,
+        rail_updated_at: meta?.updated_at ?? null,
+      };
+    }),
     can_manage: true,
+
   };
 }
 
