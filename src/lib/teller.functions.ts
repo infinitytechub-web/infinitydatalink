@@ -59,7 +59,7 @@ export type TellerTxn = {
   loan_id: string | null;
   transaction_id: string | null;
   note: string | null;
-  device_info: Record<string, unknown>;
+  device_info: { agent?: string | null };
   created_at: string;
 };
 
@@ -101,7 +101,7 @@ function mapTxn(r: any, names: Map<string, { full_name: string | null; member_no
     loan_id: r.loan_id,
     transaction_id: r.transaction_id,
     note: r.note,
-    device_info: (r.device_info ?? {}) as Record<string, unknown>,
+    device_info: (r.device_info ?? {}) as { agent?: string | null },
     created_at: r.created_at,
   };
 }
@@ -521,7 +521,7 @@ export const postTellerTransaction = createServerFn({ method: "POST" })
       const { notifyUser } = await import("@/lib/notify.server");
       await notifyUser({
         userId: data.member_id,
-        event: `teller.${data.kind}`,
+        category: `teller.${data.kind}`,
         title: `${TELLER_KIND_LABELS[data.kind]} recorded`,
         body: `Reference ${reference} for GH₵${data.amount.toFixed(2)} was recorded at the counter.`,
       });
