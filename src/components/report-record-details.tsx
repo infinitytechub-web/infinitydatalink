@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
@@ -112,9 +111,9 @@ export function ReportRecordDetails({
               </Button>
               {detail.link ? (
                 <Button asChild size="sm" variant="outline" className="gap-1">
-                  <Link to={detail.link}>
+                  <a href={detail.link}>
                     <ExternalLink className="h-3.5 w-3.5" /> Open full page
-                  </Link>
+                  </a>
                 </Button>
               ) : null}
             </div>
