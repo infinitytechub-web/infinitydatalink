@@ -174,7 +174,7 @@ export function PortalShell({
       >
         <div
           className={cn(
-            "flex items-center border-b border-white/10 p-4",
+            "flex items-center overflow-hidden border-b border-white/10 p-4",
             collapsed ? "lg:justify-center lg:p-3" : "justify-between p-6",
           )}
         >
@@ -193,7 +193,7 @@ export function PortalShell({
                 IT
               </span>
             )}
-            {!collapsed && <span className="truncate lg:inline">{displayName}</span>}
+            {!collapsed && <span className="min-w-0 truncate lg:inline">{displayName}</span>}
           </Link>
           <button
             type="button"
