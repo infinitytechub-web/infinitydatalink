@@ -39,6 +39,7 @@ export const Route = createFileRoute("/_admin/admin/finance/income")({
   validateSearch: zodValidator(searchSchema),
   component: IncomePage,
   errorComponent: ({ error }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const router = useRouter();
     return (
       <div className="p-6">

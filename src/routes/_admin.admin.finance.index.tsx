@@ -22,6 +22,7 @@ const summaryQuery = queryOptions({
 export const Route = createFileRoute("/_admin/admin/finance/")({
   component: FinanceDashboard,
   errorComponent: ({ error }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const router = useRouter();
     return (
       <div className="p-6">

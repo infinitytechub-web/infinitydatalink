@@ -530,7 +530,8 @@ function ReadinessPanel({
     mutationFn: () => selfTest({ data: { code } }),
     onSuccess: async (r) => {
       setTest(r);
-      r.passed ? toast.success("Readiness test passed") : toast.error("Readiness test failed");
+      if (r.passed) toast.success("Readiness test passed");
+      else toast.error("Readiness test failed");
       await qc.invalidateQueries({ queryKey: ["admin", "payment-config"] });
     },
     onError: (e: Error) => toast.error(e.message),

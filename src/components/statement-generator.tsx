@@ -83,7 +83,7 @@ export function StatementGenerator() {
     setApplied({ accountId, from, to });
   }
 
-  function usePreset(key: string) {
+  function applyPreset(key: string) {
     const r = presetRange(key);
     setFrom(r.from);
     setTo(r.to);
@@ -186,7 +186,7 @@ export function StatementGenerator() {
             <button
               key={p.key}
               type="button"
-              onClick={() => usePreset(p.key)}
+              onClick={() => applyPreset(p.key)}
               className="rounded-full border border-border px-3 py-1 text-xs font-medium hover:bg-muted"
             >
               {p.label}

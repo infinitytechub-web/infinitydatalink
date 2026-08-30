@@ -58,6 +58,7 @@ export const Route = createFileRoute("/_member/app/transfers")({
   }),
   component: TransfersPage,
   errorComponent: ({ error }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const router = useRouter();
     return (
       <div className="p-6">

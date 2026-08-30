@@ -83,13 +83,17 @@ export function PortalShell({
   useEffect(() => {
     try {
       setCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === "1");
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   useEffect(() => {
     try {
       window.localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, [collapsed]);
 
   // Close mobile drawer when the route changes.
