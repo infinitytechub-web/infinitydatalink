@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusPill } from "@/components/primitives";
 import { formatMoney } from "@/lib/org-config";
-import { getMyRecordDetail } from "@/lib/member-record-details.functions";
+import { getMyRecordDetail, type RecordDetail } from "@/lib/member-record-details.functions";
 import type { MemberReportDataset } from "@/lib/member-reports.shared";
 
 /**
@@ -29,7 +29,7 @@ export function ReportRecordDetails({
     queryFn: () => fetchDetail({ data: { dataset, record_id: recordId } }),
     staleTime: 15_000,
   });
-  const detail = query.data;
+  const detail = query.data as RecordDetail | undefined;
 
   const copyJson = async () => {
     if (!detail) return;

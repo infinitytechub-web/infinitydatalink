@@ -156,7 +156,12 @@ function MemberReportsPage() {
             <p className="px-4 pb-4 text-xs text-muted-foreground">{MEMBER_DATASET_HINTS[s.dataset]}</p>
           </SectionCard>
           <Filters s={s} setSearch={setSearch} showStatus />
-          <ReportView s={s} navigate={navigate} onOpenRecord={openRecord} />
+          <ReportView
+            s={s}
+            onPage={(n) => void navigate({ search: (prev) => ({ ...prev, page: n }) })}
+            onPageSize={(n) => void navigate({ search: (prev) => ({ ...prev, page: 1, page_size: n }) })}
+            onOpenRecord={openRecord}
+          />
           <StatementSchedulePanel dataset={s.dataset} />
         </>
       ) : (
@@ -233,11 +238,13 @@ function Filters({
 
 function ReportView({
   s,
-  navigate,
+  onPage,
+  onPageSize,
   onOpenRecord,
 }: {
   s: Search;
-  navigate: ReturnType<typeof useNavigate>;
+  onPage: (n: number) => void;
+  onPageSize: (n: number) => void;
   onOpenRecord: (dataset: MemberReportDataset, id: string) => void;
 }) {
   const fetchReport = useServerFn(runMyReport);
@@ -376,8 +383,8 @@ function ReportView({
               page={result.page}
               pageSize={result.page_size}
               total={result.total}
-              onPage={(n) => void navigate({ search: (prev) => ({ ...prev, page: n }) })}
-              onPageSize={(n) => void navigate({ search: (prev) => ({ ...prev, page: 1, page_size: n }) })}
+              onPage={onPage}
+              onPageSize={onPageSize}
             />
           </>
         )}

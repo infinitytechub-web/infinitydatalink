@@ -14,7 +14,7 @@ export type RecordDetail = {
   fields: RecordField[];
   timeline: Array<{ label: string; at: string | null; note?: string | null }>;
   /** Full record, for the Copy JSON action. */
-  raw: Record<string, unknown>;
+  raw: Record<string, string | number | boolean | null>;
   /** Internal app route to the full page, when one exists. */
   link: string | null;
 };

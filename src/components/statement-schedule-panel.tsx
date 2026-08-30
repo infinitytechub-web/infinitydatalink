@@ -168,7 +168,7 @@ export function StatementSchedulePanel({ dataset }: { dataset: MemberReportDatas
                     {s.last_run_at ? (
                       <span className="flex items-center gap-2">
                         {new Date(s.last_run_at).toLocaleDateString()}
-                        <StatusPill status={s.last_status ?? "pending"} />
+                        <StatusPill status={(s.last_status ?? "pending") as never} />
                       </span>
                     ) : (
                       "—"
@@ -232,7 +232,7 @@ export function StatementSchedulePanel({ dataset }: { dataset: MemberReportDatas
                 </span>
                 <span>{r.row_count} record(s)</span>
                 <span>{r.channels.length > 0 ? r.channels.join(", ") : "in-app"}</span>
-                <StatusPill status={r.status} />
+                <StatusPill status={r.status as never} />
                 {r.error ? <span className="text-destructive">{r.error}</span> : null}
               </li>
             ))}
