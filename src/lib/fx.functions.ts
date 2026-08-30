@@ -154,7 +154,8 @@ export const getFxRates = createServerFn({ method: "POST" })
       })
       .parse(d ?? {}),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAnyRole(await loadRoleSet(context.supabase, context.userId), ADMIN_ROLES, "staff");
     const { rows, source } = await getRates(data.base, data.force);
     return {
       base: data.base.toUpperCase(),
