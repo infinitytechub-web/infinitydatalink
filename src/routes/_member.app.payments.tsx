@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { EmptyState, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getOrgConfig } from "@/lib/org-config";
 import { getMyLoans, getMyTransactions } from "@/lib/member-data.functions";
+import { PayNowPanel } from "@/components/pay-now-panel";
 
 export const Route = createFileRoute("/_member/app/payments")({
   component: PaymentsPage,
