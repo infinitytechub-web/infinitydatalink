@@ -3908,6 +3908,116 @@ export type Database = {
         }
         Relationships: []
       }
+      teller_sessions: {
+        Row: {
+          close_note: string | null
+          closed_at: string | null
+          counted_close: number | null
+          created_at: string
+          expected_close: number | null
+          id: string
+          open_note: string | null
+          opened_at: string
+          opening_float: number
+          status: string
+          teller_id: string
+          updated_at: string
+          variance: number | null
+        }
+        Insert: {
+          close_note?: string | null
+          closed_at?: string | null
+          counted_close?: number | null
+          created_at?: string
+          expected_close?: number | null
+          id?: string
+          open_note?: string | null
+          opened_at?: string
+          opening_float?: number
+          status?: string
+          teller_id: string
+          updated_at?: string
+          variance?: number | null
+        }
+        Update: {
+          close_note?: string | null
+          closed_at?: string | null
+          counted_close?: number | null
+          created_at?: string
+          expected_close?: number | null
+          id?: string
+          open_note?: string | null
+          opened_at?: string
+          opening_float?: number
+          status?: string
+          teller_id?: string
+          updated_at?: string
+          variance?: number | null
+        }
+        Relationships: []
+      }
+      teller_transactions: {
+        Row: {
+          account_id: string | null
+          amount: number
+          created_at: string
+          device_info: Json
+          id: string
+          kind: string
+          loan_id: string | null
+          member_id: string
+          method: string
+          note: string | null
+          reference: string
+          session_id: string
+          teller_id: string
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          created_at?: string
+          device_info?: Json
+          id?: string
+          kind: string
+          loan_id?: string | null
+          member_id: string
+          method?: string
+          note?: string | null
+          reference: string
+          session_id: string
+          teller_id: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          created_at?: string
+          device_info?: Json
+          id?: string
+          kind?: string
+          loan_id?: string | null
+          member_id?: string
+          method?: string
+          note?: string | null
+          reference?: string
+          session_id?: string
+          teller_id?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teller_transactions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "teller_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
