@@ -56,7 +56,7 @@ export const Route = createFileRoute("/_admin/admin/teller")({
     ],
   }),
   errorComponent: ({ error }) => <ErrorState title="Teller mode unavailable" message={error.message} />,
-  notFoundComponent: () => <EmptyState title="Nothing here" description="This teller view does not exist." />,
+  notFoundComponent: () => <EmptyState title="Nothing here" hint="This teller view does not exist." />,
   component: TellerModePage,
 });
 
@@ -183,7 +183,7 @@ function TellerWorkspace() {
 
       <SectionCard title="Session postings">
         {data.transactions.length === 0 ? (
-          <EmptyState title="No postings yet" description="Captured transactions appear here with their receipt reference." />
+          <EmptyState title="No postings yet" hint="Captured transactions appear here with their receipt reference." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
