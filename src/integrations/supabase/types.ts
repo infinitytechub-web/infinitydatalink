@@ -2508,6 +2508,30 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_rail_settings: {
+        Row: {
+          enabled: boolean
+          note: string | null
+          rail: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          note?: string | null
+          rail: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          note?: string | null
+          rail?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       payment_receipts: {
         Row: {
           amount_minor: number

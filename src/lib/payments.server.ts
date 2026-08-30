@@ -108,13 +108,17 @@ export function idempotencyKey(parts: {
 /** Rail → provider readiness, computed from configured providers + secrets. */
 export async function loadRailAvailability(): Promise<RailAvailability[]> {
   const db = await admin();
-  const { data } = await db
-    .from("payment_providers")
-    .select("code, label, mode, enabled, config")
-    .order("code");
+  const [{ data }, { data: railRows }] = await Promise.all([
+    db.from("payment_providers").select("code, label, mode, enabled, config").order("code"),
+    db.from("payment_rail_settings").select("rail, enabled"),
+  ]);
   const providers = (data ?? []) as { code: string; mode: string; enabled: boolean }[];
+  const railEnabled = new Map(
+    ((railRows ?? []) as { rail: string; enabled: boolean }[]).map((r) => [r.rail, r.enabled]),
+  );
 
   return RAIL_SPECS.map((spec) => {
+    const railOn = railEnabled.get(spec.code) ?? true;
     const candidates = providers.filter((p) => spec.providerCodes.includes(p.code) && p.enabled);
     const ready = candidates.filter((p) => {
       const tpl = templateFor(p.code);
@@ -124,14 +128,20 @@ export async function loadRailAvailability(): Promise<RailAvailability[]> {
     const sandbox = ready.find((p) => p.mode === "sandbox") ?? null;
     const chosen = live ?? sandbox ?? candidates[0] ?? null;
 
-    const isLive = Boolean(live);
-    const isSandbox = Boolean(sandbox) && !isLive;
+    const isLive = Boolean(live) && railOn;
+    const isSandbox = Boolean(sandbox) && !isLive && railOn;
     const providerReady = Boolean(live || sandbox);
-    const selectable = providerReady || spec.manualSettlement;
+    const selectable = railOn && (providerReady || spec.manualSettlement);
+
+
 
     let statusLabel: string;
     let note: string;
-    if (isLive) {
+    if (!railOn) {
+      statusLabel = "Disabled";
+      note = "An administrator has switched this rail off.";
+    } else if (isLive) {
+
       statusLabel = "Live";
       note = `Processed by ${live!.code}.`;
     } else if (isSandbox) {

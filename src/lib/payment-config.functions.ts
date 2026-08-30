@@ -12,12 +12,45 @@ import {
   buildReadinessReport,
   loadPaymentConfig,
   runProviderSelfTest,
+  setRailEnabled,
   type PaymentConfigView,
+  type RailConfigRow,
   type ReadinessReport,
   type SelfTestResult,
 } from "@/lib/payment-config.server";
 
-export type { PaymentConfigView, ReadinessReport, SelfTestResult };
+export type { PaymentConfigView, RailConfigRow, ReadinessReport, SelfTestResult };
+
+/** Enable or disable a single payment rail. Requires payments.manage. */
+export const setPaymentRailEnabled = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        rail: z.string().trim().min(2).max(40),
+        enabled: z.boolean(),
+        note: z.string().trim().max(300).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertPaymentsPermission(context.supabase, "manage");
+    await setRailEnabled({
+      rail: data.rail,
+      enabled: data.enabled,
+      note: data.note?.trim() || null,
+      actorId: context.userId,
+    });
+    await writeAudit({
+      actor_id: context.userId,
+      actor_email: (context.claims as { email?: string } | null)?.email ?? null,
+      action: data.enabled ? "payments.rail.enabled" : "payments.rail.disabled",
+      target: data.rail,
+      meta: { note: data.note ?? null },
+    });
+    return { ok: true };
+  });
+
 
 /** Providers + redacted config + recent webhook activity. Requires payments.view. */
 export const getPaymentConfig = createServerFn({ method: "GET" })

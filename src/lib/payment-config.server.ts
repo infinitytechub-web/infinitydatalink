@@ -12,6 +12,8 @@ import {
   type ProviderTemplate,
 } from "@/lib/payment-providers";
 import { processPaymentWebhook, signWebhookBody } from "@/lib/payment-webhooks.server";
+import { type RailAvailability } from "@/lib/payment-rails";
+
 
 const SECRETISH = /(secret|api[_-]?key|password|token|private)/i;
 
@@ -37,12 +39,49 @@ export type WebhookEventRow = {
   created_at: string;
 };
 
+export type RailSettingRow = {
+  rail: string;
+  enabled: boolean;
+  note: string | null;
+  updated_at: string | null;
+};
+
+/** Rail availability enriched with the admin on/off switch. */
+export type RailConfigRow = RailAvailability & {
+  rail_enabled: boolean;
+  rail_note: string | null;
+  rail_updated_at: string | null;
+};
+
 export type PaymentConfigView = {
   providers: ProviderRow[];
   events: WebhookEventRow[];
   intent_counts: { status: string; count: number }[];
+  rails: RailConfigRow[];
   can_manage: boolean;
 };
+
+/** Flip a rail on/off. Caller must already hold payments.manage. */
+export async function setRailEnabled(input: {
+  rail: string;
+  enabled: boolean;
+  note: string | null;
+  actorId: string;
+}): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.from("payment_rail_settings").upsert(
+    {
+      rail: input.rail,
+      enabled: input.enabled,
+      note: input.note,
+      updated_at: new Date().toISOString(),
+      updated_by: input.actorId,
+    } as never,
+    { onConflict: "rail" },
+  );
+  if (error) throw new Error(error.message);
+}
+
 
 export type ReadinessCheck = {
   key: string;
@@ -104,6 +143,15 @@ export async function loadPaymentConfig(): Promise<PaymentConfigView> {
     counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
   }
 
+  const { loadRailAvailability } = await import("@/lib/payments.server");
+  const rails = await loadRailAvailability();
+  const { data: railRows } = await supabaseAdmin
+    .from("payment_rail_settings")
+    .select("rail, enabled, note, updated_at");
+  const railMeta = new Map(
+    ((railRows ?? []) as RailSettingRow[]).map((r) => [r.rail, r]),
+  );
+
   return {
     providers: ((providers.data ?? []) as ProviderRow[]).map((p) => ({
       ...p,
@@ -111,7 +159,17 @@ export async function loadPaymentConfig(): Promise<PaymentConfigView> {
     })),
     events: (events.data ?? []) as WebhookEventRow[],
     intent_counts: [...counts.entries()].map(([status, count]) => ({ status, count })),
+    rails: rails.map((r) => {
+      const meta = railMeta.get(r.rail) ?? null;
+      return {
+        ...r,
+        rail_enabled: meta?.enabled ?? true,
+        rail_note: meta?.note ?? null,
+        rail_updated_at: meta?.updated_at ?? null,
+      };
+    }),
     can_manage: true,
+
   };
 }
 
