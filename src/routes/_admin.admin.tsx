@@ -221,6 +221,13 @@ const groups: NavGroup[] = [
         roles: ["admin", "manager"],
       },
       {
+        to: "/admin/recycle-bin",
+        label: "Recycle bin & restore",
+        icon: <Archive />,
+        cap: "security.edit",
+        roles: ["admin"],
+      },
+      {
         to: "/admin/log-recycle-bin",
         label: "Log recycle bin",
         icon: <Archive />,
