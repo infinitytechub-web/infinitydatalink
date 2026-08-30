@@ -11,6 +11,7 @@
  *    existing intent instead of charging twice.
  */
 import { createHash, randomBytes } from "crypto";
+import type { Json } from "@/integrations/supabase/types";
 import { checkGhPhone } from "@/lib/gh-phone";
 import {
   RAIL_SPECS,
