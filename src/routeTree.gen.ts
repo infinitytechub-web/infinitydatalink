@@ -94,6 +94,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicHooksVaultRetentionRouteImport } from './routes/api/public/hooks/vault-retention'
+import { Route as ApiPublicHooksStatementSchedulesRouteImport } from './routes/api/public/hooks/statement-schedules'
 import { Route as ApiPublicHooksSavingsSweepsRouteImport } from './routes/api/public/hooks/savings-sweeps'
 import { Route as ApiPublicHooksNotificationDispatchRouteImport } from './routes/api/public/hooks/notification-dispatch'
 import { Route as ApiPublicHooksMonthlyInterestRouteImport } from './routes/api/public/hooks/monthly-interest'
@@ -580,6 +581,12 @@ const ApiPublicHooksVaultRetentionRoute =
     path: '/api/public/hooks/vault-retention',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStatementSchedulesRoute =
+  ApiPublicHooksStatementSchedulesRouteImport.update({
+    id: '/api/public/hooks/statement-schedules',
+    path: '/api/public/hooks/statement-schedules',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSavingsSweepsRoute =
   ApiPublicHooksSavingsSweepsRouteImport.update({
     id: '/api/public/hooks/savings-sweeps',
@@ -1003,6 +1010,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
+  '/api/public/hooks/statement-schedules': typeof ApiPublicHooksStatementSchedulesRoute
   '/api/public/hooks/vault-retention': typeof ApiPublicHooksVaultRetentionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1133,6 +1141,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
+  '/api/public/hooks/statement-schedules': typeof ApiPublicHooksStatementSchedulesRoute
   '/api/public/hooks/vault-retention': typeof ApiPublicHooksVaultRetentionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1273,6 +1282,7 @@ export interface FileRoutesById {
   '/api/public/hooks/monthly-interest': typeof ApiPublicHooksMonthlyInterestRoute
   '/api/public/hooks/notification-dispatch': typeof ApiPublicHooksNotificationDispatchRoute
   '/api/public/hooks/savings-sweeps': typeof ApiPublicHooksSavingsSweepsRoute
+  '/api/public/hooks/statement-schedules': typeof ApiPublicHooksStatementSchedulesRoute
   '/api/public/hooks/vault-retention': typeof ApiPublicHooksVaultRetentionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1412,6 +1422,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
+    | '/api/public/hooks/statement-schedules'
     | '/api/public/hooks/vault-retention'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1542,6 +1553,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
+    | '/api/public/hooks/statement-schedules'
     | '/api/public/hooks/vault-retention'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1681,6 +1693,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/monthly-interest'
     | '/api/public/hooks/notification-dispatch'
     | '/api/public/hooks/savings-sweeps'
+    | '/api/public/hooks/statement-schedules'
     | '/api/public/hooks/vault-retention'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1713,6 +1726,7 @@ export interface RootRouteChildren {
   ApiPublicHooksMonthlyInterestRoute: typeof ApiPublicHooksMonthlyInterestRoute
   ApiPublicHooksNotificationDispatchRoute: typeof ApiPublicHooksNotificationDispatchRoute
   ApiPublicHooksSavingsSweepsRoute: typeof ApiPublicHooksSavingsSweepsRoute
+  ApiPublicHooksStatementSchedulesRoute: typeof ApiPublicHooksStatementSchedulesRoute
   ApiPublicHooksVaultRetentionRoute: typeof ApiPublicHooksVaultRetentionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2317,6 +2331,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/vault-retention'
       fullPath: '/api/public/hooks/vault-retention'
       preLoaderRoute: typeof ApiPublicHooksVaultRetentionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/statement-schedules': {
+      id: '/api/public/hooks/statement-schedules'
+      path: '/api/public/hooks/statement-schedules'
+      fullPath: '/api/public/hooks/statement-schedules'
+      preLoaderRoute: typeof ApiPublicHooksStatementSchedulesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/savings-sweeps': {
@@ -3105,6 +3126,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNotificationDispatchRoute:
     ApiPublicHooksNotificationDispatchRoute,
   ApiPublicHooksSavingsSweepsRoute: ApiPublicHooksSavingsSweepsRoute,
+  ApiPublicHooksStatementSchedulesRoute: ApiPublicHooksStatementSchedulesRoute,
   ApiPublicHooksVaultRetentionRoute: ApiPublicHooksVaultRetentionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

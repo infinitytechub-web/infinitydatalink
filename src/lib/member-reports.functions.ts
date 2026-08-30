@@ -146,6 +146,7 @@ export const runMyReport = createServerFn({ method: "POST" })
       );
       total = r.count;
       rows = r.rows.map((a) => ({
+        record_id: a.id,
         account: a.nickname || a.savings_plans?.name || a.id.slice(0, 8),
         plan: a.savings_plans?.name ?? "—",
         balance: num(a.balance),
@@ -166,6 +167,7 @@ export const runMyReport = createServerFn({ method: "POST" })
       );
       total = r.count;
       rows = r.rows.map((l) => ({
+        record_id: l.id,
         ref: l.ref ?? l.id.slice(0, 8),
         product: l.product ?? "—",
         amount: num(l.amount),
@@ -210,6 +212,7 @@ export const runMyReport = createServerFn({ method: "POST" })
       );
       total = r.count;
       rows = r.rows.map((p) => ({
+        record_id: p.id,
         loan: refs.get(p.loan_id) ?? String(p.loan_id).slice(0, 8),
         installment: num(p.installment_no),
         due_date: day(p.due_date),
@@ -232,6 +235,7 @@ export const runMyReport = createServerFn({ method: "POST" })
       );
       total = r.count;
       rows = r.rows.map((w) => ({
+        record_id: w.id,
         ref: w.ref ?? w.id.slice(0, 8),
         amount: num(w.amount),
         channel: pretty(w.channel),
@@ -270,6 +274,7 @@ export const runMyReport = createServerFn({ method: "POST" })
       if (allErr) throw new Error(allErr.message);
       total = count ?? 0;
       rows = ((page ?? []) as any[]).map((r) => ({
+        record_id: r.id,
         receipt_no: r.receipt_no,
         reference: r.payment_intents?.reference ?? "—",
         purpose: pretty(r.payment_intents?.purpose),
@@ -293,6 +298,7 @@ export const runMyReport = createServerFn({ method: "POST" })
       );
       total = r.count;
       rows = r.rows.map((t) => ({
+        record_id: t.id,
         ref: t.ref ?? t.id.slice(0, 8),
         kind: pretty(t.kind),
         amount: num(t.amount),
