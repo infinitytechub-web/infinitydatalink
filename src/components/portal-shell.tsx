@@ -141,7 +141,7 @@ export function PortalShell({
   };
 
   return (
-    <div className="flex min-h-dvh bg-background font-sans text-foreground">
+    <div className="flex min-h-dvh overflow-x-hidden bg-background font-sans text-foreground">
       <a
         href="#portal-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
