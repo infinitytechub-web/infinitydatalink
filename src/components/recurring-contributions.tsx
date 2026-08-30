@@ -1,18 +1,9 @@
 import { useState } from "react";
-import {
-  queryOptions,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CalendarClock, Pencil, Pause, Play, Trash2, Plus, Repeat } from "lucide-react";
-import {
-  EmptyState,
-  Money,
-  SectionCard,
-} from "@/components/primitives";
+import { EmptyState, Money, SectionCard } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,16 +37,11 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function describeSchedule(s: RecurringSchedule) {
   if (s.frequency === "daily") return "Every day";
-  if (s.frequency === "weekly")
-    return `Every ${WEEKDAYS[s.day_of_week ?? 1]}`;
+  if (s.frequency === "weekly") return `Every ${WEEKDAYS[s.day_of_week ?? 1]}`;
   return `Monthly on day ${s.day_of_month ?? 1}`;
 }
 
-export function RecurringContributionsSection({
-  accounts,
-}: {
-  accounts: SavingsAccount[];
-}) {
+export function RecurringContributionsSection({ accounts }: { accounts: SavingsAccount[] }) {
   const q = useQuery(recurringQuery);
   const [editing, setEditing] = useState<RecurringSchedule | null>(null);
   const [creating, setCreating] = useState(false);
@@ -73,14 +59,22 @@ export function RecurringContributionsSection({
       }
     >
       {q.isLoading ? (
-        <div className="p-6"><Skeleton className="h-24 w-full" /></div>
+        <div className="p-6">
+          <Skeleton className="h-24 w-full" />
+        </div>
       ) : activeAccounts.length === 0 ? (
         <div className="p-6">
-          <EmptyState title="No active savings account" hint="Open a savings plan first, then automate your deposits." />
+          <EmptyState
+            title="No active savings account"
+            hint="Open a savings plan first, then automate your deposits."
+          />
         </div>
       ) : (q.data ?? []).length === 0 ? (
         <div className="p-6">
-          <EmptyState title="No recurring contributions" hint="Set one up to auto-deposit on a daily, weekly, or monthly schedule." />
+          <EmptyState
+            title="No recurring contributions"
+            hint="Set one up to auto-deposit on a daily, weekly, or monthly schedule."
+          />
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -157,7 +151,9 @@ function ScheduleRow({ s, onEdit }: { s: RecurringSchedule; onEdit: () => void }
           {describeSchedule(s)}
         </div>
       </td>
-      <td className="px-6 py-3 text-right tabular"><Money amount={s.amount} /></td>
+      <td className="px-6 py-3 text-right tabular">
+        <Money amount={s.amount} />
+      </td>
       <td className="px-6 py-3 text-[11px] text-muted-foreground">
         {new Date(s.next_run_at).toLocaleString()}
       </td>
@@ -335,7 +331,9 @@ function ScheduleDialog({
                 onChange={(e) => setDow(Number(e.target.value))}
               >
                 {WEEKDAYS.map((w, i) => (
-                  <option key={w} value={i}>{w}</option>
+                  <option key={w} value={i}>
+                    {w}
+                  </option>
                 ))}
               </select>
             </div>
@@ -369,7 +367,12 @@ function ScheduleDialog({
           </div>
           <div>
             <Label htmlFor="rs-note">Note (optional)</Label>
-            <Textarea id="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+            <Textarea
+              id="rs-note"
+              rows={2}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose} disabled={mut.isPending}>

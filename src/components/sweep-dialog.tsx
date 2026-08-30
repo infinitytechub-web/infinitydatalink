@@ -4,7 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowRightLeft, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createSweep, updateSweep, type Sweep } from "@/lib/savings-sweeps.functions";
@@ -22,7 +28,9 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
   const [to, setTo] = useState(sweep?.to_account_id ?? accounts[1]?.id ?? "");
   const [amount, setAmount] = useState(sweep ? String(sweep.amount) : "");
   const [minBalance, setMinBalance] = useState(sweep ? String(sweep.min_balance) : "0");
-  const [maxAmount, setMaxAmount] = useState(sweep?.max_amount != null ? String(sweep.max_amount) : "");
+  const [maxAmount, setMaxAmount] = useState(
+    sweep?.max_amount != null ? String(sweep.max_amount) : "",
+  );
   const [freq, setFreq] = useState<"daily" | "weekly" | "monthly">(sweep?.frequency ?? "monthly");
   const [dow, setDow] = useState(sweep?.day_of_week ?? 1);
   const [dom, setDom] = useState(sweep?.day_of_month ?? 1);
@@ -67,7 +75,13 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
           <SlidersHorizontal className="h-3.5 w-3.5" />
         </Button>
       ) : (
-        <Button size="sm" variant="outline" className="gap-1" onClick={() => setOpen(true)} disabled={accounts.length < 2}>
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1"
+          onClick={() => setOpen(true)}
+          disabled={accounts.length < 2}
+        >
           <ArrowRightLeft className="h-3.5 w-3.5" /> Schedule sweep
         </Button>
       )}
@@ -98,7 +112,9 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
                   onChange={(e) => setFrom(e.target.value)}
                 >
                   {accounts.map((a) => (
-                    <option key={a.id} value={a.id}>{a.label}</option>
+                    <option key={a.id} value={a.id}>
+                      {a.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -111,7 +127,9 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
                   onChange={(e) => setTo(e.target.value)}
                 >
                   {accounts.map((a) => (
-                    <option key={a.id} value={a.id}>{a.label}</option>
+                    <option key={a.id} value={a.id}>
+                      {a.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -120,14 +138,31 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
 
           <div>
             <Label htmlFor="sw-amt">Amount per run</Label>
-            <Input id="sw-amt" type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+            <Input
+              id="sw-amt"
+              type="number"
+              min="0"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="sw-min">Keep at least</Label>
-              <Input id="sw-min" type="number" min="0" step="0.01" value={minBalance} onChange={(e) => setMinBalance(e.target.value)} />
-              <p className="mt-1 text-[10px] text-muted-foreground">Minimum balance to leave in the source account.</p>
+              <Input
+                id="sw-min"
+                type="number"
+                min="0"
+                step="0.01"
+                value={minBalance}
+                onChange={(e) => setMinBalance(e.target.value)}
+              />
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                Minimum balance to leave in the source account.
+              </p>
             </div>
             <div>
               <Label htmlFor="sw-max">Max per sweep</Label>
@@ -140,7 +175,9 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
                 value={maxAmount}
                 onChange={(e) => setMaxAmount(e.target.value)}
               />
-              <p className="mt-1 text-[10px] text-muted-foreground">Optional hard cap on each transfer.</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                Optional hard cap on each transfer.
+              </p>
             </div>
           </div>
 
@@ -167,7 +204,9 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
                 onChange={(e) => setDow(Number(e.target.value))}
               >
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d, i) => (
-                  <option key={i} value={i}>{d}</option>
+                  <option key={i} value={i}>
+                    {d}
+                  </option>
                 ))}
               </select>
             </div>
@@ -175,17 +214,27 @@ export function SweepDialog({ accounts, sweep }: { accounts: Account[]; sweep?: 
           {freq === "monthly" ? (
             <div>
               <Label htmlFor="sw-dom">Day of month</Label>
-              <Input id="sw-dom" type="number" min="1" max="28" value={dom} onChange={(e) => setDom(Number(e.target.value))} />
+              <Input
+                id="sw-dom"
+                type="number"
+                min="1"
+                max="28"
+                value={dom}
+                onChange={(e) => setDom(Number(e.target.value))}
+              />
             </div>
           ) : null}
 
           <p className="text-[11px] text-muted-foreground">
-            Each run transfers the smaller of the amount, the cap, and whatever sits above the minimum balance. If nothing is
-            available, the run is skipped and retried on the next schedule.
+            Each run transfers the smaller of the amount, the cap, and whatever sits above the
+            minimum balance. If nothing is available, the run is skipped and retried on the next
+            schedule.
           </p>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={mut.isPending || invalid}>
               {mut.isPending ? "Saving…" : editing ? "Save rules" : "Schedule sweep"}
             </Button>

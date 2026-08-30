@@ -33,8 +33,12 @@ export const Route = createFileRoute("/_admin/admin/operations")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  errorComponent: ({ error }) => <ErrorState title="Operations board unavailable" message={error.message} />,
-  notFoundComponent: () => <EmptyState title="Nothing here" hint="This operations view does not exist." />,
+  errorComponent: ({ error }) => (
+    <ErrorState title="Operations board unavailable" message={error.message} />
+  ),
+  notFoundComponent: () => (
+    <EmptyState title="Nothing here" hint="This operations view does not exist." />
+  ),
   component: OperationsPage,
 });
 
@@ -62,7 +66,8 @@ function OperationsPage() {
 
 function QueueCard({ tile }: { tile: OperationsBoard["queues"][number] }) {
   const breached = tile.oldest_hours !== null && tile.oldest_hours > tile.sla_hours;
-  const warning = !breached && tile.oldest_hours !== null && tile.oldest_hours > tile.sla_hours * 0.6;
+  const warning =
+    !breached && tile.oldest_hours !== null && tile.oldest_hours > tile.sla_hours * 0.6;
   return (
     <a
       href={tile.link}
@@ -72,7 +77,9 @@ function QueueCard({ tile }: { tile: OperationsBoard["queues"][number] }) {
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tile.label}</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {tile.label}
+        </span>
         <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
       </div>
       <span className="text-3xl font-bold tabular-nums">{tile.count}</span>
@@ -98,9 +105,7 @@ function Board() {
 
   return (
     <div className="space-y-6">
-      <SectionCard
-        title="Work queues"
-      >
+      <SectionCard title="Work queues">
         <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-4">
           {data.queues.map((q) => (
             <QueueCard key={q.key} tile={q} />
@@ -112,7 +117,9 @@ function Board() {
         <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-5">
           {data.money.map((m) => (
             <div key={m.key} className="rounded-xl border border-border bg-card p-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{m.label}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {m.label}
+              </p>
               <p className="mt-1 text-2xl font-bold">
                 <Money amount={m.amount} />
               </p>
@@ -127,27 +134,31 @@ function Board() {
       <div className="grid gap-6 xl:grid-cols-2">
         <SectionCard title="Latest activity">
           <div className="p-5">
-          {data.activity.length === 0 ? (
-            <EmptyState title="No activity yet" hint="Audit entries appear here as staff work." />
-          ) : (
-            <ul className="divide-y divide-border text-sm">
-              {data.activity.map((a) => (
-                <li key={a.id} className="flex items-start gap-3 py-2">
-                  <Activity className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{a.action}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">
-                      {a.actor}
-                      {a.actor_role ? ` · ${a.actor_role}` : ""} · {new Date(a.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-          <a href="/admin/audit" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
-            Open the full audit trail
-          </a>
+            {data.activity.length === 0 ? (
+              <EmptyState title="No activity yet" hint="Audit entries appear here as staff work." />
+            ) : (
+              <ul className="divide-y divide-border text-sm">
+                {data.activity.map((a) => (
+                  <li key={a.id} className="flex items-start gap-3 py-2">
+                    <Activity className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{a.action}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {a.actor}
+                        {a.actor_role ? ` · ${a.actor_role}` : ""} ·{" "}
+                        {new Date(a.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <a
+              href="/admin/audit"
+              className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
+            >
+              Open the full audit trail
+            </a>
           </div>
         </SectionCard>
 
@@ -167,7 +178,9 @@ function Board() {
               >
                 <div className="min-w-0">
                   <p className="font-medium">{h.label}</p>
-                  {h.detail ? <p className="truncate text-[11px] text-muted-foreground">{h.detail}</p> : null}
+                  {h.detail ? (
+                    <p className="truncate text-[11px] text-muted-foreground">{h.detail}</p>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-lg font-bold tabular-nums">{h.value}</span>

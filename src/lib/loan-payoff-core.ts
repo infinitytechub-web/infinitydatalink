@@ -61,7 +61,9 @@ export async function computePayoffQuote(
 
   const { data: schedule, error: sErr } = await supabase
     .from("loan_repayments")
-    .select("id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, status")
+    .select(
+      "id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, status",
+    )
     .eq("loan_id", input.loan_id)
     .order("installment_no", { ascending: true });
   if (sErr) throw new Error(sErr.message);
@@ -84,7 +86,8 @@ export async function computePayoffQuote(
     .map((r) => String(r.due_date))
     .filter((d) => d <= settleOn)
     .sort();
-  const accrualFrom = elapsedDates.at(-1) ?? String(loan.disbursed_at ?? "").slice(0, 10) ?? settleOn;
+  const accrualFrom =
+    elapsedDates.at(-1) ?? String(loan.disbursed_at ?? "").slice(0, 10) ?? settleOn;
   const principal = Number(loan.outstanding_principal ?? 0);
   const rate = Number(loan.interest_rate ?? 0);
   const accrualDays = accrualFrom ? daysBetween(accrualFrom, settleOn) : 0;
@@ -93,7 +96,10 @@ export async function computePayoffQuote(
   const penalties = Math.max(0, Number(loan.penalty_accrued ?? 0) - Number(loan.penalty_paid ?? 0));
   const total = principal + interestPastDue + interestAccrued + penalties;
 
-  const { data: accounts } = await supabase.from("savings_accounts").select("balance").eq("user_id", loan.user_id);
+  const { data: accounts } = await supabase
+    .from("savings_accounts")
+    .select("balance")
+    .eq("user_id", loan.user_id);
   const savings = (accounts ?? []).reduce((sum: number, a: any) => sum + Number(a.balance ?? 0), 0);
 
   return {
@@ -106,7 +112,11 @@ export async function computePayoffQuote(
     interest_rate: rate,
     lines: [
       { label: "Outstanding principal", amount: round2(principal) },
-      { label: "Interest past due", amount: round2(interestPastDue), note: "Unpaid interest on elapsed installments" },
+      {
+        label: "Interest past due",
+        amount: round2(interestPastDue),
+        note: "Unpaid interest on elapsed installments",
+      },
       {
         label: "Interest accrued to settlement",
         amount: round2(interestAccrued),

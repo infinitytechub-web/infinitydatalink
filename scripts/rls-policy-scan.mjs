@@ -12,14 +12,14 @@
  * `.security/rls-baseline.json` so the gate fails only when a NEW finding
  * appears; the baseline documents knowingly-accepted exceptions.
  */
-import { readFileSync, readdirSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync, readdirSync } from "node:fs";
+import { join, dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, '..');
-const MIGRATIONS_DIR = join(ROOT, 'supabase/migrations');
-const BASELINE_PATH = join(ROOT, '.security/rls-baseline.json');
+const ROOT = resolve(__dirname, "..");
+const MIGRATIONS_DIR = join(ROOT, "supabase/migrations");
+const BASELINE_PATH = join(ROOT, ".security/rls-baseline.json");
 
 const CREATE_TABLE_RE =
   /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?"?([a-zA-Z_][\w]*)"?/gi;
@@ -28,8 +28,7 @@ const ENABLE_RLS_RE =
   /ALTER\s+TABLE\s+(?:ONLY\s+)?(?:public\.)?"?([a-zA-Z_][\w]*)"?\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi;
 const DISABLE_RLS_RE =
   /ALTER\s+TABLE\s+(?:ONLY\s+)?(?:public\.)?"?([a-zA-Z_][\w]*)"?\s+DISABLE\s+ROW\s+LEVEL\s+SECURITY/gi;
-const CREATE_POLICY_RE =
-  /CREATE\s+POLICY\s+[^\n]*?\s+ON\s+(?:public\.)?"?([a-zA-Z_][\w]*)"?/gi;
+const CREATE_POLICY_RE = /CREATE\s+POLICY\s+[^\n]*?\s+ON\s+(?:public\.)?"?([a-zA-Z_][\w]*)"?/gi;
 const GRANT_RE =
   /GRANT\s+[\s\S]{0,200}?\s+ON\s+(?:TABLE\s+)?(?:public\.)?"?([a-zA-Z_][\w]*)"?\s+TO\s/gi;
 
@@ -42,7 +41,7 @@ function collect(sql, re, into) {
 
 function scan() {
   const files = readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith('.sql'))
+    .filter((f) => f.endsWith(".sql"))
     .sort();
 
   const tables = new Set();
@@ -51,10 +50,10 @@ function scan() {
   const grants = new Set();
 
   for (const file of files) {
-    const sql = readFileSync(join(MIGRATIONS_DIR, file), 'utf8');
+    const sql = readFileSync(join(MIGRATIONS_DIR, file), "utf8");
 
     for (const m of sql.matchAll(CREATE_TABLE_RE)) {
-      const full = m[0].replace(/^[\s\S]*?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?/i, '');
+      const full = m[0].replace(/^[\s\S]*?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?/i, "");
       if (NON_PUBLIC_PREFIX.test(full)) continue;
       tables.add(m[1].toLowerCase());
     }
@@ -77,7 +76,7 @@ function scan() {
 
 function loadBaseline() {
   try {
-    return new Set(JSON.parse(readFileSync(BASELINE_PATH, 'utf8')).accepted ?? []);
+    return new Set(JSON.parse(readFileSync(BASELINE_PATH, "utf8")).accepted ?? []);
   } catch {
     return new Set();
   }
@@ -89,19 +88,21 @@ const isNew = findings.filter((f) => !baseline.has(f));
 const fixed = [...baseline].filter((f) => !findings.includes(f));
 
 console.log(`RLS scan: ${tableCount} public table(s), ${findings.length} finding(s).`);
-if (process.argv.includes('--list')) for (const f of findings) console.log('  -', f);
+if (process.argv.includes("--list")) for (const f of findings) console.log("  -", f);
 
 if (fixed.length) {
-  console.warn('\n⚠️  Baseline entries no longer reproduce (remove them):');
-  for (const f of fixed) console.warn('   -', f);
-  if (process.env.SECURITY_GATE_STRICT === '1') process.exit(1);
+  console.warn("\n⚠️  Baseline entries no longer reproduce (remove them):");
+  for (const f of fixed) console.warn("   -", f);
+  if (process.env.SECURITY_GATE_STRICT === "1") process.exit(1);
 }
 
 if (isNew.length) {
-  console.error('\n❌ SECURITY GATE: new RLS findings.');
-  for (const f of isNew) console.error('   +', f);
-  console.error('\nFix the migration, or add the exact string to .security/rls-baseline.json with a review note.');
+  console.error("\n❌ SECURITY GATE: new RLS findings.");
+  for (const f of isNew) console.error("   +", f);
+  console.error(
+    "\nFix the migration, or add the exact string to .security/rls-baseline.json with a review note.",
+  );
   process.exit(1);
 }
 
-console.log('\n✅ No new RLS findings.');
+console.log("\n✅ No new RLS findings.");

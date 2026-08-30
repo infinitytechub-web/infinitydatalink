@@ -84,7 +84,12 @@ function ChangeRequestDetailPage() {
         hint={(query.error as Error | null)?.message ?? "It may have been removed."}
         action={
           <Button asChild size="sm" variant="outline">
-            <Link to="/admin/change-approvals" search={{ status: "pending", kind: "all", q: "", page: 1, pageSize: 25 }}>Back to pending review</Link>
+            <Link
+              to="/admin/change-approvals"
+              search={{ status: "pending", kind: "all", q: "", page: 1, pageSize: 25 }}
+            >
+              Back to pending review
+            </Link>
           </Button>
         }
       />
@@ -99,7 +104,10 @@ function ChangeRequestDetailPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button asChild size="sm" variant="outline">
-          <Link to="/admin/change-approvals" search={{ status: "pending", kind: "all", q: "", page: 1, pageSize: 25 }}>
+          <Link
+            to="/admin/change-approvals"
+            search={{ status: "pending", kind: "all", q: "", page: 1, pageSize: 25 }}
+          >
             <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back to pending review
           </Link>
         </Button>
@@ -161,7 +169,9 @@ function ChangeRequestDetailPage() {
               {request.is_own_request ? " (you)" : ""}
             </Field>
             <Field label="Requested at">{new Date(request.requested_at).toLocaleString()}</Field>
-            <Field label="Reviewed by">{request.reviewer_email ?? request.reviewed_by ?? "—"}</Field>
+            <Field label="Reviewed by">
+              {request.reviewer_email ?? request.reviewed_by ?? "—"}
+            </Field>
             <Field label="Reviewed at">
               {request.reviewed_at ? new Date(request.reviewed_at).toLocaleString() : "—"}
             </Field>
@@ -192,14 +202,19 @@ function ChangeRequestDetailPage() {
             </Button>
           }
         >
-          <pre className="max-h-96 overflow-auto p-5 font-mono text-xs text-muted-foreground">{payloadJson}</pre>
+          <pre className="max-h-96 overflow-auto p-5 font-mono text-xs text-muted-foreground">
+            {payloadJson}
+          </pre>
         </SectionCard>
       </div>
 
       <SectionCard title="Audit history for this request">
         {audit.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No audit entries yet" hint="Lifecycle events appear here as they happen." />
+            <EmptyState
+              title="No audit entries yet"
+              hint="Lifecycle events appear here as they happen."
+            />
           </div>
         ) : (
           <ol className="divide-y divide-border/40">
@@ -208,7 +223,9 @@ function ChangeRequestDetailPage() {
                 <span className="w-40 shrink-0 text-xs text-muted-foreground tabular-nums">
                   {new Date(entry.created_at).toLocaleString()}
                 </span>
-                <span className="font-medium text-foreground">{ACTION_LABELS[entry.action] ?? entry.action}</span>
+                <span className="font-medium text-foreground">
+                  {ACTION_LABELS[entry.action] ?? entry.action}
+                </span>
                 <span className="text-xs text-muted-foreground">
                   {entry.actor_email ?? "system"}
                   {entry.actor_role ? ` · ${entry.actor_role}` : ""}

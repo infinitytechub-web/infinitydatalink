@@ -14,10 +14,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { calculateAge, isMinor, validateDateOfBirth } from "@/lib/age";
 import { GHANA_REGIONS, districtsForRegion } from "@/lib/ghana-locations";
 
-import {
-  beginPasskeyAuthentication,
-  finishPasskeyAuthentication,
-} from "@/lib/passkeys.functions";
+import { beginPasskeyAuthentication, finishPasskeyAuthentication } from "@/lib/passkeys.functions";
 import {
   GHANA_CARD_DIGITS,
   GHANA_CARD_REGEX,
@@ -28,8 +25,6 @@ import {
   toCanonicalGhanaCard,
   type MembershipType,
 } from "@/lib/member-registration";
-
-
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -124,7 +119,6 @@ function AuthPage() {
         {branding.footer_html ? (
           <div
             className="mb-2 normal-case tracking-normal text-muted-foreground"
-            // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(branding.footer_html, {
                 ALLOWED_TAGS: ["a", "b", "strong", "i", "em", "u", "br", "span", "p", "small"],
@@ -148,7 +142,6 @@ function AuthPage() {
     </div>
   );
 }
-
 
 function LoginPanel({ kind }: { kind: PanelKind }) {
   const isAdmin = kind === "admin";
@@ -273,7 +266,6 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
   const [district, setDistrict] = useState("");
   const [membershipType, setMembershipType] = useState<MembershipType>("individual");
 
-
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -375,7 +367,6 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               region: region || null,
               district: district || null,
               is_minor: dob ? isMinor(dob) : null,
-
             },
           },
         });
@@ -437,7 +428,10 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
             />
           </Field>
 
-          <Field label="Ghana Card number" hint={<span className="text-[11px] text-muted-foreground">10 digits</span>}>
+          <Field
+            label="Ghana Card number"
+            hint={<span className="text-[11px] text-muted-foreground">10 digits</span>}
+          >
             <div className="flex items-stretch gap-0">
               <span className="flex items-center rounded-l-lg border border-r-0 border-emerald-deep/15 bg-emerald-deep/5 px-3 text-sm font-semibold text-muted-foreground">
                 GHA-
@@ -538,7 +532,6 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
               ))}
             </select>
           </Field>
-
         </>
       ) : null}
 
@@ -624,7 +617,6 @@ function AuthForm({ mode, kind }: { mode: "signin" | "signup"; kind: PanelKind }
       {err ? <p className="text-xs font-medium text-destructive">{err}</p> : null}
       {notice ? <p className="text-xs font-medium text-teal-700">{notice}</p> : null}
 
-
       <button
         type="submit"
         disabled={loading}
@@ -678,7 +670,6 @@ function BiometricButton({ kind }: { kind: PanelKind }) {
   const navigate = useNavigate();
 
   if (supported === false) return null;
-
 
   const onClick = async () => {
     setMsg(null);
@@ -753,7 +744,6 @@ function BiometricButton({ kind }: { kind: PanelKind }) {
   );
 }
 
-
 function GoogleButton() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -791,10 +781,22 @@ function GoogleButton() {
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 48 48">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+      <path
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+      />
       <path fill="none" d="M0 0h48v48H0z" />
     </svg>
   );

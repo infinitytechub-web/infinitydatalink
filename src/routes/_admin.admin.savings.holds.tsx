@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Lock, Unlock } from "lucide-react";
 import {
@@ -13,7 +19,13 @@ import {
   SectionCardSkeleton,
 } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,10 +53,14 @@ export const Route = createFileRoute("/_admin/admin/savings/holds")({
       { title: "Savings holds — IT-360 CashApp" },
       {
         name: "description",
-        content: "Place and release collateral or legal holds that reduce a member's withdrawable savings balance.",
+        content:
+          "Place and release collateral or legal holds that reduce a member's withdrawable savings balance.",
       },
       { property: "og:title", content: "Savings holds — IT-360 CashApp" },
-      { property: "og:description", content: "Collateral and legal holds on member savings balances." },
+      {
+        property: "og:description",
+        content: "Collateral and legal holds on member savings balances.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -102,7 +118,12 @@ function Body({ status, stepUp }: { status: HoldFilter; stepUp: ReturnType<typeo
   return (
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-3">
-        <KPIStat label="Total held" value={<Money amount={data.held_total} />} accent hint="Across active holds" />
+        <KPIStat
+          label="Total held"
+          value={<Money amount={data.held_total} />}
+          accent
+          hint="Across active holds"
+        />
         <KPIStat label="Holds shown" value={<span className="tabular">{data.rows.length}</span>} />
         <KPIStat label="Total records" value={<span className="tabular">{data.total}</span>} />
       </section>
@@ -110,7 +131,10 @@ function Body({ status, stepUp }: { status: HoldFilter; stepUp: ReturnType<typeo
       <SectionCard title="Holds">
         {data.rows.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No holds" hint="Place a hold to encumber a member's savings balance." />
+            <EmptyState
+              title="No holds"
+              hint="Place a hold to encumber a member's savings balance."
+            />
           </div>
         ) : (
           <table className="w-full">
@@ -161,12 +185,20 @@ function Body({ status, stepUp }: { status: HoldFilter; stepUp: ReturnType<typeo
         )}
       </SectionCard>
 
-      {releasing && <ReleaseDialog hold={releasing} stepUp={stepUp} onClose={() => setReleasing(null)} />}
+      {releasing && (
+        <ReleaseDialog hold={releasing} stepUp={stepUp} onClose={() => setReleasing(null)} />
+      )}
     </div>
   );
 }
 
-function PlaceHoldDialog({ stepUp, onClose }: { stepUp: ReturnType<typeof useStepUp>; onClose: () => void }) {
+function PlaceHoldDialog({
+  stepUp,
+  onClose,
+}: {
+  stepUp: ReturnType<typeof useStepUp>;
+  onClose: () => void;
+}) {
   const qc = useQueryClient();
   const [term, setTerm] = useState("");
   const [accountId, setAccountId] = useState("");
@@ -223,18 +255,29 @@ function PlaceHoldDialog({ stepUp, onClose }: { stepUp: ReturnType<typeof useSte
               <option value="">Select an account…</option>
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.member_name ?? "Member"} ({a.member_no ?? "—"}) · {a.label} · {a.balance.toFixed(2)}
+                  {a.member_name ?? "Member"} ({a.member_no ?? "—"}) · {a.label} ·{" "}
+                  {a.balance.toFixed(2)}
                 </option>
               ))}
             </select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="hold-amount">Amount to hold</Label>
-            <Input id="hold-amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <Input
+              id="hold-amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="hold-reason">Reason (required)</Label>
-            <Textarea id="hold-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
+            <Textarea
+              id="hold-reason"
+              rows={3}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter>
@@ -243,7 +286,9 @@ function PlaceHoldDialog({ stepUp, onClose }: { stepUp: ReturnType<typeof useSte
           </Button>
           <Button
             onClick={() => mutation.mutate()}
-            disabled={mutation.isPending || !accountId || Number(amount) <= 0 || reason.trim().length < 5}
+            disabled={
+              mutation.isPending || !accountId || Number(amount) <= 0 || reason.trim().length < 5
+            }
           >
             {mutation.isPending ? "Placing…" : "Place hold"}
           </Button>
@@ -283,17 +328,26 @@ function ReleaseDialog({
           <DialogTitle>Release hold</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Releasing returns {hold.amount.toFixed(2)} to {hold.member_name ?? "the member"}'s withdrawable balance.
+          Releasing returns {hold.amount.toFixed(2)} to {hold.member_name ?? "the member"}'s
+          withdrawable balance.
         </p>
         <div className="space-y-1.5">
           <Label htmlFor="release-reason">Reason (required)</Label>
-          <Textarea id="release-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
+          <Textarea
+            id="release-reason"
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || reason.trim().length < 5}>
+          <Button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || reason.trim().length < 5}
+          >
             {mutation.isPending ? "Releasing…" : "Release hold"}
           </Button>
         </DialogFooter>

@@ -5,10 +5,15 @@ import { EntityRegistrationWizard } from "@/components/entity-registration-wizar
 export const Route = createFileRoute("/_member/app/entities/register")({
   component: RegisterEntity,
   errorComponent: ({ error }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Could not open form" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Could not open form"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },

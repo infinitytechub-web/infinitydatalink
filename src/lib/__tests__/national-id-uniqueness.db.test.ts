@@ -82,9 +82,7 @@ d("database-level national ID uniqueness", () => {
     ];
     for (const [type, raw] of cases) {
       const ui = nationalIdKey(type, normalizeNationalId(type, raw));
-      const db = q(
-        `select coalesce(public.national_id_key('${type}', ${literal(raw)}), '');`,
-      );
+      const db = q(`select coalesce(public.national_id_key('${type}', ${literal(raw)}), '');`);
       expect(db, `${type} / "${raw}"`).toBe(ui ?? "");
     }
   });
@@ -139,7 +137,11 @@ r("concurrent registrations with the same national ID", () => {
     const signUp = (i: number) =>
       fetch(`${url}/auth/v1/signup`, {
         method: "POST",
-        headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           email: `e2e.race.${stamp}.${i}@example.test`,
           password: `Race-${stamp}-${i}!`,

@@ -9,11 +9,7 @@ export function AuthBrandMark({ className = "" }: { className?: string }) {
   return (
     <Link to="/" className={`flex items-center gap-2 ${className}`}>
       {branding.logo_url ? (
-        <img
-          src={branding.logo_url}
-          alt={appName}
-          className="h-9 w-9 rounded-md object-contain"
-        />
+        <img src={branding.logo_url} alt={appName} className="h-9 w-9 rounded-md object-contain" />
       ) : (
         <div className="flex size-9 items-center justify-center rounded-md bg-emerald-deep shadow-sm">
           <div className="size-3 rotate-45 border-2 border-gold" />

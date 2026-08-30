@@ -1,6 +1,12 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -17,17 +23,14 @@ import { PremiumStatCard } from "@/components/premium";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
 import { generateBusinessInsights } from "@/lib/ai-insights.functions";
-import { getAdminOverview, type ActivityEntry, type PendingApproval } from "@/lib/admin-analytics.functions";
+import {
+  getAdminOverview,
+  type ActivityEntry,
+  type PendingApproval,
+} from "@/lib/admin-analytics.functions";
 import { decideLoan } from "@/lib/admin-loans.functions";
 import { useStepUp } from "@/components/step-up-dialog";
-import {
-  ClipboardCheck,
-  Landmark,
-  PiggyBank,
-  RefreshCw,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ClipboardCheck, Landmark, PiggyBank, RefreshCw, Sparkles, Users } from "lucide-react";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
 import { PurgeControlsWidget } from "@/components/purge-controls-widget";
 import { RealtimeNotifications } from "@/components/realtime-notifications";
@@ -142,7 +145,11 @@ function DashboardBody() {
           tone="emerald"
           icon={<PiggyBank className="size-4" />}
           label="Assets under management"
-          value={<>GH₵ <span className="tabular">{formatCompact(o.savings_aum)}</span></>}
+          value={
+            <>
+              GH₵ <span className="tabular">{formatCompact(o.savings_aum)}</span>
+            </>
+          }
           delta={o.savings_delta_mom}
           deltaLabel="MoM"
           hint="Net contributions month over month"
@@ -151,7 +158,11 @@ function DashboardBody() {
           tone="sky"
           icon={<Landmark className="size-4" />}
           label="Active loans"
-          value={<>GH₵ <span className="tabular">{formatCompact(o.loans_active_principal)}</span></>}
+          value={
+            <>
+              GH₵ <span className="tabular">{formatCompact(o.loans_active_principal)}</span>
+            </>
+          }
           progress={o.loans_on_time_rate}
           hint={`${(o.loans_on_time_rate * 100).toFixed(1)}% approved`}
         />
@@ -163,7 +174,6 @@ function DashboardBody() {
           hint={`${o.pending_loans} loans · ${o.pending_withdrawals} withdrawals`}
         />
       </section>
-
 
       <div className="grid gap-8 lg:grid-cols-3">
         <ApprovalQueue approvals={o.pending_approvals} />
@@ -184,7 +194,11 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
   const decide = useServerFn(decideLoan);
   const { ensure, dialog } = useStepUp();
   const mutation = useMutation({
-    mutationFn: async (input: { loan_id: string; decision: "approved" | "rejected"; note: string }) => {
+    mutationFn: async (input: {
+      loan_id: string;
+      decision: "approved" | "rejected";
+      note: string;
+    }) => {
       const step_up_token = await ensure(
         `${input.decision === "approved" ? "approve" : "reject"} pending loan`,
       );
@@ -217,78 +231,87 @@ function ApprovalQueue({ approvals }: { approvals: PendingApproval[] }) {
   return (
     <>
       {dialog}
-    <SectionCard
-      title="Approval queue"
-      className="lg:col-span-2"
-      action={
-        <ExportBar
-          permission="export:approvals"
-          title="Pending Approvals"
-          subtitle={`${approvals.length} pending items`}
-          filename="approval_queue"
-          columns={[
-            { header: "Ref", accessor: (a: PendingApproval) => a.ref },
-            { header: "Member", accessor: (a) => a.member_name ?? "—" },
-            { header: "Member No", accessor: (a) => a.member_no ?? "—" },
-            { header: "Product", accessor: (a) => a.product },
-            { header: "Amount", accessor: (a) => formatMoney(a.amount), align: "right" },
-            { header: "Submitted", accessor: (a) => new Date(a.created_at).toISOString() },
-          ]}
-          rows={approvals}
-        />
-      }
-    >
-      {approvals.length === 0 ? (
-        <div className="p-6">
-          <EmptyState title="No pending approvals" hint="New loan applications will appear here." />
-        </div>
-      ) : (
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
-              <th className="px-6 py-3 font-medium">Ref</th>
-              <th className="px-6 py-3 font-medium">Member</th>
-              <th className="px-6 py-3 font-medium">Product</th>
-              <th className="px-6 py-3 text-right font-medium">Amount</th>
-              <th className="px-6 py-3 text-right font-medium">Status</th>
-              <th className="px-6 py-3 text-right font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-emerald-deep/5">
-            {approvals.map((a) => (
-              <tr key={a.id}>
-                <td className="tabular px-6 py-4 text-sm font-semibold">{a.ref}</td>
-                <td className="px-6 py-4 text-sm">
-                  <div>{a.member_name ?? "—"}</div>
-                  <div className="tabular text-[11px] text-muted-foreground">{a.member_no ?? ""}</div>
-                </td>
-                <td className="px-6 py-4 text-sm text-muted-foreground">{a.product}</td>
-                <td className="px-6 py-4 text-right"><Money amount={a.amount} /></td>
-                <td className="px-6 py-4 text-right"><StatusPill status="pending" /></td>
-                <td className="px-6 py-4 text-right">
-                  <div className="flex justify-end gap-1">
-                    <button
-                      disabled={mutation.isPending}
-                      onClick={() => act(a.id, "approved")}
-                      className="rounded bg-emerald-deep px-2.5 py-1 text-[10px] font-bold uppercase text-cream hover:bg-emerald-mid disabled:opacity-50"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      disabled={mutation.isPending}
-                      onClick={() => act(a.id, "rejected")}
-                      className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase hover:bg-cream disabled:opacity-50"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </td>
+      <SectionCard
+        title="Approval queue"
+        className="lg:col-span-2"
+        action={
+          <ExportBar
+            permission="export:approvals"
+            title="Pending Approvals"
+            subtitle={`${approvals.length} pending items`}
+            filename="approval_queue"
+            columns={[
+              { header: "Ref", accessor: (a: PendingApproval) => a.ref },
+              { header: "Member", accessor: (a) => a.member_name ?? "—" },
+              { header: "Member No", accessor: (a) => a.member_no ?? "—" },
+              { header: "Product", accessor: (a) => a.product },
+              { header: "Amount", accessor: (a) => formatMoney(a.amount), align: "right" },
+              { header: "Submitted", accessor: (a) => new Date(a.created_at).toISOString() },
+            ]}
+            rows={approvals}
+          />
+        }
+      >
+        {approvals.length === 0 ? (
+          <div className="p-6">
+            <EmptyState
+              title="No pending approvals"
+              hint="New loan applications will appear here."
+            />
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
+                <th className="px-6 py-3 font-medium">Ref</th>
+                <th className="px-6 py-3 font-medium">Member</th>
+                <th className="px-6 py-3 font-medium">Product</th>
+                <th className="px-6 py-3 text-right font-medium">Amount</th>
+                <th className="px-6 py-3 text-right font-medium">Status</th>
+                <th className="px-6 py-3 text-right font-medium">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </SectionCard>
+            </thead>
+            <tbody className="divide-y divide-emerald-deep/5">
+              {approvals.map((a) => (
+                <tr key={a.id}>
+                  <td className="tabular px-6 py-4 text-sm font-semibold">{a.ref}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <div>{a.member_name ?? "—"}</div>
+                    <div className="tabular text-[11px] text-muted-foreground">
+                      {a.member_no ?? ""}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{a.product}</td>
+                  <td className="px-6 py-4 text-right">
+                    <Money amount={a.amount} />
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <StatusPill status="pending" />
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        disabled={mutation.isPending}
+                        onClick={() => act(a.id, "approved")}
+                        className="rounded bg-emerald-deep px-2.5 py-1 text-[10px] font-bold uppercase text-cream hover:bg-emerald-mid disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        disabled={mutation.isPending}
+                        onClick={() => act(a.id, "rejected")}
+                        className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase hover:bg-cream disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </SectionCard>
     </>
   );
 }
@@ -404,4 +427,3 @@ function useAiInsights() {
     retry: 1,
   });
 }
-

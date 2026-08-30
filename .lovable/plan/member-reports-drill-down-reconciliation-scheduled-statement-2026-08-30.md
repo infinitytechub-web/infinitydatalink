@@ -32,18 +32,21 @@ A new tab on the reports hub, scoped to the signed-in member:
 ## Technical notes
 
 **Database (one migration)**
+
 - `statement_schedules`: user_id, dataset, frequency, channels (email/sms booleans), timezone-free `next_run_at`, `last_run_at`, `last_status`, `last_error`, active flag, timestamps + updated_at trigger. GRANTs for `authenticated` (own rows) and `service_role`; RLS scoped to `auth.uid()`.
 - `statement_runs`: schedule_id, period_start/period_end, row_count, channels attempted, status, error, created_at — unique on (schedule_id, period_start, period_end) for idempotent re-runs. GRANT select to `authenticated`, all to `service_role`.
 - `statement_job_lease`: single-row lease with expiry for single-flight.
 - `pg_cron` entry hitting the new hook hourly.
 
 **Server**
+
 - `src/lib/member-reports.functions.ts`: extend row builders to carry `record_id` (and `record_kind`) without changing the exported column sets; add `getMyRecordDetail` (auth middleware, own-record checks per table) returning a plain DTO.
 - `src/lib/member-reconciliation.functions.ts`: `runMyReconciliation` with the pending/cleared aggregation and mismatch rules; signed-kind map reused from the admin savings reconciliation logic.
 - `src/lib/statement-schedules.functions.ts`: list/upsert/delete/pause schedules plus `runMyScheduleNow` for a manual send; `statement-schedules.server.ts` holds the due-schedule processor (bounded batch, lease, idempotent run rows, `enqueue_email` for email and the existing notification dispatch for SMS, pause on repeated failure).
 - `src/routes/api/public/hooks/statement-schedules.ts`: cron hook following the existing hook pattern (`authorizeCronRequest`, admin client, JSON result, paused-state guard, bounded batch).
 
 **UI**
+
 - `src/routes/_member.app.reports.tsx`: linked reference cells, `?record=` details panel, a Reconciliation tab, and a Scheduled statements card.
 - New components `src/components/report-record-details.tsx` and `src/components/statement-schedule-panel.tsx`; reuse `ExportBar`, `SectionCard`, `KPIStat`, `Money`, `StatusPill`.
 - Head metadata on the reports route stays unique; no new top-level routes are added.

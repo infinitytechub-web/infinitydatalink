@@ -49,11 +49,7 @@ export function FxConverterWidget() {
       <div className="grid gap-3 md:grid-cols-4">
         <div>
           <Label className="text-xs">Amount</Label>
-          <Input
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
+          <Input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
         <div>
           <Label className="text-xs">From</Label>

@@ -23,7 +23,6 @@ export const KYC_REQUIRED_PROFILE_FIELDS = [
 export { KYC_REQUIRED_DOC_TYPES } from "@/lib/kyc-document-checklist";
 import { KYC_REQUIRED_DOC_TYPES } from "@/lib/kyc-document-checklist";
 
-
 const FIELD_LABEL: Record<string, string> = {
   full_name: "Full name",
   phone: "Telephone number",

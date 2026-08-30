@@ -6,7 +6,8 @@ const VIEW_ROLES = new Set(["super_admin", "finance_officer", "auditor", "compli
 async function assertView(supabase: any, userId: string) {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   const roles = (data ?? []).map((r: any) => r.role as string);
-  if (!roles.some((r: string) => VIEW_ROLES.has(r))) throw new Error("Forbidden: finance/audit role required");
+  if (!roles.some((r: string) => VIEW_ROLES.has(r)))
+    throw new Error("Forbidden: finance/audit role required");
 }
 
 const RangeSchema = z
@@ -22,7 +23,13 @@ const RangeSchema = z
   });
 
 const INCOME_KINDS = new Set(["deposit", "loan_repayment", "transfer_in"]);
-const EXPENSE_KINDS = new Set(["withdrawal", "loan_disbursement", "expense", "transfer_out", "adjustment"]);
+const EXPENSE_KINDS = new Set([
+  "withdrawal",
+  "loan_disbursement",
+  "expense",
+  "transfer_out",
+  "adjustment",
+]);
 
 function isIncome(k: string) {
   return INCOME_KINDS.has(k);
@@ -82,7 +89,12 @@ export const getFinancialSummary = createServerFn({ method: "GET" })
       sb.from("savings_accounts").select("balance,status"),
       sb.from("loans").select("outstanding_principal,status"),
     ]);
-    const txns = (txnRes.data ?? []) as Array<{ kind: string; amount: number; status: string; created_at: string }>;
+    const txns = (txnRes.data ?? []) as Array<{
+      kind: string;
+      amount: number;
+      status: string;
+      created_at: string;
+    }>;
 
     let income_total = 0;
     let expense_total = 0;
@@ -123,14 +135,24 @@ export const getFinancialSummary = createServerFn({ method: "GET" })
       income_total,
       expense_total,
       net: income_total - expense_total,
-      income_by_kind: Array.from(inKind, ([kind, amount]) => ({ kind, amount })).sort((a, b) => b.amount - a.amount),
-      expense_by_kind: Array.from(outKind, ([kind, amount]) => ({ kind, amount })).sort((a, b) => b.amount - a.amount),
+      income_by_kind: Array.from(inKind, ([kind, amount]) => ({ kind, amount })).sort(
+        (a, b) => b.amount - a.amount,
+      ),
+      expense_by_kind: Array.from(outKind, ([kind, amount]) => ({ kind, amount })).sort(
+        (a, b) => b.amount - a.amount,
+      ),
       daily_series,
       balance_snapshot: {
         aum: savings.reduce((s, r) => s + Number(r.balance), 0),
-        outstanding_loans: loans.filter((l) => l.status === "active").reduce((s, l) => s + Number(l.outstanding_principal), 0),
-        pending_expenses_amount: expenses.filter((e) => e.status === "pending").reduce((s, e) => s + Number(e.amount), 0),
-        pending_transfers_amount: transfers.filter((t) => t.status === "pending").reduce((s, t) => s + Number(t.amount), 0),
+        outstanding_loans: loans
+          .filter((l) => l.status === "active")
+          .reduce((s, l) => s + Number(l.outstanding_principal), 0),
+        pending_expenses_amount: expenses
+          .filter((e) => e.status === "pending")
+          .reduce((s, e) => s + Number(e.amount), 0),
+        pending_transfers_amount: transfers
+          .filter((t) => t.status === "pending")
+          .reduce((s, t) => s + Number(t.amount), 0),
         active_savings_accounts: savings.filter((s) => s.status === "active").length,
         active_loans: loans.filter((l) => l.status === "active").length,
       },
@@ -221,7 +243,9 @@ export const getContributionsReport = createServerFn({ method: "GET" })
       pending_total,
       cleared_count,
       pending_count,
-      by_plan: Array.from(planAgg, ([plan, v]) => ({ plan, ...v })).sort((a, b) => b.amount - a.amount),
+      by_plan: Array.from(planAgg, ([plan, v]) => ({ plan, ...v })).sort(
+        (a, b) => b.amount - a.amount,
+      ),
       daily: Array.from(daily, ([day, v]) => ({ day, amount: v.income })),
       rows: mapped,
     };
@@ -255,7 +279,12 @@ export const getIncomeBreakdown = createServerFn({ method: "GET" })
     const byChannel = new Map<string, { amount: number; count: number }>();
     const daily = bucketDays(data.fromDate, data.toDate);
     let total = 0;
-    for (const r of (rows ?? []) as Array<{ kind: string; amount: number; channel: string | null; created_at: string }>) {
+    for (const r of (rows ?? []) as Array<{
+      kind: string;
+      amount: number;
+      channel: string | null;
+      created_at: string;
+    }>) {
       const a = Number(r.amount);
       total += a;
       const k = byKind.get(r.kind) ?? { amount: 0, count: 0 };
@@ -274,8 +303,12 @@ export const getIncomeBreakdown = createServerFn({ method: "GET" })
       from: data.from,
       to: data.to,
       total,
-      by_kind: Array.from(byKind, ([kind, v]) => ({ kind, ...v })).sort((a, b) => b.amount - a.amount),
-      by_channel: Array.from(byChannel, ([channel, v]) => ({ channel, ...v })).sort((a, b) => b.amount - a.amount),
+      by_kind: Array.from(byKind, ([kind, v]) => ({ kind, ...v })).sort(
+        (a, b) => b.amount - a.amount,
+      ),
+      by_channel: Array.from(byChannel, ([channel, v]) => ({ channel, ...v })).sort(
+        (a, b) => b.amount - a.amount,
+      ),
       daily: Array.from(daily, ([day, v]) => ({ day, amount: v.income })),
     };
   });
@@ -309,7 +342,7 @@ export const getExpensesBreakdown = createServerFn({ method: "GET" })
     if (expRes.error) throw new Error(expRes.error.message);
 
     const catMap = new Map<string, string>();
-    for (const c of ((catRes.data ?? []) as any[])) catMap.set(c.code, c.label);
+    for (const c of (catRes.data ?? []) as any[]) catMap.set(c.code, c.label);
 
     const daily = bucketDays(data.fromDate, data.toDate);
     let total_paid = 0;
@@ -354,9 +387,11 @@ export const getExpensesBreakdown = createServerFn({ method: "GET" })
       total_paid,
       total_pending,
       total_approved,
-      by_category: Array.from(byCat, ([code, v]) => ({ code, label: catMap.get(code) ?? code, ...v })).sort(
-        (a, b) => b.amount - a.amount,
-      ),
+      by_category: Array.from(byCat, ([code, v]) => ({
+        code,
+        label: catMap.get(code) ?? code,
+        ...v,
+      })).sort((a, b) => b.amount - a.amount),
       by_status: Array.from(byStatus, ([status, v]) => ({ status, ...v })),
       daily: Array.from(daily, ([day, v]) => ({ day, amount: v.expense })),
       top_vendors: Array.from(byVendor, ([vendor, v]) => ({ vendor, ...v }))

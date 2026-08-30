@@ -127,12 +127,9 @@ export async function exportPdf<T>(opts: ExportOptions<T>) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.text(BRAND.address, pageW / 2, y + 16, { align: "center" });
-    doc.text(
-      `Generated ${new Date().toLocaleString(cfg.currency.locale)}`,
-      pageW / 2,
-      y + 28,
-      { align: "center" },
-    );
+    doc.text(`Generated ${new Date().toLocaleString(cfg.currency.locale)}`, pageW / 2, y + 28, {
+      align: "center",
+    });
     doc.setFont("helvetica", "bold");
     doc.text(`Page ${pageNum} of ${pageCount}`, pageW - 32, y + 22, { align: "right" });
   };
@@ -358,7 +355,11 @@ export async function exportDocx<T>(opts: ExportOptions<T>) {
   const border = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
   const borders = { top: border, bottom: border, left: border, right: border };
   const align = (a?: "left" | "right" | "center") =>
-    a === "right" ? AlignmentType.RIGHT : a === "center" ? AlignmentType.CENTER : AlignmentType.LEFT;
+    a === "right"
+      ? AlignmentType.RIGHT
+      : a === "center"
+        ? AlignmentType.CENTER
+        : AlignmentType.LEFT;
 
   const cell = (text: string, i: number, header: boolean, a?: "left" | "right" | "center") =>
     new TableCell({
@@ -369,7 +370,14 @@ export async function exportDocx<T>(opts: ExportOptions<T>) {
       children: [
         new Paragraph({
           alignment: align(a),
-          children: [new TextRun({ text, bold: header, size: header ? 18 : 18, color: header ? "F5F0E0" : "0B1F1A" })],
+          children: [
+            new TextRun({
+              text,
+              bold: header,
+              size: header ? 18 : 18,
+              color: header ? "F5F0E0" : "0B1F1A",
+            }),
+          ],
         }),
       ],
     });
@@ -385,14 +393,19 @@ export async function exportDocx<T>(opts: ExportOptions<T>) {
       ...opts.rows.map(
         (r) =>
           new TableRow({
-            children: opts.columns.map((c, i) => cell(sanitizeCell(c.accessor(r)), i, false, c.align)),
+            children: opts.columns.map((c, i) =>
+              cell(sanitizeCell(c.accessor(r)), i, false, c.align),
+            ),
           }),
       ),
     ],
   });
 
   const meta = (text: string) =>
-    new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text, size: 18, color: "3F5B52" })] });
+    new Paragraph({
+      spacing: { after: 40 },
+      children: [new TextRun({ text, size: 18, color: "3F5B52" })],
+    });
 
   const wordDoc = new Document({
     styles: { default: { document: { run: { font: "Arial", size: 20 } } } },

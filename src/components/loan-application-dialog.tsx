@@ -4,11 +4,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { applyForLoan } from "@/lib/member-data.functions";
 import { checkMyLoanEligibility, listLoanProducts } from "@/lib/loan-products.functions";
 
@@ -35,7 +48,9 @@ export function LoanApplicationDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [productId, setProductId] = useState<string>("");
-  const [amount, setAmount] = useState<string>(defaultAmount && defaultAmount > 0 ? String(defaultAmount) : "");
+  const [amount, setAmount] = useState<string>(
+    defaultAmount && defaultAmount > 0 ? String(defaultAmount) : "",
+  );
   const [term, setTerm] = useState<string>(defaultTermMonths ? String(defaultTermMonths) : "12");
   const [purpose, setPurpose] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -58,12 +73,19 @@ export function LoanApplicationDialog({
     if (!productId && products.length > 0) setProductId(products[0]!.id);
   }, [products, productId]);
 
-  const product = useMemo(() => products.find((p) => p.id === productId) ?? null, [products, productId]);
+  const product = useMemo(
+    () => products.find((p) => p.id === productId) ?? null,
+    [products, productId],
+  );
 
   const amountNum = Number(amount);
   const termNum = Number(term);
   const inputsValid =
-    !!productId && Number.isFinite(amountNum) && amountNum > 0 && Number.isInteger(termNum) && termNum >= 1;
+    !!productId &&
+    Number.isFinite(amountNum) &&
+    amountNum > 0 &&
+    Number.isInteger(termNum) &&
+    termNum >= 1;
 
   // Debounce so typing an amount doesn't fire a request per keystroke.
   const [debounced, setDebounced] = useState({ amount: 0, term: 0 });
@@ -79,14 +101,20 @@ export function LoanApplicationDialog({
         data: { product_id: productId, amount: debounced.amount, term_months: debounced.term },
       }),
     enabled:
-      open && !!productId && debounced.amount > 0 && Number.isInteger(debounced.term) && debounced.term >= 1,
+      open &&
+      !!productId &&
+      debounced.amount > 0 &&
+      Number.isInteger(debounced.term) &&
+      debounced.term >= 1,
     staleTime: 30_000,
   });
 
   const mutation = useMutation({
     mutationFn: (input: z.infer<typeof Schema>) => apply({ data: input }),
     onSuccess: (loan) => {
-      toast.success(`Loan application submitted`, { description: `Reference ${loan.ref} · pending review.` });
+      toast.success(`Loan application submitted`, {
+        description: `Reference ${loan.ref} · pending review.`,
+      });
       qc.invalidateQueries({ queryKey: ["member", "loans"] });
       qc.invalidateQueries({ queryKey: ["member", "summary"] });
       setOpen(false);
@@ -141,14 +169,22 @@ export function LoanApplicationDialog({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl text-emerald-deep">Apply for a loan</DialogTitle>
+          <DialogTitle className="font-serif text-xl text-emerald-deep">
+            Apply for a loan
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
             <Label>Product</Label>
-            <Select value={productId} onValueChange={setProductId} disabled={productsQuery.isLoading}>
+            <Select
+              value={productId}
+              onValueChange={setProductId}
+              disabled={productsQuery.isLoading}
+            >
               <SelectTrigger>
-                <SelectValue placeholder={productsQuery.isLoading ? "Loading products…" : "Select a product"} />
+                <SelectValue
+                  placeholder={productsQuery.isLoading ? "Loading products…" : "Select a product"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {products.map((p) => (
@@ -159,9 +195,13 @@ export function LoanApplicationDialog({
               </SelectContent>
             </Select>
             {products.length === 0 && !productsQuery.isLoading && (
-              <p className="text-xs text-muted-foreground">No loan products are currently open for applications.</p>
+              <p className="text-xs text-muted-foreground">
+                No loan products are currently open for applications.
+              </p>
             )}
-            {product?.description && <p className="text-xs text-muted-foreground">{product.description}</p>}
+            {product?.description && (
+              <p className="text-xs text-muted-foreground">{product.description}</p>
+            )}
             {product && (
               <p className="text-xs text-muted-foreground">
                 {ghs(product.min_amount)}–{ghs(product.max_amount)} · {product.min_term_months}–
@@ -173,13 +213,20 @@ export function LoanApplicationDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Amount (GH₵)</Label>
-              <Input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="10000" />
+              <Input
+                inputMode="decimal"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="10000"
+              />
               {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Term (months)</Label>
               <Input inputMode="numeric" value={term} onChange={(e) => setTerm(e.target.value)} />
-              {errors.term_months && <p className="text-xs text-destructive">{errors.term_months}</p>}
+              {errors.term_months && (
+                <p className="text-xs text-destructive">{errors.term_months}</p>
+              )}
             </div>
           </div>
 
@@ -191,7 +238,9 @@ export function LoanApplicationDialog({
                   <Loader2 className="h-3.5 w-3.5 animate-spin" /> Checking eligibility…
                 </p>
               ) : eligibility.isError ? (
-                <p className="text-destructive">Could not check eligibility right now. You can still submit.</p>
+                <p className="text-destructive">
+                  Could not check eligibility right now. You can still submit.
+                </p>
               ) : verdict ? (
                 <div className="space-y-2">
                   <p
@@ -216,11 +265,15 @@ export function LoanApplicationDialog({
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
                     <div className="flex justify-between">
                       <dt>Savings balance</dt>
-                      <dd className="font-medium text-foreground">{ghs(verdict.savings_balance)}</dd>
+                      <dd className="font-medium text-foreground">
+                        {ghs(verdict.savings_balance)}
+                      </dd>
                     </div>
                     <div className="flex justify-between">
                       <dt>Max eligible</dt>
-                      <dd className="font-medium text-foreground">{ghs(verdict.max_eligible_amount)}</dd>
+                      <dd className="font-medium text-foreground">
+                        {ghs(verdict.max_eligible_amount)}
+                      </dd>
                     </div>
                     <div className="flex justify-between">
                       <dt>Interest rate</dt>
@@ -248,7 +301,12 @@ export function LoanApplicationDialog({
 
           <div className="space-y-1.5">
             <Label>Purpose (optional)</Label>
-            <Textarea value={purpose} onChange={(e) => setPurpose(e.target.value)} rows={3} placeholder="Briefly describe the intended use" />
+            <Textarea
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+              rows={3}
+              placeholder="Briefly describe the intended use"
+            />
             {errors.purpose && <p className="text-xs text-destructive">{errors.purpose}</p>}
           </div>
           <DialogFooter>

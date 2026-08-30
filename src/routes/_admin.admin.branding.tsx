@@ -21,10 +21,7 @@ import {
 
 export const Route = createFileRoute("/_admin/admin/branding")({
   head: () => ({
-    meta: [
-      { title: "Branding — IT-360 CashApp" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Branding — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: BrandingPage,
 });
@@ -101,8 +98,7 @@ function BrandingEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source.updated_at, fullQuery.data]);
 
-  const set = <K extends keyof Form>(k: K, v: Form[K]) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const updateFn = useServerFn(updateBranding);
   const uploadFn = useServerFn(uploadBrandingAsset);
@@ -172,9 +168,7 @@ function BrandingEditor() {
   });
 
   const colorsValid =
-    HEX.test(form.primary_color) &&
-    HEX.test(form.accent_color) &&
-    HEX.test(form.secondary_color);
+    HEX.test(form.primary_color) && HEX.test(form.accent_color) && HEX.test(form.secondary_color);
   const canSave = form.app_name.trim().length > 0 && colorsValid && !saveMut.isPending;
 
   // Live preview: while the colors in the form are valid, drive the real theme
@@ -211,19 +205,43 @@ function BrandingEditor() {
 
       <BrandingPreview form={form} logoUrl={branding.logo_url} />
 
-
       <SectionCard title="Identity">
         <div className="grid gap-4 md:grid-cols-2">
-          <FieldText id="app-name" label="App name" value={form.app_name} onChange={(v) => set("app_name", v)} maxLength={60} />
-          <FieldArea id="tagline" label="Tagline (optional)" value={form.tagline} onChange={(v) => set("tagline", v)} maxLength={160} rows={2} />
+          <FieldText
+            id="app-name"
+            label="App name"
+            value={form.app_name}
+            onChange={(v) => set("app_name", v)}
+            maxLength={60}
+          />
+          <FieldArea
+            id="tagline"
+            label="Tagline (optional)"
+            value={form.tagline}
+            onChange={(v) => set("tagline", v)}
+            maxLength={160}
+            rows={2}
+          />
         </div>
       </SectionCard>
 
       <SectionCard title="Colors">
         <div className="grid gap-4 md:grid-cols-3">
-          <ColorField label="Primary" value={form.primary_color} onChange={(v) => set("primary_color", v)} />
-          <ColorField label="Secondary" value={form.secondary_color} onChange={(v) => set("secondary_color", v)} />
-          <ColorField label="Accent" value={form.accent_color} onChange={(v) => set("accent_color", v)} />
+          <ColorField
+            label="Primary"
+            value={form.primary_color}
+            onChange={(v) => set("primary_color", v)}
+          />
+          <ColorField
+            label="Secondary"
+            value={form.secondary_color}
+            onChange={(v) => set("secondary_color", v)}
+          />
+          <ColorField
+            label="Accent"
+            value={form.accent_color}
+            onChange={(v) => set("accent_color", v)}
+          />
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
           <Swatch color={form.primary_color} label="Primary" light />
@@ -269,8 +287,8 @@ function BrandingEditor() {
 
       <SectionCard title="Home screen touch icon">
         <p className="mb-3 text-xs text-muted-foreground">
-          Square PNG, JPEG, or WEBP (180x180 or larger). Used as the app icon when
-          members add the app to a phone home screen. Falls back to the favicon.
+          Square PNG, JPEG, or WEBP (180x180 or larger). Used as the app icon when members add the
+          app to a phone home screen. Falls back to the favicon.
         </p>
         <AssetUploader
           kind="touch_icon"
@@ -284,10 +302,29 @@ function BrandingEditor() {
 
       <SectionCard title="Organization details">
         <div className="grid gap-4 md:grid-cols-2">
-          <FieldText id="org-name" label="Legal name" value={form.org_legal_name} onChange={(v) => set("org_legal_name", v)} maxLength={160} />
-          <FieldText id="org-reg" label="Registration / Tax ID" value={form.org_registration_no} onChange={(v) => set("org_registration_no", v)} maxLength={80} />
+          <FieldText
+            id="org-name"
+            label="Legal name"
+            value={form.org_legal_name}
+            onChange={(v) => set("org_legal_name", v)}
+            maxLength={160}
+          />
+          <FieldText
+            id="org-reg"
+            label="Registration / Tax ID"
+            value={form.org_registration_no}
+            onChange={(v) => set("org_registration_no", v)}
+            maxLength={80}
+          />
           <div className="md:col-span-2">
-            <FieldArea id="org-addr" label="Registered address" value={form.org_address} onChange={(v) => set("org_address", v)} maxLength={500} rows={3} />
+            <FieldArea
+              id="org-addr"
+              label="Registered address"
+              value={form.org_address}
+              onChange={(v) => set("org_address", v)}
+              maxLength={500}
+              rows={3}
+            />
           </div>
         </div>
       </SectionCard>
@@ -316,8 +353,22 @@ function BrandingEditor() {
 
       <SectionCard title="Footer & support">
         <div className="grid gap-4 md:grid-cols-2">
-          <FieldText id="support-email" label="Support email" value={form.support_email} onChange={(v) => set("support_email", v)} maxLength={160} placeholder="support@example.com" />
-          <FieldText id="support-phone" label="Support phone" value={form.support_phone} onChange={(v) => set("support_phone", v)} maxLength={40} placeholder="+233…" />
+          <FieldText
+            id="support-email"
+            label="Support email"
+            value={form.support_email}
+            onChange={(v) => set("support_email", v)}
+            maxLength={160}
+            placeholder="support@example.com"
+          />
+          <FieldText
+            id="support-phone"
+            label="Support phone"
+            value={form.support_phone}
+            onChange={(v) => set("support_phone", v)}
+            maxLength={40}
+            placeholder="+233…"
+          />
           <div className="md:col-span-2">
             <FieldArea
               id="footer-html"
@@ -334,19 +385,51 @@ function BrandingEditor() {
 
       <SectionCard title="Email branding">
         <div className="grid gap-4 md:grid-cols-2">
-          <FieldText id="email-from" label="From name" value={form.email_from_name} onChange={(v) => set("email_from_name", v)} maxLength={80} placeholder="IT-360 CashApp" />
-          <FieldText id="email-reply" label="Reply-to address" value={form.email_reply_to} onChange={(v) => set("email_reply_to", v)} maxLength={160} placeholder="no-reply@example.com" />
+          <FieldText
+            id="email-from"
+            label="From name"
+            value={form.email_from_name}
+            onChange={(v) => set("email_from_name", v)}
+            maxLength={80}
+            placeholder="IT-360 CashApp"
+          />
+          <FieldText
+            id="email-reply"
+            label="Reply-to address"
+            value={form.email_reply_to}
+            onChange={(v) => set("email_reply_to", v)}
+            maxLength={160}
+            placeholder="no-reply@example.com"
+          />
           <div className="md:col-span-2">
-            <FieldArea id="email-header" label="Email header HTML" value={form.email_header_html} onChange={(v) => set("email_header_html", v)} maxLength={4000} rows={3} />
+            <FieldArea
+              id="email-header"
+              label="Email header HTML"
+              value={form.email_header_html}
+              onChange={(v) => set("email_header_html", v)}
+              maxLength={4000}
+              rows={3}
+            />
           </div>
           <div className="md:col-span-2">
-            <FieldArea id="email-footer" label="Email footer HTML" value={form.email_footer_html} onChange={(v) => set("email_footer_html", v)} maxLength={4000} rows={3} />
+            <FieldArea
+              id="email-footer"
+              label="Email footer HTML"
+              value={form.email_footer_html}
+              onChange={(v) => set("email_footer_html", v)}
+              maxLength={4000}
+              rows={3}
+            />
           </div>
         </div>
       </SectionCard>
 
       <div className="sticky bottom-4 z-10 flex justify-end gap-2 rounded-lg border border-border bg-background/95 p-3 shadow-lg backdrop-blur">
-        <Button variant="outline" onClick={() => setForm(toForm(source))} disabled={saveMut.isPending}>
+        <Button
+          variant="outline"
+          onClick={() => setForm(toForm(source))}
+          disabled={saveMut.isPending}
+        >
           Reset
         </Button>
         <Button onClick={() => saveMut.mutate()} disabled={!canSave}>
@@ -370,34 +453,75 @@ function Swatch({ color, label, light }: { color: string; label: string; light?:
 }
 
 function FieldText({
-  id, label, value, onChange, maxLength, placeholder,
+  id,
+  label,
+  value,
+  onChange,
+  maxLength,
+  placeholder,
 }: {
-  id: string; label: string; value: string; onChange: (v: string) => void; maxLength?: number; placeholder?: string;
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  maxLength?: number;
+  placeholder?: string;
 }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} placeholder={placeholder} />
+      <Input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={maxLength}
+        placeholder={placeholder}
+      />
     </div>
   );
 }
 
 function FieldArea({
-  id, label, value, onChange, maxLength, rows, placeholder,
+  id,
+  label,
+  value,
+  onChange,
+  maxLength,
+  rows,
+  placeholder,
 }: {
-  id: string; label: string; value: string; onChange: (v: string) => void; maxLength?: number; rows?: number; placeholder?: string;
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  maxLength?: number;
+  rows?: number;
+  placeholder?: string;
 }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Textarea id={id} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} rows={rows} placeholder={placeholder} />
+      <Textarea
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={maxLength}
+        rows={rows}
+        placeholder={placeholder}
+      />
     </div>
   );
 }
 
 function ColorField({
-  label, value, onChange,
-}: { label: string; value: string; onChange: (v: string) => void }) {
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   const valid = HEX.test(value);
   return (
     <div className="space-y-1.5">
@@ -416,13 +540,20 @@ function ColorField({
           className={valid ? "" : "border-destructive"}
         />
       </div>
-      {!valid ? <p className="text-xs text-destructive">Enter a valid hex color like {BRAND.teal}</p> : null}
+      {!valid ? (
+        <p className="text-xs text-destructive">Enter a valid hex color like {BRAND.teal}</p>
+      ) : null}
     </div>
   );
 }
 
 function AssetUploader({
-  kind, currentUrl, accept, onUpload, onClear, busy,
+  kind,
+  currentUrl,
+  accept,
+  onUpload,
+  onClear,
+  busy,
 }: {
   kind: "logo" | "favicon" | "touch_icon";
   currentUrl: string | null;
@@ -436,7 +567,11 @@ function AssetUploader({
     <div className="flex flex-wrap items-center gap-4">
       <div className="flex h-20 w-20 items-center justify-center rounded-md border border-border bg-muted/40 p-2">
         {currentUrl ? (
-          <img src={currentUrl} alt={`Current ${kind}`} className="max-h-full max-w-full object-contain" />
+          <img
+            src={currentUrl}
+            alt={`Current ${kind}`}
+            className="max-h-full max-w-full object-contain"
+          />
         ) : (
           <span className="text-xs text-muted-foreground">None</span>
         )}
@@ -481,15 +616,21 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 function BrandingPreview({ form, logoUrl }: { form: Form; logoUrl: string | null }) {
-  const primary = HEX.test(form.primary_color) ? form.primary_color : BRAND_DEFAULT_COLORS.primary_color;
-  const accent = HEX.test(form.accent_color) ? form.accent_color : BRAND_DEFAULT_COLORS.accent_color;
-  const secondary = HEX.test(form.secondary_color) ? form.secondary_color : BRAND_DEFAULT_COLORS.secondary_color;
+  const primary = HEX.test(form.primary_color)
+    ? form.primary_color
+    : BRAND_DEFAULT_COLORS.primary_color;
+  const accent = HEX.test(form.accent_color)
+    ? form.accent_color
+    : BRAND_DEFAULT_COLORS.accent_color;
+  const secondary = HEX.test(form.secondary_color)
+    ? form.secondary_color
+    : BRAND_DEFAULT_COLORS.secondary_color;
   return (
     <SectionCard title="Live preview">
       <div className="p-6">
         <p className="mb-3 text-xs text-muted-foreground">
-          A mock preview of the sign-in banner, navigation, and CTA using unsaved values. Save to apply
-          across the platform.
+          A mock preview of the sign-in banner, navigation, and CTA using unsaved values. Save to
+          apply across the platform.
         </p>
         <div
           className="overflow-hidden rounded-xl border border-border shadow-sm"
@@ -506,9 +647,7 @@ function BrandingPreview({ form, logoUrl }: { form: Form; logoUrl: string | null
               )}
               <div>
                 <div className="text-sm font-bold">{form.app_name || "IT-360 CashApp"}</div>
-                {form.tagline ? (
-                  <div className="text-[11px] opacity-80">{form.tagline}</div>
-                ) : null}
+                {form.tagline ? <div className="text-[11px] opacity-80">{form.tagline}</div> : null}
               </div>
             </div>
             <button
@@ -533,4 +672,3 @@ function BrandingPreview({ form, logoUrl }: { form: Form; logoUrl: string | null
     </SectionCard>
   );
 }
-

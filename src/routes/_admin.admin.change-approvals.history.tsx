@@ -93,7 +93,9 @@ function ChangeAuditHistoryPage() {
     >
       <div className="flex flex-wrap items-end gap-3 border-b border-border/60 px-5 py-4">
         <div className="grid gap-1.5">
-          <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Event</Label>
+          <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Event
+          </Label>
           <select
             value={search.action}
             onChange={(e) => setSearch({ action: e.target.value as Search["action"] })}
@@ -108,7 +110,9 @@ function ChangeAuditHistoryPage() {
           </select>
         </div>
         <div className="grid gap-1.5">
-          <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Actor email</Label>
+          <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Actor email
+          </Label>
           <Input
             value={search.actor}
             onChange={(e) => setSearch({ actor: e.target.value })}
@@ -117,7 +121,9 @@ function ChangeAuditHistoryPage() {
           />
         </div>
         <div className="grid gap-1.5">
-          <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">From</Label>
+          <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            From
+          </Label>
           <Input
             type="date"
             value={search.from}
@@ -134,7 +140,12 @@ function ChangeAuditHistoryPage() {
             className="h-9"
           />
         </div>
-        <Button variant="outline" size="sm" onClick={() => void query.refetch()} disabled={query.isFetching}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => void query.refetch()}
+          disabled={query.isFetching}
+        >
           {query.isFetching ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
           Refresh
         </Button>
@@ -168,7 +179,9 @@ function ChangeAuditHistoryPage() {
                     <td className="whitespace-nowrap px-5 py-3 text-xs text-muted-foreground tabular-nums">
                       {new Date(row.created_at).toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 text-xs font-medium">{ACTION_LABELS[row.action] ?? row.action}</td>
+                    <td className="px-5 py-3 text-xs font-medium">
+                      {ACTION_LABELS[row.action] ?? row.action}
+                    </td>
                     <td className="px-5 py-3 text-xs">
                       {row.actor_email ?? "system"}
                       {row.actor_role ? (
@@ -203,7 +216,9 @@ function ChangeAuditHistoryPage() {
             pageSize={search.pageSize}
             total={query.data?.total ?? 0}
             onPage={(n) => navigate({ search: (prev: Search) => ({ ...prev, page: n }) })}
-            onPageSize={(n) => navigate({ search: (prev: Search) => ({ ...prev, pageSize: n, page: 1 }) })}
+            onPageSize={(n) =>
+              navigate({ search: (prev: Search) => ({ ...prev, pageSize: n, page: 1 }) })
+            }
           />
         </>
       )}

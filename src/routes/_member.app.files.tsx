@@ -16,7 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ACCEPT_ATTRIBUTE,
@@ -29,7 +35,13 @@ import {
   validateUpload,
   type FileCategory,
 } from "@/lib/files.shared";
-import { deleteMyFile, listMyFiles, registerMyFile, signFileUrl, updateMyFile } from "@/lib/files.functions";
+import {
+  deleteMyFile,
+  listMyFiles,
+  registerMyFile,
+  signFileUrl,
+  updateMyFile,
+} from "@/lib/files.functions";
 
 const filesQuery = queryOptions({
   queryKey: ["member", "files"],
@@ -43,14 +55,19 @@ export const Route = createFileRoute("/_member/app/files")({
       { title: "My documents — IT-360 CashApp" },
       {
         name: "description",
-        content: "Upload, preview and manage the documents you share with the credit union, with a full audit trail.",
+        content:
+          "Upload, preview and manage the documents you share with the credit union, with a full audit trail.",
       },
       { name: "robots", content: "noindex" },
     ],
   }),
   loader: () => null,
-  errorComponent: ({ error }) => <ErrorState title="Documents unavailable" message={error.message} />,
-  notFoundComponent: () => <EmptyState title="Nothing here" hint="This document view does not exist." />,
+  errorComponent: ({ error }) => (
+    <ErrorState title="Documents unavailable" message={error.message} />
+  ),
+  notFoundComponent: () => (
+    <EmptyState title="Nothing here" hint="This document view does not exist." />
+  ),
   component: MemberFilesPage,
 });
 
@@ -179,72 +196,70 @@ function FilesWorkspace() {
 
   return (
     <div className="space-y-6">
-      <SectionCard
-        title="Upload a document"
-      >
+      <SectionCard title="Upload a document">
         <div className="p-5">
-        <div className="grid gap-3 sm:grid-cols-[220px_1fr] sm:items-end">
-          <div className="space-y-1.5">
-            <Label>Category</Label>
-            <Select value={category} onValueChange={(v) => setCategory(v as FileCategory)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FILE_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {FILE_CATEGORY_LABELS[c]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragging(false);
-              void uploadFiles(e.dataTransfer.files);
-            }}
-            className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center text-sm transition ${
-              dragging ? "border-primary bg-primary/5" : "border-border"
-            }`}
-            onClick={() => inputRef.current?.click()}
-          >
-            <UploadCloud className="size-6 text-muted-foreground" />
-            <p className="font-medium">Drop files here or click to choose</p>
-            <p className="text-[11px] text-muted-foreground">
-              Shared with the review team so they can verify your account faster.
-            </p>
-            <input
-              ref={inputRef}
-              type="file"
-              multiple
-              accept={ACCEPT_ATTRIBUTE}
-              className="hidden"
-              onChange={(e) => {
-                if (e.target.files) void uploadFiles(e.target.files);
-                e.target.value = "";
+          <div className="grid gap-3 sm:grid-cols-[220px_1fr] sm:items-end">
+            <div className="space-y-1.5">
+              <Label>Category</Label>
+              <Select value={category} onValueChange={(v) => setCategory(v as FileCategory)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FILE_CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {FILE_CATEGORY_LABELS[c]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragging(true);
               }}
-            />
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragging(false);
+                void uploadFiles(e.dataTransfer.files);
+              }}
+              className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center text-sm transition ${
+                dragging ? "border-primary bg-primary/5" : "border-border"
+              }`}
+              onClick={() => inputRef.current?.click()}
+            >
+              <UploadCloud className="size-6 text-muted-foreground" />
+              <p className="font-medium">Drop files here or click to choose</p>
+              <p className="text-[11px] text-muted-foreground">
+                Shared with the review team so they can verify your account faster.
+              </p>
+              <input
+                ref={inputRef}
+                type="file"
+                multiple
+                accept={ACCEPT_ATTRIBUTE}
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) void uploadFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </div>
           </div>
-        </div>
-        {progress !== null ? (
-          <div className="mt-3 space-y-1">
-            <Progress value={progress} />
-            <p className="text-[11px] text-muted-foreground">Uploading… {progress}%</p>
+          {progress !== null ? (
+            <div className="mt-3 space-y-1">
+              <Progress value={progress} />
+              <p className="text-[11px] text-muted-foreground">Uploading… {progress}%</p>
+            </div>
+          ) : null}
+          <div className="mt-4 space-y-1">
+            <Progress value={usedPct} />
+            <p className="text-[11px] text-muted-foreground">
+              {humanBytes(data.used_bytes)} of {humanBytes(data.quota_bytes)} used ({usedPct}%)
+            </p>
           </div>
-        ) : null}
-        <div className="mt-4 space-y-1">
-          <Progress value={usedPct} />
-          <p className="text-[11px] text-muted-foreground">
-            {humanBytes(data.used_bytes)} of {humanBytes(data.quota_bytes)} used ({usedPct}%)
-          </p>
-        </div>
         </div>
       </SectionCard>
 
@@ -275,86 +290,99 @@ function FilesWorkspace() {
         }
       >
         <div className="p-5">
-        {rows.length === 0 ? (
-          <EmptyState
-            title="No documents yet"
-            hint="Upload your identity, address or income documents to speed up reviews."
-          />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="py-2">File</th>
-                  <th className="py-2">Category</th>
-                  <th className="py-2">Size</th>
-                  <th className="py-2">Review</th>
-                  <th className="py-2">Uploaded</th>
-                  <th className="py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {rows.map((f) => (
-                  <tr key={f.id}>
-                    <td className="max-w-[240px] truncate py-2 font-medium">
-                      <FileUp className="mr-1 inline size-3.5 text-muted-foreground" />
-                      {f.filename}
-                    </td>
-                    <td className="py-2">
-                      <Select
-                        value={f.category}
-                        onValueChange={(v) => recategorise.mutate({ id: f.id, category: v as FileCategory })}
-                        disabled={f.review_status !== "pending"}
-                      >
-                        <SelectTrigger className="h-8 w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FILE_CATEGORIES.map((c) => (
-                            <SelectItem key={c} value={c}>
-                              {FILE_CATEGORY_LABELS[c]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="py-2 tabular-nums">{humanBytes(f.size_bytes)}</td>
-                    <td className="py-2">
-                      <StatusPill status={REVIEW_PILL[f.review_status]} />
-                      {f.review_note ? (
-                        <p className="mt-1 max-w-[220px] text-[11px] text-muted-foreground">{f.review_note}</p>
-                      ) : null}
-                    </td>
-                    <td className="py-2 text-[11px] text-muted-foreground">
-                      {new Date(f.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="py-2">
-                      <div className="flex justify-end gap-1">
-                        {isPreviewable(f.mime_type) ? (
-                          <Button size="sm" variant="ghost" onClick={() => void open(f.id, "preview")}>
-                            <Eye className="size-3.5" />
-                          </Button>
-                        ) : null}
-                        <Button size="sm" variant="ghost" onClick={() => void open(f.id, "download")}>
-                          <Download className="size-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            if (confirm(`Remove ${f.filename}? This cannot be undone.`)) del.mutate(f.id);
-                          }}
-                        >
-                          <Trash2 className="size-3.5 text-destructive" />
-                        </Button>
-                      </div>
-                    </td>
+          {rows.length === 0 ? (
+            <EmptyState
+              title="No documents yet"
+              hint="Upload your identity, address or income documents to speed up reviews."
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="py-2">File</th>
+                    <th className="py-2">Category</th>
+                    <th className="py-2">Size</th>
+                    <th className="py-2">Review</th>
+                    <th className="py-2">Uploaded</th>
+                    <th className="py-2 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {rows.map((f) => (
+                    <tr key={f.id}>
+                      <td className="max-w-[240px] truncate py-2 font-medium">
+                        <FileUp className="mr-1 inline size-3.5 text-muted-foreground" />
+                        {f.filename}
+                      </td>
+                      <td className="py-2">
+                        <Select
+                          value={f.category}
+                          onValueChange={(v) =>
+                            recategorise.mutate({ id: f.id, category: v as FileCategory })
+                          }
+                          disabled={f.review_status !== "pending"}
+                        >
+                          <SelectTrigger className="h-8 w-40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {FILE_CATEGORIES.map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {FILE_CATEGORY_LABELS[c]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="py-2 tabular-nums">{humanBytes(f.size_bytes)}</td>
+                      <td className="py-2">
+                        <StatusPill status={REVIEW_PILL[f.review_status]} />
+                        {f.review_note ? (
+                          <p className="mt-1 max-w-[220px] text-[11px] text-muted-foreground">
+                            {f.review_note}
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="py-2 text-[11px] text-muted-foreground">
+                        {new Date(f.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="py-2">
+                        <div className="flex justify-end gap-1">
+                          {isPreviewable(f.mime_type) ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => void open(f.id, "preview")}
+                            >
+                              <Eye className="size-3.5" />
+                            </Button>
+                          ) : null}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => void open(f.id, "download")}
+                          >
+                            <Download className="size-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (confirm(`Remove ${f.filename}? This cannot be undone.`))
+                                del.mutate(f.id);
+                            }}
+                          >
+                            <Trash2 className="size-3.5 text-destructive" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </SectionCard>
     </div>

@@ -50,7 +50,10 @@ function Body() {
       <SectionCard title="You're already enrolled">
         <div className="p-6 text-sm text-muted-foreground">
           You're enrolled in every available plan. Manage them from{" "}
-          <Link to="/app/savings" className="text-emerald-mid underline">My Savings</Link>.
+          <Link to="/app/savings" className="text-emerald-mid underline">
+            My Savings
+          </Link>
+          .
         </div>
       </SectionCard>
     );
@@ -59,7 +62,12 @@ function Body() {
     <div className="grid gap-6 md:grid-cols-3">
       <div className="md:col-span-2 space-y-3">
         {plans.map((p) => (
-          <PlanCard key={p.id} p={p} active={selected?.id === p.id} onSelect={() => setSelected(p)} />
+          <PlanCard
+            key={p.id}
+            p={p}
+            active={selected?.id === p.id}
+            onSelect={() => setSelected(p)}
+          />
         ))}
       </div>
       <div>
@@ -77,7 +85,15 @@ function Body() {
   );
 }
 
-function PlanCard({ p, active, onSelect }: { p: SavingsPlan; active: boolean; onSelect: () => void }) {
+function PlanCard({
+  p,
+  active,
+  onSelect,
+}: {
+  p: SavingsPlan;
+  active: boolean;
+  onSelect: () => void;
+}) {
   return (
     <button
       type="button"
@@ -101,9 +117,17 @@ function PlanCard({ p, active, onSelect }: { p: SavingsPlan; active: boolean; on
         {active ? <Check className="h-5 w-5 text-emerald-mid" /> : null}
       </div>
       <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[11px] text-muted-foreground">
-        <span>Min contribution: <span className="tabular font-semibold">{formatMoney(p.min_contribution)}</span></span>
-        <span>Suggested: <span className="tabular font-semibold">{formatMoney(p.contribution_amount)}</span></span>
-        <span>Lock: <span className="tabular font-semibold">{p.lock_days}d</span></span>
+        <span>
+          Min contribution:{" "}
+          <span className="tabular font-semibold">{formatMoney(p.min_contribution)}</span>
+        </span>
+        <span>
+          Suggested:{" "}
+          <span className="tabular font-semibold">{formatMoney(p.contribution_amount)}</span>
+        </span>
+        <span>
+          Lock: <span className="tabular font-semibold">{p.lock_days}d</span>
+        </span>
       </div>
     </button>
   );
@@ -119,8 +143,12 @@ function EnrollForm({ plan }: { plan: SavingsPlan }) {
   const [goalDate, setGoalDate] = useState<string>("");
 
   const mut = useMutation({
-    mutationFn: (data: { plan_id: string; nickname: string | null; goal_amount: number | null; goal_target_date: string | null }) =>
-      call({ data }),
+    mutationFn: (data: {
+      plan_id: string;
+      nickname: string | null;
+      goal_amount: number | null;
+      goal_target_date: string | null;
+    }) => call({ data }),
     onSuccess: async (res) => {
       toast.success("Enrolled — start your first contribution.");
       await qc.invalidateQueries({ queryKey: ["member", "savings"] });
@@ -158,16 +186,34 @@ function EnrollForm({ plan }: { plan: SavingsPlan }) {
       </div>
       <div>
         <Label htmlFor="nickname">Nickname (optional)</Label>
-        <Input id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="e.g. School fees fund" />
+        <Input
+          id="nickname"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder="e.g. School fees fund"
+        />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label htmlFor="goal_amount">Goal amount</Label>
-          <Input id="goal_amount" type="number" inputMode="decimal" min="0" step="1" value={goalAmount} onChange={(e) => setGoalAmount(e.target.value)} />
+          <Input
+            id="goal_amount"
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="1"
+            value={goalAmount}
+            onChange={(e) => setGoalAmount(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="goal_date">Target date</Label>
-          <Input id="goal_date" type="date" value={goalDate} onChange={(e) => setGoalDate(e.target.value)} />
+          <Input
+            id="goal_date"
+            type="date"
+            value={goalDate}
+            onChange={(e) => setGoalDate(e.target.value)}
+          />
         </div>
       </div>
       <Button type="submit" disabled={mut.isPending} className="w-full">
@@ -178,7 +224,9 @@ function EnrollForm({ plan }: { plan: SavingsPlan }) {
           <ShieldAlert className="mt-0.5 h-4 w-4" />
           <div>
             KYC must be approved before enrolling.{" "}
-            <Link to="/app/kyc" className="underline">Go to verification</Link>
+            <Link to="/app/kyc" className="underline">
+              Go to verification
+            </Link>
           </div>
         </div>
       ) : null}

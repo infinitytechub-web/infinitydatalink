@@ -130,14 +130,21 @@ export const listAvailablePlans = createServerFn({ method: "GET" })
     const [{ data: plans, error: pErr }, { data: enrolled, error: eErr }] = await Promise.all([
       context.supabase
         .from("savings_plans")
-        .select("id, name, schedule, interest_rate, description, min_contribution, contribution_amount, lock_days, is_active, sort_order")
+        .select(
+          "id, name, schedule, interest_rate, description, min_contribution, contribution_amount, lock_days, is_active, sort_order",
+        )
         .eq("is_active", true)
         .order("sort_order", { ascending: true }),
-      context.supabase.from("savings_accounts").select("plan_id, status").eq("user_id", context.userId),
+      context.supabase
+        .from("savings_accounts")
+        .select("plan_id, status")
+        .eq("user_id", context.userId),
     ]);
     if (pErr) throw new Error(pErr.message);
     if (eErr) throw new Error(eErr.message);
-    const openPlans = new Set((enrolled ?? []).filter((a: any) => a.status === "active").map((a: any) => a.plan_id));
+    const openPlans = new Set(
+      (enrolled ?? []).filter((a: any) => a.status === "active").map((a: any) => a.plan_id),
+    );
     return (plans ?? [])
       .filter((p: any) => !openPlans.has(p.id))
       .map((p: any) => ({
@@ -342,20 +349,27 @@ export const adminListSavingsSummary = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<AdminSavingsSummary> => {
     await assertFinanceOrAdmin(context.supabase, context.userId);
     const since24h = new Date(Date.now() - 24 * 3600_000).toISOString();
-    const [{ data: accounts, error: aErr }, { data: plans, error: pErr }, { count: pending, error: qErr }, { count: failed, error: fErr }] =
-      await Promise.all([
-        context.supabase.from("savings_accounts").select("plan_id, balance, status"),
-        context.supabase
-          .from("savings_plans")
-          .select("id, name, schedule, interest_rate, is_active")
-          .order("sort_order", { ascending: true }),
-        context.supabase.from("transactions").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        context.supabase
-          .from("transactions")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "failed")
-          .gte("created_at", since24h),
-      ]);
+    const [
+      { data: accounts, error: aErr },
+      { data: plans, error: pErr },
+      { count: pending, error: qErr },
+      { count: failed, error: fErr },
+    ] = await Promise.all([
+      context.supabase.from("savings_accounts").select("plan_id, balance, status"),
+      context.supabase
+        .from("savings_plans")
+        .select("id, name, schedule, interest_rate, is_active")
+        .order("sort_order", { ascending: true }),
+      context.supabase
+        .from("transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending"),
+      context.supabase
+        .from("transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "failed")
+        .gte("created_at", since24h),
+    ]);
     if (aErr) throw new Error(aErr.message);
     if (pErr) throw new Error(pErr.message);
     if (qErr) throw new Error(qErr.message);
@@ -585,7 +599,11 @@ export const listSavingsLedger = createServerFn({ method: "GET" })
 
     // Page of entries
     const from = (data.page - 1) * data.page_size;
-    const { data: rows, error, count } = await applyFilters(
+    const {
+      data: rows,
+      error,
+      count,
+    } = await applyFilters(
       context.supabase
         .from("transactions")
         .select("id, ref, kind, amount, status, channel, note, created_at, savings_account_id", {

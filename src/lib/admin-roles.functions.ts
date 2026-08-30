@@ -17,10 +17,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  */
 
 async function assertSuperAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) throw new Error(error.message);
   const roles = (data ?? []).map((r: any) => r.role as string);
   if (!roles.includes("super_admin")) {

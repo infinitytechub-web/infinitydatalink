@@ -27,7 +27,14 @@ async function assertPlanAdmin(supabase: any, userId: string) {
   return { roles: Array.from(roles) as string[] };
 }
 
-async function auditLog(supabase: any, userId: string, roles: string[], action: string, target: string, meta: Record<string, any>) {
+async function auditLog(
+  supabase: any,
+  userId: string,
+  roles: string[],
+  action: string,
+  target: string,
+  meta: Record<string, any>,
+) {
   await writeAudit({
     actor_id: userId,
     actor_role: roles.includes("super_admin") ? "super_admin" : "finance_officer",
@@ -44,7 +51,9 @@ export const listPlans = createServerFn({ method: "GET" })
     const [{ data: plans, error }, { data: accts, error: aErr }] = await Promise.all([
       context.supabase
         .from("savings_plans")
-        .select("id, name, schedule, interest_rate, description, min_contribution, contribution_amount, lock_days, is_active, sort_order, created_at")
+        .select(
+          "id, name, schedule, interest_rate, description, min_contribution, contribution_amount, lock_days, is_active, sort_order, created_at",
+        )
         .order("sort_order", { ascending: true }),
       context.supabase.from("savings_accounts").select("plan_id, balance, status"),
     ]);
@@ -97,7 +106,9 @@ export const createPlan = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    await auditLog(context.supabase, context.userId, roles, "savings_plan.created", inserted!.id, { ...data });
+    await auditLog(context.supabase, context.userId, roles, "savings_plan.created", inserted!.id, {
+      ...data,
+    });
     return { id: inserted!.id };
   });
 
@@ -124,7 +135,10 @@ export const updatePlan = createServerFn({ method: "POST" })
       }
     }
 
-    const { error } = await context.supabase.from("savings_plans").update(patch as never).eq("id", id);
+    const { error } = await context.supabase
+      .from("savings_plans")
+      .update(patch as never)
+      .eq("id", id);
     if (error) throw new Error(error.message);
     await auditLog(context.supabase, context.userId, roles, "savings_plan.updated", id, {
       changes: patch,
@@ -136,12 +150,21 @@ export const updatePlan = createServerFn({ method: "POST" })
 export const reorderPlans = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ order: z.array(z.object({ id: z.string().uuid(), sort_order: z.number().int().min(0).max(9999) })).max(50) }).parse(d),
+    z
+      .object({
+        order: z
+          .array(z.object({ id: z.string().uuid(), sort_order: z.number().int().min(0).max(9999) }))
+          .max(50),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { roles } = await assertPlanAdmin(context.supabase, context.userId);
     for (const o of data.order) {
-      const { error } = await context.supabase.from("savings_plans").update({ sort_order: o.sort_order }).eq("id", o.id);
+      const { error } = await context.supabase
+        .from("savings_plans")
+        .update({ sort_order: o.sort_order })
+        .eq("id", o.id);
       if (error) throw new Error(error.message);
     }
     await auditLog(context.supabase, context.userId, roles, "savings_plan.reordered", "batch", {

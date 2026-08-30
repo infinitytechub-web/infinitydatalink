@@ -4,7 +4,13 @@
  * supports them; unconfigured rails stay visible but disabled with a reason.
  */
 import { useMemo, useState } from "react";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Banknote, Building2, CreditCard, Loader2, Smartphone } from "lucide-react";
@@ -49,7 +55,9 @@ export function PayNowPanel() {
   const qc = useQueryClient();
   const call = useServerFn(createPayment);
 
-  const [rail, setRail] = useState<string>(() => rails.find((r) => r.selectable)?.rail ?? rails[0]?.rail ?? "cash");
+  const [rail, setRail] = useState<string>(
+    () => rails.find((r) => r.selectable)?.rail ?? rails[0]?.rail ?? "cash",
+  );
   const [purpose, setPurpose] = useState<PaymentPurpose>("savings_deposit");
   const [amount, setAmount] = useState("");
   const [phone, setPhone] = useState("");
@@ -90,7 +98,8 @@ export function PayNowPanel() {
           className="space-y-5 p-5"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!selected?.selectable) return toast.error("That payment method is not available yet.");
+            if (!selected?.selectable)
+              return toast.error("That payment method is not available yet.");
             if (!amountOk) return toast.error("Enter a valid amount.");
             if (!phoneOk) return toast.error("Enter a valid 10-digit Ghana mobile number.");
             mut.mutate();
@@ -102,7 +111,12 @@ export function PayNowPanel() {
             </legend>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {rails.map((r) => (
-                <RailCard key={r.rail} rail={r} active={r.rail === rail} onSelect={() => setRail(r.rail)} />
+                <RailCard
+                  key={r.rail}
+                  rail={r}
+                  active={r.rail === rail}
+                  onSelect={() => setRail(r.rail)}
+                />
               ))}
             </div>
           </fieldset>
@@ -152,7 +166,12 @@ export function PayNowPanel() {
             <span className="mb-1 block text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Note (optional)
             </span>
-            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={300} />
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              maxLength={300}
+            />
           </label>
 
           {selected && !selected.selectable && (
@@ -171,7 +190,8 @@ export function PayNowPanel() {
             Continue to pay
           </Button>
           <p className="text-[11px] text-muted-foreground">
-            Card details are entered on the provider's secure page — this app never receives or stores card numbers.
+            Card details are entered on the provider's secure page — this app never receives or
+            stores card numbers.
           </p>
         </form>
       </SectionCard>
@@ -181,7 +201,15 @@ export function PayNowPanel() {
   );
 }
 
-function RailCard({ rail, active, onSelect }: { rail: RailAvailability; active: boolean; onSelect: () => void }) {
+function RailCard({
+  rail,
+  active,
+  onSelect,
+}: {
+  rail: RailAvailability;
+  active: boolean;
+  onSelect: () => void;
+}) {
   const Icon = KIND_ICON[rail.kind];
   return (
     <button
@@ -191,7 +219,9 @@ function RailCard({ rail, active, onSelect }: { rail: RailAvailability; active: 
       aria-pressed={active}
       className={
         "rounded-lg border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-55 " +
-        (active ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-card hover:border-primary/40")
+        (active
+          ? "border-primary bg-primary/5 shadow-sm"
+          : "border-border bg-card hover:border-primary/40")
       }
     >
       <span className="flex items-center gap-2">
@@ -217,7 +247,10 @@ function MyPaymentsTable() {
         <div className="p-6 text-sm text-muted-foreground">Loading…</div>
       ) : rows.length === 0 ? (
         <div className="p-6">
-          <EmptyState title="No payments yet" hint="Payments you start will be tracked here with a receipt." />
+          <EmptyState
+            title="No payments yet"
+            hint="Payments you start will be tracked here with a receipt."
+          />
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -236,7 +269,9 @@ function MyPaymentsTable() {
             <tbody className="divide-y divide-border/60">
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">{r.reference}</td>
+                  <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">
+                    {r.reference}
+                  </td>
                   <td className="px-5 py-3 text-sm">{RAIL_LABELS[r.rail] ?? r.rail}</td>
                   <td className="px-5 py-3 text-sm text-muted-foreground">
                     {PURPOSE_LABELS[r.purpose as PaymentPurpose] ?? r.purpose}

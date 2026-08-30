@@ -4,10 +4,7 @@ import { AuthBrandMark } from "@/components/auth-brand-mark";
 
 export const Route = createFileRoute("/auth/forgot")({
   head: () => ({
-    meta: [
-      { title: "Reset password — IT-360 CashApp" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Reset password — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: Forgot,
 });

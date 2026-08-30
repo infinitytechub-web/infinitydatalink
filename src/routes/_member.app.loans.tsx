@@ -3,7 +3,15 @@ import { Suspense } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { EmptyState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
+import {
+  EmptyState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Pagination, SortHeader, type SortState } from "@/components/table-controls";
 import { formatMoney } from "@/lib/org-config";
@@ -58,17 +66,37 @@ function LoansContent() {
   const { data } = useSuspenseQuery(loansQuery(s));
   const rows = data.rows;
   const sort: SortState = { sortBy: s.sortBy, sortDir: s.sortDir };
-  const setSort = (next: SortState) => navigate({ search: (p: any) => ({ ...p, ...next, page: 1 }) });
-  const activeOnPage = rows.filter((l: LoanRow) => l.status === "active" || l.status === "approved");
+  const setSort = (next: SortState) =>
+    navigate({ search: (p: any) => ({ ...p, ...next, page: 1 }) });
+  const activeOnPage = rows.filter(
+    (l: LoanRow) => l.status === "active" || l.status === "approved",
+  );
   const activeBalance = activeOnPage.reduce((sum: number, l: LoanRow) => sum + l.amount, 0);
   const pendingOnPage = rows.filter((l: LoanRow) => l.status === "pending").length;
 
   return (
     <>
       <section className="grid gap-6 md:grid-cols-3">
-        <KPIStat label="Active balance (page)" value={<>GH₵ <span className="tabular">{formatMoney(activeBalance).replace("GH₵ ", "")}</span></>} hint={`${activeOnPage.length} active on this page`} />
-        <KPIStat label="Pending (page)" value={<span className="tabular">{pendingOnPage}</span>} hint="Awaiting approval" />
-        <KPIStat label="Total facilities" value={<span className="tabular">{data.total}</span>} accent hint="Across all pages" />
+        <KPIStat
+          label="Active balance (page)"
+          value={
+            <>
+              GH₵ <span className="tabular">{formatMoney(activeBalance).replace("GH₵ ", "")}</span>
+            </>
+          }
+          hint={`${activeOnPage.length} active on this page`}
+        />
+        <KPIStat
+          label="Pending (page)"
+          value={<span className="tabular">{pendingOnPage}</span>}
+          hint="Awaiting approval"
+        />
+        <KPIStat
+          label="Total facilities"
+          value={<span className="tabular">{data.total}</span>}
+          accent
+          hint="Across all pages"
+        />
       </section>
 
       <SectionCard
@@ -92,7 +120,12 @@ function LoansContent() {
         }
       >
         {data.total === 0 ? (
-          <div className="p-6"><EmptyState title="No loan applications yet" hint="Use “Apply for a loan” to submit your first application." /></div>
+          <div className="p-6">
+            <EmptyState
+              title="No loan applications yet"
+              hint="Use “Apply for a loan” to submit your first application."
+            />
+          </div>
         ) : (
           <>
             <table className="w-full">
@@ -100,10 +133,28 @@ function LoansContent() {
                 <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
                   <SortHeader label="Reference" field="ref" sort={sort} onSort={setSort} />
                   <th className="px-6 py-3 font-medium">Product</th>
-                  <SortHeader label="Principal" field="amount" sort={sort} onSort={setSort} align="right" />
-                  <SortHeader label="Term" field="term_months" sort={sort} onSort={setSort} align="right" />
+                  <SortHeader
+                    label="Principal"
+                    field="amount"
+                    sort={sort}
+                    onSort={setSort}
+                    align="right"
+                  />
+                  <SortHeader
+                    label="Term"
+                    field="term_months"
+                    sort={sort}
+                    onSort={setSort}
+                    align="right"
+                  />
                   <th className="px-6 py-3 text-right font-medium">Rate</th>
-                  <SortHeader label="Status" field="status" sort={sort} onSort={setSort} align="right" />
+                  <SortHeader
+                    label="Status"
+                    field="status"
+                    sort={sort}
+                    onSort={setSort}
+                    align="right"
+                  />
                   <th className="px-6 py-3 text-right font-medium"></th>
                 </tr>
               </thead>
@@ -112,10 +163,14 @@ function LoansContent() {
                   <tr key={l.id}>
                     <td className="tabular px-6 py-4 text-sm font-semibold">{l.ref}</td>
                     <td className="px-6 py-4 text-sm">{l.product}</td>
-                    <td className="px-6 py-4 text-right"><Money amount={l.amount} /></td>
+                    <td className="px-6 py-4 text-right">
+                      <Money amount={l.amount} />
+                    </td>
                     <td className="tabular px-6 py-4 text-right text-sm">{l.term_months} mo</td>
                     <td className="tabular px-6 py-4 text-right text-sm">{l.interest_rate}%</td>
-                    <td className="px-6 py-4 text-right"><StatusPill status={l.status} /></td>
+                    <td className="px-6 py-4 text-right">
+                      <StatusPill status={l.status} />
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <Link
                         to="/app/loans/$loanId"

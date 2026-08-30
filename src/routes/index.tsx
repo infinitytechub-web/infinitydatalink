@@ -10,7 +10,10 @@ export const Route = createFileRoute("/")({
         content:
           "One platform for savings, loans, payments, and investment — built for cooperatives, SACCOs, and membership organisations.",
       },
-      { property: "og:title", content: "IT-360 CashApp — Enterprise Financial Management Platform" },
+      {
+        property: "og:title",
+        content: "IT-360 CashApp — Enterprise Financial Management Platform",
+      },
       {
         property: "og:description",
         content:
@@ -44,10 +47,22 @@ export const Route = createFileRoute("/")({
             "@type": "OfferCatalog",
             name: "IT-360 CashApp modules",
             itemListElement: [
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Savings accounts & plans" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Loan origination & servicing" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Payments & reconciliation" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Member KYC & compliance" } },
+              {
+                "@type": "Offer",
+                itemOffered: { "@type": "Service", name: "Savings accounts & plans" },
+              },
+              {
+                "@type": "Offer",
+                itemOffered: { "@type": "Service", name: "Loan origination & servicing" },
+              },
+              {
+                "@type": "Offer",
+                itemOffered: { "@type": "Service", name: "Payments & reconciliation" },
+              },
+              {
+                "@type": "Offer",
+                itemOffered: { "@type": "Service", name: "Member KYC & compliance" },
+              },
             ],
           },
         }),
@@ -96,8 +111,8 @@ function Landing() {
             <span className="italic">managed with care.</span>
           </h1>
           <p className="mt-6 max-w-lg text-base text-muted-foreground">
-            IT-360 CashApp is a secure, membership-first platform for cooperatives, SACCOs,
-            savings & loans companies, and investment groups. Two portals, one source of truth.
+            IT-360 CashApp is a secure, membership-first platform for cooperatives, SACCOs, savings
+            & loans companies, and investment groups. Two portals, one source of truth.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -150,7 +165,10 @@ function Landing() {
           </h2>
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {[
-              ["Membership", "Individual, group, department and institutional registration with full KYC."],
+              [
+                "Membership",
+                "Individual, group, department and institutional registration with full KYC.",
+              ],
               ["Savings", "Daily to annual schedules, goals, interest and automated reminders."],
               ["Loans", "Applications, guarantors, multi-level approval, repayment tracking."],
               ["Payments", "Mobile money, bank transfers, card and international rails."],

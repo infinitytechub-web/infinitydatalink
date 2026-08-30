@@ -58,14 +58,18 @@ export function Pagination({
       </div>
       <div className="flex items-center gap-3">
         <label className="flex items-center gap-2">
-          <span className="uppercase tracking-widest text-[10px] text-muted-foreground">Per page</span>
+          <span className="uppercase tracking-widest text-[10px] text-muted-foreground">
+            Per page
+          </span>
           <select
             value={pageSize}
             onChange={(e) => onPageSize(Number(e.target.value))}
             className="rounded border border-emerald-deep/15 bg-card px-2 py-1 text-xs outline-none focus:border-emerald-mid"
           >
             {[10, 25, 50, 100].map((n) => (
-              <option key={n} value={n}>{n}</option>
+              <option key={n} value={n}>
+                {n}
+              </option>
             ))}
           </select>
         </label>

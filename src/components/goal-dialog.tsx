@@ -4,7 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setGoal, clearGoal } from "@/lib/savings-goals.functions";
@@ -27,7 +33,13 @@ export function GoalDialog({
 
   const save = useMutation({
     mutationFn: () =>
-      setFn({ data: { account_id: accountId, goal_amount: Number(amount), goal_target_date: date || null } }),
+      setFn({
+        data: {
+          account_id: accountId,
+          goal_amount: Number(amount),
+          goal_target_date: date || null,
+        },
+      }),
     onSuccess: async () => {
       toast.success("Goal saved");
       setOpen(false);
@@ -66,7 +78,15 @@ export function GoalDialog({
         >
           <div>
             <Label htmlFor="g-amt">Target amount</Label>
-            <Input id="g-amt" type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+            <Input
+              id="g-amt"
+              type="number"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
           </div>
           <div>
             <Label htmlFor="g-dt">Target date (optional)</Label>
@@ -77,7 +97,12 @@ export function GoalDialog({
           </div>
           <DialogFooter className="flex justify-between gap-2 sm:justify-between">
             {currentAmount ? (
-              <Button type="button" variant="ghost" onClick={() => clear.mutate()} disabled={clear.isPending}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => clear.mutate()}
+                disabled={clear.isPending}
+              >
                 Remove goal
               </Button>
             ) : (

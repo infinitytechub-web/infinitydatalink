@@ -12,7 +12,14 @@ import { EmptyState, KPIStat, Money, SectionCard } from "@/components/primitives
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ExportBar } from "@/components/export-bar";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import { formatMoney } from "@/lib/org-config";
@@ -51,7 +58,9 @@ export function GatewayPaymentsPanel() {
               onClick={() => setTab(t)}
               className={
                 "rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition " +
-                (tab === t ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:bg-muted")
+                (tab === t
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border text-muted-foreground hover:bg-muted")
               }
             >
               {t}
@@ -67,7 +76,13 @@ export function GatewayPaymentsPanel() {
 
 function Ledger() {
   const [page, setPage] = useState(1);
-  const [f, setF] = useState<Filters>({ status: "", rail: "", date_from: "", date_to: "", search: "" });
+  const [f, setF] = useState<Filters>({
+    status: "",
+    rail: "",
+    date_from: "",
+    date_to: "",
+    search: "",
+  });
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "gateway-payments", page, f],
     queryFn: () =>
@@ -130,15 +145,30 @@ function Ledger() {
         </label>
         <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           From
-          <Input type="date" value={f.date_from} onChange={(e) => set({ date_from: e.target.value })} className="mt-1 h-9 w-36" />
+          <Input
+            type="date"
+            value={f.date_from}
+            onChange={(e) => set({ date_from: e.target.value })}
+            className="mt-1 h-9 w-36"
+          />
         </label>
         <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           To
-          <Input type="date" value={f.date_to} onChange={(e) => set({ date_to: e.target.value })} className="mt-1 h-9 w-36" />
+          <Input
+            type="date"
+            value={f.date_to}
+            onChange={(e) => set({ date_to: e.target.value })}
+            className="mt-1 h-9 w-36"
+          />
         </label>
         <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Reference / phone
-          <Input value={f.search} onChange={(e) => set({ search: e.target.value })} className="mt-1 h-9 w-44" placeholder="IW-…" />
+          <Input
+            value={f.search}
+            onChange={(e) => set({ search: e.target.value })}
+            className="mt-1 h-9 w-44"
+            placeholder="IW-…"
+          />
         </label>
         <div className="ml-auto">
           <ExportBar
@@ -151,9 +181,16 @@ function Ledger() {
               { header: "Rail", accessor: (r) => RAIL_LABELS[r.rail] ?? r.rail },
               { header: "Provider", accessor: (r) => r.provider_code },
               { header: "Purpose", accessor: (r) => r.purpose },
-              { header: "Amount", accessor: (r) => formatMoney(minorToMajor(r.amount_minor)), align: "right" },
+              {
+                header: "Amount",
+                accessor: (r) => formatMoney(minorToMajor(r.amount_minor)),
+                align: "right",
+              },
               { header: "Status", accessor: (r) => r.status },
-              { header: "Payer phone", accessor: (r) => (r.payer_phone ? formatGhPhone(r.payer_phone) : "") },
+              {
+                header: "Payer phone",
+                accessor: (r) => (r.payer_phone ? formatGhPhone(r.payer_phone) : ""),
+              },
               { header: "Receipt", accessor: (r) => receipts.get(r.id)?.receipt_no ?? "" },
               { header: "Created", accessor: (r) => new Date(r.created_at).toISOString() },
             ]}
@@ -186,7 +223,9 @@ function Ledger() {
             <tbody className="divide-y divide-border/60">
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">{r.reference}</td>
+                  <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">
+                    {r.reference}
+                  </td>
                   <td className="px-5 py-3 text-sm">
                     <div>{RAIL_LABELS[r.rail] ?? r.rail}</div>
                     <div className="text-[11px] text-muted-foreground">{r.provider_code}</div>
@@ -221,10 +260,20 @@ function Ledger() {
           Page {page} of {pages} · {total} payments
         </span>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
             Previous
           </Button>
-          <Button size="sm" variant="outline" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={page >= pages}
+            onClick={() => setPage((p) => p + 1)}
+          >
             Next
           </Button>
         </div>
@@ -235,7 +284,10 @@ function Ledger() {
 
 function RowActions({ row, canManage }: { row: IntentRow; canManage: boolean }) {
   const manual = railSpec(row.rail)?.manualSettlement ?? false;
-  const open = row.status === "pending" || row.status === "processing" || row.status === "requires_configuration";
+  const open =
+    row.status === "pending" ||
+    row.status === "processing" ||
+    row.status === "requires_configuration";
   return (
     <div className="flex flex-wrap justify-end gap-2">
       {manual && open && <ConfirmDialog row={row} disabled={!canManage} />}
@@ -258,7 +310,9 @@ function ConfirmDialog({ row, disabled }: { row: IntentRow; disabled?: boolean }
   const call = useServerFn(confirmManualPayment);
   const mut = useMutation({
     mutationFn: () =>
-      call({ data: { reference: row.reference, note, provider_reference: providerRef.trim() || null } }),
+      call({
+        data: { reference: row.reference, note, provider_reference: providerRef.trim() || null },
+      }),
     onSuccess: async (res) => {
       toast.success(`Settled ${row.reference} · receipt ${res.receipt.receipt_no}`);
       setOpen(false);
@@ -270,7 +324,12 @@ function ConfirmDialog({ row, disabled }: { row: IntentRow; disabled?: boolean }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" disabled={disabled} title={disabled ? "payments.manage required" : undefined}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          title={disabled ? "payments.manage required" : undefined}
+        >
           <BadgeCheck className="mr-1 h-3.5 w-3.5" /> Confirm
         </Button>
       </DialogTrigger>
@@ -282,13 +341,14 @@ function ConfirmDialog({ row, disabled }: { row: IntentRow; disabled?: boolean }
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            if (note.trim().length < 10) return toast.error("Describe how funds were received (min 10 characters).");
+            if (note.trim().length < 10)
+              return toast.error("Describe how funds were received (min 10 characters).");
             mut.mutate();
           }}
         >
           <p className="text-sm text-muted-foreground">
-            Confirming issues a numbered receipt for {formatMoney(minorToMajor(row.amount_minor))} and records you as the
-            settling officer.
+            Confirming issues a numbered receipt for {formatMoney(minorToMajor(row.amount_minor))}{" "}
+            and records you as the settling officer.
           </p>
           <Input
             value={providerRef}
@@ -332,7 +392,12 @@ function CancelDialog({ row, disabled }: { row: IntentRow; disabled?: boolean })
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" disabled={disabled} className="border-destructive/40 text-destructive hover:bg-destructive/10">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          className="border-destructive/40 text-destructive hover:bg-destructive/10"
+        >
           <Ban className="mr-1 h-3.5 w-3.5" /> Cancel
         </Button>
       </DialogTrigger>
@@ -348,7 +413,13 @@ function CancelDialog({ row, disabled }: { row: IntentRow; disabled?: boolean })
             mut.mutate();
           }}
         >
-          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} placeholder="Why is this cancelled?" required />
+          <Textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+            placeholder="Why is this cancelled?"
+            required
+          />
           <DialogFooter>
             <Button type="submit" variant="destructive" disabled={mut.isPending}>
               {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -393,13 +464,21 @@ function RefundDialog({ row, disabled }: { row: IntentRow; disabled?: boolean })
           onSubmit={(e) => {
             e.preventDefault();
             const value = Number(amount);
-            if (!Number.isFinite(value) || value <= 0) return toast.error("Enter a valid refund amount.");
-            if (reason.trim().length < 10) return toast.error("Explain the refund (min 10 characters).");
+            if (!Number.isFinite(value) || value <= 0)
+              return toast.error("Enter a valid refund amount.");
+            if (reason.trim().length < 10)
+              return toast.error("Explain the refund (min 10 characters).");
             mut.mutate();
           }}
         >
           <Input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} placeholder="Reason for refund" required />
+          <Textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+            placeholder="Reason for refund"
+            required
+          />
           <DialogFooter>
             <Button type="submit" disabled={mut.isPending}>
               {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -417,7 +496,9 @@ function Reconciliation() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "gateway-payments", "recon", range],
     queryFn: () =>
-      getPaymentReconciliation({ data: { date_from: range.date_from || null, date_to: range.date_to || null } }),
+      getPaymentReconciliation({
+        data: { date_from: range.date_from || null, date_to: range.date_to || null },
+      }),
     staleTime: 5_000,
   });
 
@@ -450,15 +531,33 @@ function Reconciliation() {
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-5">
-            <KPIStat label="Provider confirmed" value={<span className="tabular">{s.provider_confirmed}</span>} accent />
-            <KPIStat label="Manually confirmed" value={<span className="tabular">{s.manual_confirmed}</span>} hint="Cash / bank" />
-            <KPIStat label="Awaiting provider" value={<span className="tabular">{s.awaiting_provider}</span>} />
-            <KPIStat label="Unconfigured" value={<span className="tabular">{s.unconfigured}</span>} hint="Needs credentials" />
+            <KPIStat
+              label="Provider confirmed"
+              value={<span className="tabular">{s.provider_confirmed}</span>}
+              accent
+            />
+            <KPIStat
+              label="Manually confirmed"
+              value={<span className="tabular">{s.manual_confirmed}</span>}
+              hint="Cash / bank"
+            />
+            <KPIStat
+              label="Awaiting provider"
+              value={<span className="tabular">{s.awaiting_provider}</span>}
+            />
+            <KPIStat
+              label="Unconfigured"
+              value={<span className="tabular">{s.unconfigured}</span>}
+              hint="Needs credentials"
+            />
             <KPIStat label="Failed" value={<span className="tabular">{s.failed}</span>} />
           </div>
 
           {s.mismatches.length === 0 ? (
-            <EmptyState title="No mismatches" hint="Every payment's status, receipt and settlement agree." />
+            <EmptyState
+              title="No mismatches"
+              hint="Every payment's status, receipt and settlement agree."
+            />
           ) : (
             <div className="overflow-hidden rounded-lg border border-amber-500/30">
               <table className="w-full">

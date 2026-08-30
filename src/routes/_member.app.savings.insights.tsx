@@ -36,10 +36,14 @@ export const Route = createFileRoute("/_member/app/savings/insights")({
       { title: "Savings insights — IT-360 CashApp" },
       {
         name: "description",
-        content: "Track savings growth, contribution consistency, goal progress and 12-month projections.",
+        content:
+          "Track savings growth, contribution consistency, goal progress and 12-month projections.",
       },
       { property: "og:title", content: "Savings insights — IT-360 CashApp" },
-      { property: "og:description", content: "Personal savings analytics, consistency scoring and projections." },
+      {
+        property: "og:description",
+        content: "Personal savings analytics, consistency scoring and projections.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -86,14 +90,22 @@ function Body() {
   return (
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Total balance" value={<Money amount={i.total_balance} />} hint={`Available ${formatMoney(i.available)}`} />
+        <KPIStat
+          label="Total balance"
+          value={<Money amount={i.total_balance} />}
+          hint={`Available ${formatMoney(i.available)}`}
+        />
         <KPIStat label="Net saved (12m)" value={<Money amount={i.net_12m} signed />} accent />
         <KPIStat
           label="Consistency"
           value={<span className="tabular">{i.consistency_pct}%</span>}
           hint={`${i.months_contributed}/12 months · ${i.streak_months} month streak`}
         />
-        <KPIStat label="Projected (12m)" value={<Money amount={i.projected_12m} />} hint="At current net pace" />
+        <KPIStat
+          label="Projected (12m)"
+          value={<Money amount={i.projected_12m} />}
+          hint="At current net pace"
+        />
       </section>
 
       <SectionCard title="Balance trend">
@@ -104,7 +116,12 @@ function Body() {
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} width={70} />
               <Tooltip formatter={(v: number) => formatMoney(v)} />
-              <Area type="monotone" dataKey="balance" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
+              <Area
+                type="monotone"
+                dataKey="balance"
+                stroke="hsl(var(--primary))"
+                fill="hsl(var(--primary) / 0.2)"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -128,7 +145,10 @@ function Body() {
       <SectionCard title="Goal progress">
         {i.goals.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No savings goals set" hint="Set a goal on any savings account to track progress here." />
+            <EmptyState
+              title="No savings goals set"
+              hint="Set a goal on any savings account to track progress here."
+            />
           </div>
         ) : (
           <ul className="divide-y divide-border">

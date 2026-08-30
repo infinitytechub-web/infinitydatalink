@@ -48,7 +48,10 @@ type AnyQuery = {
   lte: (c: string, v: unknown) => AnyQuery;
   ilike: (c: string, v: string) => AnyQuery;
   order: (c: string, o?: { ascending?: boolean }) => AnyQuery;
-  range: (a: number, b: number) => Promise<{ data: unknown; error: { message: string } | null; count: number | null }>;
+  range: (
+    a: number,
+    b: number,
+  ) => Promise<{ data: unknown; error: { message: string } | null; count: number | null }>;
 };
 
 const asAny = (q: unknown) => q as AnyQuery;
@@ -80,7 +83,9 @@ export const listSecurityEvents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     PageSchema.extend({
-      category: z.enum(["all", "auth", "access", "security", "payments", "documents"]).default("all"),
+      category: z
+        .enum(["all", "auth", "access", "security", "payments", "documents"])
+        .default("all"),
       severity: z.enum(["all", "info", "warning", "critical"]).default("all"),
     }).parse(d),
   )
@@ -91,9 +96,11 @@ export const listSecurityEvents = createServerFn({ method: "POST" })
     // The category filter narrows on the server; severity is derived from the
     // action + metadata so it is applied after fetch on the current page set.
     let q = asAny(
-      context.supabase.from("audit_log").select("id, created_at, action, actor_email, actor_role, target, meta", {
-        count: "exact",
-      }),
+      context.supabase
+        .from("audit_log")
+        .select("id, created_at, action, actor_email, actor_role, target, meta", {
+          count: "exact",
+        }),
     );
     const prefixes = EVENT_CATEGORIES[data.category];
     if (prefixes.length > 0) {
@@ -143,7 +150,9 @@ export const listSecurityEvents = createServerFn({ method: "POST" })
       .gte("created_at", since)
       .limit(2000);
     const dayRows = (day.data ?? []) as { action: string; meta: Record<string, Json> | null }[];
-    const critical24h = dayRows.filter((r) => severityFor(r.action, r.meta ?? {}) === "critical").length;
+    const critical24h = dayRows.filter(
+      (r) => severityFor(r.action, r.meta ?? {}) === "critical",
+    ).length;
     const blocked24h = dayRows.filter((r) => /blocked|denied|forbidden/i.test(r.action)).length;
 
     const liveSince = new Date(Date.now() - 5 * 60_000).toISOString();
@@ -182,7 +191,10 @@ export const getFirewallConfig = createServerFn({ method: "GET" })
     await assertSecurityPermission(context.supabase, "view");
     const [settings, rules, limits, manage] = await Promise.all([
       context.supabase.from("security_settings").select("*").eq("id", true).maybeSingle(),
-      context.supabase.from("security_ip_rules").select("*").order("created_at", { ascending: false }),
+      context.supabase
+        .from("security_ip_rules")
+        .select("*")
+        .order("created_at", { ascending: false }),
       context.supabase.from("security_rate_limits").select("*").order("scope"),
       canManageSecurity(context.supabase),
     ]);
@@ -199,7 +211,10 @@ export const getFirewallConfig = createServerFn({ method: "GET" })
         block_executables: s.block_executables ?? true,
         updated_at: s.updated_at ?? null,
       },
-      ip_rules: ((rules.data ?? []) as IpRule[]).map((r) => ({ ...r, mode: r.mode === "allow" ? "allow" : "deny" })),
+      ip_rules: ((rules.data ?? []) as IpRule[]).map((r) => ({
+        ...r,
+        mode: r.mode === "allow" ? "allow" : "deny",
+      })),
       rate_limits: (limits.data ?? []) as RateLimit[],
       can_manage: manage,
     };
@@ -261,7 +276,10 @@ export const upsertIpRule = createServerFn({ method: "POST" })
       created_by: context.userId,
     };
     const res = data.id
-      ? await context.supabase.from("security_ip_rules").update(row as never).eq("id", data.id)
+      ? await context.supabase
+          .from("security_ip_rules")
+          .update(row as never)
+          .eq("id", data.id)
       : await context.supabase.from("security_ip_rules").insert(row as never);
     if (res.error) throw new Error(res.error.message);
     await writeAudit({
@@ -296,7 +314,12 @@ export const upsertRateLimit = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid().optional(),
-        scope: z.string().trim().min(3).max(60).regex(/^[a-z0-9._-]+$/, "Use lowercase dotted scope keys"),
+        scope: z
+          .string()
+          .trim()
+          .min(3)
+          .max(60)
+          .regex(/^[a-z0-9._-]+$/, "Use lowercase dotted scope keys"),
         window_seconds: z.number().int().min(1).max(86_400),
         max_requests: z.number().int().min(1).max(100_000),
         enabled: z.boolean().default(true),
@@ -314,7 +337,10 @@ export const upsertRateLimit = createServerFn({ method: "POST" })
       note: data.note?.trim() || null,
     };
     const res = data.id
-      ? await context.supabase.from("security_rate_limits").update(row as never).eq("id", data.id)
+      ? await context.supabase
+          .from("security_rate_limits")
+          .update(row as never)
+          .eq("id", data.id)
       : await context.supabase.from("security_rate_limits").insert(row as never);
     if (res.error) throw new Error(res.error.message);
     await writeAudit({
@@ -322,7 +348,11 @@ export const upsertRateLimit = createServerFn({ method: "POST" })
       actor_email: (context.claims as { email?: string } | null)?.email ?? null,
       action: data.id ? "security.rate_limit.updated" : "security.rate_limit.created",
       target: data.scope,
-      meta: { window_seconds: data.window_seconds, max_requests: data.max_requests, enabled: data.enabled },
+      meta: {
+        window_seconds: data.window_seconds,
+        max_requests: data.max_requests,
+        enabled: data.enabled,
+      },
     });
     return { ok: true as const };
   });
@@ -340,7 +370,9 @@ export type UploadScanPage = {
 export const listUploadScans = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    PageSchema.extend({ verdict: z.enum(["all", "clean", "blocked", "quarantined"]).default("all") }).parse(d),
+    PageSchema.extend({
+      verdict: z.enum(["all", "clean", "blocked", "quarantined"]).default("all"),
+    }).parse(d),
   )
   .handler(async ({ data, context }): Promise<UploadScanPage> => {
     await assertSecurityPermission(context.supabase, "view");
@@ -359,7 +391,9 @@ export const listUploadScans = createServerFn({ method: "POST" })
     if (term) q = q.ilike("filename", `%${term}%`);
 
     const offset = (data.page - 1) * data.pageSize;
-    const res = await q.order("created_at", { ascending: false }).range(offset, offset + data.pageSize - 1);
+    const res = await q
+      .order("created_at", { ascending: false })
+      .range(offset, offset + data.pageSize - 1);
     if (res.error) throw new Error(res.error.message);
 
     type Raw = {
@@ -376,7 +410,10 @@ export const listUploadScans = createServerFn({ method: "POST" })
     const ids = [...new Set(raw.map((r) => r.user_id).filter((v): v is string => Boolean(v)))];
     const names = new Map<string, string>();
     if (ids.length > 0) {
-      const profiles = await context.supabase.from("profiles").select("id, full_name").in("id", ids);
+      const profiles = await context.supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", ids);
       for (const p of (profiles.data ?? []) as { id: string; full_name: string | null }[]) {
         names.set(p.id, p.full_name ?? "Member");
       }
@@ -458,7 +495,10 @@ export const listLiveSessions = createServerFn({ method: "GET" })
     const ids = [...new Set(raw.map((r) => r.user_id))];
     const names = new Map<string, string>();
     if (ids.length > 0) {
-      const profiles = await context.supabase.from("profiles").select("id, full_name").in("id", ids);
+      const profiles = await context.supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", ids);
       for (const p of (profiles.data ?? []) as { id: string; full_name: string | null }[]) {
         names.set(p.id, p.full_name ?? "Member");
       }

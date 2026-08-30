@@ -90,8 +90,7 @@ export function VaultRetentionPanel() {
     mutationFn: async () =>
       await purgeFn({ data: { confirm: "PURGE" as const, reason: purgeReason.trim() } }),
     onSuccess: (res) => {
-      if (res.failed > 0)
-        toast.warning(`${res.entries_purged} purged · ${res.failed} failed`);
+      if (res.failed > 0) toast.warning(`${res.entries_purged} purged · ${res.failed} failed`);
       else
         toast.success(
           `${res.entries_purged} snapshot(s) and ${res.documents_purged} document(s) permanently removed`,
@@ -164,9 +163,7 @@ export function VaultRetentionPanel() {
           <Stat label="Due for removal now" value={String(data?.due_now ?? "—")} />
           <Stat
             label="Next scheduled removal"
-            value={
-              data?.next_purge_at ? new Date(data.next_purge_at).toLocaleDateString() : "—"
-            }
+            value={data?.next_purge_at ? new Date(data.next_purge_at).toLocaleDateString() : "—"}
           />
           <Stat
             label="Last purge"

@@ -24,9 +24,7 @@ d("Database: super_admin seed & role enforcement", () => {
   });
 
   it("at least one super_admin role assignment exists", () => {
-    const n = Number(
-      q("SELECT COUNT(*) FROM public.user_roles WHERE role = 'super_admin'"),
-    );
+    const n = Number(q("SELECT COUNT(*) FROM public.user_roles WHERE role = 'super_admin'"));
     expect(n).toBeGreaterThanOrEqual(1);
   });
 
@@ -61,7 +59,6 @@ d("Database: super_admin seed & role enforcement", () => {
       expect(anon, `anon must NOT EXECUTE ${fn}`).toBe("f");
     }
   });
-
 
   it("user_roles has grant metadata columns", () => {
     const cols = q(

@@ -35,9 +35,8 @@ export const getVaultRetention = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { admin } = await superAdminCtx(context);
-    const { loadVaultRetentionPolicy, listVaultPurgeCandidates } = await import(
-      "@/lib/kyc-vault-purge.server"
-    );
+    const { loadVaultRetentionPolicy, listVaultPurgeCandidates } =
+      await import("@/lib/kyc-vault-purge.server");
     const policy = await loadVaultRetentionPolicy(admin);
     const candidates = await listVaultPurgeCandidates(admin, 500);
 

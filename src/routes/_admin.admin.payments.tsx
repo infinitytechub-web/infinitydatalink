@@ -4,10 +4,25 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { EmptyState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton, TableSkeleton } from "@/components/primitives";
+import {
+  EmptyState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  TableSkeleton,
+} from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
@@ -64,10 +79,25 @@ function Body() {
   return (
     <>
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Pending total" value={<span className="tabular">{s.pending_count}</span>} accent />
-        <KPIStat label="Savings pending" value={<span className="tabular">{s.pending_savings}</span>} hint="Deposits + withdrawals" />
-        <KPIStat label="Loan repayments pending" value={<span className="tabular">{s.pending_repayments}</span>} />
-        <KPIStat label="Cleared (24h)" value={<Money amount={s.cleared_24h_volume} />} hint={`${s.failed_24h} failed in 24h`} />
+        <KPIStat
+          label="Pending total"
+          value={<span className="tabular">{s.pending_count}</span>}
+          accent
+        />
+        <KPIStat
+          label="Savings pending"
+          value={<span className="tabular">{s.pending_savings}</span>}
+          hint="Deposits + withdrawals"
+        />
+        <KPIStat
+          label="Loan repayments pending"
+          value={<span className="tabular">{s.pending_repayments}</span>}
+        />
+        <KPIStat
+          label="Cleared (24h)"
+          value={<Money amount={s.cleared_24h_volume} />}
+          hint={`${s.failed_24h} failed in 24h`}
+        />
       </section>
 
       <SectionCard
@@ -104,7 +134,11 @@ function Body() {
 function Queue({ kind }: { kind: KindFilter }) {
   const { data: rows } = useSuspenseQuery(pendingQuery(kind));
   if (rows.length === 0) {
-    return <div className="p-6"><EmptyState title="No pending payments" hint="You're all caught up." /></div>;
+    return (
+      <div className="p-6">
+        <EmptyState title="No pending payments" hint="You're all caught up." />
+      </div>
+    );
   }
   return (
     <>
@@ -168,9 +202,17 @@ function PendingRow({ row }: { row: AdminPendingPayment }) {
     onError: (e: Error) => toast.error(`Approve failed: ${e.message}`),
   });
 
-  const target = row.loan_ref
-    ? <Link to="/admin/loans/$loanId" params={{ loanId: row.loan_id ?? "" }} className="hover:underline">{row.loan_ref}</Link>
-    : (row.plan_name ?? "—");
+  const target = row.loan_ref ? (
+    <Link
+      to="/admin/loans/$loanId"
+      params={{ loanId: row.loan_id ?? "" }}
+      className="hover:underline"
+    >
+      {row.loan_ref}
+    </Link>
+  ) : (
+    (row.plan_name ?? "—")
+  );
 
   return (
     <tr>
@@ -178,12 +220,18 @@ function PendingRow({ row }: { row: AdminPendingPayment }) {
       <td className="px-6 py-3 text-sm capitalize">{row.kind.replace("_", " ")}</td>
       <td className="px-6 py-3 text-sm">
         <div className="font-semibold">{row.member_name ?? "Member"}</div>
-        <div className="text-[11px] text-muted-foreground">{row.member_no ?? row.user_id.slice(0, 8)}</div>
+        <div className="text-[11px] text-muted-foreground">
+          {row.member_no ?? row.user_id.slice(0, 8)}
+        </div>
       </td>
       <td className="px-6 py-3 text-sm text-muted-foreground">{target}</td>
       <td className="px-6 py-3 text-sm text-muted-foreground">{row.channel ?? "—"}</td>
-      <td className="px-6 py-3 text-right"><Money amount={row.amount} /></td>
-      <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">{new Date(row.created_at).toLocaleString()}</td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={row.amount} />
+      </td>
+      <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">
+        {new Date(row.created_at).toLocaleString()}
+      </td>
       <td className="px-6 py-3 text-right">
         <div className="flex justify-end gap-2">
           <Button
@@ -221,12 +269,20 @@ function RejectDialog({ row, disabled }: { row: AdminPendingPayment; disabled?: 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" disabled={disabled} title={disabled ? "payments.reject permission required" : undefined} className="border-destructive/40 text-destructive hover:bg-destructive/10">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          title={disabled ? "payments.reject permission required" : undefined}
+          className="border-destructive/40 text-destructive hover:bg-destructive/10"
+        >
           <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Reject {row.ref}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Reject {row.ref}</DialogTitle>
+        </DialogHeader>
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -236,12 +292,25 @@ function RejectDialog({ row, disabled }: { row: AdminPendingPayment; disabled?: 
           }}
         >
           <p className="text-sm text-muted-foreground">
-            Marking this payment as failed will not move any balance. The member will see the reason on their transactions page.
+            Marking this payment as failed will not move any balance. The member will see the reason
+            on their transactions page.
           </p>
-          <Textarea rows={3} placeholder="Reason for rejection" value={note} onChange={(e) => setNote(e.target.value)} required />
+          <Textarea
+            rows={3}
+            placeholder="Reason for rejection"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            required
+          />
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={mut.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={mut.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               {mut.isPending ? "Rejecting…" : "Confirm rejection"}
             </Button>
           </DialogFooter>

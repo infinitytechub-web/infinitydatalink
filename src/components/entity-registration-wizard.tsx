@@ -58,7 +58,10 @@ export function EntityRegistrationWizard({
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<WizardForm>({ ...EMPTY, type: initialType });
   const [pendingDocs, setPendingDocs] = useState<
-    { file: File; doc_type: "registration_cert" | "tax_cert" | "mandate_letter" | "id_document" | "other" }[]
+    {
+      file: File;
+      doc_type: "registration_cert" | "tax_cert" | "mandate_letter" | "id_document" | "other";
+    }[]
   >([]);
 
   const registerFn = useServerFn(registerEntity);
@@ -136,13 +139,20 @@ export function EntityRegistrationWizard({
                 i < step
                   ? "border-primary bg-primary text-primary-foreground"
                   : i === step
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-muted text-muted-foreground",
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted text-muted-foreground",
               )}
             >
               {i + 1}
             </span>
-            <span className={cn("font-medium", i === step ? "text-foreground" : "text-muted-foreground")}>{t}</span>
+            <span
+              className={cn(
+                "font-medium",
+                i === step ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {t}
+            </span>
             {i < STEP_TITLES.length - 1 ? <span className="mx-1 h-px w-6 bg-border" /> : null}
           </li>
         ))}
@@ -156,10 +166,19 @@ export function EntityRegistrationWizard({
                 <button
                   key={t}
                   type="button"
-                  onClick={() => setForm({ ...form, type: t, parent_entity_id: "", tax_id: t === "institution" ? form.tax_id : "" })}
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      type: t,
+                      parent_entity_id: "",
+                      tax_id: t === "institution" ? form.tax_id : "",
+                    })
+                  }
                   className={cn(
                     "rounded-lg border p-4 text-left transition",
-                    form.type === t ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-background hover:bg-muted",
+                    form.type === t
+                      ? "border-primary bg-primary/10 ring-1 ring-primary"
+                      : "border-border bg-background hover:bg-muted",
                   )}
                 >
                   <div className="text-sm font-semibold capitalize">{t}</div>
@@ -262,8 +281,8 @@ export function EntityRegistrationWizard({
           {step === 3 ? (
             <div className="md:col-span-2 space-y-3">
               <p className="text-xs text-muted-foreground">
-                Attach registration certificate, tax certificate, or a mandate letter (PDF/PNG/JPEG, up to 10 MB each).
-                You can upload these later from the entity page.
+                Attach registration certificate, tax certificate, or a mandate letter (PDF/PNG/JPEG,
+                up to 10 MB each). You can upload these later from the entity page.
               </p>
               <label className="flex cursor-pointer items-center justify-center rounded-md border border-dashed border-border bg-muted/40 px-4 py-6 text-xs text-muted-foreground hover:bg-muted">
                 <input
@@ -292,7 +311,9 @@ export function EntityRegistrationWizard({
                         value={d.doc_type}
                         onChange={(e) => {
                           const v = e.target.value as typeof d.doc_type;
-                          setPendingDocs((prev) => prev.map((x, i) => (i === idx ? { ...x, doc_type: v } : x)));
+                          setPendingDocs((prev) =>
+                            prev.map((x, i) => (i === idx ? { ...x, doc_type: v } : x)),
+                          );
                         }}
                       >
                         <option value="registration_cert">Registration cert.</option>
@@ -325,11 +346,15 @@ export function EntityRegistrationWizard({
                 <ReviewRow
                   label="Parent institution"
                   value={
-                    (institutionsQuery.data ?? []).find((i) => i.id === form.parent_entity_id)?.name ?? "—"
+                    (institutionsQuery.data ?? []).find((i) => i.id === form.parent_entity_id)
+                      ?.name ?? "—"
                   }
                 />
               ) : null}
-              <ReviewRow label="Contact" value={`${form.contact_email || "—"} · ${form.contact_phone || "—"}`} />
+              <ReviewRow
+                label="Contact"
+                value={`${form.contact_email || "—"} · ${form.contact_phone || "—"}`}
+              />
               <ReviewRow label="Region" value={form.region || "—"} />
               <ReviewRow label="Address" value={form.address_line || "—"} />
               <ReviewRow label="Digital address" value={form.digital_address || "—"} />

@@ -2,11 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { writeAudit } from "@/lib/audit-log";
-import {
-  PROVIDER_MODES,
-  defaultWebhookPath,
-  templateFor,
-} from "@/lib/payment-providers";
+import { PROVIDER_MODES, defaultWebhookPath, templateFor } from "@/lib/payment-providers";
 import {
   assertPaymentsPermission,
   buildReadinessReport,
@@ -50,7 +46,6 @@ export const setPaymentRailEnabled = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
-
 
 /** Providers + redacted config + recent webhook activity. Requires payments.view. */
 export const getPaymentConfig = createServerFn({ method: "GET" })

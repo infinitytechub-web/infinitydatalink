@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { FileDown, FileSpreadsheet, FileText, Lock, Printer, SlidersHorizontal } from "lucide-react";
 import {
-  exportCsv,
-  exportExcel,
-  exportPdf,
-  exportPrint,
-  type ExportColumn,
-} from "@/lib/exports";
+  FileDown,
+  FileSpreadsheet,
+  FileText,
+  Lock,
+  Printer,
+  SlidersHorizontal,
+} from "lucide-react";
+import { exportCsv, exportExcel, exportPdf, exportPrint, type ExportColumn } from "@/lib/exports";
 import { useAuth, type Permission } from "@/lib/auth";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
 
 type Props<T> = {
   title: string;
@@ -23,11 +23,21 @@ type Props<T> = {
   onExport?: (format: "csv" | "excel" | "pdf" | "print") => void;
 };
 
-export function ExportBar<T>({ title, subtitle, filename, columns, rows, permission, onExport }: Props<T>) {
+export function ExportBar<T>({
+  title,
+  subtitle,
+  filename,
+  columns,
+  rows,
+  permission,
+  onExport,
+}: Props<T>) {
   const { user, hasPermission } = useAuth();
   const allowed = hasPermission(permission);
   // Column selection applies to CSV & Excel only; PDF/Print always render the full column set.
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(columns.map((c) => c.header)));
+  const [selected, setSelected] = useState<Set<string>>(
+    () => new Set(columns.map((c) => c.header)),
+  );
 
   const selectedColumns = columns.filter((c) => selected.has(c.header));
   const csvExcelColumns = selectedColumns.length ? selectedColumns : columns;

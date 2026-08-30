@@ -48,6 +48,7 @@ Add to the member sign-up form: Ghana Card number (fixed `GHA-` prefix shown in 
 ## Technical notes
 
 Database migration (single migration, additive only):
+
 - `profiles`: add `membership_type` (individual/group/department/institution, default individual), `ghana_card` normalized column or reuse `national_id` with a canonical-format check, `kyc_submitted_at`.
 - Unique indexes on the normalized Ghana Card and on phone (partial, ignoring nulls) so existing rows are unaffected.
 - Extend `handle_new_user` to copy Ghana Card, phone, and membership type from sign-up metadata into the profile.
@@ -56,6 +57,7 @@ Database migration (single migration, additive only):
 - All new tables/columns keep current RLS posture; grants unchanged (no new public-schema tables planned).
 
 Frontend:
+
 - `src/routes/auth.tsx` — sign-up fields and validation.
 - `src/lib/member-registration.functions.ts` (new) — availability check + normalization helpers.
 - `src/routes/_member.app.tsx` — KYC gate and status banner.

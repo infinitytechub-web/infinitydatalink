@@ -6,7 +6,6 @@ import { isValidDistrict, isValidRegion } from "@/lib/ghana-locations";
 import { normalizeNationalId, validateNationalId } from "@/lib/ghana-id-types";
 import { validateDateOfBirth } from "@/lib/age";
 
-
 export type KycDocType =
   | "national_id_front"
   | "national_id_back"
@@ -71,7 +70,6 @@ export type MemberProfileFull = {
   documents: KycDocument[];
 };
 
-
 const BUCKET = "kyc-documents";
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const ALLOWED_MIMES = new Set(["image/jpeg", "image/png", "application/pdf"]);
@@ -104,7 +102,9 @@ export const getMyProfile = createServerFn({ method: "GET" })
         .order("created_at", { ascending: true }),
       sb
         .from("kyc_documents")
-        .select("id, member_id, doc_type, storage_path, mime_type, size_bytes, status, review_notes, reviewed_at, created_at")
+        .select(
+          "id, member_id, doc_type, storage_path, mime_type, size_bytes, status, review_notes, reviewed_at, created_at",
+        )
         .eq("member_id", uid)
         .order("created_at", { ascending: false }),
     ]);
@@ -130,7 +130,11 @@ const profileUpdateSchema = z
     national_id_type: z.string().trim().max(40).nullable().optional(),
     region: z.string().trim().max(80).nullable().optional(),
     district: z.string().trim().max(120).nullable().optional(),
-    date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD").nullable().optional(),
+    date_of_birth: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
+      .nullable()
+      .optional(),
     gender: z.string().trim().max(40).nullable().optional(),
     digital_address: z.string().trim().max(80).nullable().optional(),
     address_line: z.string().trim().max(240).nullable().optional(),
@@ -139,13 +143,21 @@ const profileUpdateSchema = z
   })
   .superRefine((val, ctx) => {
     if (val.region && !isValidRegion(val.region)) {
-      ctx.addIssue({ code: "custom", path: ["region"], message: "Select one of Ghana's 16 regions" });
+      ctx.addIssue({
+        code: "custom",
+        path: ["region"],
+        message: "Select one of Ghana's 16 regions",
+      });
     }
     if (val.district) {
       if (!val.region) {
         ctx.addIssue({ code: "custom", path: ["district"], message: "Select a region first" });
       } else if (!isValidDistrict(val.region, val.district)) {
-        ctx.addIssue({ code: "custom", path: ["district"], message: "District does not belong to the selected region" });
+        ctx.addIssue({
+          code: "custom",
+          path: ["district"],
+          message: "District does not belong to the selected region",
+        });
       }
     }
     if (val.date_of_birth) {
@@ -158,10 +170,13 @@ const profileUpdateSchema = z
     }
 
     if (val.national_id_type && !val.national_id) {
-      ctx.addIssue({ code: "custom", path: ["national_id"], message: "Enter the ID number for the selected ID type" });
+      ctx.addIssue({
+        code: "custom",
+        path: ["national_id"],
+        message: "Enter the ID number for the selected ID type",
+      });
     }
   });
-
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -191,7 +206,10 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     }
     if (Object.keys(patch).length === 0) return { updated: false };
 
-    const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
+    const { error } = await sb
+      .from("profiles")
+      .update(patch as any)
+      .eq("id", context.userId);
     if (error) {
       if (/duplicate key|unique/i.test(error.message)) {
         throw new Error("That national ID is already registered to another member.");
@@ -224,7 +242,14 @@ const nokSchema = z
     relationship: z.string().trim().min(2).max(60),
     relationship_code: z.string().trim().max(40).nullable().optional(),
     phone: z.string().trim().max(40).nullable().optional(),
-    email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+    email: z
+      .string()
+      .trim()
+      .email()
+      .max(160)
+      .nullable()
+      .optional()
+      .or(z.literal("").transform(() => null)),
     national_id: z.string().trim().max(80).nullable().optional(),
     national_id_type: z.string().trim().max(40).nullable().optional(),
     address: z.string().trim().max(240).nullable().optional(),
@@ -266,11 +291,7 @@ export const upsertNextOfKin = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       return row as NextOfKin;
     }
-    const { data: row, error } = await sb
-      .from("next_of_kin")
-      .insert(payload)
-      .select()
-      .single();
+    const { data: row, error } = await sb.from("next_of_kin").insert(payload).select().single();
     if (error) throw new Error(error.message);
     return row as NextOfKin;
   });
@@ -289,7 +310,13 @@ export const deleteNextOfKin = createServerFn({ method: "POST" })
   });
 
 const uploadInput = z.object({
-  doc_type: z.enum(["national_id_front", "national_id_back", "selfie", "proof_of_address", "other"]),
+  doc_type: z.enum([
+    "national_id_front",
+    "national_id_back",
+    "selfie",
+    "proof_of_address",
+    "other",
+  ]),
   filename: z.string().trim().min(1).max(160),
   mime_type: z.string().trim().min(3).max(80),
   size_bytes: z.number().int().positive().max(MAX_UPLOAD_BYTES),
@@ -317,7 +344,13 @@ export const createKycUploadUrl = createServerFn({ method: "POST" })
   });
 
 const registerInput = z.object({
-  doc_type: z.enum(["national_id_front", "national_id_back", "selfie", "proof_of_address", "other"]),
+  doc_type: z.enum([
+    "national_id_front",
+    "national_id_back",
+    "selfie",
+    "proof_of_address",
+    "other",
+  ]),
   storage_path: z.string().trim().min(3).max(400),
   mime_type: z.string().trim().min(3).max(80),
   size_bytes: z.number().int().positive().max(MAX_UPLOAD_BYTES),

@@ -8,7 +8,11 @@ import {
   type DrilldownResult,
 } from "@/lib/admin-insights-drilldown.server";
 
-export type { DrilldownMetric, DrilldownRow, DrilldownResult } from "@/lib/admin-insights-drilldown.server";
+export type {
+  DrilldownMetric,
+  DrilldownRow,
+  DrilldownResult,
+} from "@/lib/admin-insights-drilldown.server";
 
 const InputSchema = z.object({
   metric: z.enum(DRILLDOWN_METRICS),

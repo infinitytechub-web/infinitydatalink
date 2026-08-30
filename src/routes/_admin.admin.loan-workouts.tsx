@@ -17,8 +17,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatMoney } from "@/lib/org-config";
 import { listAdminLoans } from "@/lib/admin-loans.functions";
 import {
@@ -40,7 +52,8 @@ export const Route = createFileRoute("/_admin/admin/loan-workouts")({
       { property: "og:title", content: "Loan Workouts & Write-offs" },
       {
         property: "og:description",
-        content: "Two-person approval workflow for loan restructuring, grace periods and partial write-offs.",
+        content:
+          "Two-person approval workflow for loan restructuring, grace periods and partial write-offs.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -54,7 +67,11 @@ function PageError({ error }: { error: Error }) {
   const router = useRouter();
   return (
     <div className="p-6">
-      <ErrorState title="Workouts failed to load" message={error.message} onRetry={() => router.invalidate()} />
+      <ErrorState
+        title="Workouts failed to load"
+        message={error.message}
+        onRetry={() => router.invalidate()}
+      />
     </div>
   );
 }
@@ -106,7 +123,10 @@ function WorkoutsContent() {
 
   const pending = useMemo(() => all.filter((r) => r.status === "pending"), [all]);
   const history = useMemo(
-    () => all.filter((r) => (historyStatus === "all" ? r.status !== "pending" : r.status === historyStatus)),
+    () =>
+      all.filter((r) =>
+        historyStatus === "all" ? r.status !== "pending" : r.status === historyStatus,
+      ),
     [all, historyStatus],
   );
   const writeOffTotal = useMemo(
@@ -121,17 +141,30 @@ function WorkoutsContent() {
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KPIStat label="Awaiting decision" value={String(pending.length)} />
-        <KPIStat label="Approved workouts" value={String(all.filter((r) => r.status === "approved").length)} />
-        <KPIStat label="Rejected" value={String(all.filter((r) => r.status === "rejected").length)} />
+        <KPIStat
+          label="Approved workouts"
+          value={String(all.filter((r) => r.status === "approved").length)}
+        />
+        <KPIStat
+          label="Rejected"
+          value={String(all.filter((r) => r.status === "rejected").length)}
+        />
         <KPIStat label="Approved write-offs" value={formatMoney(writeOffTotal)} />
       </div>
 
       <SectionCard
         title={`Pending workout requests (${pending.length})`}
-        action={<Button size="sm" onClick={() => setRequesting(true)}>New workout request</Button>}
+        action={
+          <Button size="sm" onClick={() => setRequesting(true)}>
+            New workout request
+          </Button>
+        }
       >
         {pending.length === 0 ? (
-          <EmptyState title="No requests awaiting decision" hint="Raise a workout request to start the approval flow." />
+          <EmptyState
+            title="No requests awaiting decision"
+            hint="Raise a workout request to start the approval flow."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -161,18 +194,26 @@ function WorkoutsContent() {
                     <td className="py-3 pr-4">{KIND_LABEL[r.kind] ?? r.kind}</td>
                     <td className="py-3 pr-4 text-xs">
                       <Terms row={r} />
-                      {r.request_note && <div className="mt-1 text-muted-foreground">“{r.request_note}”</div>}
+                      {r.request_note && (
+                        <div className="mt-1 text-muted-foreground">“{r.request_note}”</div>
+                      )}
                     </td>
                     <td className="py-3 pr-4 text-xs">
                       <div>{r.requested_by_email ?? "—"}</div>
-                      <div className="text-muted-foreground">{new Date(r.requested_at).toLocaleString()}</div>
+                      <div className="text-muted-foreground">
+                        {new Date(r.requested_at).toLocaleString()}
+                      </div>
                     </td>
                     <td className="py-3">
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => setDeciding({ row: r, approve: true })}>
                           Approve
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => setDeciding({ row: r, approve: false })}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDeciding({ row: r, approve: false })}
+                        >
                           Reject
                         </Button>
                       </div>
@@ -201,7 +242,10 @@ function WorkoutsContent() {
         }
       >
         {history.length === 0 ? (
-          <EmptyState title="No decisions yet" hint="Approved and rejected workouts appear here with their notes." />
+          <EmptyState
+            title="No decisions yet"
+            hint="Approved and rejected workouts appear here with their notes."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -239,7 +283,9 @@ function WorkoutsContent() {
                     </td>
                     <td className="py-3 pr-4 text-xs">
                       <div>{r.requested_by_email ?? "—"}</div>
-                      <div className="text-muted-foreground">{new Date(r.requested_at).toLocaleString()}</div>
+                      <div className="text-muted-foreground">
+                        {new Date(r.requested_at).toLocaleString()}
+                      </div>
                     </td>
                     <td className="py-3 pr-4 text-xs">
                       <div>{r.decided_by_email ?? "—"}</div>
@@ -247,7 +293,9 @@ function WorkoutsContent() {
                         {r.decided_at ? new Date(r.decided_at).toLocaleString() : ""}
                       </div>
                     </td>
-                    <td className="py-3 pr-4 text-xs text-muted-foreground">{r.decision_note ?? "—"}</td>
+                    <td className="py-3 pr-4 text-xs text-muted-foreground">
+                      {r.decision_note ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -316,7 +364,9 @@ function RequestDialog({ open, onClose }: { open: boolean; onClose: () => void }
           <DialogTitle>New workout request</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <Suspense fallback={<div className="text-xs text-muted-foreground">Loading active loans…</div>}>
+          <Suspense
+            fallback={<div className="text-xs text-muted-foreground">Loading active loans…</div>}
+          >
             <LoanPicker value={loanId} onChange={setLoanId} />
           </Suspense>
           <div className="space-y-1.5">
@@ -336,18 +386,33 @@ function RequestDialog({ open, onClose }: { open: boolean; onClose: () => void }
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>New term (months)</Label>
-                <Input inputMode="numeric" value={term} onChange={(e) => setTerm(e.target.value)} placeholder="24" />
+                <Input
+                  inputMode="numeric"
+                  value={term}
+                  onChange={(e) => setTerm(e.target.value)}
+                  placeholder="24"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>New rate (% p.a.)</Label>
-                <Input inputMode="decimal" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="18" />
+                <Input
+                  inputMode="decimal"
+                  value={rate}
+                  onChange={(e) => setRate(e.target.value)}
+                  placeholder="18"
+                />
               </div>
             </div>
           )}
           {kind === "grace_period" && (
             <div className="space-y-1.5">
               <Label>Grace period (months)</Label>
-              <Input inputMode="numeric" value={grace} onChange={(e) => setGrace(e.target.value)} placeholder="3" />
+              <Input
+                inputMode="numeric"
+                value={grace}
+                onChange={(e) => setGrace(e.target.value)}
+                placeholder="3"
+              />
             </div>
           )}
           {kind === "write_off" && (
@@ -415,7 +480,9 @@ function DecideDialog({
   const decide = useServerFn(decideLoanRestructure);
   const mutation = useMutation({
     mutationFn: () =>
-      decide({ data: { request_id: pending!.row.id, approve: pending!.approve, note: note.trim() } }),
+      decide({
+        data: { request_id: pending!.row.id, approve: pending!.approve, note: note.trim() },
+      }),
     onSuccess: () => {
       toast.success(pending?.approve ? "Workout approved and applied" : "Workout rejected");
       qc.invalidateQueries({ queryKey: ["admin", "loan-workouts"] });
@@ -442,7 +509,8 @@ function DecideDialog({
                 {KIND_LABEL[pending.row.kind] ?? pending.row.kind} — <Terms row={pending.row} />
               </div>
               <div className="mt-1 text-muted-foreground">
-                Requested by {pending.row.requested_by_email ?? "—"}. The requester cannot decide their own request.
+                Requested by {pending.row.requested_by_email ?? "—"}. The requester cannot decide
+                their own request.
               </div>
             </div>
           )}
@@ -455,7 +523,10 @@ function DecideDialog({
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button disabled={mutation.isPending || note.trim().length < 10} onClick={() => mutation.mutate()}>
+          <Button
+            disabled={mutation.isPending || note.trim().length < 10}
+            onClick={() => mutation.mutate()}
+          >
             {mutation.isPending ? "Saving…" : pending?.approve ? "Approve" : "Reject"}
           </Button>
         </DialogFooter>

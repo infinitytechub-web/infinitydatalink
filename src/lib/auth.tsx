@@ -1,5 +1,13 @@
 // Supabase-backed auth context with RBAC. Roles come from the `user_roles` table.
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { User } from "@supabase/supabase-js";
 import {
   can as canDo,
@@ -61,8 +69,13 @@ export const ADMIN_ROLE_LABEL: Record<Exclude<AppRole, "member">, string> = {
 };
 
 const ALL_EXPORTS: Permission[] = [
-  "export:members", "export:loans", "export:savings", "export:payments",
-  "export:security", "export:audit", "export:approvals",
+  "export:members",
+  "export:loans",
+  "export:savings",
+  "export:payments",
+  "export:security",
+  "export:audit",
+  "export:approvals",
 ];
 
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
@@ -75,12 +88,24 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   auditor: [...ALL_EXPORTS],
   teller: ["export:members", "export:savings", "export:payments"],
   support_officer: ["export:members"],
-  member: ["export:own_transactions", "export:own_loans", "export:own_savings", "export:own_statement"],
+  member: [
+    "export:own_transactions",
+    "export:own_loans",
+    "export:own_savings",
+    "export:own_statement",
+  ],
 };
 
 const ADMIN_ROLES: AppRole[] = [
-  "super_admin", "admin", "manager", "compliance_officer", "loan_officer", "finance_officer", "auditor",
-  "teller", "support_officer",
+  "super_admin",
+  "admin",
+  "manager",
+  "compliance_officer",
+  "loan_officer",
+  "finance_officer",
+  "auditor",
+  "teller",
+  "support_officer",
 ];
 
 export type AccountStatus = "pending" | "approved" | "rejected" | "deactivated";
@@ -127,7 +152,9 @@ async function loadRoles(userId: string): Promise<AppRole[]> {
   return data.map((r: { role: string }) => r.role as AppRole);
 }
 
-async function loadStatus(userId: string): Promise<{ status: AccountStatus; rejectionReason: string | null }> {
+async function loadStatus(
+  userId: string,
+): Promise<{ status: AccountStatus; rejectionReason: string | null }> {
   const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("profiles")
@@ -153,8 +180,7 @@ function toSessionUser(
     id: u.id,
     email: u.email ?? "",
     fullName:
-      (u.user_metadata?.full_name as string | undefined) ??
-      (u.email?.split("@")[0] ?? "Member"),
+      (u.user_metadata?.full_name as string | undefined) ?? u.email?.split("@")[0] ?? "Member",
     roles: roles.length ? roles : ["member"],
     status,
     rejectionReason,
@@ -182,7 +208,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     lastHydratedId.current = authUser.id;
-    const [roles, statusInfo] = await Promise.all([loadRoles(authUser.id), loadStatus(authUser.id)]);
+    const [roles, statusInfo] = await Promise.all([
+      loadRoles(authUser.id),
+      loadStatus(authUser.id),
+    ]);
     setUser(toSessionUser(authUser, roles, statusInfo.status, statusInfo.rejectionReason));
     // Capabilities come from the database matrix so the UI mirrors what RLS and
     // the server functions will actually allow.
@@ -251,8 +280,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     const can = (module: PermModule, action: PermAction) => canDo(capabilities, module, action);
     return {
-      user, loading, permissions, capabilities: capabilities as CapabilitySet, isMember, isAdmin,
-      hasRole, hasPermission, hasAnyPermission, can, signOut, refresh,
+      user,
+      loading,
+      permissions,
+      capabilities: capabilities as CapabilitySet,
+      isMember,
+      isAdmin,
+      hasRole,
+      hasPermission,
+      hasAnyPermission,
+      can,
+      signOut,
+      refresh,
     };
   }, [user, loading, permissions, capabilities]);
 

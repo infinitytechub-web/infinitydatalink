@@ -103,7 +103,10 @@ const columns: ExportColumn<CronRunRow>[] = [
   { header: "Status", accessor: (r) => r.status.toUpperCase() },
   { header: "Attempt", accessor: (r) => r.attempt, align: "right" },
   { header: "Started (UTC)", accessor: (r) => new Date(r.started_at).toISOString() },
-  { header: "Finished (UTC)", accessor: (r) => (r.finished_at ? new Date(r.finished_at).toISOString() : "") },
+  {
+    header: "Finished (UTC)",
+    accessor: (r) => (r.finished_at ? new Date(r.finished_at).toISOString() : ""),
+  },
   { header: "Duration (ms)", accessor: (r) => r.duration_ms ?? "", align: "right" },
   { header: "Caller", accessor: (r) => r.caller ?? "" },
   { header: "Error", accessor: (r) => r.error ?? "" },

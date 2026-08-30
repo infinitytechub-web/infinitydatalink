@@ -7,7 +7,19 @@ import { ADMIN_ROLES, assertAnyRole, loadRoleSet } from "@/lib/role-guards";
 
 export const DEFAULT_BASE = "GHS";
 export const SUPPORTED_QUOTES = [
-  "GHS", "USD", "EUR", "GBP", "NGN", "ZAR", "KES", "XOF", "CAD", "AUD", "JPY", "CNY", "INR",
+  "GHS",
+  "USD",
+  "EUR",
+  "GBP",
+  "NGN",
+  "ZAR",
+  "KES",
+  "XOF",
+  "CAD",
+  "AUD",
+  "JPY",
+  "CNY",
+  "INR",
 ] as const;
 
 export type FxRate = { base: string; quote: string; rate: number; fetched_at: string };
@@ -30,9 +42,7 @@ async function readDbRates(base: string): Promise<FxRate[]> {
 async function writeDbRates(rows: FxRate[]) {
   if (!rows.length) return;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await (supabaseAdmin as any)
-    .from("fx_rates")
-    .upsert(rows, { onConflict: "base,quote" });
+  await (supabaseAdmin as any).from("fx_rates").upsert(rows, { onConflict: "base,quote" });
 }
 
 async function fetchLive(base: string): Promise<FxRate[] | null> {
@@ -257,12 +267,10 @@ async function writeHistory(rows: HistoryRow[], source = HISTORY_PROVIDER) {
   if (!rows.length) return;
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await (supabaseAdmin as any)
-      .from("fx_rate_history")
-      .upsert(
-        rows.map((r) => ({ ...r, source })),
-        { onConflict: "base,quote,rate_date" },
-      );
+    await (supabaseAdmin as any).from("fx_rate_history").upsert(
+      rows.map((r) => ({ ...r, source })),
+      { onConflict: "base,quote,rate_date" },
+    );
   } catch {
     /* best-effort — chart still renders from whatever is already stored */
   }

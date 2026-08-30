@@ -97,7 +97,7 @@ export async function fetchDrilldown(
   },
 ): Promise<DrilldownResult> {
   const { metric, fromISO, toISO, fromDate, toDate, scopeIds } = args;
-  const inScope = <T,>(q: T): T =>
+  const inScope = <T>(q: T): T =>
     scopeIds ? ((q as any).in("user_id", scopeIds.length ? scopeIds : [NO_MATCH_UUID]) as T) : q;
 
   let rows: DrilldownRow[] = [];
@@ -118,7 +118,10 @@ export async function fetchDrilldown(
         .limit(MAX_ROWS + 1),
     );
     if (error) throw new Error(error.message);
-    const names = await nameMap(supabase, (data ?? []).map((r: any) => r.user_id));
+    const names = await nameMap(
+      supabase,
+      (data ?? []).map((r: any) => r.user_id),
+    );
     rows = (data ?? []).map((r: any) => ({
       id: String(r.id),
       occurred_at: String(r.created_at),
@@ -147,7 +150,10 @@ export async function fetchDrilldown(
     if (metric === "cancellations") q = q.not("cancelled_at", "is", null);
     const { data, error } = await inScope(q);
     if (error) throw new Error(error.message);
-    const names = await nameMap(supabase, (data ?? []).map((r: any) => r.user_id));
+    const names = await nameMap(
+      supabase,
+      (data ?? []).map((r: any) => r.user_id),
+    );
     rows = (data ?? []).map((r: any) => ({
       id: String(r.id),
       occurred_at: String(r.paid_at ?? r.cancelled_at ?? r.created_at),
@@ -176,7 +182,10 @@ export async function fetchDrilldown(
     }
     const { data, error } = await inScope(q);
     if (error) throw new Error(error.message);
-    const names = await nameMap(supabase, (data ?? []).map((r: any) => r.user_id));
+    const names = await nameMap(
+      supabase,
+      (data ?? []).map((r: any) => r.user_id),
+    );
     rows = (data ?? []).map((r: any) => ({
       id: String(r.id),
       occurred_at: String(r.disbursed_at ?? r.created_at),
@@ -232,7 +241,8 @@ export async function fetchDrilldown(
         member_no: names.get(uid)?.no ?? "—",
         category: `Instalment ${r.installment_no}`,
         status: String(r.status),
-        amount: metric === "loan_repayments" ? num(r.paid_amount) : num(r.total_due) - num(r.paid_amount),
+        amount:
+          metric === "loan_repayments" ? num(r.paid_amount) : num(r.total_due) - num(r.paid_amount),
         detail: `Due ${r.due_date}`,
       };
     });

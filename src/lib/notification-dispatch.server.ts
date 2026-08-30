@@ -108,7 +108,10 @@ async function sendEmail(
   return { ok: true };
 }
 
-async function sendSms(row: OutboxRow, phone: string | null): Promise<{ ok: boolean; error?: string }> {
+async function sendSms(
+  row: OutboxRow,
+  phone: string | null,
+): Promise<{ ok: boolean; error?: string }> {
   if (!phone) return { ok: false, error: "no phone number on record" };
 
   const lovableKey = process.env.LOVABLE_API_KEY;
@@ -181,7 +184,9 @@ export async function dispatchNotificationOutbox(limit = 50): Promise<DispatchRe
     const attempts = row.attempts + 1;
     const unrecoverable =
       !outcome.ok &&
-      /not configured|no email on record|no phone number|suppressed|not registered/i.test(outcome.error ?? "");
+      /not configured|no email on record|no phone number|suppressed|not registered/i.test(
+        outcome.error ?? "",
+      );
     const status = outcome.ok ? "sent" : unrecoverable || attempts >= 5 ? "skipped" : "pending";
 
     await admin

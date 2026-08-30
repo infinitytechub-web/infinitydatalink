@@ -174,9 +174,7 @@ export const createWithdrawalRequest = createServerFn({ method: "POST" })
 export const cancelWithdrawalRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z
-      .object({ id: z.string().uuid(), reason: z.string().trim().min(5).max(500) })
-      .parse(d),
+    z.object({ id: z.string().uuid(), reason: z.string().trim().min(5).max(500) }).parse(d),
   )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { error } = await context.supabase.rpc("cancel_savings_withdrawal", {
@@ -199,7 +197,9 @@ export const cancelWithdrawalRequest = createServerFn({ method: "POST" })
 // ============================================================================
 
 const FilterSchema = z.object({
-  status: z.enum(["all", "pending", "approved", "paid", "rejected", "cancelled"]).default("pending"),
+  status: z
+    .enum(["all", "pending", "approved", "paid", "rejected", "cancelled"])
+    .default("pending"),
   search: z.string().trim().max(120).optional().nullable(),
   page: z.number().int().min(1).default(1),
   page_size: z.number().int().min(5).max(100).default(25),
@@ -299,9 +299,7 @@ export const exportAdminWithdrawals = createServerFn({ method: "POST" })
     const roles = await loadRoleSet(context.supabase, context.userId);
     assertAnyRole(roles, [...FINANCE_ROLES, "auditor"], "finance");
 
-    let q = context.supabase
-      .from("savings_withdrawal_requests")
-      .select(SELECT_COLS);
+    let q = context.supabase.from("savings_withdrawal_requests").select(SELECT_COLS);
     if (data.status !== "all") q = q.eq("status", data.status);
     if (data.date_from) q = q.gte("created_at", `${data.date_from}T00:00:00Z`);
     if (data.date_to) q = q.lte("created_at", `${data.date_to}T23:59:59.999Z`);
@@ -387,7 +385,12 @@ export const adminApproveWithdrawal = createServerFn({ method: "POST" })
       actor_role: actorRole,
       action: "withdrawal.approved",
       target: data.id,
-      meta: { ref: r?.ref, amount: r?.amount, note: data.note, step_up: { method: proof.method, session_id: proof.id } },
+      meta: {
+        ref: r?.ref,
+        amount: r?.amount,
+        note: data.note,
+        step_up: { method: proof.method, session_id: proof.id },
+      },
     });
     return { ok: true };
   });
@@ -415,7 +418,12 @@ export const adminRejectWithdrawal = createServerFn({ method: "POST" })
       actor_role: actorRole,
       action: "withdrawal.rejected",
       target: data.id,
-      meta: { ref: r?.ref, amount: r?.amount, reason: data.note, step_up: { method: proof.method, session_id: proof.id } },
+      meta: {
+        ref: r?.ref,
+        amount: r?.amount,
+        reason: data.note,
+        step_up: { method: proof.method, session_id: proof.id },
+      },
     });
     return { ok: true };
   });
@@ -444,7 +452,12 @@ export const adminPayWithdrawal = createServerFn({ method: "POST" })
       actor_role: actorRole,
       action: "withdrawal.paid",
       target: data.id,
-      meta: { ref: r?.ref, amount: r?.amount, txn_id: r?.txn_id, step_up: { method: proof.method, session_id: proof.id } },
+      meta: {
+        ref: r?.ref,
+        amount: r?.amount,
+        txn_id: r?.txn_id,
+        step_up: { method: proof.method, session_id: proof.id },
+      },
     });
     return { txn_id: r?.txn_id ?? null };
   });
@@ -533,7 +546,9 @@ export const adminBulkCancelWithdrawals = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<BulkCancelResult> => {
     // Atomic gate: if any single reason is missing or too short the whole batch
     // is rejected before a single cancellation is attempted.
-    const invalid = data.items.filter((i) => i.note.trim().length < MIN_BULK_REASON).map((i) => i.id);
+    const invalid = data.items
+      .filter((i) => i.note.trim().length < MIN_BULK_REASON)
+      .map((i) => i.id);
     if (invalid.length > 0) {
       throw new Error(
         `Batch blocked: ${invalid.length} request(s) are missing a cancellation reason of at least ${MIN_BULK_REASON} characters.`,
@@ -612,7 +627,11 @@ export const adminUpdateWithdrawalSettings = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("savings_withdrawal_settings")
-      .update({ ...data, updated_at: new Date().toISOString(), updated_by: context.userId } as never)
+      .update({
+        ...data,
+        updated_at: new Date().toISOString(),
+        updated_by: context.userId,
+      } as never)
       .eq("id", 1);
     if (error) throw new Error(error.message);
     await writeAudit({

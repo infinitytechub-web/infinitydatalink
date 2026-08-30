@@ -4,7 +4,13 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, LineChart as LineChartIcon, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  Download,
+  LineChart as LineChartIcon,
+  RefreshCw,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { EmptyState, SectionCard } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -121,7 +127,9 @@ export function FxHistoryChart({
       action={
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Range</Label>
+            <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              Range
+            </Label>
             <div className="mt-1 inline-flex overflow-hidden rounded-md border border-border">
               {RANGE_KEYS.map((key) => (
                 <button
@@ -186,7 +194,10 @@ export function FxHistoryChart({
         </div>
 
         {q.isLoading ? (
-          <div aria-hidden="true" className="h-[320px] w-full animate-pulse rounded-lg bg-muted/40" />
+          <div
+            aria-hidden="true"
+            className="h-[320px] w-full animate-pulse rounded-lg bg-muted/40"
+          />
         ) : points.length === 0 ? (
           <EmptyState
             title="History not available for this range yet"

@@ -68,7 +68,10 @@ export const adminReconcileSavings = createServerFn({ method: "GET" })
 
     const [accountsRes, txnRes, adjRes, plansRes] = await Promise.all([
       sb.from("savings_accounts").select("id, user_id, plan_id, nickname, balance, status"),
-      sb.from("transactions").select("id, savings_account_id, kind, amount, status, created_at").not("savings_account_id", "is", null),
+      sb
+        .from("transactions")
+        .select("id, savings_account_id, kind, amount, status, created_at")
+        .not("savings_account_id", "is", null),
       sb.from("balance_adjustments").select("txn_id, direction, amount"),
       sb.from("savings_plans").select("id, name"),
     ]);
@@ -78,7 +81,9 @@ export const adminReconcileSavings = createServerFn({ method: "GET" })
 
     const accounts = (accountsRes.data ?? []) as any[];
     const planName = new Map((plansRes.data ?? []).map((p: any) => [p.id, p.name as string]));
-    const adjByTxn = new Map((adjRes.data ?? []).map((a: any) => [a.txn_id, a.direction as string]));
+    const adjByTxn = new Map(
+      (adjRes.data ?? []).map((a: any) => [a.txn_id, a.direction as string]),
+    );
 
     const userIds = Array.from(new Set(accounts.map((a) => a.user_id)));
     const profiles = userIds.length
@@ -87,11 +92,23 @@ export const adminReconcileSavings = createServerFn({ method: "GET" })
     if (profiles.error) throw new Error(profiles.error.message);
     const profileById = new Map((profiles.data ?? []).map((p: any) => [p.id, p]));
 
-    type Agg = { computed: number; movements: number; pendingCount: number; pendingAmount: number; last: string | null };
+    type Agg = {
+      computed: number;
+      movements: number;
+      pendingCount: number;
+      pendingAmount: number;
+      last: string | null;
+    };
     const agg = new Map<string, Agg>();
     for (const t of (txnRes.data ?? []) as any[]) {
       const key = t.savings_account_id as string;
-      const rec = agg.get(key) ?? { computed: 0, movements: 0, pendingCount: 0, pendingAmount: 0, last: null };
+      const rec = agg.get(key) ?? {
+        computed: 0,
+        movements: 0,
+        pendingCount: 0,
+        pendingAmount: 0,
+        last: null,
+      };
       const amount = Number(t.amount ?? 0);
       if (t.status === "cleared") {
         let sign = SIGN[t.kind] ?? 0;
@@ -114,7 +131,13 @@ export const adminReconcileSavings = createServerFn({ method: "GET" })
     let discrepancies = 0;
 
     for (const a of accounts) {
-      const rec = agg.get(a.id) ?? { computed: 0, movements: 0, pendingCount: 0, pendingAmount: 0, last: null };
+      const rec = agg.get(a.id) ?? {
+        computed: 0,
+        movements: 0,
+        pendingCount: 0,
+        pendingAmount: 0,
+        last: null,
+      };
       const recorded = Number(a.balance ?? 0);
       const computed = Math.round(rec.computed * 100) / 100;
       const delta = Math.round((recorded - computed) * 100) / 100;

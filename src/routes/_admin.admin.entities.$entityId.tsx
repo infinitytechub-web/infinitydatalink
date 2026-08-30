@@ -1,6 +1,12 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -41,10 +47,15 @@ import {
 export const Route = createFileRoute("/_admin/admin/entities/$entityId")({
   component: EntityDetail,
   errorComponent: ({ error }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Entity failed to load" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Entity failed to load"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -111,7 +122,11 @@ function EntityBody({ entityId }: { entityId: string }) {
         <KPIStat
           label="Registered"
           value={new Date(entity.created_at).toLocaleDateString()}
-          hint={entity.reviewed_at ? `Reviewed ${new Date(entity.reviewed_at).toLocaleDateString()}` : "Never reviewed"}
+          hint={
+            entity.reviewed_at
+              ? `Reviewed ${new Date(entity.reviewed_at).toLocaleDateString()}`
+              : "Never reviewed"
+          }
         />
       </section>
 
@@ -150,7 +165,6 @@ function EntityBody({ entityId }: { entityId: string }) {
           }}
         />
       </div>
-
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
@@ -192,10 +206,15 @@ function EntityBody({ entityId }: { entityId: string }) {
         </TabsContent>
       </Tabs>
 
-      <Dialog open={decideDialog !== null} onOpenChange={(o) => (!o ? setDecideDialog(null) : null)}>
+      <Dialog
+        open={decideDialog !== null}
+        onOpenChange={(o) => (!o ? setDecideDialog(null) : null)}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{decideDialog === "approve" ? "Approve entity" : "Suspend entity"}</DialogTitle>
+            <DialogTitle>
+              {decideDialog === "approve" ? "Approve entity" : "Suspend entity"}
+            </DialogTitle>
             <DialogDescription>
               {decideDialog === "approve"
                 ? "This activates the entity so members can transact. A note is required for audit."
@@ -213,7 +232,11 @@ function EntityBody({ entityId }: { entityId: string }) {
             />
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setDecideDialog(null)} disabled={decide.isPending}>
+            <Button
+              variant="ghost"
+              onClick={() => setDecideDialog(null)}
+              disabled={decide.isPending}
+            >
               Cancel
             </Button>
             <Button
@@ -293,8 +316,8 @@ function MembersTab({
               {lookup.isFetching
                 ? "Searching…"
                 : lookup.data
-                ? `Match: ${lookup.data.full_name ?? "(no name)"}`
-                : "No match — cannot add"}
+                  ? `Match: ${lookup.data.full_name ?? "(no name)"}`
+                  : "No match — cannot add"}
             </p>
           ) : null}
         </div>
@@ -312,7 +335,9 @@ function MembersTab({
         </Button>
       </form>
       {members.length === 0 ? (
-        <div className="p-6"><EmptyState title="No members yet" /></div>
+        <div className="p-6">
+          <EmptyState title="No members yet" />
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -365,9 +390,9 @@ function DocumentsTab({ entityId }: { entityId: string }) {
   const qc = useQueryClient();
   const uploadFn = useServerFn(uploadEntityDocument);
   const urlFn = useServerFn(getEntityDocumentUrl);
-  const [docType, setDocType] = useState<"registration_cert" | "tax_cert" | "mandate_letter" | "id_document" | "other">(
-    "registration_cert",
-  );
+  const [docType, setDocType] = useState<
+    "registration_cert" | "tax_cert" | "mandate_letter" | "id_document" | "other"
+  >("registration_cert");
   const [file, setFile] = useState<File | null>(null);
 
   const q = useQuery({
@@ -442,7 +467,9 @@ function DocumentsTab({ entityId }: { entityId: string }) {
       {q.isLoading ? (
         <div className="p-6 text-xs text-muted-foreground">Loading…</div>
       ) : (q.data ?? []).length === 0 ? (
-        <div className="p-6"><EmptyState title="No documents yet" hint="Attach registration or KYC documents above." /></div>
+        <div className="p-6">
+          <EmptyState title="No documents yet" hint="Attach registration or KYC documents above." />
+        </div>
       ) : (
         <ul className="divide-y divide-border">
           {(q.data ?? []).map((d) => (
@@ -457,7 +484,12 @@ function DocumentsTab({ entityId }: { entityId: string }) {
               <span className="text-xs text-muted-foreground">
                 {new Date(d.created_at).toLocaleDateString()}
               </span>
-              <Button size="sm" variant="ghost" onClick={() => open.mutate(d.id)} disabled={open.isPending}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => open.mutate(d.id)}
+                disabled={open.isPending}
+              >
                 View
               </Button>
             </li>
@@ -480,7 +512,9 @@ function TimelineTab({ entityId }: { entityId: string }) {
       {q.isLoading ? (
         <div className="p-6 text-xs text-muted-foreground">Loading…</div>
       ) : (q.data ?? []).length === 0 ? (
-        <div className="p-6"><EmptyState title="No audit events" hint="Actions on this entity will appear here." /></div>
+        <div className="p-6">
+          <EmptyState title="No audit events" hint="Actions on this entity will appear here." />
+        </div>
       ) : (
         <ol className="divide-y divide-border">
           {(q.data ?? []).map((e) => (
@@ -508,8 +542,12 @@ function TimelineTab({ entityId }: { entityId: string }) {
 function Detail({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <dt className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-foreground">{value ?? <span className="text-muted-foreground">—</span>}</dd>
+      <dt className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-1 text-foreground">
+        {value ?? <span className="text-muted-foreground">—</span>}
+      </dd>
     </div>
   );
 }

@@ -2,7 +2,13 @@ import { useMemo, useState } from "react";
 import { Calculator, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { KPIStat, SectionCard } from "@/components/primitives";
 import { computeLoanEstimate, FREQUENCIES, type RepaymentFrequency } from "@/lib/loan-schedule";
 import { formatMoney } from "@/lib/org-config";
@@ -86,11 +92,21 @@ export function LoanCalculator({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="calc-rate">Interest rate (% per year)</Label>
-            <Input id="calc-rate" inputMode="decimal" value={rate} onChange={(e) => setRate(e.target.value)} />
+            <Input
+              id="calc-rate"
+              inputMode="decimal"
+              value={rate}
+              onChange={(e) => setRate(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="calc-term">Duration (months)</Label>
-            <Input id="calc-term" inputMode="numeric" value={term} onChange={(e) => setTerm(e.target.value)} />
+            <Input
+              id="calc-term"
+              inputMode="numeric"
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Repayment frequency</Label>
@@ -120,7 +136,12 @@ export function LoanCalculator({
       </SectionCard>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPIStat label="Instalment" value={formatMoney(estimate.installment)} tone="royal" hint={`${estimate.periods} payments`} />
+        <KPIStat
+          label="Instalment"
+          value={formatMoney(estimate.installment)}
+          tone="royal"
+          hint={`${estimate.periods} payments`}
+        />
         <KPIStat label="Total interest" value={formatMoney(estimate.totalInterest)} tone="gold" />
         <KPIStat label="Total repayment" value={formatMoney(estimate.totalRepayment)} tone="teal" />
         <KPIStat label="Principal" value={formatMoney(amountNum)} tone="slate" />
@@ -129,8 +150,8 @@ export function LoanCalculator({
       <p className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
         <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
         <span>
-          These figures are estimates only. Final instalments, fees and due dates are confirmed by the lending
-          team when your application is assessed and disbursed.
+          These figures are estimates only. Final instalments, fees and due dates are confirmed by
+          the lending team when your application is assessed and disbursed.
         </span>
       </p>
 
@@ -167,7 +188,9 @@ export function LoanCalculator({
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Calculator className="size-4" aria-hidden />
-        <span>Annuity method — equal instalments with interest charged on the reducing balance.</span>
+        <span>
+          Annuity method — equal instalments with interest charged on the reducing balance.
+        </span>
       </div>
     </div>
   );

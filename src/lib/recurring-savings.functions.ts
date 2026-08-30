@@ -46,7 +46,15 @@ function firstRun(
     const delta = (dow! - d.getUTCDay() + 7) % 7;
     d.setUTCDate(d.getUTCDate() + (delta === 0 ? 7 : delta));
   } else if (frequency === "monthly" && dom) {
-    const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), Math.min(dom, 28), d.getUTCHours(), d.getUTCMinutes()));
+    const target = new Date(
+      Date.UTC(
+        d.getUTCFullYear(),
+        d.getUTCMonth(),
+        Math.min(dom, 28),
+        d.getUTCHours(),
+        d.getUTCMinutes(),
+      ),
+    );
     if (target <= base) target.setUTCMonth(target.getUTCMonth() + 1);
     return target.toISOString();
   }
@@ -100,7 +108,12 @@ export const createRecurring = createServerFn({ method: "POST" })
     if (!acct || acct.user_id !== context.userId) throw new Error("account_not_found");
     if (acct.status !== "active") throw new Error("account_not_active");
 
-    const next = firstRun(data.frequency, data.day_of_week ?? null, data.day_of_month ?? null, data.start_at);
+    const next = firstRun(
+      data.frequency,
+      data.day_of_week ?? null,
+      data.day_of_month ?? null,
+      data.start_at,
+    );
     const { data: inserted, error } = await context.supabase
       .from("savings_recurring_contributions")
       .insert({
@@ -110,8 +123,8 @@ export const createRecurring = createServerFn({ method: "POST" })
         channel: data.channel,
         note: data.note ?? null,
         frequency: data.frequency,
-        day_of_week: data.frequency === "weekly" ? data.day_of_week ?? 1 : null,
-        day_of_month: data.frequency === "monthly" ? data.day_of_month ?? 1 : null,
+        day_of_week: data.frequency === "weekly" ? (data.day_of_week ?? 1) : null,
+        day_of_month: data.frequency === "monthly" ? (data.day_of_month ?? 1) : null,
         next_run_at: next,
       })
       .select("id")
@@ -132,8 +145,8 @@ export const updateRecurring = createServerFn({ method: "POST" })
     if (data.note !== undefined) patch.note = data.note;
     if (data.frequency !== undefined) {
       patch.frequency = data.frequency;
-      patch.day_of_week = data.frequency === "weekly" ? data.day_of_week ?? 1 : null;
-      patch.day_of_month = data.frequency === "monthly" ? data.day_of_month ?? 1 : null;
+      patch.day_of_week = data.frequency === "weekly" ? (data.day_of_week ?? 1) : null;
+      patch.day_of_month = data.frequency === "monthly" ? (data.day_of_month ?? 1) : null;
       patch.next_run_at = firstRun(
         data.frequency,
         data.day_of_week ?? null,

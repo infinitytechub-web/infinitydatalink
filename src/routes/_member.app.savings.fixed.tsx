@@ -14,7 +14,13 @@ import {
   StatusPill,
 } from "@/components/primitives";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,10 +56,14 @@ export const Route = createFileRoute("/_member/app/savings/fixed")({
       { title: "Fixed deposits — IT-360 CashApp" },
       {
         name: "description",
-        content: "Lock savings into term deposits with fixed rates, maturity dates and rollover options.",
+        content:
+          "Lock savings into term deposits with fixed rates, maturity dates and rollover options.",
       },
       { property: "og:title", content: "Fixed deposits — IT-360 CashApp" },
-      { property: "og:description", content: "Term savings with fixed rates and maturity scheduling." },
+      {
+        property: "og:description",
+        content: "Term savings with fixed rates and maturity scheduling.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -107,7 +117,11 @@ function Body() {
   return (
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-3">
-        <KPIStat label="Locked principal" value={<Money amount={locked} />} hint={`${active.length} active deposits`} />
+        <KPIStat
+          label="Locked principal"
+          value={<Money amount={locked} />}
+          hint={`${active.length} active deposits`}
+        />
         <KPIStat label="Projected interest" value={<Money amount={projected} />} accent />
         <KPIStat
           label="Next maturity"
@@ -150,7 +164,12 @@ function Body() {
                   <dd className="tabular text-foreground">{p.early_break_penalty_pct}%</dd>
                 </div>
               </dl>
-              <Button className="mt-4 w-full" size="sm" onClick={() => setOpenFor(p)} disabled={accounts.length === 0}>
+              <Button
+                className="mt-4 w-full"
+                size="sm"
+                onClick={() => setOpenFor(p)}
+                disabled={accounts.length === 0}
+              >
                 <Lock className="mr-1 h-3.5 w-3.5" /> Open deposit
               </Button>
             </div>
@@ -162,7 +181,10 @@ function Body() {
       <SectionCard title="My deposits">
         {deposits.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No fixed deposits yet" hint="Choose a term product above to lock in a rate." />
+            <EmptyState
+              title="No fixed deposits yet"
+              hint="Choose a term product above to lock in a rate."
+            />
           </div>
         ) : (
           <table className="w-full">
@@ -188,7 +210,9 @@ function Body() {
                   <td className="px-6 py-3 text-right tabular">
                     <Money amount={d.status === "active" ? d.interest_expected : d.interest_paid} />
                   </td>
-                  <td className="px-6 py-3 text-xs">{new Date(d.maturity_date).toLocaleDateString()}</td>
+                  <td className="px-6 py-3 text-xs">
+                    {new Date(d.maturity_date).toLocaleDateString()}
+                  </td>
                   <td className="px-6 py-3">
                     <StatusPill
                       status={
@@ -216,7 +240,9 @@ function Body() {
         )}
       </SectionCard>
 
-      {openFor && <OpenDialog product={openFor} accounts={accounts} onClose={() => setOpenFor(null)} />}
+      {openFor && (
+        <OpenDialog product={openFor} accounts={accounts} onClose={() => setOpenFor(null)} />
+      )}
       {breakFor && <BreakDialog deposit={breakFor} onClose={() => setBreakFor(null)} />}
     </div>
   );
@@ -249,7 +275,8 @@ function OpenDialog({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const projected = (Number(amount) || 0) * (product.rate_annual / 100) * (product.term_months / 12);
+  const projected =
+    (Number(amount) || 0) * (product.rate_annual / 100) * (product.term_months / 12);
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -335,18 +362,27 @@ function BreakDialog({ deposit, onClose }: { deposit: FixedDeposit; onClose: () 
           <DialogTitle>Break {deposit.ref} early</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Breaking before {new Date(deposit.maturity_date).toLocaleDateString()} forfeits part of the accrued interest.
-          The principal returns to your savings account immediately.
+          Breaking before {new Date(deposit.maturity_date).toLocaleDateString()} forfeits part of
+          the accrued interest. The principal returns to your savings account immediately.
         </p>
         <div className="space-y-1.5">
           <Label htmlFor="fd-reason">Reason (required)</Label>
-          <Textarea id="fd-reason" value={reason} onChange={(e) => setReason(e.target.value)} rows={3} />
+          <Textarea
+            id="fd-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Keep deposit
           </Button>
-          <Button variant="destructive" onClick={() => mutation.mutate()} disabled={mutation.isPending || reason.trim().length < 5}>
+          <Button
+            variant="destructive"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || reason.trim().length < 5}
+          >
             {mutation.isPending ? "Processing…" : "Break deposit"}
           </Button>
         </DialogFooter>

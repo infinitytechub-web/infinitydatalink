@@ -10,28 +10,34 @@ import {
 
 export const listMyStatementSchedules = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ schedules: StatementSchedule[]; runs: StatementRun[] }> => {
-    const sb = context.supabase as any;
-    const [sched, runs] = await Promise.all([
-      sb
-        .from("statement_schedules")
-        .select("id, dataset, frequency, email, sms, active, next_run_at, last_run_at, last_status, last_error")
-        .eq("user_id", context.userId)
-        .order("created_at", { ascending: true }),
-      sb
-        .from("statement_runs")
-        .select("id, schedule_id, period_start, period_end, row_count, channels, status, error, created_at")
-        .eq("user_id", context.userId)
-        .order("created_at", { ascending: false })
-        .limit(20),
-    ]);
-    if (sched.error) throw new Error(sched.error.message);
-    if (runs.error) throw new Error(runs.error.message);
-    return {
-      schedules: (sched.data ?? []) as StatementSchedule[],
-      runs: (runs.data ?? []) as StatementRun[],
-    };
-  });
+  .handler(
+    async ({ context }): Promise<{ schedules: StatementSchedule[]; runs: StatementRun[] }> => {
+      const sb = context.supabase as any;
+      const [sched, runs] = await Promise.all([
+        sb
+          .from("statement_schedules")
+          .select(
+            "id, dataset, frequency, email, sms, active, next_run_at, last_run_at, last_status, last_error",
+          )
+          .eq("user_id", context.userId)
+          .order("created_at", { ascending: true }),
+        sb
+          .from("statement_runs")
+          .select(
+            "id, schedule_id, period_start, period_end, row_count, channels, status, error, created_at",
+          )
+          .eq("user_id", context.userId)
+          .order("created_at", { ascending: false })
+          .limit(20),
+      ]);
+      if (sched.error) throw new Error(sched.error.message);
+      if (runs.error) throw new Error(runs.error.message);
+      return {
+        schedules: (sched.data ?? []) as StatementSchedule[],
+        runs: (runs.data ?? []) as StatementRun[],
+      };
+    },
+  );
 
 export const saveMyStatementSchedule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -62,7 +68,11 @@ export const saveMyStatementSchedule = createServerFn({ method: "POST" })
       next_run_at: nextRunAt(data.frequency),
     };
     const { error } = data.id
-      ? await sb.from("statement_schedules").update(payload).eq("id", data.id).eq("user_id", context.userId)
+      ? await sb
+          .from("statement_schedules")
+          .update(payload)
+          .eq("id", data.id)
+          .eq("user_id", context.userId)
       : await sb
           .from("statement_schedules")
           .upsert(payload, { onConflict: "user_id,dataset,frequency" });

@@ -393,9 +393,7 @@ export const GHANA_REGION_NAMES: string[] = GHANA_REGIONS.map((r) => r.name);
 export function districtsForRegion(regionName: string | null | undefined): string[] {
   if (!regionName) return [];
   const key = regionName.trim().toLowerCase();
-  const region = GHANA_REGIONS.find(
-    (r) => r.name.toLowerCase() === key || r.code === key,
-  );
+  const region = GHANA_REGIONS.find((r) => r.name.toLowerCase() === key || r.code === key);
   return region ? region.districts : [];
 }
 
@@ -414,7 +412,4 @@ export function isValidDistrict(
   return list.some((d) => d.toLowerCase() === district.trim().toLowerCase());
 }
 
-export const GHANA_DISTRICT_COUNT = GHANA_REGIONS.reduce(
-  (sum, r) => sum + r.districts.length,
-  0,
-);
+export const GHANA_DISTRICT_COUNT = GHANA_REGIONS.reduce((sum, r) => sum + r.districts.length, 0);

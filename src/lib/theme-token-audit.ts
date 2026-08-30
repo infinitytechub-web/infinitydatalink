@@ -165,7 +165,10 @@ export function parseColor(input: string): Rgba {
       r: num(parts[0]!),
       g: num(parts[1]!),
       b: num(parts[2]!),
-      a: parts[3] === undefined ? 1 : parseFloat(parts[3].replace("%", "")) / (parts[3].endsWith("%") ? 100 : 1),
+      a:
+        parts[3] === undefined
+          ? 1
+          : parseFloat(parts[3].replace("%", "")) / (parts[3].endsWith("%") ? 100 : 1),
     };
   }
 
@@ -189,9 +192,7 @@ function channel(value: number): number {
 }
 
 export function relativeLuminance(color: Rgba): number {
-  return (
-    0.2126 * channel(color.r) + 0.7152 * channel(color.g) + 0.0722 * channel(color.b)
-  );
+  return 0.2126 * channel(color.r) + 0.7152 * channel(color.g) + 0.0722 * channel(color.b);
 }
 
 /** WCAG 2.1 contrast ratio between two colors (alpha composited first). */
@@ -201,8 +202,14 @@ export function contrastRatio(
   base: string | Rgba = "#ffffff",
 ): number {
   const baseRgb = typeof base === "string" ? parseColor(base) : base;
-  const bgRgb = flatten(typeof background === "string" ? parseColor(background) : background, baseRgb);
-  const fgRgb = flatten(typeof foreground === "string" ? parseColor(foreground) : foreground, bgRgb);
+  const bgRgb = flatten(
+    typeof background === "string" ? parseColor(background) : background,
+    baseRgb,
+  );
+  const fgRgb = flatten(
+    typeof foreground === "string" ? parseColor(foreground) : foreground,
+    bgRgb,
+  );
   const l1 = relativeLuminance(fgRgb);
   const l2 = relativeLuminance(bgRgb);
   const [hi, lo] = l1 >= l2 ? [l1, l2] : [l2, l1];

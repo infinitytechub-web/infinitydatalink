@@ -55,20 +55,20 @@ export async function loadAlertSettings(): Promise<SecurityAlertSettings> {
     if (error || !data) return ALERT_DEFAULTS;
     const row = data as Record<string, unknown>;
     return {
-      enabled: row['enabled'] !== false,
-      channels: normaliseChannels(row['channels']),
-      notify_roles: Array.isArray(row['notify_roles'])
-        ? (row['notify_roles'] as string[])
+      enabled: row["enabled"] !== false,
+      channels: normaliseChannels(row["channels"]),
+      notify_roles: Array.isArray(row["notify_roles"])
+        ? (row["notify_roles"] as string[])
         : ALERT_DEFAULTS.notify_roles,
-      audit_alerts_enabled: row['audit_alerts_enabled'] !== false,
-      audit_min_severity: (row['audit_min_severity'] as AlertSeverity) ?? "critical",
-      audit_action_prefixes: Array.isArray(row['audit_action_prefixes'])
-        ? (row['audit_action_prefixes'] as string[]).filter(Boolean)
+      audit_alerts_enabled: row["audit_alerts_enabled"] !== false,
+      audit_min_severity: (row["audit_min_severity"] as AlertSeverity) ?? "critical",
+      audit_action_prefixes: Array.isArray(row["audit_action_prefixes"])
+        ? (row["audit_action_prefixes"] as string[]).filter(Boolean)
         : [],
-      upload_alerts_enabled: row['upload_alerts_enabled'] !== false,
-      rate_limit_alerts_enabled: row['rate_limit_alerts_enabled'] !== false,
-      throttle_minutes: Number(row['throttle_minutes'] ?? 15),
-      updated_at: (row['updated_at'] as string | null) ?? null,
+      upload_alerts_enabled: row["upload_alerts_enabled"] !== false,
+      rate_limit_alerts_enabled: row["rate_limit_alerts_enabled"] !== false,
+      throttle_minutes: Number(row["throttle_minutes"] ?? 15),
+      updated_at: (row["updated_at"] as string | null) ?? null,
     };
   } catch (err) {
     console.error("loadAlertSettings failed", (err as Error)?.message);

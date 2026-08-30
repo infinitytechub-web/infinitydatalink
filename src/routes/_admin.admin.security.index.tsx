@@ -4,19 +4,17 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { EyeOff, ShieldCheck } from "lucide-react";
-import {
-  EmptyState,
-  KPIStat,
-  SectionCard,
-  SectionCardSkeleton,
-} from "@/components/primitives";
+import { EmptyState, KPIStat, SectionCard, SectionCardSkeleton } from "@/components/primitives";
 import { ExportBar } from "@/components/export-bar";
 import { Pagination } from "@/components/table-controls";
 import type { ExportColumn } from "@/lib/exports";
 import { listSecurityEvents, type SecurityEvent } from "@/lib/security-centre.functions";
 
 const search = z.object({
-  category: fallback(z.enum(["all", "auth", "access", "security", "payments", "documents"]), "all").default("all"),
+  category: fallback(
+    z.enum(["all", "auth", "access", "security", "payments", "documents"]),
+    "all",
+  ).default("all"),
   severity: fallback(z.enum(["all", "info", "warning", "critical"]), "all").default("all"),
   from: fallback(z.string(), "").default(""),
   to: fallback(z.string(), "").default(""),
@@ -86,13 +84,19 @@ function Content() {
   return (
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Events (24h)" value={<span className="tabular">{data.kpis.events24h}</span>} />
+        <KPIStat
+          label="Events (24h)"
+          value={<span className="tabular">{data.kpis.events24h}</span>}
+        />
         <KPIStat
           label="Critical (24h)"
           value={<span className="tabular">{data.kpis.critical24h}</span>}
           accent
         />
-        <KPIStat label="Blocked (24h)" value={<span className="tabular">{data.kpis.blocked24h}</span>} />
+        <KPIStat
+          label="Blocked (24h)"
+          value={<span className="tabular">{data.kpis.blocked24h}</span>}
+        />
         <KPIStat
           label="Live sessions"
           value={<span className="tabular">{data.kpis.liveSessions}</span>}
@@ -157,11 +161,21 @@ function Content() {
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             From
-            <input type="date" className={field} value={s.from} onChange={(e) => setSearch({ from: e.target.value })} />
+            <input
+              type="date"
+              className={field}
+              value={s.from}
+              onChange={(e) => setSearch({ from: e.target.value })}
+            />
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             To
-            <input type="date" className={field} value={s.to} onChange={(e) => setSearch({ to: e.target.value })} />
+            <input
+              type="date"
+              className={field}
+              value={s.to}
+              onChange={(e) => setSearch({ to: e.target.value })}
+            />
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Search

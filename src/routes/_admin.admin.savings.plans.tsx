@@ -4,12 +4,25 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Pencil, Plus } from "lucide-react";
-import { ErrorState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  ErrorState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import {
   createPlan,
@@ -35,7 +48,9 @@ export const Route = createFileRoute("/_admin/admin/savings/plans")({
   loader: ({ context }) => context.queryClient.ensureQueryData(plansQuery),
   component: PlansPage,
   errorComponent: ({ error }) => (
-    <div className="p-6"><ErrorState title="Plans unavailable" message={error.message} /></div>
+    <div className="p-6">
+      <ErrorState title="Plans unavailable" message={error.message} />
+    </div>
   ),
 });
 
@@ -62,7 +77,11 @@ function Body() {
   return (
     <>
       <section className="grid gap-6 md:grid-cols-3">
-        <KPIStat label="Plans" value={<span className="tabular">{plans.length}</span>} hint={`${plans.filter((p) => p.is_active).length} active`} />
+        <KPIStat
+          label="Plans"
+          value={<span className="tabular">{plans.length}</span>}
+          hint={`${plans.filter((p) => p.is_active).length} active`}
+        />
         <KPIStat label="Active accounts" value={<span className="tabular">{totalAccounts}</span>} />
         <KPIStat label="Balances managed" value={<Money amount={totalBalance} />} />
       </section>
@@ -100,14 +119,22 @@ function PlanRow({ p }: { p: AdminPlan }) {
     <tr>
       <td className="px-6 py-3">
         <div className="font-semibold">{p.name}</div>
-        {p.description ? <div className="text-[11px] text-muted-foreground">{p.description}</div> : null}
+        {p.description ? (
+          <div className="text-[11px] text-muted-foreground">{p.description}</div>
+        ) : null}
       </td>
       <td className="px-6 py-3 text-muted-foreground">{p.schedule}</td>
       <td className="tabular px-6 py-3 text-right">{p.interest_rate}%</td>
-      <td className="px-6 py-3 text-right"><Money amount={p.min_contribution} /></td>
-      <td className="px-6 py-3 text-right"><Money amount={p.contribution_amount} /></td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={p.min_contribution} />
+      </td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={p.contribution_amount} />
+      </td>
       <td className="tabular px-6 py-3 text-right">{p.active_accounts}</td>
-      <td className="px-6 py-3 text-right"><Money amount={p.total_balance} /></td>
+      <td className="px-6 py-3 text-right">
+        <Money amount={p.total_balance} />
+      </td>
       <td className="px-6 py-3 text-right">
         <span
           className={
@@ -163,9 +190,13 @@ function CreateDialog() {
   });
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button onClick={() => setOpen(true)} className="gap-1"><Plus className="h-4 w-4" /> New plan</Button>
+      <Button onClick={() => setOpen(true)} className="gap-1">
+        <Plus className="h-4 w-4" /> New plan
+      </Button>
       <DialogContent>
-        <DialogHeader><DialogTitle>Create savings plan</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Create savings plan</DialogTitle>
+        </DialogHeader>
         <form
           className="grid gap-3 sm:grid-cols-2"
           onSubmit={(e) => {
@@ -176,39 +207,78 @@ function CreateDialog() {
         >
           <div className="sm:col-span-2">
             <Label>Name</Label>
-            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            <Input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
           </div>
           <div>
             <Label>Schedule</Label>
-            <Input value={form.schedule} onChange={(e) => setForm({ ...form, schedule: e.target.value })} placeholder="monthly" />
+            <Input
+              value={form.schedule}
+              onChange={(e) => setForm({ ...form, schedule: e.target.value })}
+              placeholder="monthly"
+            />
           </div>
           <div>
             <Label>Interest rate (% p.a.)</Label>
-            <Input type="number" step="0.01" value={form.interest_rate} onChange={(e) => setForm({ ...form, interest_rate: e.target.value })} />
+            <Input
+              type="number"
+              step="0.01"
+              value={form.interest_rate}
+              onChange={(e) => setForm({ ...form, interest_rate: e.target.value })}
+            />
           </div>
           <div>
             <Label>Min contribution</Label>
-            <Input type="number" step="0.01" value={form.min_contribution} onChange={(e) => setForm({ ...form, min_contribution: e.target.value })} />
+            <Input
+              type="number"
+              step="0.01"
+              value={form.min_contribution}
+              onChange={(e) => setForm({ ...form, min_contribution: e.target.value })}
+            />
           </div>
           <div>
             <Label>Contribution amount</Label>
-            <Input type="number" step="0.01" value={form.contribution_amount} onChange={(e) => setForm({ ...form, contribution_amount: e.target.value })} />
+            <Input
+              type="number"
+              step="0.01"
+              value={form.contribution_amount}
+              onChange={(e) => setForm({ ...form, contribution_amount: e.target.value })}
+            />
           </div>
           <div>
             <Label>Lock days</Label>
-            <Input type="number" value={form.lock_days} onChange={(e) => setForm({ ...form, lock_days: e.target.value })} />
+            <Input
+              type="number"
+              value={form.lock_days}
+              onChange={(e) => setForm({ ...form, lock_days: e.target.value })}
+            />
           </div>
           <div>
             <Label>Sort order</Label>
-            <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
+            <Input
+              type="number"
+              value={form.sort_order}
+              onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
+            />
           </div>
           <div className="sm:col-span-2">
             <Label>Description</Label>
-            <Textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <Textarea
+              rows={2}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
           </div>
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Creating…" : "Create plan"}</Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={mut.isPending}>
+              {mut.isPending ? "Creating…" : "Create plan"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -265,9 +335,13 @@ function EditDialog({ p }: { p: AdminPlan }) {
   const willDeactivate = p.is_active && !form.is_active;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button size="sm" variant="ghost" onClick={() => setOpen(true)}><Pencil className="h-3.5 w-3.5" /></Button>
+      <Button size="sm" variant="ghost" onClick={() => setOpen(true)}>
+        <Pencil className="h-3.5 w-3.5" />
+      </Button>
       <DialogContent>
-        <DialogHeader><DialogTitle>Edit {p.name}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Edit {p.name}</DialogTitle>
+        </DialogHeader>
         <form
           className="grid gap-3 sm:grid-cols-2"
           onSubmit={(e) => {
@@ -281,48 +355,91 @@ function EditDialog({ p }: { p: AdminPlan }) {
           </div>
           <div>
             <Label>Schedule</Label>
-            <Input value={form.schedule} onChange={(e) => setForm({ ...form, schedule: e.target.value })} />
+            <Input
+              value={form.schedule}
+              onChange={(e) => setForm({ ...form, schedule: e.target.value })}
+            />
           </div>
           <div>
             <Label>Interest rate (%)</Label>
-            <Input type="number" step="0.01" value={form.interest_rate} onChange={(e) => setForm({ ...form, interest_rate: e.target.value })} />
+            <Input
+              type="number"
+              step="0.01"
+              value={form.interest_rate}
+              onChange={(e) => setForm({ ...form, interest_rate: e.target.value })}
+            />
           </div>
           <div>
             <Label>Min contribution</Label>
-            <Input type="number" step="0.01" value={form.min_contribution} onChange={(e) => setForm({ ...form, min_contribution: e.target.value })} />
+            <Input
+              type="number"
+              step="0.01"
+              value={form.min_contribution}
+              onChange={(e) => setForm({ ...form, min_contribution: e.target.value })}
+            />
           </div>
           <div>
             <Label>Contribution amount</Label>
-            <Input type="number" step="0.01" value={form.contribution_amount} onChange={(e) => setForm({ ...form, contribution_amount: e.target.value })} />
+            <Input
+              type="number"
+              step="0.01"
+              value={form.contribution_amount}
+              onChange={(e) => setForm({ ...form, contribution_amount: e.target.value })}
+            />
           </div>
           <div>
             <Label>Lock days</Label>
-            <Input type="number" value={form.lock_days} onChange={(e) => setForm({ ...form, lock_days: e.target.value })} />
+            <Input
+              type="number"
+              value={form.lock_days}
+              onChange={(e) => setForm({ ...form, lock_days: e.target.value })}
+            />
           </div>
           <div>
             <Label>Sort order</Label>
-            <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
+            <Input
+              type="number"
+              value={form.sort_order}
+              onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
+            />
           </div>
           <div className="sm:col-span-2">
             <Label>Description</Label>
-            <Textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <Textarea
+              rows={2}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
           </div>
           <div className="flex items-center justify-between rounded-md border border-border p-3 sm:col-span-2">
             <div>
               <div className="text-sm font-medium">Active</div>
-              <div className="text-[11px] text-muted-foreground">Inactive plans hide from member enrollment.</div>
+              <div className="text-[11px] text-muted-foreground">
+                Inactive plans hide from member enrollment.
+              </div>
             </div>
-            <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
+            <Switch
+              checked={form.is_active}
+              onCheckedChange={(v) => setForm({ ...form, is_active: v })}
+            />
           </div>
           {willDeactivate && p.active_accounts > 0 ? (
             <div className="sm:col-span-2">
               <Label>Deactivation reason ({p.active_accounts} active accounts)</Label>
-              <Textarea rows={2} value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
+              <Textarea
+                rows={2}
+                value={form.reason}
+                onChange={(e) => setForm({ ...form, reason: e.target.value })}
+              />
             </div>
           ) : null}
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Saving…" : "Save changes"}</Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={mut.isPending}>
+              {mut.isPending ? "Saving…" : "Save changes"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

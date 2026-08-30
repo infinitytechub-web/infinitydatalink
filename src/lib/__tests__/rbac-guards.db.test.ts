@@ -67,7 +67,8 @@ function evalAuditPolicy(args: {
   // `request.jwt.claims`. Equivalent to running the policy under RLS.
   const actorEmailSql = args.actorEmail === null ? "NULL" : `'${args.actorEmail}'`;
   const actorRoleSql = args.actorRole === null ? "NULL" : `'${args.actorRole}'`;
-  return q(`
+  return (
+    q(`
     BEGIN;
     ${setJwt(args.jwtUserId, args.jwtEmail)}
     WITH j AS (
@@ -90,10 +91,11 @@ function evalAuditPolicy(args: {
     );
     ROLLBACK;
   `)
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter((s) => s === "t" || s === "f")
-    .at(-1) ?? "";
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter((s) => s === "t" || s === "f")
+      .at(-1) ?? ""
+  );
 }
 
 d("guard_super_admin_role trigger", () => {
@@ -149,7 +151,9 @@ d("guard_super_admin_role trigger", () => {
     // The trigger raises 'forbidden: super_admin ...'. If the caller lacks
     // table DELETE privilege entirely, that also counts as denied — both
     // outcomes leave the row intact, which is the guarantee we care about.
-    expect(r.stderr).toMatch(/forbidden.*super_admin|super_admin role changes require|permission denied/i);
+    expect(r.stderr).toMatch(
+      /forbidden.*super_admin|super_admin role changes require|permission denied/i,
+    );
   });
 
   it("existing super_admin CAN INSERT another super_admin (rolled back)", () => {
@@ -219,13 +223,10 @@ d("audit_log anti-spoof invariants (definer-only appends)", () => {
     expect(insertPolicies).toBe("0");
 
     for (const role of ["authenticated", "anon"]) {
-      const priv = q(
-        `SELECT has_table_privilege('${role}','public.audit_log','INSERT')`,
-      );
+      const priv = q(`SELECT has_table_privilege('${role}','public.audit_log','INSERT')`);
       expect(priv, `${role} must NOT INSERT audit_log`).toBe("f");
     }
   });
-
 
   it("rejects when actor_id != auth.uid()", () => {
     const allowed = evalAuditPolicy({

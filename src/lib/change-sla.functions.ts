@@ -67,7 +67,6 @@ export const getChangeSlaSettings = createServerFn({ method: "GET" })
       settings: { ...CHANGE_SLA_DEFAULTS, ...((data ?? {}) as Partial<ChangeSlaSettings>) },
       canManage: manage.data === true,
     };
-
   });
 
 export const updateChangeSlaSettings = createServerFn({ method: "POST" })

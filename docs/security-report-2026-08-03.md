@@ -4,14 +4,14 @@ Scan run: 2026-08-03T16:14:14Z (backend scan + dependency audit + persisted find
 
 ## Summary
 
-| Scanner | Status | Findings |
-| --- | --- | --- |
-| Backend / database (Supabase linter) | success | 48 (all `warn`) |
-| Backend deep scan (`supabase_lov` v3.2) | success | 0 |
-| App MCP surface | success | 0 |
-| Connector security | success | 0 |
-| Dependency audit (high/critical) | success | 0 |
-| Persisted findings (prior releases) | — | 0 open |
+| Scanner                                 | Status  | Findings        |
+| --------------------------------------- | ------- | --------------- |
+| Backend / database (Supabase linter)    | success | 48 (all `warn`) |
+| Backend deep scan (`supabase_lov` v3.2) | success | 0               |
+| App MCP surface                         | success | 0               |
+| Connector security                      | success | 0               |
+| Dependency audit (high/critical)        | success | 0               |
+| Persisted findings (prior releases)     | —       | 0 open          |
 
 No high or critical severity issues. No open findings carried over from previous releases.
 
@@ -20,6 +20,7 @@ No high or critical severity issues. No open findings carried over from previous
 All 48 findings collapse into two linter rules, both `warn`:
 
 ### 1. Public (anon) can execute a `SECURITY DEFINER` function — 18 occurrences
+
 `lint=0028_anon_security_definer_function_executable`
 
 Functions in `public` still holding `EXECUTE` for the `anon` role:
@@ -32,6 +33,7 @@ Functions in `public` still holding `EXECUTE` for the `anon` role:
 `sell_shares`, `transfer_shares`
 
 Notes for triage:
+
 - `guard_*`, `notify_*`, `profiles_*` are **trigger functions**. They never need a role
   grant at all — revoking `EXECUTE FROM anon, authenticated` is a no-risk cleanup.
 - `check_registration_availability` is intentionally reachable pre-signup (registration
@@ -42,6 +44,7 @@ Notes for triage:
   broader than intended and should be revoked.
 
 ### 2. Signed-in users can execute a `SECURITY DEFINER` function — 30 occurrences
+
 `lint=0029_authenticated_security_definer_function_executable`
 
 The 18 above (also granted to `authenticated`) plus:

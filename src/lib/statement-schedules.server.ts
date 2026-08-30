@@ -7,10 +7,7 @@
  * the member's notification preferences and the existing outbox dispatcher.
  */
 import { notifyUser } from "@/lib/notify.server";
-import {
-  FREQUENCY_DAYS,
-  type StatementFrequency,
-} from "@/lib/statement-schedules.shared";
+import { FREQUENCY_DAYS, type StatementFrequency } from "@/lib/statement-schedules.shared";
 import { MEMBER_DATASET_LABELS, type MemberReportDataset } from "@/lib/member-reports.shared";
 
 const BATCH = 25;
@@ -56,7 +53,10 @@ export async function summariseStatement(
       lines: [
         { label: "Accounts", value: String(rows.length) },
         { label: "Total balance", value: money(rows.reduce((s, a) => s + num(a.balance), 0)) },
-        { label: "Active accounts", value: String(rows.filter((a) => a.status === "active").length) },
+        {
+          label: "Active accounts",
+          value: String(rows.filter((a) => a.status === "active").length),
+        },
       ],
     };
   }
@@ -272,7 +272,14 @@ export async function processDueStatementSchedules(): Promise<ProcessResult> {
     return { claimed: false, processed: 0, sent: 0, failed: 0, skipped: 0, paused: 0 };
   }
 
-  const out: ProcessResult = { claimed: true, processed: 0, sent: 0, failed: 0, skipped: 0, paused: 0 };
+  const out: ProcessResult = {
+    claimed: true,
+    processed: 0,
+    sent: 0,
+    failed: 0,
+    skipped: 0,
+    paused: 0,
+  };
   try {
     const { data, error } = await admin
       .from("statement_schedules")

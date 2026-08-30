@@ -51,7 +51,12 @@ export const listLoanRestructures = createServerFn({ method: "GET" })
       .parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<RestructureRow[]> => {
-    await assertRoles(context.supabase, context.userId, READ_ROLES, "loan, finance or audit role required");
+    await assertRoles(
+      context.supabase,
+      context.userId,
+      READ_ROLES,
+      "loan, finance or audit role required",
+    );
     let q = context.supabase
       .from("loan_restructures")
       .select(
@@ -69,11 +74,17 @@ export const listLoanRestructures = createServerFn({ method: "GET" })
     let loans = new Map<string, any>();
     let profiles = new Map<string, any>();
     if (loanIds.length) {
-      const { data: l } = await context.supabase.from("loans").select("id, ref, user_id").in("id", loanIds);
+      const { data: l } = await context.supabase
+        .from("loans")
+        .select("id, ref, user_id")
+        .in("id", loanIds);
       loans = new Map((l ?? []).map((row: any) => [row.id, row]));
       const userIds = Array.from(new Set((l ?? []).map((row: any) => row.user_id)));
       if (userIds.length) {
-        const { data: p } = await context.supabase.from("profiles").select("id, full_name").in("id", userIds);
+        const { data: p } = await context.supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
         profiles = new Map((p ?? []).map((row: any) => [row.id, row]));
       }
     }
@@ -104,15 +115,26 @@ export const requestLoanRestructure = createServerFn({ method: "POST" })
         note: z.string().trim().min(10, "Explain the workout in at least 10 characters").max(1000),
       })
       .parse(d);
-    if (parsed.kind === "reschedule" && !parsed.new_term_months && parsed.new_interest_rate == null) {
+    if (
+      parsed.kind === "reschedule" &&
+      !parsed.new_term_months &&
+      parsed.new_interest_rate == null
+    ) {
       throw new Error("Reschedule needs a new term and/or a new interest rate");
     }
-    if (parsed.kind === "grace_period" && !parsed.grace_months) throw new Error("Enter the grace period in months");
-    if (parsed.kind === "write_off" && !parsed.write_off_amount) throw new Error("Enter the amount to write off");
+    if (parsed.kind === "grace_period" && !parsed.grace_months)
+      throw new Error("Enter the grace period in months");
+    if (parsed.kind === "write_off" && !parsed.write_off_amount)
+      throw new Error("Enter the amount to write off");
     return parsed;
   })
   .handler(async ({ data, context }) => {
-    await assertRoles(context.supabase, context.userId, REQUEST_ROLES, "super admin or loan officer role required");
+    await assertRoles(
+      context.supabase,
+      context.userId,
+      REQUEST_ROLES,
+      "super admin or loan officer role required",
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await (supabaseAdmin as any).rpc("request_loan_restructure", {
       _loan_id: data.loan_id,
@@ -135,12 +157,21 @@ export const decideLoanRestructure = createServerFn({ method: "POST" })
       .object({
         request_id: z.string().uuid(),
         approve: z.boolean(),
-        note: z.string().trim().min(10, "A decision note of at least 10 characters is required").max(1000),
+        note: z
+          .string()
+          .trim()
+          .min(10, "A decision note of at least 10 characters is required")
+          .max(1000),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertRoles(context.supabase, context.userId, DECIDE_ROLES, "super admin or finance officer role required");
+    await assertRoles(
+      context.supabase,
+      context.userId,
+      DECIDE_ROLES,
+      "super admin or finance officer role required",
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await (supabaseAdmin as any).rpc("decide_loan_restructure", {
       _request_id: data.request_id,
@@ -153,7 +184,8 @@ export const decideLoanRestructure = createServerFn({ method: "POST" })
   });
 
 function translate(message: string): string {
-  if (message.includes("two_person_rule")) return "Two-person rule: the requester cannot approve their own workout.";
+  if (message.includes("two_person_rule"))
+    return "Two-person rule: the requester cannot approve their own workout.";
   if (message.includes("already_decided")) return "This workout request has already been decided.";
   if (message.includes("pending_exists")) return "This loan already has a pending workout request.";
   if (message.includes("invalid_kind")) return "Unsupported workout type.";

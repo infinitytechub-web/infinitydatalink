@@ -47,11 +47,17 @@ async function hydrate(supabase: any, rows: any[]): Promise<SettlementRequestRow
   let loans = new Map<string, any>();
   let profiles = new Map<string, any>();
   if (loanIds.length) {
-    const { data } = await supabase.from("loans").select("id, ref, product, outstanding_principal").in("id", loanIds);
+    const { data } = await supabase
+      .from("loans")
+      .select("id, ref, product, outstanding_principal")
+      .in("id", loanIds);
     loans = new Map((data ?? []).map((l: any) => [l.id, l]));
   }
   if (userIds.length) {
-    const { data } = await supabase.from("profiles").select("id, full_name, member_no").in("id", userIds);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, full_name, member_no")
+      .in("id", userIds);
     profiles = new Map((data ?? []).map((p: any) => [p.id, p]));
   }
   return rows.map((r) => {
@@ -67,7 +73,8 @@ async function hydrate(supabase: any, rows: any[]): Promise<SettlementRequestRow
       member_no: profile?.member_no ?? null,
       settle_on: String(r.settle_on),
       quoted_total: Number(r.quoted_total ?? 0),
-      outstanding_principal: loan?.outstanding_principal == null ? null : Number(loan.outstanding_principal),
+      outstanding_principal:
+        loan?.outstanding_principal == null ? null : Number(loan.outstanding_principal),
       member_note: r.member_note ?? null,
       status: String(r.status),
       requested_at: String(r.requested_at),
@@ -115,7 +122,11 @@ export const decideSettlementRequest = createServerFn({ method: "POST" })
       .object({
         request_id: z.string().uuid(),
         approve: z.boolean(),
-        note: z.string().trim().min(10, "A decision note of at least 10 characters is required").max(1000),
+        note: z
+          .string()
+          .trim()
+          .min(10, "A decision note of at least 10 characters is required")
+          .max(1000),
       })
       .parse(d),
   )
@@ -230,10 +241,14 @@ export const cancelSettlementRequest = createServerFn({ method: "POST" })
   });
 
 function translate(message: string): string {
-  if (message.includes("two_person_rule")) return "You cannot decide a settlement request you raised yourself.";
-  if (message.includes("already_decided")) return "This settlement request has already been decided.";
-  if (message.includes("pending_exists")) return "This loan already has a settlement request awaiting a decision.";
-  if (message.includes("note_required")) return "A decision note of at least 10 characters is required.";
+  if (message.includes("two_person_rule"))
+    return "You cannot decide a settlement request you raised yourself.";
+  if (message.includes("already_decided"))
+    return "This settlement request has already been decided.";
+  if (message.includes("pending_exists"))
+    return "This loan already has a settlement request awaiting a decision.";
+  if (message.includes("note_required"))
+    return "A decision note of at least 10 characters is required.";
   if (message.includes("loan_not_settleable")) return "Only active loans can be settled early.";
   if (message.includes("invalid_settle_date")) return "Pick a settlement date of today or later.";
   if (message.includes("request_not_found")) return "Settlement request not found.";

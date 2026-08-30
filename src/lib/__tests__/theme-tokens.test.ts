@@ -58,7 +58,11 @@ describe("theme token declarations", () => {
         for (const [name] of Object.entries(SETS.theme)) {
           if (NON_COLOR.test(name)) continue;
           const value = resolveValue(tokens, SETS.theme[name]!);
-          if (value.includes("gradient") || value.includes(",") === false || value.startsWith("#")) {
+          if (
+            value.includes("gradient") ||
+            value.includes(",") === false ||
+            value.startsWith("#")
+          ) {
             expect(() => parseColor(value), `${name} in ${mode} = ${value}`).not.toThrow();
           } else {
             expect(() => parseColor(value), `${name} in ${mode} = ${value}`).not.toThrow();
@@ -164,43 +168,147 @@ function pairsFor(mode: Mode): Pair[] {
   return [
     // Base surfaces
     { name: "body text on app background", fg: t("--foreground"), bg: appBg, min: 4.5 },
-    { name: "card text on card", fg: t("--card-foreground"), bg: t("--card"), base: appBg, min: 4.5 },
+    {
+      name: "card text on card",
+      fg: t("--card-foreground"),
+      bg: t("--card"),
+      base: appBg,
+      min: 4.5,
+    },
     { name: "muted text on app background", fg: t("--muted-foreground"), bg: appBg, min: 4.5 },
-    { name: "muted text on card", fg: t("--muted-foreground"), bg: t("--card"), base: appBg, min: 4.5 },
-    { name: "popover text on popover", fg: t("--popover-foreground"), bg: t("--popover"), base: appBg, min: 4.5 },
+    {
+      name: "muted text on card",
+      fg: t("--muted-foreground"),
+      bg: t("--card"),
+      base: appBg,
+      min: 4.5,
+    },
+    {
+      name: "popover text on popover",
+      fg: t("--popover-foreground"),
+      bg: t("--popover"),
+      base: appBg,
+      min: 4.5,
+    },
 
     // Primary / secondary / accent buttons
     { name: "primary button label", fg: t("--primary-foreground"), bg: t("--primary"), min: 4.5 },
     { name: "primary button edge vs app bg", fg: t("--primary"), bg: appBg, min: 3 },
-    { name: "secondary button label", fg: t("--secondary-foreground"), bg: t("--secondary"), base: appBg, min: 4.5 },
+    {
+      name: "secondary button label",
+      fg: t("--secondary-foreground"),
+      bg: t("--secondary"),
+      base: appBg,
+      min: 4.5,
+    },
     { name: "accent button label", fg: t("--accent-foreground"), bg: t("--accent"), min: 4.5 },
-    { name: "destructive button label", fg: t("--destructive-foreground"), bg: t("--destructive"), min: 4.5 },
-    { name: "link/ghost primary text on card", fg: t("--primary"), bg: t("--card"), base: appBg, min: 4.5 },
+    {
+      name: "destructive button label",
+      fg: t("--destructive-foreground"),
+      bg: t("--destructive"),
+      min: 4.5,
+    },
+    {
+      name: "link/ghost primary text on card",
+      fg: t("--primary"),
+      bg: t("--card"),
+      base: appBg,
+      min: 4.5,
+    },
     { name: "focus ring vs app bg", fg: t("--ring"), bg: appBg, min: 3 },
     { name: "input border vs card", fg: t("--input"), bg: t("--card"), base: appBg, min: 3 },
 
     // Gold "premium" button — gradient spans goldDeep → goldLight
-    { name: "gold button label on darkest gold stop", fg: BRAND.forest, bg: BRAND.goldDeep, min: 4.5 },
-    { name: "gold button label on lightest gold stop", fg: BRAND.forest, bg: BRAND.goldLight, min: 4.5 },
+    {
+      name: "gold button label on darkest gold stop",
+      fg: BRAND.forest,
+      bg: BRAND.goldDeep,
+      min: 4.5,
+    },
+    {
+      name: "gold button label on lightest gold stop",
+      fg: BRAND.forest,
+      bg: BRAND.goldLight,
+      min: 4.5,
+    },
 
     // Sidebar rail (gradient forest → tealDeep → forestDeep)
     { name: "sidebar label on rail", fg: t("--sidebar-foreground"), bg: sidebarBg, min: 4.5 },
-    { name: "sidebar label on teal gradient stop", fg: t("--sidebar-foreground"), bg: BRAND.tealDeep, min: 4.5 },
-    { name: "active sidebar item label", fg: t("--sidebar-accent-foreground"), bg: t("--sidebar-accent"), base: sidebarBg, min: 4.5 },
-    { name: "active sidebar item on teal stop", fg: t("--sidebar-accent-foreground"), bg: t("--sidebar-accent"), base: BRAND.tealDeep, min: 4.5 },
-    { name: "sidebar group label (gold) on rail", fg: t("--sidebar-primary"), bg: sidebarBg, min: 4.5 },
-    { name: "sidebar group label (gold) on teal stop", fg: t("--sidebar-primary"), bg: BRAND.tealDeep, min: 4.5 },
-    { name: "sidebar gold chip label", fg: t("--sidebar-primary-foreground"), bg: t("--sidebar-primary"), min: 4.5 },
+    {
+      name: "sidebar label on teal gradient stop",
+      fg: t("--sidebar-foreground"),
+      bg: BRAND.tealDeep,
+      min: 4.5,
+    },
+    {
+      name: "active sidebar item label",
+      fg: t("--sidebar-accent-foreground"),
+      bg: t("--sidebar-accent"),
+      base: sidebarBg,
+      min: 4.5,
+    },
+    {
+      name: "active sidebar item on teal stop",
+      fg: t("--sidebar-accent-foreground"),
+      bg: t("--sidebar-accent"),
+      base: BRAND.tealDeep,
+      min: 4.5,
+    },
+    {
+      name: "sidebar group label (gold) on rail",
+      fg: t("--sidebar-primary"),
+      bg: sidebarBg,
+      min: 4.5,
+    },
+    {
+      name: "sidebar group label (gold) on teal stop",
+      fg: t("--sidebar-primary"),
+      bg: BRAND.tealDeep,
+      min: 4.5,
+    },
+    {
+      name: "sidebar gold chip label",
+      fg: t("--sidebar-primary-foreground"),
+      bg: t("--sidebar-primary"),
+      min: 4.5,
+    },
     { name: "sidebar border vs rail", fg: t("--sidebar-border"), bg: sidebarBg, min: 1.2 },
 
     // Auth screens — forest hero panel with gold/teal accents + white card
     { name: "auth hero text on forest panel", fg: "#ffffff", bg: BRAND.forest, min: 4.5 },
-    { name: "auth hero muted text on forest panel", fg: t("--sidebar-foreground"), bg: BRAND.forest, min: 4.5 },
+    {
+      name: "auth hero muted text on forest panel",
+      fg: t("--sidebar-foreground"),
+      bg: BRAND.forest,
+      min: 4.5,
+    },
     { name: "auth hero gold accent on forest panel", fg: BRAND.gold, bg: BRAND.forest, min: 4.5 },
-    { name: "auth hero teal accent on forest panel", fg: BRAND.tealGlow, bg: BRAND.forest, min: 4.5 },
-    { name: "auth card label on card", fg: t("--foreground"), bg: t("--card"), base: appBg, min: 4.5 },
-    { name: "auth card helper text", fg: t("--muted-foreground"), bg: t("--card"), base: appBg, min: 4.5 },
-    { name: "auth submit button label", fg: t("--primary-foreground"), bg: t("--primary"), min: 4.5 },
+    {
+      name: "auth hero teal accent on forest panel",
+      fg: BRAND.tealGlow,
+      bg: BRAND.forest,
+      min: 4.5,
+    },
+    {
+      name: "auth card label on card",
+      fg: t("--foreground"),
+      bg: t("--card"),
+      base: appBg,
+      min: 4.5,
+    },
+    {
+      name: "auth card helper text",
+      fg: t("--muted-foreground"),
+      bg: t("--card"),
+      base: appBg,
+      min: 4.5,
+    },
+    {
+      name: "auth submit button label",
+      fg: t("--primary-foreground"),
+      bg: t("--primary"),
+      min: 4.5,
+    },
 
     // Status + chart series need to stay legible on the surface they land on
     { name: "success text on card", fg: t("--success"), bg: t("--card"), base: appBg, min: 4.5 },
@@ -209,7 +317,13 @@ function pairsFor(mode: Mode): Pair[] {
     { name: "chart series 1 vs card", fg: t("--chart-1"), bg: t("--card"), base: appBg, min: 3 },
     { name: "chart series 2 vs card", fg: t("--chart-2"), bg: t("--card"), base: appBg, min: 3 },
     { name: "chart series 3 vs card", fg: t("--chart-3"), bg: t("--card"), base: appBg, min: 3 },
-    { name: "chart axis labels vs card", fg: t("--chart-axis"), bg: t("--card"), base: appBg, min: 3 },
+    {
+      name: "chart axis labels vs card",
+      fg: t("--chart-axis"),
+      bg: t("--card"),
+      base: appBg,
+      min: 3,
+    },
   ];
 }
 
@@ -217,7 +331,11 @@ for (const mode of MODES) {
   describe(`WCAG contrast — ${mode} mode`, () => {
     const cases = pairsFor(mode).map((p) => [p.name, p] as const);
     it.each(cases)("%s meets its minimum ratio", (_name, pair) => {
-      const ratio = contrastRatio(pair.fg, pair.bg, pair.base ?? (mode === "dark" ? "#000000" : "#ffffff"));
+      const ratio = contrastRatio(
+        pair.fg,
+        pair.bg,
+        pair.base ?? (mode === "dark" ? "#000000" : "#ffffff"),
+      );
       expect(
         round2(ratio),
         `${pair.name} (${mode}): ${pair.fg} on ${pair.bg} = ${round2(ratio)}:1, needs ${pair.min}:1`,

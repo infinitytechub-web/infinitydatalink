@@ -69,7 +69,6 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
     staleTime: 30_000,
   });
 
-
   const markAll = useMutation({
     mutationFn: () => markAllFn({}),
     onSuccess: async () => {
@@ -92,7 +91,12 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
       .channel(`notifications:${user.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
           const row = payload.new as NotificationRow;
           toast(row.title, { description: row.body ?? undefined });
@@ -103,7 +107,12 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
       )
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
         () => void qc.invalidateQueries({ queryKey: ["notifications"] }),
       )
       .subscribe((status) => setLive(status === "SUBSCRIBED"));
@@ -173,9 +182,6 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasNextPage, loadMore]);
-
-
-
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLElement>, index: number, row: NotificationRow) => {
@@ -248,7 +254,11 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
               live ? "bg-emerald-mid/10 text-emerald-mid" : "bg-muted text-muted-foreground",
             )}
           >
-            {live ? <Wifi className="h-3 w-3" aria-hidden="true" /> : <WifiOff className="h-3 w-3" aria-hidden="true" />}
+            {live ? (
+              <Wifi className="h-3 w-3" aria-hidden="true" />
+            ) : (
+              <WifiOff className="h-3 w-3" aria-hidden="true" />
+            )}
             <span aria-hidden="true">{live ? "Live" : "Offline"}</span>
             <span className="sr-only">
               {live ? "Live updates connected" : "Live updates disconnected, reconnecting"}
@@ -262,7 +272,9 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
           >
             <span aria-hidden="true">{unread} unread</span>
             <span className="sr-only">
-              {unread === 0 ? "No unread notifications" : `${unread} unread notification${unread === 1 ? "" : "s"}`}
+              {unread === 0
+                ? "No unread notifications"
+                : `${unread} unread notification${unread === 1 ? "" : "s"}`}
             </span>
           </span>
           {unread > 0 ? (
@@ -308,15 +320,14 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
       ) : (
         <>
           <p className="sr-only" id="notifications-feed-help">
-            Use the arrow keys to move between notifications, Home or End to jump to the first or last item, Enter to
-            open a notification, and the R key to mark it as read. Pressing the down arrow on the last item loads older
-            notifications.
+            Use the arrow keys to move between notifications, Home or End to jump to the first or
+            last item, Enter to open a notification, and the R key to mark it as read. Pressing the
+            down arrow on the last item loads older notifications.
           </p>
           <ul
             ref={listRef}
             role="feed"
             aria-busy={markAll.isPending || isFetchingNextPage}
-
             aria-label={feedLabel}
             aria-describedby="notifications-feed-help"
             className="divide-y divide-border"
@@ -334,17 +345,30 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
                     aria-hidden="true"
                     className={cn(
                       "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-                      n.read_at ? "bg-muted text-muted-foreground" : "bg-emerald-mid/10 text-emerald-mid",
+                      n.read_at
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-emerald-mid/10 text-emerald-mid",
                     )}
                   >
-                    {n.read_at ? <Bell className="h-3.5 w-3.5" /> : <BellRing className="h-3.5 w-3.5" />}
+                    {n.read_at ? (
+                      <Bell className="h-3.5 w-3.5" />
+                    ) : (
+                      <BellRing className="h-3.5 w-3.5" />
+                    )}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className={cn("truncate text-sm", n.read_at ? "text-muted-foreground" : "font-semibold")}>
+                    <p
+                      className={cn(
+                        "truncate text-sm",
+                        n.read_at ? "text-muted-foreground" : "font-semibold",
+                      )}
+                    >
                       {n.title}
                       {!n.read_at ? <span className="sr-only"> (unread)</span> : null}
                     </p>
-                    {n.body ? <p className="line-clamp-2 text-xs text-muted-foreground">{n.body}</p> : null}
+                    {n.body ? (
+                      <p className="line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
+                    ) : null}
                     <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                       {n.category} · {relative(n.created_at)}
                     </p>
@@ -401,15 +425,25 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
               <div className="space-y-2" role="status" aria-live="polite">
                 <span className="sr-only">Loading more notifications…</span>
                 {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="h-12 animate-pulse rounded-lg bg-muted/60" aria-hidden="true" />
+                  <div
+                    key={i}
+                    className="h-12 animate-pulse rounded-lg bg-muted/60"
+                    aria-hidden="true"
+                  />
                 ))}
               </div>
             ) : isFetchNextPageError ? (
               <div className="space-y-2" role="alert">
                 <p className="text-xs text-destructive">
-                  Couldn’t load more notifications{feedError instanceof Error ? `: ${feedError.message}` : "."}
+                  Couldn’t load more notifications
+                  {feedError instanceof Error ? `: ${feedError.message}` : "."}
                 </p>
-                <Button size="sm" variant="outline" className="w-full" onClick={() => loadMore(true)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => loadMore(true)}
+                >
                   Try again
                 </Button>
               </div>
@@ -418,13 +452,15 @@ export function RealtimeNotifications({ limit = 8 }: { limit?: number }) {
                 Load older notifications
               </Button>
             ) : (
-              <p className="text-center text-[10px] uppercase tracking-wider text-muted-foreground" role="status">
+              <p
+                className="text-center text-[10px] uppercase tracking-wider text-muted-foreground"
+                role="status"
+              >
                 You’re all caught up — end of feed
               </p>
             )}
           </div>
         </>
-
       )}
     </SectionCard>
   );

@@ -30,13 +30,9 @@ import {
   type MembershipType,
 } from "@/lib/member-registration";
 
-
 export const Route = createFileRoute("/_admin/admin/approvals")({
   head: () => ({
-    meta: [
-      { title: "User Approvals — IT-360 CashApp" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "User Approvals — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: ApprovalsPage,
 });
@@ -44,11 +40,11 @@ export const Route = createFileRoute("/_admin/admin/approvals")({
 type Status = "pending" | "approved" | "rejected" | "deactivated" | "all";
 type MembershipFilter = MembershipType | "all";
 
-
 function ApprovalsPage() {
   const { hasRole, hasAnyPermission, loading } = useAuth();
   if (loading) return null;
-  const allowed = hasRole("super_admin") || hasRole("compliance_officer") || hasAnyPermission(["members:manage"]);
+  const allowed =
+    hasRole("super_admin") || hasRole("compliance_officer") || hasAnyPermission(["members:manage"]);
   if (!allowed) return <Navigate to="/admin" replace />;
   return <ApprovalsInner />;
 }
@@ -75,7 +71,6 @@ function ApprovalsInner() {
       listFn({ data: { status, membership_type: membershipType, search, page, pageSize } }),
   });
 
-
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-approvals"] });
 
   const approveMut = useMutation({
@@ -96,8 +91,7 @@ function ApprovalsInner() {
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
   const activeMut = useMutation({
-    mutationFn: (v: { user_id: string; active: boolean; reason?: string }) =>
-      activeFn({ data: v }),
+    mutationFn: (v: { user_id: string; active: boolean; reason?: string }) => activeFn({ data: v }),
     onSuccess: () => {
       toast.success("Updated");
       invalidate();
@@ -188,7 +182,9 @@ function ApprovalsInner() {
         </div>
       </SectionCard>
 
-      <SectionCard title={`${status === "all" ? "All users" : status.charAt(0).toUpperCase() + status.slice(1)}`}>
+      <SectionCard
+        title={`${status === "all" ? "All users" : status.charAt(0).toUpperCase() + status.slice(1)}`}
+      >
         {query.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : rows.length === 0 ? (
@@ -223,7 +219,10 @@ function ApprovalsInner() {
                     <td className="py-2 pr-3">
                       <StatusPill status={r.status} />
                       {r.status === "rejected" && r.rejection_reason ? (
-                        <div className="mt-1 max-w-[240px] truncate text-xs text-muted-foreground" title={r.rejection_reason}>
+                        <div
+                          className="mt-1 max-w-[240px] truncate text-xs text-muted-foreground"
+                          title={r.rejection_reason}
+                        >
                           {r.rejection_reason}
                         </div>
                       ) : null}
@@ -258,9 +257,7 @@ function ApprovalsInner() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              activeMut.mutate({ user_id: r.user_id, active: false })
-                            }
+                            onClick={() => activeMut.mutate({ user_id: r.user_id, active: false })}
                           >
                             Deactivate
                           </Button>
@@ -269,9 +266,7 @@ function ApprovalsInner() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              activeMut.mutate({ user_id: r.user_id, active: true })
-                            }
+                            onClick={() => activeMut.mutate({ user_id: r.user_id, active: true })}
                           >
                             Reactivate
                           </Button>
@@ -371,11 +366,13 @@ function ApprovalsInner() {
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              This permanently removes <span className="font-medium">{deleteFor?.full_name ?? deleteFor?.email ?? "this account"}</span>{" "}
-              and its login, freeing the email, phone and Ghana Card for a fresh
-              registration. A snapshot is kept in the recycle bin for audit. Accounts
-              with savings, loans or transactions cannot be deleted — deactivate them
-              instead.
+              This permanently removes{" "}
+              <span className="font-medium">
+                {deleteFor?.full_name ?? deleteFor?.email ?? "this account"}
+              </span>{" "}
+              and its login, freeing the email, phone and Ghana Card for a fresh registration. A
+              snapshot is kept in the recycle bin for audit. Accounts with savings, loans or
+              transactions cannot be deleted — deactivate them instead.
             </p>
             <div>
               <Label className="text-xs">Reason (min. 10 characters)</Label>
@@ -431,7 +428,9 @@ function StatusPill({ status }: { status: string }) {
           ? "bg-red-100 text-red-800"
           : "bg-slate-200 text-slate-800";
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${cls}`}>
+    <span
+      className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${cls}`}
+    >
       {status}
     </span>
   );

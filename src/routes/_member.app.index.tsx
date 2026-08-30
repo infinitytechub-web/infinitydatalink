@@ -7,7 +7,6 @@ import { OnlineUsersWidget } from "@/components/online-users-widget";
 import { AgeBadge } from "@/components/biodata-fields";
 import { getMyProfile } from "@/lib/member-profile.functions";
 
-
 export const Route = createFileRoute("/_member/app/")({
   head: () => ({
     meta: [
@@ -24,10 +23,42 @@ export const Route = createFileRoute("/_member/app/")({
 });
 
 const transactions = [
-  { icon: "S", label: "Monthly Share Contribution", ref: "REF-902341", date: "Sep 28, 2025", amount: 2500, kind: "Savings Wallet", status: "cleared" as const },
-  { icon: "L", label: "Business Expansion Loan Repayment", ref: "REF-812399", date: "Sep 15, 2025", amount: -1200, kind: "Direct Debit", status: "cleared" as const },
-  { icon: "I", label: "Quarterly Dividend Payout", ref: "DIV-440212", date: "Sep 10, 2025", amount: 8420, kind: "Investment Account", status: "cleared" as const },
-  { icon: "M", label: "MTN Mobile Money Deposit", ref: "MOMO-77812", date: "Sep 05, 2025", amount: 500, kind: "Wallet", status: "pending" as const },
+  {
+    icon: "S",
+    label: "Monthly Share Contribution",
+    ref: "REF-902341",
+    date: "Sep 28, 2025",
+    amount: 2500,
+    kind: "Savings Wallet",
+    status: "cleared" as const,
+  },
+  {
+    icon: "L",
+    label: "Business Expansion Loan Repayment",
+    ref: "REF-812399",
+    date: "Sep 15, 2025",
+    amount: -1200,
+    kind: "Direct Debit",
+    status: "cleared" as const,
+  },
+  {
+    icon: "I",
+    label: "Quarterly Dividend Payout",
+    ref: "DIV-440212",
+    date: "Sep 10, 2025",
+    amount: 8420,
+    kind: "Investment Account",
+    status: "cleared" as const,
+  },
+  {
+    icon: "M",
+    label: "MTN Mobile Money Deposit",
+    ref: "MOMO-77812",
+    date: "Sep 05, 2025",
+    amount: 500,
+    kind: "Wallet",
+    status: "pending" as const,
+  },
 ];
 
 function BiodataStrip() {
@@ -49,7 +80,9 @@ function BiodataStrip() {
         </p>
       </div>
       <div className="shrink-0 text-right">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">Your age</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">
+          Your age
+        </p>
         <div className="text-sm font-semibold">
           <AgeBadge dateOfBirth={p.date_of_birth} storedIsMinor={p.is_minor} />
         </div>
@@ -64,7 +97,6 @@ function Dashboard() {
       <BiodataStrip />
       {/* KPI row */}
       <section className="grid gap-6 md:grid-cols-3">
-
         <KPIStat
           label="Total Net Worth"
           value={
@@ -74,7 +106,9 @@ function Dashboard() {
           }
           hint={
             <div className="flex items-center gap-2">
-              <span className="rounded bg-emerald-mid/10 px-1.5 py-0.5 font-medium text-emerald-mid">+12.4%</span>
+              <span className="rounded bg-emerald-mid/10 px-1.5 py-0.5 font-medium text-emerald-mid">
+                +12.4%
+              </span>
               <span>vs last month</span>
             </div>
           }
@@ -88,8 +122,8 @@ function Dashboard() {
           }
           hint={
             <>
-              Next payment:{" "}
-              <span className="tabular font-bold text-emerald-deep">GH₵ 1,200</span> on Oct 15
+              Next payment: <span className="tabular font-bold text-emerald-deep">GH₵ 1,200</span>{" "}
+              on Oct 15
             </>
           }
         />
@@ -98,8 +132,7 @@ function Dashboard() {
           accent
           value={
             <>
-              72%{" "}
-              <span className="font-sans text-xs text-muted-foreground">Complete</span>
+              72% <span className="font-sans text-xs text-muted-foreground">Complete</span>
             </>
           }
           hint={
@@ -126,7 +159,10 @@ function Dashboard() {
             </div>
             <div className="divide-y divide-emerald-deep/5">
               {transactions.map((t) => (
-                <div key={t.ref} className="flex items-center justify-between p-4 transition-colors hover:bg-cream/30">
+                <div
+                  key={t.ref}
+                  className="flex items-center justify-between p-4 transition-colors hover:bg-cream/30"
+                >
                   <div className="flex items-center gap-4">
                     <div className="flex size-10 items-center justify-center rounded bg-cream font-serif text-emerald-deep">
                       {t.icon}
@@ -139,7 +175,9 @@ function Dashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`tabular text-sm font-bold ${t.amount < 0 ? "text-destructive" : "text-emerald-mid"}`}>
+                    <p
+                      className={`tabular text-sm font-bold ${t.amount < 0 ? "text-destructive" : "text-emerald-mid"}`}
+                    >
                       <Money amount={t.amount} signed />
                     </p>
                     <p className="text-[10px] text-muted-foreground">{t.kind}</p>
@@ -172,11 +210,15 @@ function Dashboard() {
             </p>
             <p className="mb-6 font-serif text-lg leading-relaxed">
               "Your current savings trajectory suggests you will meet your Real Estate goal{" "}
-              <span className="text-brand-gold-ink dark:text-brand-gold">4 months earlier</span> than projected."
+              <span className="text-brand-gold-ink dark:text-brand-gold">4 months earlier</span>{" "}
+              than projected."
             </p>
             <div className="rounded bg-white/10 p-4 text-xs text-white/80">
               <p className="mb-2 font-medium">Recommendation</p>
-              <p>Consider re-allocating GH₵ 500 from your low-yield checking to the high-yield Prosperity Fund.</p>
+              <p>
+                Consider re-allocating GH₵ 500 from your low-yield checking to the high-yield
+                Prosperity Fund.
+              </p>
             </div>
             <button className="mt-6 w-full rounded bg-gold py-3 text-[10px] font-bold uppercase tracking-widest text-brand-forest hover:opacity-90">
               Optimize Portfolio
@@ -226,7 +268,8 @@ function Dashboard() {
 }
 
 function QuickAction({ label, variant }: { label: string; variant?: "primary" | "gold" }) {
-  const base = "flex flex-col items-center justify-center gap-3 rounded p-6 shadow-sm transition-transform hover:-translate-y-0.5";
+  const base =
+    "flex flex-col items-center justify-center gap-3 rounded p-6 shadow-sm transition-transform hover:-translate-y-0.5";
   const style =
     variant === "primary"
       ? "bg-emerald-deep text-white"
@@ -235,7 +278,9 @@ function QuickAction({ label, variant }: { label: string; variant?: "primary" | 
         : "border border-emerald-deep/10 bg-card text-emerald-deep";
   return (
     <button className={`${base} ${style}`}>
-      <div className={`size-5 rounded-sm border-2 ${variant === "primary" ? "border-gold" : variant === "gold" ? "border-white/50" : "border-emerald-deep/20"}`} />
+      <div
+        className={`size-5 rounded-sm border-2 ${variant === "primary" ? "border-gold" : variant === "gold" ? "border-white/50" : "border-emerald-deep/20"}`}
+      />
       <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
     </button>
   );

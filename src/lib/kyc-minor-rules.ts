@@ -61,7 +61,9 @@ export function isGuardianRelationship(relationship: string | null | undefined):
 
 /** Guardian-eligible next-of-kin records (guardian relationship + phone on file). */
 export function eligibleGuardians<T extends GuardianCandidate>(nextOfKin: readonly T[]): T[] {
-  return nextOfKin.filter((n) => isGuardianRelationship(n.relationship) && !!(n.phone ?? "").trim());
+  return nextOfKin.filter(
+    (n) => isGuardianRelationship(n.relationship) && !!(n.phone ?? "").trim(),
+  );
 }
 
 export type MinorGuardrailInput = {
@@ -111,7 +113,10 @@ export function evaluateMinorGuardrails(input: MinorGuardrailInput): MinorGuardr
   if (!review.guardian_nok_id || !guardians.some((g) => g.id === review.guardian_nok_id)) {
     blockers.push("Select the verified guardian from the member's next-of-kin records.");
   }
-  if (!(review.guardian_consent_ref ?? "").trim() || (review.guardian_consent_ref ?? "").trim().length < 4) {
+  if (
+    !(review.guardian_consent_ref ?? "").trim() ||
+    (review.guardian_consent_ref ?? "").trim().length < 4
+  ) {
     blockers.push("Record the guardian consent reference held on file (min 4 characters).");
   }
   if (!review.guardian_id_verified) {

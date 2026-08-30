@@ -34,7 +34,10 @@ const adminSeriesQO = queryOptions<InvestmentSeriesPoint[]>({
 
 export const Route = createFileRoute("/_admin/admin/investments")({
   head: () => ({
-    meta: [{ title: "Investments & Shares — Admin — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Investments & Shares — Admin — IT-360 CashApp" },
+      { name: "robots", content: "noindex" },
+    ],
   }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(overviewQO);
@@ -115,7 +118,10 @@ function AdminInvestments() {
   const [editing, setEditing] = useState<ShareProduct | null>(null);
   const [showNewProduct, setShowNewProduct] = useState(false);
   const [showNewRun, setShowNewRun] = useState(false);
-  const [reviewing, setReviewing] = useState<{ run: DividendRun; mode: "approve" | "reject" } | null>(null);
+  const [reviewing, setReviewing] = useState<{
+    run: DividendRun;
+    mode: "approve" | "reject";
+  } | null>(null);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "investments"] });
 
@@ -150,7 +156,8 @@ function AdminInvestments() {
   });
   const reviewMut = useMutation({
     mutationFn: async (v: { run_id: string; mode: "approve" | "reject"; text: string }) => {
-      if (v.mode === "approve") return approveRun({ data: { run_id: v.run_id, note: v.text || null } });
+      if (v.mode === "approve")
+        return approveRun({ data: { run_id: v.run_id, note: v.text || null } });
       return rejectRun({ data: { run_id: v.run_id, reason: v.text } });
     },
     onSuccess: async () => {
@@ -163,7 +170,9 @@ function AdminInvestments() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-serif text-2xl text-emerald-deep dark:text-emerald-100">Investments & Shares</h1>
+          <h1 className="font-serif text-2xl text-emerald-deep dark:text-emerald-100">
+            Investments & Shares
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground dark:text-emerald-200/60">
             Manage share products, holdings, and dividend runs.
           </p>
@@ -199,7 +208,9 @@ function AdminInvestments() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-emerald-deep/10 bg-white p-4 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">Total portfolio value (12 months)</h2>
+          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">
+            Total portfolio value (12 months)
+          </h2>
           <TrendChart
             title="Aggregate portfolio value over time"
             data={series}
@@ -209,7 +220,9 @@ function AdminInvestments() {
           />
         </div>
         <div className="rounded-2xl border border-emerald-deep/10 bg-white p-4 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">Contributions, returns & dividends</h2>
+          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">
+            Contributions, returns & dividends
+          </h2>
           <TrendChart
             title="Contributions, returns and cumulative dividends"
             data={series}
@@ -224,9 +237,10 @@ function AdminInvestments() {
         </div>
       </section>
 
-
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-        <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Share products</h2>
+        <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+          Share products
+        </h2>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
@@ -242,7 +256,10 @@ function AdminInvestments() {
             </thead>
             <tbody>
               {data.products.map((p) => (
-                <tr key={p.id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
+                <tr
+                  key={p.id}
+                  className="border-t border-emerald-deep/5 dark:border-emerald-100/10"
+                >
                   <td className="py-2 font-mono text-xs">{p.code}</td>
                   <td>{p.name}</td>
                   <td>{money(p.unit_price, p.currency)}</td>
@@ -278,7 +295,9 @@ function AdminInvestments() {
       </section>
 
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-        <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Dividend runs</h2>
+        <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+          Dividend runs
+        </h2>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
@@ -295,7 +314,10 @@ function AdminInvestments() {
             </thead>
             <tbody>
               {data.runs.map((r) => (
-                <tr key={r.id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
+                <tr
+                  key={r.id}
+                  className="border-t border-emerald-deep/5 dark:border-emerald-100/10"
+                >
                   <td className="py-2 font-mono text-xs">{r.ref}</td>
                   <td>{r.product_name}</td>
                   <td className="text-xs">
@@ -362,19 +384,20 @@ function AdminInvestments() {
         </div>
         {(executeRunMut.error || submitRunMut.error || cancelRunMut.error) && (
           <p className="mt-3 text-sm text-red-600">
-            {(
-              (executeRunMut.error as Error | null) ??
-              (submitRunMut.error as Error | null) ??
-              (cancelRunMut.error as Error | null)
-            )?.message}
+            {
+              (
+                (executeRunMut.error as Error | null) ??
+                (submitRunMut.error as Error | null) ??
+                (cancelRunMut.error as Error | null)
+              )?.message
+            }
           </p>
         )}
         {exportError && <p className="mt-3 text-sm text-red-600">Export failed: {exportError}</p>}
         <p className="mt-3 text-xs text-muted-foreground dark:text-emerald-200/60">
-          Dividend runs require dual control: after submission, an approver
-          (super admin or compliance officer) other than the creator must
-          approve the run before a finance officer can execute payouts, and
-          the executor cannot be the same person who approved.
+          Dividend runs require dual control: after submission, an approver (super admin or
+          compliance officer) other than the creator must approve the run before a finance officer
+          can execute payouts, and the executor cannot be the same person who approved.
         </p>
       </section>
 
@@ -393,7 +416,10 @@ function AdminInvestments() {
             </thead>
             <tbody>
               {data.top_holders.map((h) => (
-                <tr key={h.user_id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
+                <tr
+                  key={h.user_id}
+                  className="border-t border-emerald-deep/5 dark:border-emerald-100/10"
+                >
                   <td className="py-2">{h.full_name ?? "—"}</td>
                   <td className="font-mono text-xs">{h.member_no ?? "—"}</td>
                   <td>{h.units.toLocaleString()}</td>
@@ -533,9 +559,7 @@ function RunActions({
     if (isApprover) {
       return (
         <div className="inline-flex items-center gap-2">
-          <span className="text-xs italic text-muted-foreground">
-            Awaiting a different officer
-          </span>
+          <span className="text-xs italic text-muted-foreground">Awaiting a different officer</span>
           {exportBtn}
         </div>
       );
@@ -623,7 +647,9 @@ function ReviewDialog({
 function KPI({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-emerald-deep/10 bg-white p-5 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-      <p className="text-[10px] uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">{label}</p>
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
+        {label}
+      </p>
       <p className="mt-2 font-serif text-2xl text-emerald-deep dark:text-emerald-100">{value}</p>
     </div>
   );
@@ -714,7 +740,9 @@ function ProductDialog({
               type="number"
               step="0.0001"
               value={form.dividend_rate_annual}
-              onChange={(e) => setForm({ ...form, dividend_rate_annual: Number(e.target.value) || 0 })}
+              onChange={(e) =>
+                setForm({ ...form, dividend_rate_annual: Number(e.target.value) || 0 })
+              }
               className="w-full rounded-md border border-emerald-deep/20 bg-transparent px-3 py-2"
             />
           </Field>
@@ -844,7 +872,9 @@ function NewRunDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-emerald-950">
-        <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">New dividend run</h3>
+        <h3 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+          New dividend run
+        </h3>
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <Field label="Product" span={2}>
             <select
@@ -908,13 +938,16 @@ function NewRunDialog({
               <dd className="text-right font-semibold">{calc.total_units.toLocaleString()}</dd>
               <dt className="text-muted-foreground dark:text-emerald-200/60">Estimated total</dt>
               <dd className="text-right font-semibold">
-                {new Intl.NumberFormat("en-GH", { style: "currency", currency: calc.currency }).format(
-                  calc.estimated_total,
-                )}
+                {new Intl.NumberFormat("en-GH", {
+                  style: "currency",
+                  currency: calc.currency,
+                }).format(calc.estimated_total)}
               </dd>
             </dl>
           ) : (
-            <p className="mt-1 text-muted-foreground">Select a product and per-unit amount to preview.</p>
+            <p className="mt-1 text-muted-foreground">
+              Select a product and per-unit amount to preview.
+            </p>
           )}
         </div>
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
@@ -946,7 +979,15 @@ function NewRunDialog({
   );
 }
 
-function Field({ label, children, span }: { label: string; children: React.ReactNode; span?: 1 | 2 }) {
+function Field({
+  label,
+  children,
+  span,
+}: {
+  label: string;
+  children: React.ReactNode;
+  span?: 1 | 2;
+}) {
   return (
     <label className={span === 2 ? "col-span-2 block" : "block"}>
       <span className="text-muted-foreground dark:text-emerald-200/70">{label}</span>

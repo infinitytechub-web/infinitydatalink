@@ -1,4 +1,11 @@
-import { test, expect, type Page, type ConsoleMessage, type Request, type Response } from "@playwright/test";
+import {
+  test,
+  expect,
+  type Page,
+  type ConsoleMessage,
+  type Request,
+  type Response,
+} from "@playwright/test";
 
 /**
  * Smoke test for /admin/roles (and sibling admin pages that historically
@@ -18,7 +25,7 @@ const SQL_ERROR_PATTERNS: RegExp[] = [
   /schema cache/i,
   /\bPGRST\d{3}\b/i,
   /"code"\s*:\s*"PGRST\d{3}"/i,
-  /"code"\s*:\s*"42\d{3}"/i,           // pg SQL error class 42 (syntax/undefined)
+  /"code"\s*:\s*"42\d{3}"/i, // pg SQL error class 42 (syntax/undefined)
   /PostgrestError/,
   /postgrest[^"]*error/i,
   /syntax error at or near/i,
@@ -38,7 +45,10 @@ function matchesSqlError(text: string | null | undefined): string | null {
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/auth");
   await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).first().fill(password);
+  await page
+    .getByLabel(/password/i)
+    .first()
+    .fill(password);
   await Promise.all([
     page.waitForLoadState("networkidle"),
     page.getByRole("button", { name: /sign in/i }).click(),
@@ -106,10 +116,9 @@ test.describe("admin pages SQL-error smoke", () => {
       expect(domHit, `SQL error text visible in DOM at ${path}: /${domHit}/`).toBeNull();
 
       // "This page didn't load" is our root error boundary — never acceptable here.
-      expect(
-        bodyText,
-        `Root error boundary rendered at ${path}`,
-      ).not.toMatch(/this page didn't load/i);
+      expect(bodyText, `Root error boundary rendered at ${path}`).not.toMatch(
+        /this page didn't load/i,
+      );
 
       const consoleHits = consoleErrors.filter(matchesSqlError);
       expect(consoleHits, `console SQL errors at ${path}:\n${consoleHits.join("\n")}`).toEqual([]);
@@ -117,7 +126,9 @@ test.describe("admin pages SQL-error smoke", () => {
         sqlResponseErrors,
         `response SQL errors at ${path}:\n${sqlResponseErrors.join("\n")}`,
       ).toEqual([]);
-      expect(networkErrors, `network failures at ${path}:\n${networkErrors.join("\n")}`).toEqual([]);
+      expect(networkErrors, `network failures at ${path}:\n${networkErrors.join("\n")}`).toEqual(
+        [],
+      );
     });
   }
 });

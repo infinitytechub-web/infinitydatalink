@@ -2,7 +2,12 @@ import { writeAudit } from "@/lib/audit-log";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { KycDocStatus, KycDocument, NextOfKin, ProfileKycStatus } from "./member-profile.functions";
+import type {
+  KycDocStatus,
+  KycDocument,
+  NextOfKin,
+  ProfileKycStatus,
+} from "./member-profile.functions";
 import { notifyStaff, notifyUser } from "@/lib/notify.server";
 import {
   ALL_REMEDIATION_ITEMS,
@@ -25,8 +30,6 @@ import {
   type GuardianCandidate,
   type MinorReview,
 } from "@/lib/kyc-minor-rules";
-
-
 
 const KYC_ADMIN_ROLES = new Set(["super_admin", "compliance_officer"]);
 const BUCKET = "kyc-documents";
@@ -96,7 +99,9 @@ export const listKycQueue = createServerFn({ method: "GET" })
       );
     q = isPending
       ? q.order("updated_at", { ascending: true }).order("full_name", { ascending: true })
-      : q.order("kyc_reviewed_at", { ascending: false, nullsFirst: true }).order("full_name", { ascending: true });
+      : q
+          .order("kyc_reviewed_at", { ascending: false, nullsFirst: true })
+          .order("full_name", { ascending: true });
 
     if (data.status !== "all") q = q.eq("kyc", data.status);
     if (data.q) {
@@ -176,9 +181,7 @@ export const listKycQueue = createServerFn({ method: "GET" })
       rows: (rows ?? []).map((r: any) => {
         const stats = docStats.get(r.id);
         const isPend = r.kyc === "pending";
-        const pendingSince = isPend
-          ? (stats?.earliest_pending ?? r.updated_at ?? null)
-          : null;
+        const pendingSince = isPend ? (stats?.earliest_pending ?? r.updated_at ?? null) : null;
         return {
           member_id: r.id,
           full_name: r.full_name,
@@ -251,7 +254,6 @@ function maskNationalId(value: string | null | undefined): string | null {
   return `•••• ${tail}`;
 }
 
-
 export const getMemberKyc = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ member_id: z.string().uuid() }).parse(data))
@@ -269,12 +271,16 @@ export const getMemberKyc = createServerFn({ method: "GET" })
         .maybeSingle(),
       sb
         .from("next_of_kin")
-        .select("id, full_name, relationship, phone, email, national_id, address, created_at, updated_at")
+        .select(
+          "id, full_name, relationship, phone, email, national_id, address, created_at, updated_at",
+        )
         .eq("member_id", data.member_id)
         .order("created_at", { ascending: true }),
       sb
         .from("kyc_documents")
-        .select("id, member_id, doc_type, storage_path, mime_type, size_bytes, status, review_notes, reviewed_at, created_at")
+        .select(
+          "id, member_id, doc_type, storage_path, mime_type, size_bytes, status, review_notes, reviewed_at, created_at",
+        )
         .eq("member_id", data.member_id)
         .order("created_at", { ascending: false }),
     ]);
@@ -334,7 +340,6 @@ const decideInput = z
     }
   });
 
-
 /**
  * Enforces the minor-specific review steps. Returns audit-ready metadata when
  * the member is a minor, or null for ordinary adult reviews.
@@ -352,7 +357,10 @@ async function enforceMinorReview(
 ): Promise<{ guardian: GuardianCandidate; review: MinorReview; step_up_id: string } | null> {
   const [{ data: prof }, { data: nok }] = await Promise.all([
     sb.from("profiles").select("id, is_minor, date_of_birth").eq("id", opts.memberId).maybeSingle(),
-    sb.from("next_of_kin").select("id, full_name, relationship, phone").eq("member_id", opts.memberId),
+    sb
+      .from("next_of_kin")
+      .select("id, full_name, relationship, phone")
+      .eq("member_id", opts.memberId),
   ]);
   if (!prof) throw new Error("Member not found");
   if (!(prof as any).is_minor) return null;
@@ -379,7 +387,6 @@ async function enforceMinorReview(
   const guardian = nextOfKin.find((g) => g.id === opts.minorReview!.guardian_nok_id)!;
   return { guardian, review: opts.minorReview!, step_up_id: proof.id };
 }
-
 
 /**
  * Resubmission window + attempt allowance applied when a KYC review is rejected.
@@ -472,7 +479,6 @@ export const decideKyc = createServerFn({ method: "POST" })
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
     const now = new Date().toISOString();
 
-
     // Minor accounts: guardian checklist + longer note + fresh re-authentication
     // are enforced before anything is written.
     const minor = await enforceMinorReview(sb, {
@@ -484,9 +490,8 @@ export const decideKyc = createServerFn({ method: "POST" })
       officerId: context.userId,
     });
 
-
-
-    const remediation = data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
+    const remediation =
+      data.decision === "rejected" ? Array.from(new Set(data.remediation_items)) : [];
     const window = await resubmissionStamp(sb, data.decision);
     const snapshot =
       data.decision === "rejected" ? await captureRejectionSnapshot(sb, data.member_id) : null;
@@ -508,7 +513,8 @@ export const decideKyc = createServerFn({ method: "POST" })
     if (pErr) throw new Error(pErr.message);
     if (!profile) throw new Error("Member not found");
 
-    const docStatus: "approved" | "rejected" = data.decision === "approved" ? "approved" : "rejected";
+    const docStatus: "approved" | "rejected" =
+      data.decision === "approved" ? "approved" : "rejected";
     const { error: dErr } = await sb
       .from("kyc_documents")
       .update({
@@ -525,14 +531,13 @@ export const decideKyc = createServerFn({ method: "POST" })
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,
       actor_role: role,
-      action:
-        minor
-          ? data.decision === "approved"
-            ? "kyc.minor_approved"
-            : "kyc.minor_rejected"
-          : data.decision === "approved"
-            ? "kyc.approved"
-            : "kyc.rejected",
+      action: minor
+        ? data.decision === "approved"
+          ? "kyc.minor_approved"
+          : "kyc.minor_rejected"
+        : data.decision === "approved"
+          ? "kyc.approved"
+          : "kyc.rejected",
       target: data.member_id,
       meta: {
         notes: data.notes || null,
@@ -566,18 +571,22 @@ export const decideKyc = createServerFn({ method: "POST" })
         title: `Minor KYC ${data.decision} — secondary review required`,
         body: `A minor account was ${data.decision} by ${role}. Guardian: ${minor.guardian.full_name ?? "unknown"} (${minor.guardian.relationship ?? "n/a"}), consent ref ${minor.review.guardian_consent_ref}.`,
         link: `/admin/members/${data.member_id}`,
-        meta: { member_id: data.member_id, decision: data.decision, guardian_nok_id: minor.review.guardian_nok_id },
+        meta: {
+          member_id: data.member_id,
+          decision: data.decision,
+          guardian_nok_id: minor.review.guardian_nok_id,
+        },
         dedupeKey: `kyc.minor.${data.decision}:${data.member_id}:${now}`,
         excludeUserId: context.userId,
       });
     }
 
-
     // In-app + email/SMS fan-out per the member's notification preferences.
     const fanOut = await notifyUser({
       userId: data.member_id,
       category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
-      title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
+      title:
+        data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
       body:
         data.decision === "approved"
           ? `Your identity verification has been approved. Your full member dashboard, savings and loan facilities are now unlocked.${data.notes ? ` Reviewer note: ${data.notes}` : ""}`
@@ -695,8 +704,7 @@ export const getKycSummary = createServerFn({ method: "GET" })
     const t72 = new Date(now - 72 * H).toISOString();
     const t120 = new Date(now - 120 * H).toISOString();
 
-    const pendingCount = (extra: (q: any) => any) =>
-      countBy("kyc", "pending", extra);
+    const pendingCount = (extra: (q: any) => any) => countBy("kyc", "pending", extra);
 
     const [
       pending,
@@ -845,7 +853,6 @@ const bulkDecideInput = z
     }
   });
 
-
 export const bulkDecideKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => bulkDecideInput.parse(data))
@@ -853,7 +860,8 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
     const role = await assertKycAdmin(context.supabase, context.userId);
     const sb = context.supabase;
     const profileKyc: "active" | "rejected" = data.decision === "approved" ? "active" : "rejected";
-    const docStatus: "approved" | "rejected" = data.decision === "approved" ? "approved" : "rejected";
+    const docStatus: "approved" | "rejected" =
+      data.decision === "approved" ? "approved" : "rejected";
     const now = new Date().toISOString();
     const remediation =
       data.decision === "rejected"
@@ -891,7 +899,6 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
         // are skipped with a reason instead of being silently approved.
         await assertKycDecidable(sb, memberId, data.decision);
         const snapshot =
-
           data.decision === "rejected" ? await captureRejectionSnapshot(sb, memberId) : null;
 
         const { data: prof, error: pErr } = await sb
@@ -933,14 +940,21 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
         const fanOut = await notifyUser({
           userId: memberId,
           category: data.decision === "approved" ? "account.kyc.approved" : "account.kyc.rejected",
-          title: data.decision === "approved" ? "KYC verification approved" : "KYC verification declined",
+          title:
+            data.decision === "approved"
+              ? "KYC verification approved"
+              : "KYC verification declined",
           body:
             data.decision === "approved"
               ? `Your identity verification has been approved. Your full member dashboard, savings and loan facilities are now unlocked.${data.notes ? ` Reviewer note: ${data.notes}` : ""}`
               : `Your identity verification could not be approved.${data.notes ? ` Reviewer note: ${data.notes}` : ""} Items to revise: ${remediation.map(remediationLabel).join(", ")}.`,
           link: "/app/kyc",
           channels: ["in_app", "sms"],
-          meta: { notes: data.notes || null, decision: data.decision, remediation_items: remediation },
+          meta: {
+            notes: data.notes || null,
+            decision: data.decision,
+            remediation_items: remediation,
+          },
           dedupeKey: `kyc.${data.decision}:${memberId}:${now}`,
         });
 
@@ -991,7 +1005,6 @@ export const bulkDecideKyc = createServerFn({ method: "POST" })
     return { succeeded: succeeded.length, failed };
   });
 
-
 export type KycResubmissionSettings = {
   deadline_days: number;
   max_attempts: number;
@@ -1025,7 +1038,7 @@ export const getKycResubmissionSettings = createServerFn({ method: "GET" })
       max_attempts: Number(data?.max_attempts ?? 3),
       enforce_deadline: (data?.enforce_deadline ?? true) as boolean,
       auto_flag_enabled: ((data as any)?.auto_flag_enabled ?? true) as boolean,
-      auto_flag_min_severity: (((data as any)?.auto_flag_min_severity ?? "medium") as RiskSeverity),
+      auto_flag_min_severity: ((data as any)?.auto_flag_min_severity ?? "medium") as RiskSeverity,
       reminder_enabled: ((data as any)?.reminder_enabled ?? true) as boolean,
       reminder_lead_days: Number((data as any)?.reminder_lead_days ?? 3),
       low_attempts_threshold: Number((data as any)?.low_attempts_threshold ?? 1),
@@ -1066,8 +1079,6 @@ export const updateKycResubmissionSettings = createServerFn({ method: "POST" })
       } as any)
       .eq("id", true);
     if (error) throw new Error(error.message);
-
-
 
     await writeAudit({
       actor_id: context.userId,
@@ -1115,7 +1126,6 @@ export type KycResubmissionDiff = {
   flagged_at: string | null;
   flag_reason: string | null;
 };
-
 
 /**
  * Field-by-field and file-by-file comparison between what a reviewer rejected
@@ -1171,7 +1181,9 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
     };
 
     const fileLabel = (d: any | null) =>
-      d ? `${d.storage_path.split("/").pop()} (${Math.round(Number(d.size_bytes ?? 0) / 1024)} KB)` : null;
+      d
+        ? `${d.storage_path.split("/").pop()} (${Math.round(Number(d.size_bytes ?? 0) / 1024)} KB)`
+        : null;
 
     const rows: KycDiffRow[] = [];
     for (const item of ALL_REMEDIATION_ITEMS) {
@@ -1195,9 +1207,7 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
       }
       const beforeDoc = snapDocs[item.docType] ?? null;
       const afterDoc = latestDoc.get(item.docType) ?? null;
-      const changed =
-        Boolean(snapshot) &&
-        (beforeDoc?.id ?? null) !== (afterDoc?.id ?? null);
+      const changed = Boolean(snapshot) && (beforeDoc?.id ?? null) !== (afterDoc?.id ?? null);
       rows.push({
         key: item.key,
         kind: "document",
@@ -1214,7 +1224,9 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
     }
 
     // Requested items first, then anything else that moved.
-    rows.sort((a, b) => Number(b.requested) - Number(a.requested) || Number(b.changed) - Number(a.changed));
+    rows.sort(
+      (a, b) => Number(b.requested) - Number(a.requested) || Number(b.changed) - Number(a.changed),
+    );
 
     const attemptsUsed = Number((profile as any).kyc_attempts ?? 0);
     const resubmittedAt = ((profile as any).kyc_resubmitted_at as string | null) ?? null;
@@ -1235,7 +1247,7 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
 
     const autoFlag = {
       enabled: (flagSettings?.auto_flag_enabled ?? true) as boolean,
-      min_severity: ((flagSettings?.auto_flag_min_severity ?? "medium") as RiskSeverity),
+      min_severity: (flagSettings?.auto_flag_min_severity ?? "medium") as RiskSeverity,
     };
 
     let flaggedAt = ((profile as any).kyc_flagged_at as string | null) ?? null;
@@ -1307,11 +1319,22 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
           excludeUserId: context.userId,
         });
       }
-    } else if (!shouldFlag && risk.level === "none" && flaggedAt && resubmittedAt && flaggedAt >= resubmittedAt) {
+    } else if (
+      !shouldFlag &&
+      risk.level === "none" &&
+      flaggedAt &&
+      resubmittedAt &&
+      flaggedAt >= resubmittedAt
+    ) {
       // Patterns cleared on a newer diff — drop the stale flag.
       await sb
         .from("profiles")
-        .update({ kyc_flagged_at: null, kyc_flag_reason: null, kyc_risk_level: "none", kyc_risk_flags: [] as any })
+        .update({
+          kyc_flagged_at: null,
+          kyc_flag_reason: null,
+          kyc_risk_level: "none",
+          kyc_risk_flags: [] as any,
+        })
         .eq("id", data.member_id);
       flaggedAt = null;
       flagReason = null;
@@ -1334,7 +1357,6 @@ export const getKycResubmissionDiff = createServerFn({ method: "GET" })
     };
   });
 
-
 export type MinorStatusChange = {
   id: string;
   member_id: string;
@@ -1355,12 +1377,16 @@ export type MinorStatusChange = {
 export const listMinorStatusChanges = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
-    z.object({ member_id: z.string().uuid(), limit: z.number().int().min(1).max(100).default(20) }).parse(data),
+    z
+      .object({ member_id: z.string().uuid(), limit: z.number().int().min(1).max(100).default(20) })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("minor_status_changes")
-      .select("id, member_id, was_minor, is_minor, previous_date_of_birth, source_date_of_birth, change_kind, changed_by, changed_at")
+      .select(
+        "id, member_id, was_minor, is_minor, previous_date_of_birth, source_date_of_birth, change_kind, changed_by, changed_at",
+      )
       .eq("member_id", data.member_id)
       .order("changed_at", { ascending: false })
       .limit(data.limit);

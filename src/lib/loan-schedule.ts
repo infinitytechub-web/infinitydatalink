@@ -5,7 +5,12 @@
  */
 export type RepaymentFrequency = "monthly" | "biweekly" | "weekly" | "quarterly";
 
-export const FREQUENCIES: Array<{ value: RepaymentFrequency; label: string; perYear: number; days: number }> = [
+export const FREQUENCIES: Array<{
+  value: RepaymentFrequency;
+  label: string;
+  perYear: number;
+  days: number;
+}> = [
   { value: "weekly", label: "Weekly", perYear: 52, days: 7 },
   { value: "biweekly", label: "Bi-weekly", perYear: 26, days: 14 },
   { value: "monthly", label: "Monthly", perYear: 12, days: 30 },

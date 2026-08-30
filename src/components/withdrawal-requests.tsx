@@ -45,7 +45,8 @@ const ERROR_TEXT: Record<string, string> = {
   below_min_amount: "Amount is below the minimum withdrawal.",
   above_max_amount: "Amount is above the maximum withdrawal.",
   daily_limit_exceeded: "This exceeds your daily withdrawal limit.",
-  insufficient_available_balance: "Not enough available balance — funds may be held by another request.",
+  insufficient_available_balance:
+    "Not enough available balance — funds may be held by another request.",
   request_not_cancellable: "Only pending requests can be cancelled.",
 };
 

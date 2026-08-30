@@ -39,7 +39,10 @@ export const Route = createFileRoute("/_admin/admin/audit/transfers")({
   head: () => ({
     meta: [
       { title: "Transfer Decision Audit — IT-360 CashApp" },
-      { name: "description", content: "Immutable log of every transfer approve and reject action." },
+      {
+        name: "description",
+        content: "Immutable log of every transfer approve and reject action.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -109,7 +112,7 @@ function AuditContent() {
     navigate({ search: (prev: SearchInput) => ({ ...prev, selected: id ?? "" }) });
 
   const rows = data.rows;
-  const selected = s.selected ? rows.find((r) => r.id === s.selected) ?? null : null;
+  const selected = s.selected ? (rows.find((r) => r.id === s.selected) ?? null) : null;
 
   return (
     <>
@@ -122,12 +125,22 @@ function AuditContent() {
             subtitle={`${data.total} events`}
             filename="transfer_audit"
             columns={[
-              { header: "Timestamp", accessor: (e: TransferAuditEntry) => new Date(e.created_at).toISOString() },
+              {
+                header: "Timestamp",
+                accessor: (e: TransferAuditEntry) => new Date(e.created_at).toISOString(),
+              },
               { header: "Action", accessor: (e) => actionLabel(e.action) },
               { header: "Transfer Ref", accessor: (e) => e.transfer_ref ?? "—" },
               { header: "Transfer ID", accessor: (e) => e.transfer_id ?? "—" },
-              { header: "Amount", accessor: (e) => (e.amount != null ? formatMoney(e.amount) : "—"), align: "right" },
-              { header: "From member", accessor: (e) => e.from_member_name ?? e.from_account_id ?? "—" },
+              {
+                header: "Amount",
+                accessor: (e) => (e.amount != null ? formatMoney(e.amount) : "—"),
+                align: "right",
+              },
+              {
+                header: "From member",
+                accessor: (e) => e.from_member_name ?? e.from_account_id ?? "—",
+              },
               { header: "From member no", accessor: (e) => e.from_member_no ?? "—" },
               { header: "To member", accessor: (e) => e.to_member_name ?? e.to_account_id ?? "—" },
               { header: "To member no", accessor: (e) => e.to_member_no ?? "—" },
@@ -349,13 +362,17 @@ function DetailsDialog({
                 label="Reference"
                 value={entry.transfer_ref ?? "—"}
                 mono
-                onCopy={entry.transfer_ref ? () => copy(entry.transfer_ref!, "Reference") : undefined}
+                onCopy={
+                  entry.transfer_ref ? () => copy(entry.transfer_ref!, "Reference") : undefined
+                }
               />
               <Row
                 label="Transfer ID"
                 value={entry.transfer_id ?? "—"}
                 mono
-                onCopy={entry.transfer_id ? () => copy(entry.transfer_id!, "Transfer ID") : undefined}
+                onCopy={
+                  entry.transfer_id ? () => copy(entry.transfer_id!, "Transfer ID") : undefined
+                }
               />
               <Row label="Amount" value={entry.amount != null ? formatMoney(entry.amount) : "—"} />
               <Row label="Action code" value={entry.action} mono />
@@ -370,7 +387,11 @@ function DetailsDialog({
                 label="Account ID"
                 value={entry.from_account_id ?? "—"}
                 mono
-                onCopy={entry.from_account_id ? () => copy(entry.from_account_id!, "Account ID") : undefined}
+                onCopy={
+                  entry.from_account_id
+                    ? () => copy(entry.from_account_id!, "Account ID")
+                    : undefined
+                }
               />
             </Section>
 
@@ -381,7 +402,9 @@ function DetailsDialog({
                 label="Account ID"
                 value={entry.to_account_id ?? "—"}
                 mono
-                onCopy={entry.to_account_id ? () => copy(entry.to_account_id!, "Account ID") : undefined}
+                onCopy={
+                  entry.to_account_id ? () => copy(entry.to_account_id!, "Account ID") : undefined
+                }
               />
             </Section>
 
@@ -457,7 +480,13 @@ function Row({
     <div className="flex items-start justify-between gap-3 rounded px-3 py-1.5 hover:bg-cream/30">
       <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</div>
       <div className="flex items-center gap-2">
-        <div className={mono ? "tabular text-right text-xs text-emerald-deep/90" : "text-right text-xs text-emerald-deep/90"}>
+        <div
+          className={
+            mono
+              ? "tabular text-right text-xs text-emerald-deep/90"
+              : "text-right text-xs text-emerald-deep/90"
+          }
+        >
           {value}
         </div>
         {onCopy && (

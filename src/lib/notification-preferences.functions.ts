@@ -90,18 +90,16 @@ export const updateMyNotificationSettings = createServerFn({ method: "POST" })
     const allowed = new Set(NOTIFICATION_CATEGORIES.map((c) => c.key));
     const muted = Array.from(new Set(data.muted_categories.filter((c) => allowed.has(c as never))));
 
-    const { error } = await context.supabase
-      .from("notification_preferences")
-      .upsert(
-        {
-          user_id: context.userId,
-          in_app: data.in_app,
-          email: data.email,
-          sms: data.sms,
-          muted_categories: muted,
-        },
-        { onConflict: "user_id" },
-      );
+    const { error } = await context.supabase.from("notification_preferences").upsert(
+      {
+        user_id: context.userId,
+        in_app: data.in_app,
+        email: data.email,
+        sms: data.sms,
+        muted_categories: muted,
+      },
+      { onConflict: "user_id" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

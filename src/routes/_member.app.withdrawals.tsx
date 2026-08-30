@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { EmptyState, ErrorState, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { WithdrawalRequestsSection } from "@/components/withdrawal-requests";
 import { listMyAccounts } from "@/lib/savings.functions";
 
@@ -23,8 +29,12 @@ export const Route = createFileRoute("/_member/app/withdrawals")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  errorComponent: ({ error }) => <ErrorState title="Withdrawals unavailable" message={error.message} />,
-  notFoundComponent: () => <EmptyState title="Nothing here" hint="This withdrawal view does not exist." />,
+  errorComponent: ({ error }) => (
+    <ErrorState title="Withdrawals unavailable" message={error.message} />
+  ),
+  notFoundComponent: () => (
+    <EmptyState title="Nothing here" hint="This withdrawal view does not exist." />
+  ),
   component: MemberWithdrawalsPage,
 });
 

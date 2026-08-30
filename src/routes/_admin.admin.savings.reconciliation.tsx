@@ -2,7 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, ArrowLeft, CheckCircle2, RefreshCw } from "lucide-react";
-import { ErrorState, KPIStat, Money, PageHeader, SectionCard, SectionCardSkeleton } from "@/components/primitives";
+import {
+  ErrorState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
@@ -22,16 +29,25 @@ export const Route = createFileRoute("/_admin/admin/savings/reconciliation")({
   head: () => ({
     meta: [
       { title: "Savings Reconciliation · IT-360 CashApp" },
-      { name: "description", content: "Compare savings ledger movements against recorded balances and flag discrepancies." },
+      {
+        name: "description",
+        content:
+          "Compare savings ledger movements against recorded balances and flag discrepancies.",
+      },
       { property: "og:title", content: "Savings Reconciliation · IT-360 CashApp" },
-      { property: "og:description", content: "Ledger vs. balance reconciliation for savings accounts." },
+      {
+        property: "og:description",
+        content: "Ledger vs. balance reconciliation for savings accounts.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ReconciliationPage,
   errorComponent: ({ error }) => (
-    <div className="p-6"><ErrorState title="Failed to load reconciliation" message={error.message} /></div>
+    <div className="p-6">
+      <ErrorState title="Failed to load reconciliation" message={error.message} />
+    </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
@@ -60,7 +76,13 @@ function ReconciliationPage() {
   );
 }
 
-function Body({ onlyDiscrepancies, onToggle }: { onlyDiscrepancies: boolean; onToggle: (v: boolean) => void }) {
+function Body({
+  onlyDiscrepancies,
+  onToggle,
+}: {
+  onlyDiscrepancies: boolean;
+  onToggle: (v: boolean) => void;
+}) {
   const qc = useQueryClient();
   const { data } = useSuspenseQuery(reconQuery(onlyDiscrepancies));
   const clean = data.discrepancies === 0;
@@ -68,29 +90,49 @@ function Body({ onlyDiscrepancies, onToggle }: { onlyDiscrepancies: boolean; onT
   return (
     <>
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Accounts checked" value={<span className="tabular">{data.accounts_checked}</span>} hint={`Run ${new Date(data.generated_at).toLocaleString()}`} />
+        <KPIStat
+          label="Accounts checked"
+          value={<span className="tabular">{data.accounts_checked}</span>}
+          hint={`Run ${new Date(data.generated_at).toLocaleString()}`}
+        />
         <KPIStat
           label="Discrepancies"
           value={<span className="tabular">{data.discrepancies}</span>}
           accent={!clean}
           hint={clean ? "Ledger matches balances" : "Needs finance review"}
         />
-        <KPIStat label="Net drift" value={<Money amount={data.total_recorded - data.total_computed} />} hint={`Absolute ${formatMoney(data.total_abs_delta)}`} accent={!clean} />
-        <KPIStat label="Pending (unposted)" value={<Money amount={data.pending_total} />} hint="Excluded from computed balances" />
+        <KPIStat
+          label="Net drift"
+          value={<Money amount={data.total_recorded - data.total_computed} />}
+          hint={`Absolute ${formatMoney(data.total_abs_delta)}`}
+          accent={!clean}
+        />
+        <KPIStat
+          label="Pending (unposted)"
+          value={<Money amount={data.pending_total} />}
+          hint="Excluded from computed balances"
+        />
       </section>
 
       <SectionCard
         title={onlyDiscrepancies ? "Flagged accounts" : "All accounts"}
         action={
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="gap-1" onClick={() => onToggle(!onlyDiscrepancies)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              onClick={() => onToggle(!onlyDiscrepancies)}
+            >
               {onlyDiscrepancies ? "Show all accounts" : "Show flagged only"}
             </Button>
             <Button
               size="sm"
               variant="outline"
               className="gap-1"
-              onClick={() => qc.invalidateQueries({ queryKey: ["admin", "savings", "reconciliation"] })}
+              onClick={() =>
+                qc.invalidateQueries({ queryKey: ["admin", "savings", "reconciliation"] })
+              }
             >
               <RefreshCw className="h-3.5 w-3.5" /> Re-run
             </Button>
@@ -103,9 +145,21 @@ function Body({ onlyDiscrepancies, onToggle }: { onlyDiscrepancies: boolean; onT
                 { header: "Member", accessor: (r: ReconRow) => r.member_name ?? "—" },
                 { header: "Member no", accessor: (r: ReconRow) => r.member_no ?? "—" },
                 { header: "Plan", accessor: (r: ReconRow) => r.plan_name ?? "—" },
-                { header: "Recorded", accessor: (r: ReconRow) => formatMoney(r.recorded_balance), align: "right" },
-                { header: "Computed", accessor: (r: ReconRow) => formatMoney(r.computed_balance), align: "right" },
-                { header: "Delta", accessor: (r: ReconRow) => formatMoney(r.delta), align: "right" },
+                {
+                  header: "Recorded",
+                  accessor: (r: ReconRow) => formatMoney(r.recorded_balance),
+                  align: "right",
+                },
+                {
+                  header: "Computed",
+                  accessor: (r: ReconRow) => formatMoney(r.computed_balance),
+                  align: "right",
+                },
+                {
+                  header: "Delta",
+                  accessor: (r: ReconRow) => formatMoney(r.delta),
+                  align: "right",
+                },
                 { header: "Movements", accessor: (r: ReconRow) => r.movements, align: "right" },
               ]}
               rows={data.rows}
@@ -137,26 +191,36 @@ function Body({ onlyDiscrepancies, onToggle }: { onlyDiscrepancies: boolean; onT
                 <tr key={r.account_id}>
                   <td className="px-6 py-3 text-sm">
                     <div className="font-semibold">{r.member_name ?? "Member"}</div>
-                    <div className="text-[11px] text-muted-foreground">{r.member_no ?? r.account_id.slice(0, 8)}</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {r.member_no ?? r.account_id.slice(0, 8)}
+                    </div>
                   </td>
                   <td className="px-6 py-3 text-sm text-muted-foreground">
                     <div>{r.nickname ?? r.plan_name ?? "Savings"}</div>
                     <div className="text-[11px] capitalize text-muted-foreground">{r.status}</div>
                   </td>
-                  <td className="px-6 py-3 text-right"><Money amount={r.recorded_balance} /></td>
-                  <td className="px-6 py-3 text-right"><Money amount={r.computed_balance} /></td>
+                  <td className="px-6 py-3 text-right">
+                    <Money amount={r.recorded_balance} />
+                  </td>
+                  <td className="px-6 py-3 text-right">
+                    <Money amount={r.computed_balance} />
+                  </td>
                   <td className="px-6 py-3 text-right">
                     {Math.abs(r.delta) > 0.005 ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-[11px] font-semibold text-destructive">
                         <AlertTriangle className="h-3 w-3" /> {formatMoney(r.delta)}
                       </span>
                     ) : (
-                      <span className="tabular text-[11px] text-muted-foreground">{formatMoney(r.delta)}</span>
+                      <span className="tabular text-[11px] text-muted-foreground">
+                        {formatMoney(r.delta)}
+                      </span>
                     )}
                   </td>
                   <td className="tabular px-6 py-3 text-right text-sm">{r.movements}</td>
                   <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">
-                    {r.pending_count > 0 ? `${r.pending_count} · ${formatMoney(r.pending_amount)}` : "—"}
+                    {r.pending_count > 0
+                      ? `${r.pending_count} · ${formatMoney(r.pending_amount)}`
+                      : "—"}
                   </td>
                   <td className="px-6 py-3 text-right text-[11px] text-muted-foreground">
                     {r.last_movement_at ? new Date(r.last_movement_at).toLocaleDateString() : "—"}

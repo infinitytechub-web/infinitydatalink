@@ -26,10 +26,7 @@ import {
 
 export const Route = createFileRoute("/_admin/admin/super-admins")({
   head: () => ({
-    meta: [
-      { title: "Super Admins — IT-360 CashApp" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Super Admins — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: SuperAdminsPage,
 });
@@ -103,8 +100,7 @@ function Directory({ currentUserId }: { currentUserId: string }) {
   const revokeFn = useServerFn(revokeSuperAdmin);
 
   const grant = useMutation({
-    mutationFn: async (vars: { email: string; note?: string }) =>
-      await grantFn({ data: vars }),
+    mutationFn: async (vars: { email: string; note?: string }) => await grantFn({ data: vars }),
     onSuccess: (r) => {
       toast.success("Super Admin granted", { description: r?.email });
       setGrantOpen(false);
@@ -114,8 +110,7 @@ function Directory({ currentUserId }: { currentUserId: string }) {
   });
 
   const revoke = useMutation({
-    mutationFn: async (vars: { user_id: string; reason: string }) =>
-      await revokeFn({ data: vars }),
+    mutationFn: async (vars: { user_id: string; reason: string }) => await revokeFn({ data: vars }),
     onSuccess: () => {
       toast.success("Super Admin revoked");
       setRevokeTarget(null);
@@ -166,7 +161,6 @@ function Directory({ currentUserId }: { currentUserId: string }) {
                       <td className="px-6 py-3 tabular">{r.granted_by_email ?? "system"}</td>
                       <td className="px-6 py-3">
                         <StatusPill status={r.seeded ? "cleared" : "pending"} />
-
                       </td>
                       <td className="px-6 py-3 text-right">
                         <button
@@ -212,7 +206,8 @@ function SeedList({ seed }: { seed: SeedEmailRow[] }) {
   return (
     <SectionCard title={`Seeded emails (${seed.length})`}>
       <div className="border-b border-emerald-deep/5 px-6 py-3 text-xs text-muted-foreground">
-        Emails on this allow-list may self-provision Super Admin on first confirmed sign-in. Managed automatically when granting or revoking.
+        Emails on this allow-list may self-provision Super Admin on first confirmed sign-in. Managed
+        automatically when granting or revoking.
       </div>
       {seed.length === 0 ? (
         <EmptyState title="No seeded emails" hint="Every Super Admin was granted manually." />
@@ -222,9 +217,7 @@ function SeedList({ seed }: { seed: SeedEmailRow[] }) {
             <li key={s.email} className="flex items-center justify-between px-6 py-3 text-sm">
               <div>
                 <div className="tabular">{s.email}</div>
-                {s.note ? (
-                  <div className="text-xs text-muted-foreground">{s.note}</div>
-                ) : null}
+                {s.note ? <div className="text-xs text-muted-foreground">{s.note}</div> : null}
               </div>
               <div className="text-xs text-muted-foreground tabular">{fmtDate(s.created_at)}</div>
             </li>
@@ -254,11 +247,14 @@ function GrantDialog({
         <DialogHeader>
           <DialogTitle>Grant Super Admin</DialogTitle>
           <DialogDescription>
-            The account must already exist and have a confirmed email. This will be recorded in the audit log.
+            The account must already exist and have a confirmed email. This will be recorded in the
+            audit log.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-2">
-          <label className="block text-xs uppercase tracking-widest text-muted-foreground">Email</label>
+          <label className="block text-xs uppercase tracking-widest text-muted-foreground">
+            Email
+          </label>
           <input
             type="email"
             value={email}
@@ -266,7 +262,9 @@ function GrantDialog({
             placeholder="name@example.com"
             className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm"
           />
-          <label className="block text-xs uppercase tracking-widest text-muted-foreground">Note (optional)</label>
+          <label className="block text-xs uppercase tracking-widest text-muted-foreground">
+            Note (optional)
+          </label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -312,7 +310,8 @@ function RevokeDialog({
         <DialogHeader>
           <DialogTitle>Revoke Super Admin</DialogTitle>
           <DialogDescription>
-            Removes Super Admin from <b>{target?.email}</b> and their seed entry. Provide a reason for the audit log.
+            Removes Super Admin from <b>{target?.email}</b> and their seed entry. Provide a reason
+            for the audit log.
           </DialogDescription>
         </DialogHeader>
         <textarea

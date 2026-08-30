@@ -8,7 +8,6 @@ navigation flows. The transfer specs (`transfers.spec.ts`,
 `transfers-api.spec.ts`) verify the member↔member and account↔account
 request → approval / rejection lifecycle end-to-end.
 
-
 ## Running
 
 Playwright is not bundled with the app. Install once:
@@ -28,7 +27,6 @@ Environment variables required (do NOT commit real credentials):
   or `super_admin` used to clear/reject transfers in the lifecycle spec
 - `E2E_MEMBER2_EMAIL`, `E2E_MEMBER2_PASSWORD` — optional second member for
   the member↔member transfer lifecycle test
-
 
 Then:
 
@@ -88,4 +86,3 @@ member email; used only for negative grant/revoke attempts).
    settlement with `transfer_not_pending`.
 4. **Pending → failed (rejected)** records the reason in the transfer note,
    leaves balances untouched, and rejects any repeat action.
-

@@ -14,7 +14,6 @@ import {
 import { processPaymentWebhook, signWebhookBody } from "@/lib/payment-webhooks.server";
 import { type RailAvailability } from "@/lib/payment-rails";
 
-
 const SECRETISH = /(secret|api[_-]?key|password|token|private)/i;
 
 export type ProviderRow = {
@@ -82,7 +81,6 @@ export async function setRailEnabled(input: {
   if (error) throw new Error(error.message);
 }
 
-
 export type ReadinessCheck = {
   key: string;
   label: string;
@@ -132,7 +130,9 @@ export async function loadPaymentConfig(): Promise<PaymentConfigView> {
       .order("code"),
     supabaseAdmin
       .from("payment_webhook_events")
-      .select("id, provider_code, event_id, event_type, signature_verified, processed_at, error, created_at")
+      .select(
+        "id, provider_code, event_id, event_type, signature_verified, processed_at, error, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(25),
     supabaseAdmin.from("payment_intents").select("status").limit(1000),
@@ -148,9 +148,7 @@ export async function loadPaymentConfig(): Promise<PaymentConfigView> {
   const { data: railRows } = await supabaseAdmin
     .from("payment_rail_settings")
     .select("rail, enabled, note, updated_at");
-  const railMeta = new Map(
-    ((railRows ?? []) as RailSettingRow[]).map((r) => [r.rail, r]),
-  );
+  const railMeta = new Map(((railRows ?? []) as RailSettingRow[]).map((r) => [r.rail, r]));
 
   return {
     providers: ((providers.data ?? []) as ProviderRow[]).map((p) => ({
@@ -169,7 +167,6 @@ export async function loadPaymentConfig(): Promise<PaymentConfigView> {
       };
     }),
     can_manage: true,
-
   };
 }
 
@@ -192,12 +189,24 @@ export async function buildReadinessReport(code: string): Promise<ReadinessRepor
 
   checks.push(
     provider
-      ? { key: "record", label: "Provider saved", state: "pass", detail: `Stored in ${provider.mode} mode.` }
-      : { key: "record", label: "Provider saved", state: "fail", detail: "No approved configuration yet." },
+      ? {
+          key: "record",
+          label: "Provider saved",
+          state: "pass",
+          detail: `Stored in ${provider.mode} mode.`,
+        }
+      : {
+          key: "record",
+          label: "Provider saved",
+          state: "fail",
+          detail: "No approved configuration yet.",
+        },
   );
 
   const missingFields = template.fields.filter(
-    (f) => f.required && !String(((provider?.config ?? {}) as Record<string, unknown>)[f.key] ?? "").trim(),
+    (f) =>
+      f.required &&
+      !String(((provider?.config ?? {}) as Record<string, unknown>)[f.key] ?? "").trim(),
   );
   checks.push({
     key: "fields",
@@ -214,7 +223,9 @@ export async function buildReadinessReport(code: string): Promise<ReadinessRepor
     key: "api_secret",
     label: `API secret (${template.secretEnv})`,
     state: apiSecret ? "pass" : "fail",
-    detail: apiSecret ? "Stored securely as a backend secret." : "Secret not configured — intents cannot be created.",
+    detail: apiSecret
+      ? "Stored securely as a backend secret."
+      : "Secret not configured — intents cannot be created.",
   });
 
   const hookSecret = process.env[template.webhookSecretEnv];
@@ -222,7 +233,9 @@ export async function buildReadinessReport(code: string): Promise<ReadinessRepor
     key: "webhook_secret",
     label: `Webhook signing secret (${template.webhookSecretEnv})`,
     state: hookSecret ? "pass" : "fail",
-    detail: hookSecret ? "Callback signatures will be verified." : "Missing — callbacks will be rejected with 503.",
+    detail: hookSecret
+      ? "Callback signatures will be verified."
+      : "Missing — callbacks will be rejected with 503.",
   });
 
   const expectedPath = defaultWebhookPath(code);
@@ -239,7 +252,9 @@ export async function buildReadinessReport(code: string): Promise<ReadinessRepor
     key: "enabled",
     label: "Rail enabled",
     state: provider?.enabled ? "pass" : "warn",
-    detail: provider?.enabled ? "Accepting traffic." : "Disabled — no live traffic will be accepted.",
+    detail: provider?.enabled
+      ? "Accepting traffic."
+      : "Disabled — no live traffic will be accepted.",
   });
 
   if (provider?.mode === "live") {
@@ -289,7 +304,10 @@ export async function runProviderSelfTest(code: string, actorId: string): Promis
     ok: report.ready_for_intents,
     detail: report.ready_for_intents
       ? "Provider record and API secret present."
-      : report.checks.filter((c) => c.state === "fail").map((c) => c.detail).join(" "),
+      : report.checks
+          .filter((c) => c.state === "fail")
+          .map((c) => c.detail)
+          .join(" "),
   });
   if (!report.ready_for_intents) return { code, reference: null, passed: false, steps };
 
@@ -330,7 +348,8 @@ export async function runProviderSelfTest(code: string, actorId: string): Promis
     signature,
     simulate: !signature,
   });
-  const hookOk = outcome.status === 200 && (outcome.body as { applied?: string }).applied === "succeeded";
+  const hookOk =
+    outcome.status === 200 && (outcome.body as { applied?: string }).applied === "succeeded";
   steps.push({
     label: "Process webhook callback",
     ok: hookOk,

@@ -3,11 +3,30 @@ import { Suspense, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Download, Eye, FileSpreadsheet, FileText, FileType2, Loader2, Pencil, Printer, ShieldAlert, Table2, Trash2 } from "lucide-react";
+import {
+  Download,
+  Eye,
+  FileSpreadsheet,
+  FileText,
+  FileType2,
+  Loader2,
+  Pencil,
+  Printer,
+  ShieldAlert,
+  Table2,
+  Trash2,
+} from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth";
-import { exportCsv, exportDocx, exportExcel, exportPdf, exportPrint, type ExportColumn } from "@/lib/exports";
+import {
+  exportCsv,
+  exportDocx,
+  exportExcel,
+  exportPdf,
+  exportPrint,
+  type ExportColumn,
+} from "@/lib/exports";
 import {
   deleteManagedDocument,
   exportManagedDocuments,
@@ -18,7 +37,6 @@ import {
   type ManagedDocument,
 } from "@/lib/admin-documents.functions";
 
-
 export const Route = createFileRoute("/_admin/admin/documents")({
   head: () => ({
     meta: [
@@ -28,7 +46,9 @@ export const Route = createFileRoute("/_admin/admin/documents")({
   }),
   component: DocumentsPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Document register unavailable: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">
+      Document register unavailable: {error.message}
+    </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm">Not found.</div>,
 });
@@ -51,9 +71,9 @@ function DocumentsPage() {
           <div className="flex items-start gap-3 p-6 text-sm text-muted-foreground">
             <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-destructive" aria-hidden />
             <p>
-              Document download, print and export are limited to the <strong>Super Admin</strong> role.
-              Your account does not hold that role, so the register is not shown. Requests are also
-              rejected server-side and logged.
+              Document download, print and export are limited to the <strong>Super Admin</strong>{" "}
+              role. Your account does not hold that role, so the register is not shown. Requests are
+              also rejected server-side and logged.
             </p>
           </div>
         </SectionCard>
@@ -71,10 +91,17 @@ const REGISTER_COLUMNS: ExportColumn<ManagedDocument>[] = [
   { header: "Source", accessor: (r) => r.source },
   { header: "Type", accessor: (r) => r.doc_type.replace(/_/g, " ") },
   { header: "Format", accessor: (r) => formatLabel(r.mime_type) },
-  { header: "Size (KB)", accessor: (r) => Math.max(1, Math.round(r.size_bytes / 1024)), align: "right" },
+  {
+    header: "Size (KB)",
+    accessor: (r) => Math.max(1, Math.round(r.size_bytes / 1024)),
+    align: "right",
+  },
   { header: "Status", accessor: (r) => r.status ?? "—" },
   { header: "Filename", accessor: (r) => r.filename },
-  { header: "Uploaded", accessor: (r) => new Date(r.created_at).toISOString().slice(0, 19).replace("T", " ") },
+  {
+    header: "Uploaded",
+    accessor: (r) => new Date(r.created_at).toISOString().slice(0, 19).replace("T", " "),
+  },
 ];
 
 function ExportButton({
@@ -93,7 +120,9 @@ function ExportButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={label === "Print" ? "Print document register" : `Export document register as ${label}`}
+      aria-label={
+        label === "Print" ? "Print document register" : `Export document register as ${label}`
+      }
       className="inline-flex min-h-[40px] items-center gap-1.5 rounded border border-emerald-deep/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest hover:bg-cream disabled:opacity-50"
     >
       {icon}
@@ -101,7 +130,6 @@ function ExportButton({
     </button>
   );
 }
-
 
 function DocumentsBody() {
   const qc = useQueryClient();
@@ -156,17 +184,29 @@ function DocumentsBody() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-
   const query = useQuery({
     queryKey: ["admin", "documents", { source, search, format, page, pageSize, sort, dir }],
     queryFn: () =>
-      list({ data: { source, search: search || undefined, format: format || undefined, page, page_size: pageSize, sort, dir } }),
+      list({
+        data: {
+          source,
+          search: search || undefined,
+          format: format || undefined,
+          page,
+          page_size: pageSize,
+          sort,
+          dir,
+        },
+      }),
     placeholderData: keepPreviousData,
   });
 
   const open = useMutation({
     mutationFn: (v: { row: ManagedDocument; intent: "view" | "download" | "print" }) =>
-      urlFn({ data: { source: v.row.source, id: v.row.id, intent: v.intent } }).then((r) => ({ ...r, intent: v.intent })),
+      urlFn({ data: { source: v.row.source, id: v.row.id, intent: v.intent } }).then((r) => ({
+        ...r,
+        intent: v.intent,
+      })),
     onSuccess: (r) => {
       const win = window.open(r.url, "_blank", "noopener,noreferrer");
       if (!win) {
@@ -267,15 +307,38 @@ function DocumentsBody() {
             {exportRun.isPending ? " · preparing export…" : ""}
           </p>
           <div className="flex flex-wrap items-center gap-1.5">
-            <ExportButton icon={<FileText className="h-3.5 w-3.5" />} label="PDF" disabled={exportRun.isPending} onClick={() => exportRun.mutate("pdf")} />
-            <ExportButton icon={<Table2 className="h-3.5 w-3.5" />} label="CSV" disabled={exportRun.isPending} onClick={() => exportRun.mutate("csv")} />
-            <ExportButton icon={<FileType2 className="h-3.5 w-3.5" />} label="DOCX" disabled={exportRun.isPending} onClick={() => exportRun.mutate("docx")} />
-            <ExportButton icon={<FileSpreadsheet className="h-3.5 w-3.5" />} label="XLSX" disabled={exportRun.isPending} onClick={() => exportRun.mutate("xlsx")} />
-            <ExportButton icon={<Printer className="h-3.5 w-3.5" />} label="Print" disabled={exportRun.isPending} onClick={() => exportRun.mutate("print")} />
+            <ExportButton
+              icon={<FileText className="h-3.5 w-3.5" />}
+              label="PDF"
+              disabled={exportRun.isPending}
+              onClick={() => exportRun.mutate("pdf")}
+            />
+            <ExportButton
+              icon={<Table2 className="h-3.5 w-3.5" />}
+              label="CSV"
+              disabled={exportRun.isPending}
+              onClick={() => exportRun.mutate("csv")}
+            />
+            <ExportButton
+              icon={<FileType2 className="h-3.5 w-3.5" />}
+              label="DOCX"
+              disabled={exportRun.isPending}
+              onClick={() => exportRun.mutate("docx")}
+            />
+            <ExportButton
+              icon={<FileSpreadsheet className="h-3.5 w-3.5" />}
+              label="XLSX"
+              disabled={exportRun.isPending}
+              onClick={() => exportRun.mutate("xlsx")}
+            />
+            <ExportButton
+              icon={<Printer className="h-3.5 w-3.5" />}
+              label="Print"
+              disabled={exportRun.isPending}
+              onClick={() => exportRun.mutate("print")}
+            />
           </div>
         </div>
-
-
 
         {query.isLoading ? (
           <div className="p-6">
@@ -286,7 +349,10 @@ function DocumentsBody() {
         ) : (
           <ul className="divide-y divide-emerald-deep/5">
             {rows.map((r) => (
-              <li key={`${r.source}-${r.id}`} className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <li
+                key={`${r.source}-${r.id}`}
+                className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+              >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{r.owner_label}</p>
                   <p className="truncate text-xs text-muted-foreground">
@@ -302,10 +368,16 @@ function DocumentsBody() {
                   <IconAction label="View" onClick={() => open.mutate({ row: r, intent: "view" })}>
                     <Eye className="h-3.5 w-3.5" />
                   </IconAction>
-                  <IconAction label="Download" onClick={() => open.mutate({ row: r, intent: "download" })}>
+                  <IconAction
+                    label="Download"
+                    onClick={() => open.mutate({ row: r, intent: "download" })}
+                  >
                     <Download className="h-3.5 w-3.5" />
                   </IconAction>
-                  <IconAction label="Print" onClick={() => open.mutate({ row: r, intent: "print" })}>
+                  <IconAction
+                    label="Print"
+                    onClick={() => open.mutate({ row: r, intent: "print" })}
+                  >
                     <Printer className="h-3.5 w-3.5" />
                   </IconAction>
                   <IconAction label="Edit metadata" onClick={() => setEditing(r)}>
@@ -326,7 +398,11 @@ function DocumentsBody() {
                     }}
                     className="inline-flex min-h-[40px] items-center gap-1 rounded border border-destructive/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10"
                   >
-                    {remove.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    {remove.isPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
               </li>
@@ -414,8 +490,9 @@ function EditDialog({ row, onClose }: { row: ManagedDocument; onClose: () => voi
           source: row.source,
           id: row.id,
           doc_type: docType,
-          review_notes: row.source === "kyc" ? (notes || null) : undefined,
-          status: row.source === "kyc" ? (status as "pending" | "approved" | "rejected") : undefined,
+          review_notes: row.source === "kyc" ? notes || null : undefined,
+          status:
+            row.source === "kyc" ? (status as "pending" | "approved" | "rejected") : undefined,
         },
       }),
     onSuccess: () => {

@@ -46,7 +46,11 @@ export const listLogRecycleBin = createServerFn({ method: "GET" })
     }
 
     const start = (data.page - 1) * data.pageSize;
-    const { data: rows, count, error } = await query
+    const {
+      data: rows,
+      count,
+      error,
+    } = await query
       .order("deleted_at", { ascending: false })
       .range(start, start + data.pageSize - 1);
     if (error) throw new Error(error.message);
@@ -84,11 +88,9 @@ export const deleteLogEntriesForever = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => deleteInput.parse(data))
   .handler(async ({ data, context }) => {
-    const { data: deleted, error } = await context.supabase.rpc(
-      "delete_log_recycle_bin_entries",
-      { _ids: data.ids },
-    );
+    const { data: deleted, error } = await context.supabase.rpc("delete_log_recycle_bin_entries", {
+      _ids: data.ids,
+    });
     if (error) throw new Error(error.message);
     return { deleted: Number(deleted ?? 0) };
   });
-

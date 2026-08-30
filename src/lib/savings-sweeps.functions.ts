@@ -44,15 +44,27 @@ const CreateSchema = z.object({
 
 const UpdateSchema = z.object({ id: z.string().uuid(), ...RuleFields });
 
-
-function firstRun(frequency: string, dow: number | null | undefined, dom: number | null | undefined, start?: string | null): string {
+function firstRun(
+  frequency: string,
+  dow: number | null | undefined,
+  dom: number | null | undefined,
+  start?: string | null,
+): string {
   const base = start ? new Date(start) : new Date(Date.now() + 60_000);
   const d = new Date(base);
   if (frequency === "weekly" && (dow ?? -1) >= 0) {
     const delta = (dow! - d.getUTCDay() + 7) % 7;
     d.setUTCDate(d.getUTCDate() + (delta === 0 ? 7 : delta));
   } else if (frequency === "monthly" && dom) {
-    const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), Math.min(dom, 28), d.getUTCHours(), d.getUTCMinutes()));
+    const target = new Date(
+      Date.UTC(
+        d.getUTCFullYear(),
+        d.getUTCMonth(),
+        Math.min(dom, 28),
+        d.getUTCHours(),
+        d.getUTCMinutes(),
+      ),
+    );
     if (target <= base) target.setUTCMonth(target.getUTCMonth() + 1);
     return target.toISOString();
   }
@@ -96,7 +108,9 @@ export const listMySweeps = createServerFn({ method: "GET" })
         .from("savings_accounts")
         .select("id, nickname, savings_plans(name)")
         .in("id", Array.from(ids));
-      labelMap = new Map((accts ?? []).map((a: any) => [a.id, a.nickname || a.savings_plans?.name || "Savings"]));
+      labelMap = new Map(
+        (accts ?? []).map((a: any) => [a.id, a.nickname || a.savings_plans?.name || "Savings"]),
+      );
     }
 
     return (data ?? []).map((r: any) => ({
@@ -126,8 +140,18 @@ export const createSweep = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => CreateSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ id: string }> => {
-    await assertBothMine(context.supabase, context.userId, data.from_account_id, data.to_account_id);
-    const next = firstRun(data.frequency, data.day_of_week ?? null, data.day_of_month ?? null, data.start_at);
+    await assertBothMine(
+      context.supabase,
+      context.userId,
+      data.from_account_id,
+      data.to_account_id,
+    );
+    const next = firstRun(
+      data.frequency,
+      data.day_of_week ?? null,
+      data.day_of_month ?? null,
+      data.start_at,
+    );
     const { data: inserted, error } = await context.supabase
       .from("savings_sweeps")
       .insert({
@@ -138,8 +162,8 @@ export const createSweep = createServerFn({ method: "POST" })
         min_balance: data.min_balance,
         max_amount: data.max_amount ?? null,
         frequency: data.frequency,
-        day_of_week: data.frequency === "weekly" ? data.day_of_week ?? 1 : null,
-        day_of_month: data.frequency === "monthly" ? data.day_of_month ?? 1 : null,
+        day_of_week: data.frequency === "weekly" ? (data.day_of_week ?? 1) : null,
+        day_of_month: data.frequency === "monthly" ? (data.day_of_month ?? 1) : null,
         note: data.note ?? null,
         next_run_at: next,
       })
@@ -163,8 +187,8 @@ export const updateSweep = createServerFn({ method: "POST" })
     if (readErr) throw new Error(readErr.message);
     if (!existing) throw new Error("sweep_not_found");
 
-    const dow = data.frequency === "weekly" ? data.day_of_week ?? 1 : null;
-    const dom = data.frequency === "monthly" ? data.day_of_month ?? 1 : null;
+    const dow = data.frequency === "weekly" ? (data.day_of_week ?? 1) : null;
+    const dom = data.frequency === "monthly" ? (data.day_of_month ?? 1) : null;
     const cadenceChanged =
       existing.frequency !== data.frequency ||
       (existing.day_of_week ?? null) !== dow ||
@@ -190,7 +214,9 @@ export const updateSweep = createServerFn({ method: "POST" })
 
 export const setSweepStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), status: z.enum(["active", "paused"]) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), status: z.enum(["active", "paused"]) }).parse(d),
+  )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { error } = await context.supabase
       .from("savings_sweeps")
@@ -228,7 +254,12 @@ export const submitOwnAccountTransfer = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ transfer_id: string }> => {
-    await assertBothMine(context.supabase, context.userId, data.from_account_id, data.to_account_id);
+    await assertBothMine(
+      context.supabase,
+      context.userId,
+      data.from_account_id,
+      data.to_account_id,
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: t, error } = await supabaseAdmin.rpc("post_transfer", {
       _from: data.from_account_id,
@@ -252,10 +283,15 @@ export const submitOwnAccountTransfer = createServerFn({ method: "POST" })
 export const adminRunMonthlyAccrual = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ period_end: z.string().optional().nullable(), note: z.string().min(3).max(500) }).parse(d),
+    z
+      .object({ period_end: z.string().optional().nullable(), note: z.string().min(3).max(500) })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ accounts: number; total_interest: number }> => {
-    const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
+    const { data: roles } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
     const set = new Set((roles ?? []).map((r: any) => r.role));
     if (!set.has("super_admin")) throw new Error("forbidden");
 

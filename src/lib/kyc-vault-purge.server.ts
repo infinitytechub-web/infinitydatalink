@@ -87,7 +87,12 @@ export async function purgeExpiredVaultEntries(
     const paths = docs.map((d) => d.vault_path).filter(Boolean) as string[];
 
     if (options.dryRun) {
-      results.push({ vault_id: row.id, member_id: memberId, ok: true, documents_purged: paths.length });
+      results.push({
+        vault_id: row.id,
+        member_id: memberId,
+        ok: true,
+        documents_purged: paths.length,
+      });
       documentsPurged += paths.length;
       continue;
     }
@@ -101,7 +106,12 @@ export async function purgeExpiredVaultEntries(
       if (dErr) throw new Error(dErr.message);
 
       documentsPurged += paths.length;
-      results.push({ vault_id: row.id, member_id: memberId, ok: true, documents_purged: paths.length });
+      results.push({
+        vault_id: row.id,
+        member_id: memberId,
+        ok: true,
+        documents_purged: paths.length,
+      });
 
       await writeAudit({
         actor_id: actor.userId ?? null,

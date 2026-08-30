@@ -13,8 +13,6 @@ import { KycRecordActions } from "@/components/kyc-record-actions";
 import { DocumentPreviewPanel } from "@/components/document-preview-panel";
 import { IfCan } from "@/components/record-actions";
 
-
-
 import {
   decideKyc,
   getKycResubmissionDiff,
@@ -34,9 +32,10 @@ import {
 import { resolveMinorStatus } from "@/lib/age";
 import { useQuery } from "@tanstack/react-query";
 
-
 export const Route = createFileRoute("/_admin/admin/members/$id")({
-  head: () => ({ meta: [{ title: "Member review — KYC" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Member review — KYC" }, { name: "robots", content: "noindex" }],
+  }),
   component: MemberDetailPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">Member unavailable: {error.message}</div>
@@ -97,7 +96,9 @@ function MemberDetailBody() {
                 { label: "Date of birth", value: profile.date_of_birth ?? "—" },
                 {
                   label: "Under 18",
-                  value: resolveMinorStatus(profile.date_of_birth, profile.is_minor).effective ? "Yes" : "No",
+                  value: resolveMinorStatus(profile.date_of_birth, profile.is_minor).effective
+                    ? "Yes"
+                    : "No",
                 },
                 { label: "Gender", value: profile.gender ?? "—" },
                 { label: "Region", value: profile.region ?? "—" },
@@ -135,7 +136,9 @@ function MemberDetailBody() {
               <Field label="National ID" value={profile.national_id} />
               <Field label="Date of birth" value={profile.date_of_birth} />
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Age</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Age
+                </p>
                 <div className="mt-1 text-sm">
                   <AgeBadge dateOfBirth={profile.date_of_birth} storedIsMinor={profile.is_minor} />
                 </div>
@@ -155,13 +158,21 @@ function MemberDetailBody() {
               <Field label="District / Municipal" value={profile.district} />
               <Field label="Digital address" value={profile.digital_address} />
 
-              <Field label="Residential address" value={profile.address_line} className="sm:col-span-2" />
+              <Field
+                label="Residential address"
+                value={profile.address_line}
+                className="sm:col-span-2"
+              />
               <Field label="Occupation" value={profile.occupation} />
               <Field label="Employer" value={profile.employer} />
               <Field label="Membership tier" value={profile.tier} />
               <Field
                 label="Last reviewed"
-                value={profile.kyc_reviewed_at ? new Date(profile.kyc_reviewed_at).toLocaleString() : null}
+                value={
+                  profile.kyc_reviewed_at
+                    ? new Date(profile.kyc_reviewed_at).toLocaleString()
+                    : null
+                }
               />
               {profile.kyc_notes ? (
                 <div className="sm:col-span-2">
@@ -176,14 +187,11 @@ function MemberDetailBody() {
 
           <MinorHistoryCard memberId={profile.id} />
 
-
-
           <div id="kyc-documents" />
           <DocumentPreviewPanel
             documents={documents}
             isMinor={resolveMinorStatus(profile.date_of_birth, profile.is_minor).effective}
           />
-
 
           <SectionCard title="Next of kin">
             <div
@@ -214,7 +222,9 @@ function MemberDetailBody() {
                         ID {n.national_id_masked} (masked)
                       </p>
                     ) : null}
-                    {n.address ? <p className="text-[11px] text-muted-foreground">{n.address}</p> : null}
+                    {n.address ? (
+                      <p className="text-[11px] text-muted-foreground">{n.address}</p>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -238,15 +248,10 @@ function MemberDetailBody() {
         </div>
 
         {profile.is_minor ? <MinorAttestationUploads memberId={profile.id} /> : null}
-
-
       </div>
     </>
   );
 }
-
-
-
 
 function DecisionPanel({
   memberId,
@@ -314,21 +319,21 @@ function DecisionPanel({
   const approveBlockers = minorBlockers("approved");
   const rejectBlockers = minorBlockers("rejected");
 
-
   return (
     <SectionCard title="Compliance decision">
       <div className="space-y-4 p-6">
         <p className="text-xs text-muted-foreground">
-          Approving marks the member as verified and unlocks full portal access. Every decision needs a
-          reviewer note of at least 5 characters, and approval is only possible once all required details
-          and documents have been submitted.
+          Approving marks the member as verified and unlocks full portal access. Every decision
+          needs a reviewer note of at least 5 characters, and approval is only possible once all
+          required details and documents have been submitted.
         </p>
         {isMinor ? (
           <div className="rounded border border-gold/40 bg-gold/10 p-3 text-[11px] text-muted-foreground">
-            <strong className="uppercase tracking-widest">Minor account</strong> — this member is under
-            18. Every decision needs a verified guardian, a consent reference, a note of at least{" "}
-            {MINOR_DECISION_NOTE_MIN} characters, and fresh re-authentication. Minors are excluded from
-            bulk decisions, and each decision is broadcast to compliance leadership for secondary review.
+            <strong className="uppercase tracking-widest">Minor account</strong> — this member is
+            under 18. Every decision needs a verified guardian, a consent reference, a note of at
+            least {MINOR_DECISION_NOTE_MIN} characters, and fresh re-authentication. Minors are
+            excluded from bulk decisions, and each decision is broadcast to compliance leadership
+            for secondary review.
           </div>
         ) : null}
         <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -368,8 +373,8 @@ function DecisionPanel({
             </label>
             {guardians.length === 0 ? (
               <p className="text-[11px] text-destructive">
-                No eligible guardian on file. Add a next-of-kin with a parent/guardian relationship and a
-                phone number before deciding.
+                No eligible guardian on file. Add a next-of-kin with a parent/guardian relationship
+                and a phone number before deciding.
               </p>
             ) : null}
             <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -407,7 +412,10 @@ function DecisionPanel({
           </legend>
           <div className="grid gap-1.5 sm:grid-cols-2">
             {ALL_REMEDIATION_ITEMS.map((item) => (
-              <label key={item.key} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <label
+                key={item.key}
+                className="flex items-center gap-2 text-xs text-muted-foreground"
+              >
                 <input
                   type="checkbox"
                   checked={items.includes(item.key)}
@@ -478,13 +486,22 @@ function DecisionPanel({
       {dialog}
     </SectionCard>
   );
-
 }
 
-function Field({ label, value, className }: { label: string; value: string | null | undefined; className?: string }) {
+function Field({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: string | null | undefined;
+  className?: string;
+}) {
   return (
     <div className={className}>
-      <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</dt>
+      <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </dt>
       <dd className="mt-1 text-sm">{value ?? "—"}</dd>
     </div>
   );
@@ -534,9 +551,10 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
     >
       <div className="space-y-3 px-6 py-4">
         <p className="text-xs text-muted-foreground">
-          Declined {data.reviewed_at ? new Date(data.reviewed_at).toLocaleString() : "—"} · Resubmitted{" "}
-          {data.resubmitted_at ? new Date(data.resubmitted_at).toLocaleString() : "not yet"} · Attempt{" "}
-          {data.attempts_used}
+          Declined {data.reviewed_at ? new Date(data.reviewed_at).toLocaleString() : "—"} ·
+          Resubmitted{" "}
+          {data.resubmitted_at ? new Date(data.resubmitted_at).toLocaleString() : "not yet"} ·
+          Attempt {data.attempts_used}
         </p>
         <div className="flex flex-wrap gap-2 text-[11px] font-bold uppercase tracking-widest">
           <span className="rounded bg-success/10 px-2 py-1 text-success">
@@ -567,7 +585,8 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
           >
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
               <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                Risk patterns · {RISK_SEVERITY_LABEL[data.risk.level as "low" | "medium" | "high"]} risk
+                Risk patterns · {RISK_SEVERITY_LABEL[data.risk.level as "low" | "medium" | "high"]}{" "}
+                risk
               </p>
               <span
                 className={
@@ -594,7 +613,6 @@ function ResubmissionDiff({ memberId }: { memberId: string }) {
             </ul>
           </div>
         ) : null}
-
 
         {visible.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nothing changed since the rejection.</p>
@@ -670,7 +688,9 @@ function DiffSide({
         : "border-emerald-deep/10 bg-cream/30";
   return (
     <div className={`rounded border px-3 py-2 ${toneClass}`}>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{heading}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {heading}
+      </p>
       <p className={`mt-1 break-words text-sm ${tone === "old" ? "line-through opacity-70" : ""}`}>
         {value ?? "—"}
       </p>
@@ -691,7 +711,6 @@ function DiffSide({
   );
 }
 
-
 /**
  * Trigger-written history of automatic under-18 flag changes for this member.
  * Every entry shows the date of birth that produced the change and when it
@@ -708,7 +727,9 @@ function MinorHistoryCard({ memberId }: { memberId: string }) {
   return (
     <SectionCard title="Under-18 status history">
       {isLoading ? (
-        <div className="p-6"><Skeleton className="h-16 w-full" /></div>
+        <div className="p-6">
+          <Skeleton className="h-16 w-full" />
+        </div>
       ) : changes.length === 0 ? (
         <div className="p-6 text-sm text-muted-foreground">
           No automatic under-18 status changes recorded for this member.
@@ -716,7 +737,10 @@ function MinorHistoryCard({ memberId }: { memberId: string }) {
       ) : (
         <ul className="divide-y divide-emerald-deep/5">
           {changes.map((c) => (
-            <li key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-6 py-3 text-sm">
+            <li
+              key={c.id}
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 px-6 py-3 text-sm"
+            >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-widest ${
                   c.is_minor
@@ -725,8 +749,12 @@ function MinorHistoryCard({ memberId }: { memberId: string }) {
                 }`}
               >
                 {c.was_minor === null
-                  ? c.is_minor ? "Set to under 18" : "Set to adult"
-                  : c.is_minor ? "Adult → under 18" : "Under 18 → adult"}
+                  ? c.is_minor
+                    ? "Set to under 18"
+                    : "Set to adult"
+                  : c.is_minor
+                    ? "Adult → under 18"
+                    : "Under 18 → adult"}
               </span>
               <span className="text-muted-foreground">
                 Source date of birth: <strong>{c.source_date_of_birth ?? "not set"}</strong>

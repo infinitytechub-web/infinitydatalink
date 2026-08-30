@@ -149,7 +149,9 @@ export const getAdminInsights = createServerFn({ method: "GET" })
       scoped(
         sb
           .from("loans")
-          .select("amount, product, status, outstanding_principal, created_at, disbursed_at, decided_at")
+          .select(
+            "amount, product, status, outstanding_principal, created_at, disbursed_at, decided_at",
+          )
           .gte("created_at", fromISO)
           .lte("created_at", toISO),
         scopeIds,
@@ -274,7 +276,10 @@ export const getAdminInsights = createServerFn({ method: "GET" })
     let outstanding = 0;
     for (const l of (loansRes.data ?? []) as any[]) {
       loanStatus.set(l.status, (loanStatus.get(l.status) ?? 0) + 1);
-      loanProduct.set(l.product ?? "Unknown", (loanProduct.get(l.product ?? "Unknown") ?? 0) + num(l.amount));
+      loanProduct.set(
+        l.product ?? "Unknown",
+        (loanProduct.get(l.product ?? "Unknown") ?? 0) + num(l.amount),
+      );
       outstanding += num(l.outstanding_principal);
       const applyKey = keyFor(l.created_at);
       if (applyKey) loanMap.get(applyKey)!.applications += 1;

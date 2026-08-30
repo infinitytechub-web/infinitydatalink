@@ -18,7 +18,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { TrendChart } from "@/components/charts";
 
-
 const investmentsQO = queryOptions<MemberInvestmentSummary>({
   queryKey: ["member", "investments"],
   queryFn: () => getMyInvestments(),
@@ -62,8 +61,9 @@ function downloadTradeReceipt(r: TradeReceipt) {
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-GH", { style: "currency", currency: r.currency }).format(n);
   const esc = (s: string) =>
-    s.replace(/[&<>"']/g, (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+    s.replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
     );
   const title = `${r.mode === "buy" ? "Purchase" : "Sale"} Receipt — ${r.ref}`;
   const html = `<!doctype html>
@@ -107,7 +107,6 @@ function downloadTradeReceipt(r: TradeReceipt) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-
 function InvestmentsPage() {
   const { data } = useSuspenseQuery(investmentsQO);
   const { data: series } = useSuspenseQuery(seriesQO);
@@ -121,31 +120,44 @@ function InvestmentsPage() {
     | { mode: "sell"; holding: ShareHolding; product: ShareProduct }
     | null
   >(null);
-  const [transferState, setTransferState] = useState<
-    { holding: ShareHolding; product: ShareProduct } | null
-  >(null);
-  const [breakdownState, setBreakdownState] = useState<
-    { holding: ShareHolding; product: ShareProduct } | null
-  >(null);
-
+  const [transferState, setTransferState] = useState<{
+    holding: ShareHolding;
+    product: ShareProduct;
+  } | null>(null);
+  const [breakdownState, setBreakdownState] = useState<{
+    holding: ShareHolding;
+    product: ShareProduct;
+  } | null>(null);
 
   const purchaseMut = useMutation({
-    mutationFn: (v: { product_id: string; savings_account_id: string; units: number; note: string | null }) =>
-      purchase({ data: v }),
+    mutationFn: (v: {
+      product_id: string;
+      savings_account_id: string;
+      units: number;
+      note: string | null;
+    }) => purchase({ data: v }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
     },
   });
   const sellMut = useMutation({
-    mutationFn: (v: { product_id: string; savings_account_id: string; units: number; note: string | null }) =>
-      sell({ data: v }),
+    mutationFn: (v: {
+      product_id: string;
+      savings_account_id: string;
+      units: number;
+      note: string | null;
+    }) => sell({ data: v }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
     },
   });
   const transferMut = useMutation({
-    mutationFn: (v: { product_id: string; to_member_no: string; units: number; note: string | null }) =>
-      transfer({ data: v }),
+    mutationFn: (v: {
+      product_id: string;
+      to_member_no: string;
+      units: number;
+      note: string | null;
+    }) => transfer({ data: v }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["member", "investments"] });
       setTransferState(null);
@@ -155,7 +167,9 @@ function InvestmentsPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">
       <header>
-        <h1 className="font-serif text-2xl text-emerald-deep dark:text-emerald-100">Investments & Shares</h1>
+        <h1 className="font-serif text-2xl text-emerald-deep dark:text-emerald-100">
+          Investments & Shares
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground dark:text-emerald-200/60">
           Buy cooperative share units and track dividends paid into your savings.
         </p>
@@ -170,19 +184,21 @@ function InvestmentsPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-emerald-deep/10 bg-white p-4 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">Portfolio value (12 months)</h2>
+          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">
+            Portfolio value (12 months)
+          </h2>
           <TrendChart
             title="Portfolio value over time"
             data={series}
             xKey="month"
             height={260}
-            series={[
-              { key: "portfolio_value", label: "Market value", format: (v) => money(v) },
-            ]}
+            series={[{ key: "portfolio_value", label: "Market value", format: (v) => money(v) }]}
           />
         </div>
         <div className="rounded-2xl border border-emerald-deep/10 bg-white p-4 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">Contributions, returns & dividends</h2>
+          <h2 className="font-serif text-base text-emerald-deep dark:text-emerald-100">
+            Contributions, returns & dividends
+          </h2>
           <TrendChart
             title="Contributions, returns and cumulative dividends"
             data={series}
@@ -197,9 +213,10 @@ function InvestmentsPage() {
         </div>
       </section>
 
-
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
-        <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Your holdings</h2>
+        <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+          Your holdings
+        </h2>
         {data.holdings.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground dark:text-emerald-200/60">
             You don't hold any shares yet. Buy from a product below to get started.
@@ -221,9 +238,14 @@ function InvestmentsPage() {
                 {data.holdings.map((h) => {
                   const product = data.products.find((p) => p.id === h.product_id);
                   return (
-                    <tr key={h.id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
+                    <tr
+                      key={h.id}
+                      className="border-t border-emerald-deep/5 dark:border-emerald-100/10"
+                    >
                       <td className="py-2">
-                        <div className="font-medium text-emerald-deep dark:text-emerald-100">{h.product_name}</div>
+                        <div className="font-medium text-emerald-deep dark:text-emerald-100">
+                          {h.product_name}
+                        </div>
                         <div className="text-xs text-muted-foreground">{h.product_code}</div>
                       </td>
                       <td>{h.units.toLocaleString()}</td>
@@ -265,9 +287,13 @@ function InvestmentsPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 font-serif text-lg text-emerald-deep dark:text-emerald-100">Available products</h2>
+        <h2 className="mb-3 font-serif text-lg text-emerald-deep dark:text-emerald-100">
+          Available products
+        </h2>
         {data.products.length === 0 ? (
-          <p className="text-sm text-muted-foreground dark:text-emerald-200/60">No active share products yet.</p>
+          <p className="text-sm text-muted-foreground dark:text-emerald-200/60">
+            No active share products yet.
+          </p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.products.map((p) => (
@@ -276,13 +302,17 @@ function InvestmentsPage() {
                 className="rounded-2xl border border-emerald-deep/10 bg-white p-5 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40"
               >
                 <div className="flex items-baseline justify-between">
-                  <h3 className="font-serif text-base text-emerald-deep dark:text-emerald-100">{p.name}</h3>
+                  <h3 className="font-serif text-base text-emerald-deep dark:text-emerald-100">
+                    {p.name}
+                  </h3>
                   <span className="rounded bg-emerald-deep/10 px-2 py-0.5 text-xs font-mono text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100">
                     {p.code}
                   </span>
                 </div>
                 {p.description && (
-                  <p className="mt-2 text-xs text-muted-foreground dark:text-emerald-200/60">{p.description}</p>
+                  <p className="mt-2 text-xs text-muted-foreground dark:text-emerald-200/60">
+                    {p.description}
+                  </p>
                 )}
                 <dl className="mt-4 grid grid-cols-2 gap-2 text-sm">
                   <dt className="text-muted-foreground dark:text-emerald-200/60">Unit price</dt>
@@ -299,7 +329,9 @@ function InvestmentsPage() {
                   onClick={() => setTradeState({ mode: "buy", product: p })}
                   className="mt-4 w-full rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream shadow-sm hover:bg-emerald-mid disabled:opacity-50"
                 >
-                  {data.savings_accounts.length === 0 ? "Open a savings account first" : "Buy shares"}
+                  {data.savings_accounts.length === 0
+                    ? "Open a savings account first"
+                    : "Buy shares"}
                 </button>
               </article>
             ))}
@@ -309,13 +341,17 @@ function InvestmentsPage() {
 
       <section className="rounded-2xl border border-emerald-deep/10 bg-white p-6 shadow-sm dark:border-emerald-100/10 dark:bg-emerald-950/40">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">Investment activity</h2>
+          <h2 className="font-serif text-lg text-emerald-deep dark:text-emerald-100">
+            Investment activity
+          </h2>
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-emerald-200/60">
             Immutable audit log
           </span>
         </div>
         {data.recent.length === 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground dark:text-emerald-200/60">No share transactions yet.</p>
+          <p className="mt-3 text-sm text-muted-foreground dark:text-emerald-200/60">
+            No share transactions yet.
+          </p>
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -334,15 +370,24 @@ function InvestmentsPage() {
                 {data.recent.map((t) => {
                   const isTransfer = /transfer/i.test(t.note ?? "");
                   const label = isTransfer
-                    ? t.kind === "sale" ? "Transfer out" : "Transfer in"
-                    : t.kind === "purchase" ? "Buy"
-                    : t.kind === "sale" ? "Sell"
-                    : "Dividend";
+                    ? t.kind === "sale"
+                      ? "Transfer out"
+                      : "Transfer in"
+                    : t.kind === "purchase"
+                      ? "Buy"
+                      : t.kind === "sale"
+                        ? "Sell"
+                        : "Dividend";
                   const sign = t.kind === "purchase" ? "-" : "+";
                   return (
-                    <tr key={t.id} className="border-t border-emerald-deep/5 dark:border-emerald-100/10">
+                    <tr
+                      key={t.id}
+                      className="border-t border-emerald-deep/5 dark:border-emerald-100/10"
+                    >
                       <td className="py-2 font-mono text-xs">{t.ref}</td>
-                      <td className="tabular whitespace-nowrap">{new Date(t.created_at).toLocaleString()}</td>
+                      <td className="tabular whitespace-nowrap">
+                        {new Date(t.created_at).toLocaleString()}
+                      </td>
                       <td>
                         <span className="rounded-full border border-emerald-deep/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:border-emerald-100/20 dark:text-emerald-100/80">
                           {label}
@@ -354,7 +399,10 @@ function InvestmentsPage() {
                         {sign}
                         {money(t.amount)}
                       </td>
-                      <td className="max-w-xs truncate text-xs text-muted-foreground dark:text-emerald-200/70" title={t.note ?? ""}>
+                      <td
+                        className="max-w-xs truncate text-xs text-muted-foreground dark:text-emerald-200/70"
+                        title={t.note ?? ""}
+                      >
                         {t.note || "—"}
                       </td>
                     </tr>
@@ -366,14 +414,17 @@ function InvestmentsPage() {
         )}
       </section>
 
-
       {tradeState && (
         <TradeDialog
           state={tradeState}
           accounts={data.savings_accounts}
           onCancel={() => setTradeState(null)}
           submitting={purchaseMut.isPending || sellMut.isPending}
-          error={(purchaseMut.error as Error | null)?.message ?? (sellMut.error as Error | null)?.message ?? null}
+          error={
+            (purchaseMut.error as Error | null)?.message ??
+            (sellMut.error as Error | null)?.message ??
+            null
+          }
           onSubmit={async (v) => {
             const args = { product_id: tradeState.product.id, ...v };
             return tradeState.mode === "buy"
@@ -390,19 +441,13 @@ function InvestmentsPage() {
           submitting={transferMut.isPending}
           error={(transferMut.error as Error | null)?.message ?? null}
           result={transferMut.data ?? null}
-          onSubmit={(v) =>
-            transferMut.mutate({ product_id: transferState.product.id, ...v })
-          }
+          onSubmit={(v) => transferMut.mutate({ product_id: transferState.product.id, ...v })}
         />
       )}
 
       {breakdownState && (
-        <BreakdownDialog
-          state={breakdownState}
-          onClose={() => setBreakdownState(null)}
-        />
+        <BreakdownDialog state={breakdownState} onClose={() => setBreakdownState(null)} />
       )}
-
     </div>
   );
 }
@@ -443,7 +488,11 @@ function TradeDialog({
     | { mode: "sell"; holding: ShareHolding; product: ShareProduct };
   accounts: Array<{ id: string; nickname: string | null; balance: number; plan_name: string }>;
   onCancel: () => void;
-  onSubmit: (v: { savings_account_id: string; units: number; note: string | null }) => Promise<{ id: string; ref: string }>;
+  onSubmit: (v: {
+    savings_account_id: string;
+    units: number;
+    note: string | null;
+  }) => Promise<{ id: string; ref: string }>;
   submitting: boolean;
   error: string | null;
 }) {
@@ -479,14 +528,16 @@ function TradeDialog({
           {step === "edit"
             ? "Step 1 of 2 · Details"
             : step === "review"
-            ? "Step 2 of 2 · Review & confirm"
-            : "Trade completed · Receipt"}
+              ? "Step 2 of 2 · Review & confirm"
+              : "Trade completed · Receipt"}
         </p>
 
         {step === "edit" ? (
           <div className="mt-4 space-y-3">
             <label className="block text-sm">
-              <span className="text-muted-foreground dark:text-emerald-200/70">Savings account</span>
+              <span className="text-muted-foreground dark:text-emerald-200/70">
+                Savings account
+              </span>
               <select
                 value={accountId}
                 onChange={(e) => setAccountId(e.target.value)}
@@ -513,7 +564,9 @@ function TradeDialog({
               />
             </label>
             <label className="block text-sm">
-              <span className="text-muted-foreground dark:text-emerald-200/70">Note (optional)</span>
+              <span className="text-muted-foreground dark:text-emerald-200/70">
+                Note (optional)
+              </span>
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -545,7 +598,9 @@ function TradeDialog({
                 <span className="font-semibold">{money(price, ccy)}</span>
               </div>
               <div className="mt-1 flex justify-between">
-                <span className="text-muted-foreground dark:text-emerald-200/70">Savings account</span>
+                <span className="text-muted-foreground dark:text-emerald-200/70">
+                  Savings account
+                </span>
                 <span className="font-semibold">
                   {account?.nickname ?? account?.plan_name ?? "—"}
                 </span>
@@ -587,7 +642,9 @@ function TradeDialog({
         ) : (
           <div className="mt-4 space-y-3 text-sm">
             <div className="flex items-center gap-2 rounded-md bg-emerald-mid/10 px-3 py-2 text-emerald-deep dark:bg-emerald-100/10 dark:text-emerald-100">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-mid text-cream">✓</span>
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-mid text-cream">
+                ✓
+              </span>
               <span className="text-sm font-semibold">
                 {state.mode === "buy" ? "Purchase" : "Sale"} confirmed
               </span>
@@ -599,7 +656,9 @@ function TradeDialog({
               </div>
               <div className="mt-1 flex justify-between text-xs">
                 <span className="text-muted-foreground dark:text-emerald-200/60">Timestamp</span>
-                <span className="tabular">{receipt ? new Date(receipt.timestamp).toLocaleString() : ""}</span>
+                <span className="tabular">
+                  {receipt ? new Date(receipt.timestamp).toLocaleString() : ""}
+                </span>
               </div>
               <div className="mt-1 flex justify-between text-xs">
                 <span className="text-muted-foreground dark:text-emerald-200/60">Product</span>
@@ -629,7 +688,8 @@ function TradeDialog({
               </div>
             </div>
             <p className="text-xs text-muted-foreground dark:text-emerald-200/60">
-              This receipt is your permanent record of the trade. A matching entry is filed in the immutable audit log.
+              This receipt is your permanent record of the trade. A matching entry is filed in the
+              immutable audit log.
             </p>
           </div>
         )}
@@ -701,7 +761,11 @@ function TradeDialog({
                   }}
                   className="rounded-md bg-emerald-deep px-4 py-2 text-sm font-semibold uppercase tracking-widest text-cream disabled:opacity-50"
                 >
-                  {submitting ? "Working…" : state.mode === "buy" ? "Confirm purchase" : "Confirm sale"}
+                  {submitting
+                    ? "Working…"
+                    : state.mode === "buy"
+                      ? "Confirm purchase"
+                      : "Confirm sale"}
                 </button>
               )}
             </>
@@ -711,7 +775,6 @@ function TradeDialog({
     </div>
   );
 }
-
 
 function TransferDialog({
   state,
@@ -802,7 +865,9 @@ function TransferDialog({
               />
             </label>
             <label className="block text-sm">
-              <span className="text-muted-foreground dark:text-emerald-200/70">Note (optional)</span>
+              <span className="text-muted-foreground dark:text-emerald-200/70">
+                Note (optional)
+              </span>
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -813,18 +878,22 @@ function TransferDialog({
               <div className="flex justify-between">
                 <span>Unit price</span>
                 <span className="font-semibold">
-                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(price)}
+                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(
+                    price,
+                  )}
                 </span>
               </div>
               <div className="mt-1 flex justify-between">
                 <span>Reference value</span>
                 <span className="font-semibold">
-                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(value)}
+                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(
+                    value,
+                  )}
                 </span>
               </div>
               <p className="mt-2 text-xs text-muted-foreground dark:text-emerald-200/60">
-                No cash moves between savings accounts. A proportional share of your cost basis moves
-                with the units.
+                No cash moves between savings accounts. A proportional share of your cost basis
+                moves with the units.
               </p>
             </div>
           </div>
@@ -844,7 +913,9 @@ function TransferDialog({
                   Reference value
                 </span>
                 <span className="font-semibold">
-                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(value)}
+                  {new Intl.NumberFormat("en-GH", { style: "currency", currency: ccy }).format(
+                    value,
+                  )}
                 </span>
               </div>
               <div className="mt-1 flex justify-between">
@@ -969,9 +1040,7 @@ function BreakdownDialog({
                 value={
                   <span className={gainClass(data.unrealized_gain)}>
                     {fmt(data.unrealized_gain)}
-                    <span className="ml-1 text-xs">
-                      ({data.unrealized_gain_pct.toFixed(2)}%)
-                    </span>
+                    <span className="ml-1 text-xs">({data.unrealized_gain_pct.toFixed(2)}%)</span>
                   </span>
                 }
               />
@@ -1041,7 +1110,9 @@ function BreakdownDialog({
                             {fmt(lot.amount)}
                           </td>
                           <td className="text-right">{fmt(lot.running_avg_cost)}</td>
-                          <td className={`text-right ${lot.realized_gain != null ? gainClass(lot.realized_gain) : "text-muted-foreground"}`}>
+                          <td
+                            className={`text-right ${lot.realized_gain != null ? gainClass(lot.realized_gain) : "text-muted-foreground"}`}
+                          >
                             {lot.realized_gain != null ? fmt(lot.realized_gain) : "—"}
                           </td>
                         </tr>
@@ -1052,8 +1123,8 @@ function BreakdownDialog({
               </div>
             )}
             <p className="mt-4 text-xs text-muted-foreground dark:text-emerald-200/50">
-              Realized P/L uses the weighted-average cost method. Transfers between members
-              move cost basis but are not recorded as realized gains or losses.
+              Realized P/L uses the weighted-average cost method. Transfers between members move
+              cost basis but are not recorded as realized gains or losses.
             </p>
           </>
         )}

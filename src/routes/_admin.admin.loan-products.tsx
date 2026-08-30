@@ -3,8 +3,21 @@ import { Suspense, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { EmptyState, ErrorState, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,9 +35,15 @@ export const Route = createFileRoute("/_admin/admin/loan-products")({
   head: () => ({
     meta: [
       { title: "Loan Products & Eligibility — Admin" },
-      { name: "description", content: "Manage the loan product catalogue, pricing, limits and eligibility rules." },
+      {
+        name: "description",
+        content: "Manage the loan product catalogue, pricing, limits and eligibility rules.",
+      },
       { property: "og:title", content: "Loan Products & Eligibility" },
-      { property: "og:description", content: "Loan product catalogue with limits, pricing and eligibility rules." },
+      {
+        property: "og:description",
+        content: "Loan product catalogue with limits, pricing and eligibility rules.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -37,7 +56,11 @@ function PageError({ error }: { error: Error }) {
   const router = useRouter();
   return (
     <div className="p-6">
-      <ErrorState title="Loan products failed to load" message={error.message} onRetry={() => router.invalidate()} />
+      <ErrorState
+        title="Loan products failed to load"
+        message={error.message}
+        onRetry={() => router.invalidate()}
+      />
     </div>
   );
 }
@@ -134,7 +157,10 @@ function ProductsContent() {
 
       <SectionCard title={`Product catalogue (${products.length})`}>
         {products.length === 0 ? (
-          <EmptyState title="No loan products" hint="Create your first product to enable applications." />
+          <EmptyState
+            title="No loan products"
+            hint="Create your first product to enable applications."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -165,7 +191,8 @@ function ProductsContent() {
                     <td className="py-3 pr-4">
                       <div>{p.interest_rate}% p.a.</div>
                       <div className="text-xs text-muted-foreground">
-                        fee {p.processing_fee_pct}% · late {p.late_fee_pct}% after {p.late_fee_grace_days}d
+                        fee {p.processing_fee_pct}% · late {p.late_fee_pct}% after{" "}
+                        {p.late_fee_grace_days}d
                       </div>
                     </td>
                     <td className="py-3 pr-4 text-xs text-muted-foreground">
@@ -306,7 +333,10 @@ function ProductDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Name</Label>
-            <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+            <Input
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            />
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label>Description</Label>

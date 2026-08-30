@@ -35,7 +35,9 @@ export type MemberDirectoryAccount = {
 export const listMyTransfers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ status: z.enum(["all", "pending", "cleared", "failed"]).default("all") }).parse(d ?? {}),
+    z
+      .object({ status: z.enum(["all", "pending", "cleared", "failed"]).default("all") })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<MyTransferRow[]> => {
     // Find my accounts first so we can label direction correctly.
@@ -58,7 +60,9 @@ export const listMyTransfers = createServerFn({ method: "GET" })
       // Fallback: no joins available
       const { data: r2 } = await context.supabase
         .from("transfers")
-        .select("id, ref, from_account_id, to_account_id, amount, status, channel, note, created_at, cleared_at")
+        .select(
+          "id, ref, from_account_id, to_account_id, amount, status, channel, note, created_at, cleared_at",
+        )
         .order("created_at", { ascending: false })
         .limit(200);
       return ((r2 ?? []) as any[]).map((t) => ({
@@ -73,7 +77,9 @@ export const listMyTransfers = createServerFn({ method: "GET" })
         created_at: t.created_at,
         cleared_at: t.cleared_at,
         direction: mine.has(t.from_account_id) ? "out" : "in",
-        counterparty_label: mine.has(t.from_account_id) ? t.to_account_id.slice(0, 8) : t.from_account_id.slice(0, 8),
+        counterparty_label: mine.has(t.from_account_id)
+          ? t.to_account_id.slice(0, 8)
+          : t.from_account_id.slice(0, 8),
       }));
     }
     return ((rows ?? []) as any[]).map((t) => {
@@ -120,11 +126,15 @@ export const listMyTransferAccounts = createServerFn({ method: "GET" })
 // We limit to member_no (masked identifier) and plan for privacy — no email.
 export const listTransferableAccounts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ search: z.string().trim().max(80).optional() }).parse(d ?? {}))
+  .inputValidator((d: unknown) =>
+    z.object({ search: z.string().trim().max(80).optional() }).parse(d ?? {}),
+  )
   .handler(async ({ data, context }): Promise<MemberDirectoryAccount[]> => {
     let q: any = (context.supabase as any)
       .from("savings_accounts")
-      .select("id, user_id, profiles!savings_accounts_user_id_profiles_fkey!inner(full_name, member_no), savings_plans(name)")
+      .select(
+        "id, user_id, profiles!savings_accounts_user_id_profiles_fkey!inner(full_name, member_no), savings_plans(name)",
+      )
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(200);

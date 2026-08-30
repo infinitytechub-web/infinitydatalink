@@ -16,7 +16,6 @@ export type PendingUserRow = {
   created_at: string;
 };
 
-
 async function assertReviewer(supabase: any, userId: string) {
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) throw new Error(error.message);
@@ -41,7 +40,9 @@ export const listPendingUsers = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
     z
       .object({
-        status: z.enum(["pending", "rejected", "deactivated", "approved", "all"]).default("pending"),
+        status: z
+          .enum(["pending", "rejected", "deactivated", "approved", "all"])
+          .default("pending"),
         membership_type: z
           .enum(["individual", "group", "department", "institution", "all"])
           .optional()
@@ -69,13 +70,20 @@ export const listPendingUsers = createServerFn({ method: "GET" })
     }
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: profiles, count, error } = await q.order("created_at", { ascending: false }).range(from, to);
+    const {
+      data: profiles,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, to);
     if (error) throw new Error(error.message);
     // Fetch emails from auth.users via admin
     const ids = (profiles ?? []).map((p: any) => p.id);
     const emailMap = new Map<string, string>();
     if (ids.length) {
-      const { data: usersRes } = await (supabaseAdmin as any).auth.admin.listUsers({ page: 1, perPage: 200 });
+      const { data: usersRes } = await (supabaseAdmin as any).auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      });
       for (const u of usersRes?.users ?? []) {
         if (u.email && ids.includes(u.id)) emailMap.set(u.id, u.email);
       }
@@ -129,7 +137,8 @@ export const approveUser = createServerFn({ method: "POST" })
       _user_id: data.user_id,
       _category: "account.registration.approved",
       _title: "Membership approved",
-      _body: "Your registration has been approved. Sign in and complete your KYC verification to unlock your dashboard.",
+      _body:
+        "Your registration has been approved. Sign in and complete your KYC verification to unlock your dashboard.",
       _link: "/app/kyc",
       _meta: { note: data.note ?? null },
       _dedupe_key: `user.approved:${data.user_id}`,
@@ -138,14 +147,10 @@ export const approveUser = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
-
 export const rejectUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z
-      .object({ user_id: z.string().uuid(), reason: z.string().trim().min(3).max(500) })
-      .parse(d),
+    z.object({ user_id: z.string().uuid(), reason: z.string().trim().min(3).max(500) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     const actorRole = await assertReviewerRole(context.supabase, context.userId);
@@ -243,9 +248,7 @@ export const getMyApprovalStatus = createServerFn({ method: "GET" })
 export const deleteUserPermanently = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z
-      .object({ user_id: z.string().uuid(), reason: z.string().trim().min(10).max(500) })
-      .parse(d),
+    z.object({ user_id: z.string().uuid(), reason: z.string().trim().min(10).max(500) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     const { data: roleRows, error: roleErr } = await context.supabase

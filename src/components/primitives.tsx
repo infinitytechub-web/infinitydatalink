@@ -3,7 +3,13 @@ import { AlertTriangle, Inbox, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/org-config";
 import { Skeleton } from "@/components/ui/skeleton";
-import { KPI_TONES, SECTION_ACCENT, STATUS_PILL, pickTone, type ToneName } from "@/lib/theme-tokens";
+import {
+  KPI_TONES,
+  SECTION_ACCENT,
+  STATUS_PILL,
+  pickTone,
+  type ToneName,
+} from "@/lib/theme-tokens";
 
 /** Backwards-compat alias; tone names now live in the shared token module. */
 export type KPITone = ToneName;
@@ -50,15 +56,18 @@ export function KPIStat({
       <p className={cn("mb-3 text-[10.5px] font-semibold uppercase tracking-[0.14em]", t.label)}>
         {label}
       </p>
-      <h2 className={cn("font-display text-3xl font-bold tracking-tight tabular-nums drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]", t.value)}>
+      <h2
+        className={cn(
+          "font-display text-3xl font-bold tracking-tight tabular-nums drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]",
+          t.value,
+        )}
+      >
         {value}
       </h2>
       {hint ? <div className={cn("mt-4 text-[11px] font-medium", t.hint)}>{hint}</div> : null}
     </div>
   );
 }
-
-
 
 export function Money({ amount, signed }: { amount: number; signed?: boolean }) {
   const sign = signed ? (amount > 0 ? "+ " : amount < 0 ? "- " : "") : "";
@@ -111,7 +120,10 @@ export function SectionCard({
         className,
       )}
     >
-      <span aria-hidden="true" className={cn("absolute inset-x-0 top-0 h-0.5 opacity-70", SECTION_ACCENT(accent))} />
+      <span
+        aria-hidden="true"
+        className={cn("absolute inset-x-0 top-0 h-0.5 opacity-70", SECTION_ACCENT(accent))}
+      />
       <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-border/60 bg-linear-to-b from-muted/40 to-transparent px-5 py-3.5">
         <h3 className="min-w-0 basis-full font-display text-base font-semibold tracking-tight text-foreground sm:basis-auto">
           {title}
@@ -119,13 +131,10 @@ export function SectionCard({
         {action}
       </header>
 
-
       {children}
     </section>
   );
 }
-
-
 
 export function PageHeader({
   eyebrow,
@@ -146,7 +155,9 @@ export function PageHeader({
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="truncate font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
+        <h1 className="truncate font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {title}
+        </h1>
         {description ? (
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
         ) : null}
@@ -214,9 +225,7 @@ export function ErrorState({
         <AlertTriangle className="size-5" aria-hidden="true" />
       </div>
       <p className="font-serif text-lg text-foreground">{title}</p>
-      {message ? (
-        <p className="max-w-md text-xs text-muted-foreground">{message}</p>
-      ) : null}
+      {message ? <p className="max-w-md text-xs text-muted-foreground">{message}</p> : null}
       {onRetry ? (
         <button
           type="button"
@@ -240,10 +249,15 @@ export function KPIStatSkeleton({ accent }: { accent?: boolean } = {}) {
       className={cn(
         "relative overflow-hidden rounded-xl border p-4",
         "shadow-[var(--shadow-elevated)]",
-        accent ? "border-primary/30 bg-linear-to-br from-primary/5 via-card to-card" : "border-border bg-card",
+        accent
+          ? "border-primary/30 bg-linear-to-br from-primary/5 via-card to-card"
+          : "border-border bg-card",
       )}
     >
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-border to-transparent"
+      />
       <Skeleton className="mb-3 h-3 w-24" />
       <Skeleton className="h-8 w-32" />
       <Skeleton className="mt-4 h-3 w-40" />
@@ -258,7 +272,11 @@ export function KPIGridSkeleton({ count = 4 }: { count?: number }) {
       aria-label="Loading key figures"
       className={cn(
         "grid gap-4",
-        count === 2 ? "md:grid-cols-2" : count === 3 ? "md:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-4",
+        count === 2
+          ? "md:grid-cols-2"
+          : count === 3
+            ? "md:grid-cols-3"
+            : "md:grid-cols-2 lg:grid-cols-4",
       )}
     >
       {Array.from({ length: count }).map((_, i) => (
@@ -300,7 +318,10 @@ export function TableSkeleton({
             {Array.from({ length: cols }).map((_, c) => (
               <Skeleton
                 key={c}
-                className={cn("h-4", c === 0 ? "w-36" : c === cols - 1 ? "w-16 justify-self-end" : "w-24")}
+                className={cn(
+                  "h-4",
+                  c === 0 ? "w-36" : c === cols - 1 ? "w-16 justify-self-end" : "w-24",
+                )}
               />
             ))}
           </div>
@@ -334,4 +355,3 @@ export function SectionCardSkeleton({
     </section>
   );
 }
-

@@ -18,9 +18,7 @@ export const LiveDot = memo(function LiveDot({ className }: { className?: string
       <span
         className={cn(
           "relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500",
-          reduced
-            ? "ring-2 ring-emerald-600/60"
-            : "shadow-[0_0_8px_rgba(16,185,129,0.9)]",
+          reduced ? "ring-2 ring-emerald-600/60" : "shadow-[0_0_8px_rgba(16,185,129,0.9)]",
         )}
       />
     </span>
@@ -107,7 +105,12 @@ export const SidebarOnlinePanel = memo(function SidebarOnlinePanel({
       className="rounded-xl bg-white/5 p-3 ring-1 ring-inset ring-white/10"
       aria-label="Online users"
     >
-      <div className="mb-2 flex items-center gap-2" role="status" aria-live="polite" aria-atomic="true">
+      <div
+        className="mb-2 flex items-center gap-2"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         <LiveDot />
         <span className="sr-only">{label}</span>
         <span
@@ -145,10 +148,7 @@ export const SidebarOnlinePanel = memo(function SidebarOnlinePanel({
               <span className="min-w-0 flex-1 truncate text-[11px] text-white/85">
                 {u.name}
                 {u.token === meId ? <span className="text-white/75"> (you)</span> : null}
-                <span className="sr-only">
-                  {" "}
-                  — online{u.role === "Staff" ? ", staff" : ""}
-                </span>
+                <span className="sr-only"> — online{u.role === "Staff" ? ", staff" : ""}</span>
               </span>
 
               {u.role === "Staff" ? (

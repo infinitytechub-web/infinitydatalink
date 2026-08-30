@@ -23,7 +23,6 @@ const realtimeSsrStub = fileURLToPath(
 // interop entirely.
 const tslibEsm = fileURLToPath(new URL("./node_modules/tslib/tslib.es6.mjs", import.meta.url));
 
-
 // Opt-in bundle analyzer: run `BUNDLE_ANALYZE=1 bun run build` to emit
 // dist/stats.html with an interactive treemap of the client bundle.
 const analyze = process.env.BUNDLE_ANALYZE === "1";

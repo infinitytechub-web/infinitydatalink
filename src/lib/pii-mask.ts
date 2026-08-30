@@ -25,7 +25,13 @@ export function maskEmail(value: string | null | undefined): string | null {
 }
 
 /** Roles allowed to see raw contact details on guarantor / entity records. */
-const FULL_CONTACT_ROLES = new Set(["super_admin", "compliance_officer", "loan_officer", "finance_officer", "support_officer"]);
+const FULL_CONTACT_ROLES = new Set([
+  "super_admin",
+  "compliance_officer",
+  "loan_officer",
+  "finance_officer",
+  "support_officer",
+]);
 
 export function canSeeRawContacts(roles: Iterable<string>): boolean {
   for (const r of roles) if (FULL_CONTACT_ROLES.has(r)) return true;

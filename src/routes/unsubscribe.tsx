@@ -21,9 +21,9 @@ export const Route = createFileRoute("/unsubscribe")({
 
 function UnsubscribePage() {
   const { token } = Route.useSearch();
-  const [state, setState] = useState<"loading" | "confirm" | "already" | "invalid" | "done" | "error">(
-    "loading",
-  );
+  const [state, setState] = useState<
+    "loading" | "confirm" | "already" | "invalid" | "done" | "error"
+  >("loading");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -73,7 +73,9 @@ function UnsubscribePage() {
           {state === "invalid" && (
             <p className="text-destructive">This unsubscribe link is invalid or has expired.</p>
           )}
-          {state === "already" && <p>You've already been unsubscribed. No further emails will be sent.</p>}
+          {state === "already" && (
+            <p>You've already been unsubscribed. No further emails will be sent.</p>
+          )}
           {state === "confirm" && (
             <div className="space-y-4">
               <p>Click below to confirm you want to stop receiving emails from IT-360 CashApp.</p>

@@ -132,7 +132,13 @@ function WithdrawalsPage() {
           <Select
             value={search.status}
             onValueChange={(v) =>
-              navigate({ search: (p: SearchParams) => ({ ...p, status: v as SearchParams["status"], page: 1 }) })
+              navigate({
+                search: (p: SearchParams) => ({
+                  ...p,
+                  status: v as SearchParams["status"],
+                  page: 1,
+                }),
+              })
             }
           >
             <SelectTrigger>
@@ -156,7 +162,13 @@ function WithdrawalsPage() {
               type="date"
               value={search.date_from ?? ""}
               onChange={(e) =>
-                navigate({ search: (p: SearchParams) => ({ ...p, date_from: e.target.value || undefined, page: 1 }) })
+                navigate({
+                  search: (p: SearchParams) => ({
+                    ...p,
+                    date_from: e.target.value || undefined,
+                    page: 1,
+                  }),
+                })
               }
               className="block h-9 rounded-md border border-border bg-background px-2 text-sm"
             />
@@ -169,7 +181,13 @@ function WithdrawalsPage() {
               type="date"
               value={search.date_to ?? ""}
               onChange={(e) =>
-                navigate({ search: (p: SearchParams) => ({ ...p, date_to: e.target.value || undefined, page: 1 }) })
+                navigate({
+                  search: (p: SearchParams) => ({
+                    ...p,
+                    date_to: e.target.value || undefined,
+                    page: 1,
+                  }),
+                })
               }
               className="block h-9 rounded-md border border-border bg-background px-2 text-sm"
             />
@@ -184,12 +202,16 @@ function WithdrawalsPage() {
               onChange={(e) => setTerm(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter")
-                  navigate({ search: (p: SearchParams) => ({ ...p, q: term || undefined, page: 1 }) });
+                  navigate({
+                    search: (p: SearchParams) => ({ ...p, q: term || undefined, page: 1 }),
+                  });
               }}
             />
             <Button
               variant="secondary"
-              onClick={() => navigate({ search: (p: SearchParams) => ({ ...p, q: term || undefined, page: 1 }) })}
+              onClick={() =>
+                navigate({ search: (p: SearchParams) => ({ ...p, q: term || undefined, page: 1 }) })
+              }
             >
               <Search className="size-4" />
             </Button>
@@ -281,7 +303,11 @@ function QueueBody({ search }: { search: SearchParams }) {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KPIStat label="Pending review" value={String(list.counts.pending)} tone="gold" />
-        <KPIStat label="Approved, awaiting payout" value={String(list.counts.approved)} tone="royal" />
+        <KPIStat
+          label="Approved, awaiting payout"
+          value={String(list.counts.approved)}
+          tone="royal"
+        />
         <KPIStat label="Paid out" value={String(list.counts.paid)} tone="emerald" />
         <KPIStat
           label="Value on hold"
@@ -452,11 +478,15 @@ function RequestRow({
       </td>
       <td className="py-3 pr-4">
         <div className="font-medium">{row.member_name ?? "Member"}</div>
-        <div className="text-xs text-muted-foreground">{row.member_no ?? row.user_id.slice(0, 8)}</div>
+        <div className="text-xs text-muted-foreground">
+          {row.member_no ?? row.user_id.slice(0, 8)}
+        </div>
       </td>
       <td className="py-3 pr-4">
         <div>{row.account_label}</div>
-        <div className="text-xs text-muted-foreground capitalize">{row.channel.replace(/_/g, " ")}</div>
+        <div className="text-xs text-muted-foreground capitalize">
+          {row.channel.replace(/_/g, " ")}
+        </div>
       </td>
       <td className="py-3 pr-4 font-semibold">
         <Money amount={row.amount} />
@@ -500,7 +530,7 @@ function RequestRow({
                 ? `Cancelled${row.cancelled_at ? ` ${new Date(row.cancelled_at).toLocaleString()}` : ""}${
                     row.cancellation_reason ? ` — ${row.cancellation_reason}` : ""
                   }${row.cancelled_by_role && row.cancelled_by_role !== "member" ? " (staff)" : ""}`
-                : row.rejection_reason ?? "—"}
+                : (row.rejection_reason ?? "—")}
           </span>
         )}
 
@@ -605,11 +635,21 @@ function SettingsButton() {
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="p-min">Minimum</Label>
-                <Input id="p-min" type="number" value={min} onChange={(e) => setMin(e.target.value)} />
+                <Input
+                  id="p-min"
+                  type="number"
+                  value={min}
+                  onChange={(e) => setMin(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="p-max">Maximum</Label>
-                <Input id="p-max" type="number" value={max} onChange={(e) => setMax(e.target.value)} />
+                <Input
+                  id="p-max"
+                  type="number"
+                  value={max}
+                  onChange={(e) => setMax(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="p-daily">Daily cap</Label>
@@ -737,7 +777,9 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
     onSuccess: (res) => {
       if (res.ok.length) toast.success(`Cancelled ${res.ok.length} request(s)`);
       if (res.failed.length)
-        toast.error(`${res.failed.length} could not be cancelled: ${friendlyError(res.failed[0].error)}`);
+        toast.error(
+          `${res.failed.length} could not be cancelled: ${friendlyError(res.failed[0].error)}`,
+        );
       setOpen(false);
       setNotes({});
       onDone();
@@ -829,7 +871,11 @@ function BulkCancelBar({ rows, onDone }: { rows: WithdrawalRequest[]; onDone: ()
             <Button variant="ghost" onClick={() => setOpen(false)}>
               Back
             </Button>
-            <Button variant="destructive" disabled={!ready || run.isPending} onClick={() => run.mutate()}>
+            <Button
+              variant="destructive"
+              disabled={!ready || run.isPending}
+              onClick={() => run.mutate()}
+            >
               {run.isPending ? "Cancelling…" : `Cancel ${rows.length} requests`}
             </Button>
           </DialogFooter>

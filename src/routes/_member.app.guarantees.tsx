@@ -14,9 +14,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatMoney } from "@/lib/org-config";
-import { listMyGuarantees, respondToGuarantee, type MyGuaranteeRow } from "@/lib/loan-security.functions";
+import {
+  listMyGuarantees,
+  respondToGuarantee,
+  type MyGuaranteeRow,
+} from "@/lib/loan-security.functions";
 
 export const Route = createFileRoute("/_member/app/guarantees")({
   head: () => ({
@@ -24,10 +34,14 @@ export const Route = createFileRoute("/_member/app/guarantees")({
       { title: "My Guarantees — Member Portal" },
       {
         name: "description",
-        content: "Review loans you have been asked to guarantee, accept or decline consent, and track your exposure.",
+        content:
+          "Review loans you have been asked to guarantee, accept or decline consent, and track your exposure.",
       },
       { property: "og:title", content: "My Guarantees" },
-      { property: "og:description", content: "Accept or decline guarantee requests and track your guaranteed exposure." },
+      {
+        property: "og:description",
+        content: "Accept or decline guarantee requests and track your guaranteed exposure.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -40,7 +54,11 @@ function PageError({ error }: { error: Error }) {
   const router = useRouter();
   return (
     <div className="p-6">
-      <ErrorState title="Guarantees failed to load" message={error.message} onRetry={() => router.invalidate()} />
+      <ErrorState
+        title="Guarantees failed to load"
+        message={error.message}
+        onRetry={() => router.invalidate()}
+      />
     </div>
   );
 }
@@ -67,11 +85,16 @@ function GuaranteesPage() {
 
 function GuaranteesContent() {
   const { data: rows } = useSuspenseQuery(guaranteesQuery);
-  const [responding, setResponding] = useState<{ row: MyGuaranteeRow; accept: boolean } | null>(null);
+  const [responding, setResponding] = useState<{ row: MyGuaranteeRow; accept: boolean } | null>(
+    null,
+  );
 
   const pending = rows.filter((r) => r.consent === "pending");
   const exposure = rows
-    .filter((r) => r.consent === "accepted" && (r.loan_status === "active" || r.loan_status === "approved"))
+    .filter(
+      (r) =>
+        r.consent === "accepted" && (r.loan_status === "active" || r.loan_status === "approved"),
+    )
     .reduce((sum, r) => sum + r.guaranteed_amount, 0);
 
   return (
@@ -100,18 +123,25 @@ function GuaranteesContent() {
                     <td className="py-3 pr-4">
                       <div className="font-mono text-xs">{r.loan_ref ?? "—"}</div>
                       <div className="text-xs text-muted-foreground">
-                        {r.loan_amount != null ? formatMoney(r.loan_amount) : ""} {r.loan_status ?? ""}
+                        {r.loan_amount != null ? formatMoney(r.loan_amount) : ""}{" "}
+                        {r.loan_status ?? ""}
                       </div>
                     </td>
                     <td className="py-3 pr-4">
                       <div>{r.borrower_name ?? "—"}</div>
-                      {r.relationship && <div className="text-xs text-muted-foreground">{r.relationship}</div>}
+                      {r.relationship && (
+                        <div className="text-xs text-muted-foreground">{r.relationship}</div>
+                      )}
                     </td>
                     <td className="py-3 pr-4">{formatMoney(r.guaranteed_amount)}</td>
                     <td className="py-3 pr-4">
                       <StatusPill
                         status={
-                          r.consent === "accepted" ? "approved" : r.consent === "declined" ? "rejected" : "pending"
+                          r.consent === "accepted"
+                            ? "approved"
+                            : r.consent === "declined"
+                              ? "rejected"
+                              : "pending"
                         }
                       />
                       {r.consent_at && (
@@ -119,7 +149,9 @@ function GuaranteesContent() {
                           {new Date(r.consent_at).toLocaleDateString()}
                         </div>
                       )}
-                      {r.consent_note && <div className="text-xs text-muted-foreground">“{r.consent_note}”</div>}
+                      {r.consent_note && (
+                        <div className="text-xs text-muted-foreground">“{r.consent_note}”</div>
+                      )}
                     </td>
                     <td className="py-3">
                       {r.consent === "pending" ? (
@@ -127,7 +159,11 @@ function GuaranteesContent() {
                           <Button size="sm" onClick={() => setResponding({ row: r, accept: true })}>
                             Accept
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => setResponding({ row: r, accept: false })}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setResponding({ row: r, accept: false })}
+                          >
                             Decline
                           </Button>
                         </div>
@@ -145,9 +181,10 @@ function GuaranteesContent() {
 
       <SectionCard title="Your exposure">
         <p className="text-sm text-muted-foreground">
-          You are currently guaranteeing <span className="font-semibold text-foreground">{formatMoney(exposure)}</span>{" "}
-          across live loans. Accepting a guarantee means the institution may recover the guaranteed amount from you if
-          the borrower defaults.
+          You are currently guaranteeing{" "}
+          <span className="font-semibold text-foreground">{formatMoney(exposure)}</span> across live
+          loans. Accepting a guarantee means the institution may recover the guaranteed amount from
+          you if the borrower defaults.
         </p>
       </SectionCard>
 

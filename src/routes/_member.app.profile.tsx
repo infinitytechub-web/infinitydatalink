@@ -3,7 +3,17 @@ import { Suspense, useRef, useState } from "react";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, FileText, Loader2, Lock, Trash2, Upload, X, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  FileText,
+  Loader2,
+  Lock,
+  Trash2,
+  Upload,
+  X,
+  XCircle,
+} from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/primitives";
 import { PasskeyEnrollmentCard } from "@/components/passkey-enrollment";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,10 +45,7 @@ import {
 
 export const Route = createFileRoute("/_member/app/profile")({
   head: () => ({
-    meta: [
-      { title: "Profile & KYC — IT-360 CashApp" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Profile & KYC — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
   }),
   component: ProfilePage,
   errorComponent: ({ error }) => (
@@ -72,7 +79,11 @@ function ProfileBody() {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <KycBanner status={data.profile.kyc} notes={data.profile.kyc_notes} reviewedAt={data.profile.kyc_reviewed_at} />
+        <KycBanner
+          status={data.profile.kyc}
+          notes={data.profile.kyc_notes}
+          reviewedAt={data.profile.kyc_reviewed_at}
+        />
         <PersonalDetailsForm profile={data.profile} />
         <NextOfKinSection rows={data.next_of_kin} />
         <DocumentsSection documents={data.documents} />
@@ -96,7 +107,10 @@ function KycBanner({
   notes: string | null;
   reviewedAt: string | null;
 }) {
-  const map: Record<ProfileKycStatus, { label: string; hint: string; className: string; Icon: typeof Clock }> = {
+  const map: Record<
+    ProfileKycStatus,
+    { label: string; hint: string; className: string; Icon: typeof Clock }
+  > = {
     pending: {
       label: "Verification pending",
       hint: "Upload the required documents below. A reviewer will approve or reject shortly.",
@@ -165,8 +179,9 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const setField = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
+  const setField =
+    (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }));
 
   return (
     <SectionCard title="Personal details">
@@ -177,9 +192,19 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
           mutation.mutate();
         }}
       >
-        <TextField label="Full name" value={form.full_name} onChange={setField("full_name")} required />
+        <TextField
+          label="Full name"
+          value={form.full_name}
+          onChange={setField("full_name")}
+          required
+        />
         <TextField label="Email" value={profile.email ?? ""} onChange={() => {}} disabled />
-        <TextField label="Phone" value={form.phone} onChange={setField("phone")} placeholder="+233 …" />
+        <TextField
+          label="Phone"
+          value={form.phone}
+          onChange={setField("phone")}
+          placeholder="+233 …"
+        />
         <DateOfBirthField
           value={form.date_of_birth}
           onChange={(v) => setForm((f) => ({ ...f, date_of_birth: v }))}
@@ -198,8 +223,18 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
           onRegionChange={(v) => setForm((f) => ({ ...f, region: v }))}
           onDistrictChange={(v) => setForm((f) => ({ ...f, district: v }))}
         />
-        <TextField label="Digital address" value={form.digital_address} onChange={setField("digital_address")} placeholder="GA-123-4567" />
-        <TextField label="Residential address" value={form.address_line} onChange={setField("address_line")} className="sm:col-span-2" />
+        <TextField
+          label="Digital address"
+          value={form.digital_address}
+          onChange={setField("digital_address")}
+          placeholder="GA-123-4567"
+        />
+        <TextField
+          label="Residential address"
+          value={form.address_line}
+          onChange={setField("address_line")}
+          className="sm:col-span-2"
+        />
         <NationalIdFields
           idType={form.national_id_type}
           idNumber={form.national_id}
@@ -209,8 +244,12 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfileFull["profile"
           lockedHint={identityLocked ? "Locked after verification" : undefined}
         />
         <TextField label="Occupation" value={form.occupation} onChange={setField("occupation")} />
-        <TextField label="Employer" value={form.employer} onChange={setField("employer")} className="sm:col-span-2" />
-
+        <TextField
+          label="Employer"
+          value={form.employer}
+          onChange={setField("employer")}
+          className="sm:col-span-2"
+        />
 
         <div className="flex items-center justify-end gap-2 sm:col-span-2">
           {identityLocked ? (
@@ -310,14 +349,14 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
         <span className="font-bold uppercase tracking-widest">Note · Private</span>
         <br />
         Visible only to you and compliance staff during a KYC review. Never shown to other members,
-        and identity numbers are masked in staff views. Only add details you have your contact&apos;s
-        permission to share.
+        and identity numbers are masked in staff views. Only add details you have your
+        contact&apos;s permission to share.
       </div>
       {rows.length === 0 ? (
         <div className="p-6 text-sm text-muted-foreground">
-          No next of kin recorded. Add at least one trusted contact for account recovery and beneficiary purposes.
+          No next of kin recorded. Add at least one trusted contact for account recovery and
+          beneficiary purposes.
         </div>
-
       ) : (
         <ul className="divide-y divide-emerald-deep/5">
           {rows.map((r) => (
@@ -329,7 +368,9 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
                   {r.phone ? ` · ${r.phone}` : ""}
                   {r.email ? ` · ${r.email}` : ""}
                 </p>
-                {r.address ? <p className="text-[11px] text-muted-foreground">{r.address}</p> : null}
+                {r.address ? (
+                  <p className="text-[11px] text-muted-foreground">{r.address}</p>
+                ) : null}
               </div>
               <div className="flex items-center gap-1.5">
                 <button
@@ -343,7 +384,6 @@ function NextOfKinSection({ rows }: { rows: NextOfKin[] }) {
                       national_id: r.national_id ?? "",
                       national_id_type: r.national_id_type ?? DEFAULT_NATIONAL_ID_TYPE,
                       address: r.address ?? "",
-
                     })
                   }
                   className="rounded border border-emerald-deep/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream"
@@ -411,7 +451,12 @@ function NokDialog({
             onSave();
           }}
         >
-          <TextField label="Full name" value={value.full_name} onChange={set("full_name")} required />
+          <TextField
+            label="Full name"
+            value={value.full_name}
+            onChange={set("full_name")}
+            required
+          />
           <RelationshipSelect
             value={value.relationship}
             onChange={(v) => onChange({ ...value, relationship: v })}
@@ -426,7 +471,12 @@ function NokDialog({
             onNumberChange={(v) => onChange({ ...value, national_id: v })}
           />
 
-          <TextField label="Address" value={value.address} onChange={set("address")} className="sm:col-span-2" />
+          <TextField
+            label="Address"
+            value={value.address}
+            onChange={set("address")}
+            className="sm:col-span-2"
+          />
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button
               type="button"
@@ -458,7 +508,12 @@ const DOC_LABELS: Record<KycDocType, string> = {
   other: "Other",
 };
 
-const DOC_SLOTS: KycDocType[] = ["national_id_front", "national_id_back", "selfie", "proof_of_address"];
+const DOC_SLOTS: KycDocType[] = [
+  "national_id_front",
+  "national_id_back",
+  "selfie",
+  "proof_of_address",
+];
 
 function DocumentsSection({ documents }: { documents: KycDocument[] }) {
   const grouped = new Map<KycDocType, KycDocument[]>();
@@ -475,7 +530,13 @@ function DocumentsSection({ documents }: { documents: KycDocument[] }) {
         {DOC_SLOTS.map((t) => (
           <DocumentSlot key={t} type={t} label={DOC_LABELS[t]} docs={grouped.get(t) ?? []} />
         ))}
-        <DocumentSlot key="other" type="other" label={DOC_LABELS.other} docs={others} className="sm:col-span-2" />
+        <DocumentSlot
+          key="other"
+          type="other"
+          label={DOC_LABELS.other}
+          docs={others}
+          className="sm:col-span-2"
+        />
       </div>
     </SectionCard>
   );
@@ -546,7 +607,11 @@ function DocumentSlot({
           disabled={uploading}
           className="inline-flex items-center gap-1 rounded border border-emerald-deep/15 px-2 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-cream disabled:opacity-50"
         >
-          {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+          {uploading ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Upload className="h-3 w-3" />
+          )}
           {uploading ? "Uploading" : "Upload"}
         </button>
         <input
@@ -562,16 +627,22 @@ function DocumentSlot({
       ) : (
         <ul className="mt-3 space-y-2">
           {docs.map((d) => (
-            <li key={d.id} className="flex items-center justify-between gap-2 rounded bg-cream/50 px-3 py-2 text-xs">
+            <li
+              key={d.id}
+              className="flex items-center justify-between gap-2 rounded bg-cream/50 px-3 py-2 text-xs"
+            >
               <div className="flex min-w-0 items-center gap-2">
                 <FileText className="h-3 w-3 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
                   <p className="truncate">{d.storage_path.split("/").pop()}</p>
                   <p className="text-[10px] text-muted-foreground">
-                    Uploaded {new Date(d.created_at).toLocaleDateString()} · {(d.size_bytes / 1024).toFixed(0)} KB
+                    Uploaded {new Date(d.created_at).toLocaleDateString()} ·{" "}
+                    {(d.size_bytes / 1024).toFixed(0)} KB
                   </p>
                   {d.status === "rejected" && d.review_notes ? (
-                    <p className="mt-0.5 text-[10px] text-destructive">Reviewer: {d.review_notes}</p>
+                    <p className="mt-0.5 text-[10px] text-destructive">
+                      Reviewer: {d.review_notes}
+                    </p>
                   ) : null}
                 </div>
               </div>
@@ -604,7 +675,9 @@ function DocStatusPill({ status }: { status: KycDocStatus }) {
     rejected: "bg-destructive/10 text-destructive",
   } as const;
   return (
-    <span className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${map[status]}`}>
+    <span
+      className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${map[status]}`}
+    >
       {status}
     </span>
   );
@@ -616,7 +689,9 @@ function RegionPresetCard() {
   const [region, setRegion] = useState(cfg.id);
   return (
     <div className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Region preset</p>
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        Region preset
+      </p>
       <select
         value={region}
         onChange={(e) => {
@@ -632,7 +707,9 @@ function RegionPresetCard() {
           </option>
         ))}
       </select>
-      <p className="mt-2 text-[11px] text-muted-foreground">Controls currency, ID label, and MoMo providers.</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Controls currency, ID label, and MoMo providers.
+      </p>
     </div>
   );
 }
@@ -640,18 +717,26 @@ function RegionPresetCard() {
 function MembershipCard({ profile }: { profile: MemberProfileFull["profile"] }) {
   return (
     <div className="rounded border border-emerald-deep/5 bg-card p-6 shadow-sm">
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Membership</p>
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        Membership
+      </p>
       <dl className="grid gap-3 text-sm">
         <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Member no.</dt>
+          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Member no.
+          </dt>
           <dd className="tabular mt-1">{profile.member_no ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Tier</dt>
+          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Tier
+          </dt>
           <dd className="mt-1 capitalize">{profile.tier}</dd>
         </div>
         <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">KYC status</dt>
+          <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            KYC status
+          </dt>
           <dd className="mt-1 capitalize">{profile.kyc}</dd>
         </div>
       </dl>
@@ -682,7 +767,9 @@ function TextField({
   className?: string;
 }) {
   return (
-    <label className={`flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${className ?? ""}`}>
+    <label
+      className={`flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${className ?? ""}`}
+    >
       {label}
       <input
         type={type}

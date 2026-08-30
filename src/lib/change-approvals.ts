@@ -29,10 +29,13 @@ export const KIND_LABELS: Record<ChangeKind, string> = {
 };
 
 export const KIND_HINTS: Record<ChangeKind, string> = {
-  branding: 'Branding fields to write, e.g. {"org_display_name":"IT-360 Cash","primary_color":"#0f766e"}',
-  institution: 'Institution profile fields, e.g. {"org_legal_name":"IT-360 Financial Services Ltd"}',
+  branding:
+    'Branding fields to write, e.g. {"org_display_name":"IT-360 Cash","primary_color":"#0f766e"}',
+  institution:
+    'Institution profile fields, e.g. {"org_legal_name":"IT-360 Financial Services Ltd"}',
   role_grant: 'Target user and role, e.g. {"user_id":"<uuid>","role":"manager","note":"promotion"}',
-  role_revoke: 'Target user and role, e.g. {"user_id":"<uuid>","role":"manager","note":"left the team"}',
+  role_revoke:
+    'Target user and role, e.g. {"user_id":"<uuid>","role":"manager","note":"left the team"}',
   permission_matrix:
     'Role capabilities, e.g. {"role":"manager","capabilities":["loans.view","loans.approve"]}',
   payment_config:

@@ -5,7 +5,13 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { BellRing, CheckCheck, MailOpen, RotateCcw, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader, SectionCard, SectionCardSkeleton, EmptyState, StatusPill } from "@/components/primitives";
+import {
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  EmptyState,
+  StatusPill,
+} from "@/components/primitives";
 import { Pagination } from "@/components/table-controls";
 import { KycReminderLog } from "@/components/kyc-reminder-log";
 import { Button } from "@/components/ui/button";

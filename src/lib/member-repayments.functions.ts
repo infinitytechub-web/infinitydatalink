@@ -100,23 +100,25 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
     const todayKey = today.toISOString().slice(0, 10);
     const monthStart = `${todayKey.slice(0, 7)}-01`;
 
-    const schedule: UpcomingInstallment[] = (schedRes.data ?? []).map((r: any): UpcomingInstallment => {
-      const total = Number(r.total_due ?? 0);
-      const paid = Number(r.paid_amount ?? 0);
-      const remaining = Math.max(0, total - paid);
-      return {
-        id: r.id as string,
-        loan_id: r.loan_id as string,
-        loan_ref: refById.get(r.loan_id) ?? "—",
-        installment_no: Number(r.installment_no ?? 0),
-        due_date: r.due_date as string,
-        total_due: total,
-        paid_amount: paid,
-        remaining,
-        status: String(r.status ?? "due"),
-        overdue: remaining > 0.005 && String(r.due_date) < todayKey,
-      };
-    });
+    const schedule: UpcomingInstallment[] = (schedRes.data ?? []).map(
+      (r: any): UpcomingInstallment => {
+        const total = Number(r.total_due ?? 0);
+        const paid = Number(r.paid_amount ?? 0);
+        const remaining = Math.max(0, total - paid);
+        return {
+          id: r.id as string,
+          loan_id: r.loan_id as string,
+          loan_ref: refById.get(r.loan_id) ?? "—",
+          installment_no: Number(r.installment_no ?? 0),
+          due_date: r.due_date as string,
+          total_due: total,
+          paid_amount: paid,
+          remaining,
+          status: String(r.status ?? "due"),
+          overdue: remaining > 0.005 && String(r.due_date) < todayKey,
+        };
+      },
+    );
 
     const history: RepaymentHistoryRow[] = (txnRes.data ?? []).map((t: any) => ({
       id: t.id,
@@ -171,7 +173,8 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
         repaidThisMonth: cleared
           .filter((h) => h.created_at.slice(0, 10) >= monthStart)
           .reduce((s, h) => s + h.amount, 0),
-        activeLoans: loanSummaries.filter((l) => l.status === "active" || l.status === "approved").length,
+        activeLoans: loanSummaries.filter((l) => l.status === "active" || l.status === "approved")
+          .length,
         nextDueDate: upcoming[0]?.due_date ?? null,
         nextDueAmount: upcoming[0]?.remaining ?? null,
       },

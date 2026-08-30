@@ -23,7 +23,12 @@ type Options = {
  *    the network actually works again — `navigator.onLine` lies often)
  *  - a slow heartbeat while everything is healthy
  */
-export function useBackgroundSync({ queryKey, stale, intervalMs = 60_000, retryMs = 8_000 }: Options) {
+export function useBackgroundSync({
+  queryKey,
+  stale,
+  intervalMs = 60_000,
+  retryMs = 8_000,
+}: Options) {
   const queryClient = useQueryClient();
   const online = useOnlineStatus();
   const [syncing, setSyncing] = useState(false);

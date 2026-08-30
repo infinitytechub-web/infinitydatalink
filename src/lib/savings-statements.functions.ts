@@ -47,7 +47,8 @@ export const listMyStatements = createServerFn({ method: "GET" })
     return (rows ?? []).map((r: any) => ({
       id: r.id,
       account_id: r.account_id,
-      account_label: r.savings_accounts?.nickname || r.savings_accounts?.savings_plans?.name || "Savings",
+      account_label:
+        r.savings_accounts?.nickname || r.savings_accounts?.savings_plans?.name || "Savings",
       plan_name: r.savings_accounts?.savings_plans?.name || "—",
       period_start: r.period_start,
       period_end: r.period_end,
@@ -88,7 +89,8 @@ export const getStatement = createServerFn({ method: "GET" })
       statement: {
         id: r.id,
         account_id: r.account_id,
-        account_label: r.savings_accounts?.nickname || r.savings_accounts?.savings_plans?.name || "Savings",
+        account_label:
+          r.savings_accounts?.nickname || r.savings_accounts?.savings_plans?.name || "Savings",
         plan_name: r.savings_accounts?.savings_plans?.name || "—",
         period_start: r.period_start,
         period_end: r.period_end,
@@ -257,7 +259,9 @@ export const buildStatement = createServerFn({ method: "GET" })
 
     return {
       account_id: data.account_id ?? null,
-      account_label: data.account_id ? (labels.get(data.account_id) ?? "Savings") : "All savings accounts",
+      account_label: data.account_id
+        ? (labels.get(data.account_id) ?? "Savings")
+        : "All savings accounts",
       period_start: data.from,
       period_end: data.to,
       opening_balance: opening,

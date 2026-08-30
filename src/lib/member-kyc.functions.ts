@@ -78,7 +78,6 @@ const REQUIRED_PROFILE_FIELDS = [
   "national_id",
 ] as const;
 
-
 const REQUIRED_DOC_TYPES = ["national_id_front", "national_id_back", "selfie"] as const;
 
 export const getMyKycStatus = createServerFn({ method: "GET" })
@@ -113,7 +112,11 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
     const missingDocTypes = REQUIRED_DOC_TYPES.filter((t) => !submittedTypes.has(t));
 
     const profileStep: KycStepState =
-      missingFields.length === 0 ? "done" : missingFields.length < REQUIRED_PROFILE_FIELDS.length ? "in_progress" : "todo";
+      missingFields.length === 0
+        ? "done"
+        : missingFields.length < REQUIRED_PROFILE_FIELDS.length
+          ? "in_progress"
+          : "todo";
     const documentsStep: KycStepState =
       missingDocTypes.length === 0 ? "done" : submittedTypes.size > 0 ? "in_progress" : "todo";
 
@@ -159,7 +162,10 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
     } else if (reviewState === "rejected") {
       next_action = { label: "Update your profile and resubmit", link: "/app/profile" };
     } else if (reviewState === "in_review") {
-      next_action = { label: "Sit tight — a compliance officer is reviewing your submission.", link: "/app/kyc" };
+      next_action = {
+        label: "Sit tight — a compliance officer is reviewing your submission.",
+        link: "/app/kyc",
+      };
     }
 
     // Reviewer-requested revisions. A profile item counts as resolved once the
@@ -271,7 +277,6 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
     };
   });
 
-
 // --- Resubmission flow -----------------------------------------------------
 
 const FIELD_MAX = 160;
@@ -346,7 +351,10 @@ export const saveKycRemediationFields = createServerFn({ method: "POST" })
 
     if (Object.keys(patch).length === 0) return { updated: false as const };
 
-    const { error } = await sb.from("profiles").update(patch as any).eq("id", context.userId);
+    const { error } = await sb
+      .from("profiles")
+      .update(patch as any)
+      .eq("id", context.userId);
     if (error) throw new Error(error.message);
 
     if ("date_of_birth" in patch) {
@@ -532,7 +540,8 @@ export const acknowledgeKycRestore = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
 
-    const acknowledgedAt = ((updated as any)?.acknowledged_at as string) ?? new Date().toISOString();
+    const acknowledgedAt =
+      ((updated as any)?.acknowledged_at as string) ?? new Date().toISOString();
     await writeAudit({
       actor_id: context.userId,
       actor_email: (context.claims as any)?.email ?? null,

@@ -40,10 +40,7 @@ export type SnapshotRow = {
 // ---- Role assertion ------------------------------------------------------
 
 async function assertSuperAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) throw new Error(error.message);
   const roles = (data ?? []).map((r: any) => r.role as string);
   if (!roles.includes("super_admin")) throw new Error("Forbidden: super_admin role required");
@@ -56,8 +53,12 @@ export const listSettingsChangeRequests = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
       .object({
-        status: z.enum(["all", "pending", "approved", "rejected", "applied", "failed"]).default("all"),
-        kind: z.enum(["all", "branding", "institution", "role_grant", "role_revoke"]).default("all"),
+        status: z
+          .enum(["all", "pending", "approved", "rejected", "applied", "failed"])
+          .default("all"),
+        kind: z
+          .enum(["all", "branding", "institution", "role_grant", "role_revoke"])
+          .default("all"),
         limit: z.number().int().min(1).max(200).default(50),
         offset: z.number().int().min(0).default(0),
       })
@@ -102,7 +103,7 @@ export const listSettingsChangeRequests = createServerFn({ method: "POST" })
       requester_email: emails.get(r.requested_by) ?? null,
       reviewed_by: r.reviewed_by,
       reviewed_at: r.reviewed_at,
-      reviewer_email: r.reviewed_by ? emails.get(r.reviewed_by) ?? null : null,
+      reviewer_email: r.reviewed_by ? (emails.get(r.reviewed_by) ?? null) : null,
       review_note: r.review_note,
       applied_at: r.applied_at,
       error: r.error,
@@ -219,7 +220,9 @@ export const listSnapshots = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
-    const ids = Array.from(new Set(((rows ?? []) as any[]).map((r) => r.created_by).filter(Boolean)));
+    const ids = Array.from(
+      new Set(((rows ?? []) as any[]).map((r) => r.created_by).filter(Boolean)),
+    );
     const emails = new Map<string, string>();
     if (ids.length) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

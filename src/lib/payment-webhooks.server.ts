@@ -59,7 +59,11 @@ function digestEqual(a: string, b: string): boolean {
   return timingSafeEqual(x, y);
 }
 
-export function signWebhookBody(secret: string, rawBody: string, algo: "sha256" | "sha512"): string {
+export function signWebhookBody(
+  secret: string,
+  rawBody: string,
+  algo: "sha256" | "sha512",
+): string {
   return createHmac(algo, secret).update(rawBody, "utf8").digest("hex");
 }
 
@@ -166,7 +170,9 @@ export async function processPaymentWebhook(args: ProcessArgs): Promise<WebhookO
     if (!parsed?.signature) return { status: 401, body: { error: "missing_signature" } };
     const candidates = [signWebhookBody(secret, args.rawBody, template.signatureAlgo)];
     if (headerTs) {
-      candidates.push(signWebhookPayload(secret, args.rawBody, template.signatureAlgo, String(headerTs)));
+      candidates.push(
+        signWebhookPayload(secret, args.rawBody, template.signatureAlgo, String(headerTs)),
+      );
     }
     verified = candidates.some((expected) => digestEqual(parsed.signature, expected));
     if (!verified) return { status: 401, body: { error: "invalid_signature" } };
@@ -185,7 +191,8 @@ export async function processPaymentWebhook(args: ProcessArgs): Promise<WebhookO
     (payload["event_id"] as string | undefined) ??
     (inner["id"] as string | undefined) ??
     null;
-  const eventType = (payload["event"] as string | undefined) ?? (payload["type"] as string | undefined) ?? null;
+  const eventType =
+    (payload["event"] as string | undefined) ?? (payload["type"] as string | undefined) ?? null;
   const reference =
     (inner["reference"] as string | undefined) ?? (inner["tx_ref"] as string | undefined) ?? null;
   const nextStatus = normalizeIntentStatus((inner["status"] as string | undefined) ?? eventType);
@@ -194,7 +201,8 @@ export async function processPaymentWebhook(args: ProcessArgs): Promise<WebhookO
   // A timestamp inside the signed body is also honoured (providers that sign
   // the timestamp into the payload rather than a header).
   if (!headerTs && !args.simulate) {
-    const bodyTs = (payload["timestamp"] as string | undefined) ?? (inner["timestamp"] as string | undefined);
+    const bodyTs =
+      (payload["timestamp"] as string | undefined) ?? (inner["timestamp"] as string | undefined);
     const bodyFresh = checkTimestampFreshness(bodyTs ?? null);
     if (!bodyFresh.ok) return { status: 401, body: { error: bodyFresh.reason } };
   }
@@ -244,8 +252,11 @@ export async function processPaymentWebhook(args: ProcessArgs): Promise<WebhookO
       const amount = inner["amount_minor"] ?? inner["amount"];
       const currency = (inner["currency"] as string | undefined) ?? null;
       const amountMismatch =
-        amount != null && Number(amount) !== intent.amount_minor && Number(amount) * 100 !== intent.amount_minor;
-      const currencyMismatch = currency != null && currency.toUpperCase() !== intent.currency.toUpperCase();
+        amount != null &&
+        Number(amount) !== intent.amount_minor &&
+        Number(amount) * 100 !== intent.amount_minor;
+      const currencyMismatch =
+        currency != null && currency.toUpperCase() !== intent.currency.toUpperCase();
       if (amountMismatch || currencyMismatch) {
         failure = "amount_or_currency_mismatch";
       } else {

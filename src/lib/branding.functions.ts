@@ -97,7 +97,6 @@ const DEFAULTS: BrandingSettings = {
   updated_at: new Date(0).toISOString(),
 };
 
-
 async function assertSuperAdmin(supabase: any, userId: string) {
   const { data } = await supabase
     .from("user_roles")
@@ -135,11 +134,9 @@ function withVersion(url: string, version: number): string {
 /** Public read — used by BrandingProvider on every visit. */
 export const getBranding = createServerFn({ method: "GET" }).handler(
   async (): Promise<BrandingSettings> => {
-    const client = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
-    );
+    const client = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const { data } = await client
       .from("branding_settings")
       .select(
@@ -220,7 +217,6 @@ export const getBrandingFull = createServerFn({ method: "GET" })
     } as BrandingSettings;
   });
 
-
 const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 export const updateBranding = createServerFn({ method: "POST" })
@@ -233,16 +229,36 @@ export const updateBranding = createServerFn({ method: "POST" })
         primary_color: z.string().regex(HEX, "Invalid hex color"),
         accent_color: z.string().regex(HEX, "Invalid hex color"),
         secondary_color: z.string().regex(HEX, "Invalid hex color").optional(),
-        login_hero_url: z.string().url().max(500).nullable().optional().or(z.literal("").transform(() => null)),
+        login_hero_url: z
+          .string()
+          .url()
+          .max(500)
+          .nullable()
+          .optional()
+          .or(z.literal("").transform(() => null)),
         login_tagline: z.string().trim().max(200).nullable().optional(),
         org_legal_name: z.string().trim().max(160).nullable().optional(),
         org_address: z.string().trim().max(500).nullable().optional(),
         org_registration_no: z.string().trim().max(80).nullable().optional(),
         footer_html: z.string().trim().max(2000).nullable().optional(),
-        support_email: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+        support_email: z
+          .string()
+          .trim()
+          .email()
+          .max(160)
+          .nullable()
+          .optional()
+          .or(z.literal("").transform(() => null)),
         support_phone: z.string().trim().max(40).nullable().optional(),
         email_from_name: z.string().trim().max(80).nullable().optional(),
-        email_reply_to: z.string().trim().email().max(160).nullable().optional().or(z.literal("").transform(() => null)),
+        email_reply_to: z
+          .string()
+          .trim()
+          .email()
+          .max(160)
+          .nullable()
+          .optional()
+          .or(z.literal("").transform(() => null)),
         email_header_html: z.string().trim().max(4000).nullable().optional(),
         email_footer_html: z.string().trim().max(4000).nullable().optional(),
       })
@@ -346,7 +362,10 @@ export const uploadBrandingAsset = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     if (oldPath) {
-      await (supabaseAdmin as any).storage.from(BUCKET).remove([oldPath]).catch(() => {});
+      await (supabaseAdmin as any).storage
+        .from(BUCKET)
+        .remove([oldPath])
+        .catch(() => {});
     }
     await writeAudit({
       actor_id: context.userId,
@@ -388,7 +407,10 @@ export const clearBrandingAsset = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (oldPath) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await (supabaseAdmin as any).storage.from(BUCKET).remove([oldPath]).catch(() => {});
+      await (supabaseAdmin as any).storage
+        .from(BUCKET)
+        .remove([oldPath])
+        .catch(() => {});
     }
     await writeAudit({
       actor_id: context.userId,
@@ -398,7 +420,6 @@ export const clearBrandingAsset = createServerFn({ method: "POST" })
     });
     return getBranding();
   });
-
 
 /**
  * Tiny public read used to poll for branding asset changes. Devices compare the
@@ -412,11 +433,9 @@ export const getBrandingVersion = createServerFn({ method: "GET" }).handler(
     touch_icon_version: number;
     updated_at: string;
   }> => {
-    const client = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
-    );
+    const client = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const { data } = await client
       .from("branding_settings")
       .select("logo_version, favicon_version, touch_icon_version, updated_at")

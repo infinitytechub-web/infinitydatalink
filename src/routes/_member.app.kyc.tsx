@@ -1,7 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { CheckCircle2, Circle, Clock, ShieldCheck, ShieldAlert, Mail, Smartphone } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  Clock,
+  ShieldCheck,
+  ShieldAlert,
+  Mail,
+  Smartphone,
+} from "lucide-react";
 import { KycResubmissionPanel } from "@/components/kyc-resubmission-panel";
 import { KycRestoreAcknowledgment } from "@/components/kyc-restore-acknowledgment";
 import { PageHeader, SectionCard, StatusPill } from "@/components/primitives";
@@ -15,11 +23,15 @@ const statusQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_member/app/kyc")({
-  head: () => ({ meta: [{ title: "KYC verification — IT-360 CashApp" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "KYC verification — IT-360 CashApp" }, { name: "robots", content: "noindex" }],
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(statusQuery),
   component: KycStatusPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Verification status failed to load: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">
+      Verification status failed to load: {error.message}
+    </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });
@@ -114,7 +126,9 @@ function Body() {
 
       {data.latest_decision ? (
         <SectionCard
-          title={data.latest_decision.decision === "approved" ? "Latest decision" : "Reviewer feedback"}
+          title={
+            data.latest_decision.decision === "approved" ? "Latest decision" : "Reviewer feedback"
+          }
         >
           <div className="space-y-3 p-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -171,14 +185,9 @@ function Body() {
                 </div>
                 <StatusPill
                   status={
-                    n.status === "sent"
-                      ? "approved"
-                      : n.status === "failed"
-                        ? "failed"
-                        : "pending"
+                    n.status === "sent" ? "approved" : n.status === "failed" ? "failed" : "pending"
                   }
                 />
-
               </li>
             ))}
           </ul>
@@ -192,7 +201,10 @@ function Body() {
 }
 
 function StatusBanner({ data }: { data: MyKycStatus }) {
-  const map: Record<string, { title: string; body: string; tone: "pending" | "active" | "rejected" }> = {
+  const map: Record<
+    string,
+    { title: string; body: string; tone: "pending" | "active" | "rejected" }
+  > = {
     approved: {
       title: "You're verified",
       body: "All member features are unlocked.",
@@ -241,7 +253,11 @@ function Step({
 }) {
   const Icon = state === "done" ? CheckCircle2 : state === "in_progress" ? Clock : Circle;
   const color =
-    state === "done" ? "text-emerald-mid" : state === "in_progress" ? "text-brand-gold-ink dark:text-brand-gold" : "text-muted-foreground";
+    state === "done"
+      ? "text-emerald-mid"
+      : state === "in_progress"
+        ? "text-brand-gold-ink dark:text-brand-gold"
+        : "text-muted-foreground";
   return (
     <div className="flex items-start gap-4 px-6 py-4">
       <div className={`mt-0.5 ${color}`}>

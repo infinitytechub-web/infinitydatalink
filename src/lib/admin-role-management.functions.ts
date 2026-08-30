@@ -59,10 +59,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, string[]> = {
 };
 
 async function assertAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) throw new Error(error.message);
   const roles = (data ?? []).map((r: any) => r.role as string);
   if (!roles.includes("super_admin")) {
@@ -85,7 +82,10 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
     z
       .object({
         search: z.string().trim().max(200).optional().default(""),
-        role: z.enum(["all", "super_admin", ...ASSIGNABLE_ROLES, "member"]).optional().default("all"),
+        role: z
+          .enum(["all", "super_admin", ...ASSIGNABLE_ROLES, "member"])
+          .optional()
+          .default("all"),
         page: z.number().int().min(1).optional().default(1),
         pageSize: z.number().int().min(5).max(100).optional().default(25),
       })
@@ -106,13 +106,15 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
 
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: profiles, count, error } = await q
-      .order("created_at", { ascending: false })
-      .range(from, to);
+    const {
+      data: profiles,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, to);
     if (error) throw new Error(error.message);
 
     const ids = (profiles ?? []).map((p: any) => p.id);
-    let rolesByUser = new Map<string, AppRole[]>();
+    const rolesByUser = new Map<string, AppRole[]>();
     const emailMap = new Map<string, string>();
     if (ids.length) {
       const { data: rolesRows, error: rErr } = await supabaseAdmin
@@ -125,7 +127,10 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
         list.push(r.role as AppRole);
         rolesByUser.set(r.user_id, list);
       }
-      const { data: usersRes } = await (supabaseAdmin as any).auth.admin.listUsers({ page: 1, perPage: 200 });
+      const { data: usersRes } = await (supabaseAdmin as any).auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      });
       for (const u of usersRes?.users ?? []) {
         if (u.email && ids.includes(u.id)) emailMap.set(u.id, u.email);
       }
@@ -139,7 +144,6 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
       created_at: p.created_at,
       roles: rolesByUser.get(p.id) ?? [],
     }));
-
 
     if (data.role !== "all") {
       rows = rows.filter((r) => r.roles.includes(data.role as AppRole));

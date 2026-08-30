@@ -76,7 +76,12 @@ const groups: NavGroup[] = [
   {
     label: "Membership",
     items: [
-      { to: "/admin/approvals", label: "User approvals", icon: <UserCheck />, cap: "members.approve" },
+      {
+        to: "/admin/approvals",
+        label: "User approvals",
+        icon: <UserCheck />,
+        cap: "members.approve",
+      },
       { to: "/admin/members", label: "Individuals (KYC)", icon: <Users />, cap: "kyc.view" },
       { to: "/admin/entities?type=group", label: "Groups", icon: <Users2 />, cap: "entities.view" },
       {
@@ -96,19 +101,44 @@ const groups: NavGroup[] = [
   {
     label: "Savings",
     items: [
-      { to: "/admin/savings", label: "Accounts & posting", icon: <PiggyBank />, cap: "savings.view" },
+      {
+        to: "/admin/savings",
+        label: "Accounts & posting",
+        icon: <PiggyBank />,
+        cap: "savings.view",
+      },
       {
         to: "/admin/savings/withdrawals",
         label: "Withdrawal approvals",
         icon: <BanknoteArrowDown />,
         cap: "savings.approve",
       },
-      { to: "/admin/savings/plans", label: "Plans & products", icon: <ClipboardList />, cap: "savings.edit" },
+      {
+        to: "/admin/savings/plans",
+        label: "Plans & products",
+        icon: <ClipboardList />,
+        cap: "savings.edit",
+      },
       { to: "/admin/savings/fixed", label: "Fixed deposits", icon: <Lock />, cap: "savings.view" },
       { to: "/admin/savings/holds", label: "Holds & liens", icon: <Scale />, cap: "savings.view" },
-      { to: "/admin/savings/pots", label: "Group & susu pots", icon: <HandCoins />, cap: "savings.view" },
-      { to: "/admin/savings/interest", label: "Interest runs", icon: <Percent />, cap: "savings.edit" },
-      { to: "/admin/recurring", label: "Recurring schedules", icon: <RefreshCw />, cap: "savings.view" },
+      {
+        to: "/admin/savings/pots",
+        label: "Group & susu pots",
+        icon: <HandCoins />,
+        cap: "savings.view",
+      },
+      {
+        to: "/admin/savings/interest",
+        label: "Interest runs",
+        icon: <Percent />,
+        cap: "savings.edit",
+      },
+      {
+        to: "/admin/recurring",
+        label: "Recurring schedules",
+        icon: <RefreshCw />,
+        cap: "savings.view",
+      },
       {
         to: "/admin/savings/reconciliation",
         label: "Reconciliation",
@@ -120,32 +150,97 @@ const groups: NavGroup[] = [
   {
     label: "Lending",
     items: [
-      { to: "/admin/loans", label: "Loan book & approvals", icon: <BadgeDollarSign />, cap: "loans.view" },
-      { to: "/admin/loan-products", label: "Products & eligibility", icon: <ClipboardList />, cap: "loans.edit" },
-      { to: "/admin/loan-arrears", label: "Arrears & collections", icon: <TrendingDown />, cap: "loans.view" },
-      { to: "/admin/loan-workouts", label: "Workout approvals", icon: <Scale />, cap: "loans.approve" },
+      {
+        to: "/admin/loans",
+        label: "Loan book & approvals",
+        icon: <BadgeDollarSign />,
+        cap: "loans.view",
+      },
+      {
+        to: "/admin/loan-products",
+        label: "Products & eligibility",
+        icon: <ClipboardList />,
+        cap: "loans.edit",
+      },
+      {
+        to: "/admin/loan-arrears",
+        label: "Arrears & collections",
+        icon: <TrendingDown />,
+        cap: "loans.view",
+      },
+      {
+        to: "/admin/loan-workouts",
+        label: "Workout approvals",
+        icon: <Scale />,
+        cap: "loans.approve",
+      },
       {
         to: "/admin/loan-settlements",
         label: "Settlement approvals",
         icon: <ClipboardCheck />,
         cap: "loans.approve",
       },
-      { to: "/admin/loan-provisions", label: "Loss provisioning", icon: <ShieldAlert />, cap: "loans.export" },
-      { to: "/admin/loan-calculator", label: "Loan calculator", icon: <Calculator />, cap: "loans.view" },
+      {
+        to: "/admin/loan-provisions",
+        label: "Loss provisioning",
+        icon: <ShieldAlert />,
+        cap: "loans.export",
+      },
+      {
+        to: "/admin/loan-calculator",
+        label: "Loan calculator",
+        icon: <Calculator />,
+        cap: "loans.view",
+      },
     ],
   },
   {
     label: "Finance",
     items: [
       { to: "/admin/finance", label: "Finance dashboard", icon: <Wallet />, cap: "reports.view" },
-      { to: "/admin/finance/summary", label: "Financial summary", icon: <ClipboardList />, cap: "reports.view" },
-      { to: "/admin/finance/contributions", label: "Contributions", icon: <HandCoins />, cap: "savings.view" },
+      {
+        to: "/admin/finance/summary",
+        label: "Financial summary",
+        icon: <ClipboardList />,
+        cap: "reports.view",
+      },
+      {
+        to: "/admin/finance/contributions",
+        label: "Contributions",
+        icon: <HandCoins />,
+        cap: "savings.view",
+      },
       { to: "/admin/finance/income", label: "Income", icon: <TrendingUp />, cap: "reports.view" },
-      { to: "/admin/finance/breakdown", label: "Expense breakdown", icon: <TrendingDown />, cap: "reports.view" },
-      { to: "/admin/finance/expenses", label: "Expense ledger", icon: <Receipt />, cap: "payments.view" },
-      { to: "/admin/finance/transfers", label: "Transfers", icon: <Send />, cap: "payments.approve" },
-      { to: "/admin/finance/adjustments", label: "Balance management", icon: <Scale />, cap: "payments.approve" },
-      { to: "/admin/investments", label: "Investments & shares", icon: <TrendingUp />, cap: "payments.view" },
+      {
+        to: "/admin/finance/breakdown",
+        label: "Expense breakdown",
+        icon: <TrendingDown />,
+        cap: "reports.view",
+      },
+      {
+        to: "/admin/finance/expenses",
+        label: "Expense ledger",
+        icon: <Receipt />,
+        cap: "payments.view",
+      },
+      {
+        to: "/admin/finance/transfers",
+        label: "Transfers",
+        icon: <Send />,
+        cap: "payments.approve",
+      },
+      {
+        to: "/admin/finance/adjustments",
+        label: "Balance management",
+        icon: <Scale />,
+        cap: "payments.approve",
+      },
+      {
+        to: "/admin/investments",
+        label: "Investments & shares",
+        icon: <TrendingUp />,
+        cap: "payments.view",
+      },
       { to: "/admin/fx", label: "Currency converter", icon: <Coins />, cap: "reports.view" },
     ],
   },
@@ -167,10 +262,25 @@ const groups: NavGroup[] = [
     label: "Reporting",
     items: [
       { to: "/admin/reports", label: "Reports", icon: <FileBarChart />, cap: "reports.view" },
-      { to: "/admin/exports", label: "Report exports", icon: <FileBarChart />, cap: "reports.export" },
+      {
+        to: "/admin/exports",
+        label: "Report exports",
+        icon: <FileBarChart />,
+        cap: "reports.export",
+      },
       { to: "/admin/audit", label: "Audit & activity", icon: <History />, cap: "security.view" },
-      { to: "/admin/activity", label: "Activity timeline", icon: <Activity />, cap: "security.view" },
-      { to: "/admin/audit/transfers", label: "Transfer audit", icon: <ArrowLeftRight />, cap: "payments.view" },
+      {
+        to: "/admin/activity",
+        label: "Activity timeline",
+        icon: <Activity />,
+        cap: "security.view",
+      },
+      {
+        to: "/admin/audit/transfers",
+        label: "Transfer audit",
+        icon: <ArrowLeftRight />,
+        cap: "payments.view",
+      },
       {
         to: "/admin/compliance/approvals",
         label: "Approval audit trail",
@@ -182,10 +292,20 @@ const groups: NavGroup[] = [
   {
     label: "Records",
     items: [
-      { to: "/admin/documents", label: "Document management", icon: <FileText />, cap: "documents.view" },
+      {
+        to: "/admin/documents",
+        label: "Document management",
+        icon: <FileText />,
+        cap: "documents.view",
+      },
       { to: "/admin/files", label: "Member files", icon: <FileText />, cap: "files.view" },
       { to: "/admin/vault", label: "KYC vault", icon: <Archive />, cap: "kyc.delete" },
-      { to: "/admin/relationships", label: "Relationship types", icon: <Users />, cap: "members.edit" },
+      {
+        to: "/admin/relationships",
+        label: "Relationship types",
+        icon: <Users />,
+        cap: "members.edit",
+      },
     ],
   },
   {
@@ -198,7 +318,12 @@ const groups: NavGroup[] = [
         cap: "settings.manage",
         roles: ["admin"],
       },
-      { to: "/admin/change-approvals", label: "Change approvals", icon: <ClipboardList />, cap: "approvals.view" },
+      {
+        to: "/admin/change-approvals",
+        label: "Change approvals",
+        icon: <ClipboardList />,
+        cap: "approvals.view",
+      },
       { to: "/admin/roles", label: "Roles & permissions", icon: <KeyRound />, cap: "users.edit" },
       { to: "/admin/super-admins", label: "Super admins", icon: <Crown />, cap: "users.manage" },
     ],
@@ -206,7 +331,12 @@ const groups: NavGroup[] = [
   {
     label: "Platform",
     items: [
-      { to: "/admin/security", label: "Security centre", icon: <ShieldAlert />, cap: "security.view" },
+      {
+        to: "/admin/security",
+        label: "Security centre",
+        icon: <ShieldAlert />,
+        cap: "security.view",
+      },
       {
         to: "/admin/notifications",
         label: "Notification delivery",

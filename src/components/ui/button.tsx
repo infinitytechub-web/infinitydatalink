@@ -16,12 +16,9 @@ const buttonVariants = cva(
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover:shadow-md hover:-translate-y-px",
         outline:
           "border border-input bg-background text-foreground shadow-xs hover:bg-muted hover:border-primary/30 hover:text-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "text-foreground hover:bg-muted hover:text-foreground",
-        link:
-          "text-primary underline-offset-4 hover:underline",
+        secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+        ghost: "text-foreground hover:bg-muted hover:text-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
         premium:
           "text-brand-forest shadow-sm ring-1 ring-amber-400/40 bg-linear-to-r from-brand-gold-deep via-brand-gold to-brand-gold-light hover:brightness-105 hover:-translate-y-px hover:shadow-md",
         success:
@@ -43,8 +40,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
 }

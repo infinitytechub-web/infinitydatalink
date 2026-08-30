@@ -63,7 +63,10 @@ export class FakeSupabaseAdmin {
       for (const col of uniqueCols) {
         const v = p[col];
         if (v != null && existing.some((r) => r[col] === v)) {
-          return { rows: null, error: { code: "23505", message: `duplicate key value for ${col}` } };
+          return {
+            rows: null,
+            error: { code: "23505", message: `duplicate key value for ${col}` },
+          };
         }
       }
       const now = new Date().toISOString();
@@ -158,7 +161,15 @@ class FakeQuery implements PromiseLike<{ data: any; count: number | null; error:
     if (this.orderCol) {
       const { col, asc } = this.orderCol;
       rows = [...rows].sort((a, b) =>
-        String(a[col]) < String(b[col]) ? (asc ? -1 : 1) : String(a[col]) > String(b[col]) ? (asc ? 1 : -1) : 0,
+        String(a[col]) < String(b[col])
+          ? asc
+            ? -1
+            : 1
+          : String(a[col]) > String(b[col])
+            ? asc
+              ? 1
+              : -1
+            : 0,
       );
     }
     const total = rows.length;
@@ -184,7 +195,13 @@ class FakeQuery implements PromiseLike<{ data: any; count: number | null; error:
   }
 
   then<TResult1 = any, TResult2 = never>(
-    onfulfilled?: ((value: { data: any; count: number | null; error: any }) => TResult1 | PromiseLike<TResult1>) | null,
+    onfulfilled?:
+      | ((value: {
+          data: any;
+          count: number | null;
+          error: any;
+        }) => TResult1 | PromiseLike<TResult1>)
+      | null,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
   ): PromiseLike<TResult1 | TResult2> {
     return Promise.resolve(this.run()).then(onfulfilled, onrejected);

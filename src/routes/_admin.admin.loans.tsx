@@ -28,7 +28,11 @@ function LoansError({ error }: { error: Error }) {
   const router = useRouter();
   return (
     <div className="p-6">
-      <ErrorState title="Loans failed to load" message={error.message} onRetry={() => router.invalidate()} />
+      <ErrorState
+        title="Loans failed to load"
+        message={error.message}
+        onRetry={() => router.invalidate()}
+      />
     </div>
   );
 }
@@ -74,8 +78,19 @@ function AdminLoansContent() {
   return (
     <>
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Portfolio" value={<>GH₵ <span className="tabular">{formatMoney(portfolio).replace("GH₵ ", "")}</span></>} />
-        <KPIStat label="Awaiting approval" value={<span className="tabular">{pending}</span>} accent />
+        <KPIStat
+          label="Portfolio"
+          value={
+            <>
+              GH₵ <span className="tabular">{formatMoney(portfolio).replace("GH₵ ", "")}</span>
+            </>
+          }
+        />
+        <KPIStat
+          label="Awaiting approval"
+          value={<span className="tabular">{pending}</span>}
+          accent
+        />
         <KPIStat label="Approved / active" value={<span className="tabular">{approved}</span>} />
         <KPIStat label="Total in view" value={<span className="tabular">{loans.length}</span>} />
       </section>
@@ -116,7 +131,9 @@ function AdminLoansContent() {
         }
       >
         {loans.length === 0 ? (
-          <div className="p-6"><EmptyState title="Nothing to show" hint="No loans in this filter." /></div>
+          <div className="p-6">
+            <EmptyState title="Nothing to show" hint="No loans in this filter." />
+          </div>
         ) : (
           <table className="w-full">
             <thead>
@@ -173,7 +190,8 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
     if (!noteValid) {
       setShowPanel(true);
       toast.error("Decision note required", {
-        description: "Enter at least 5 characters explaining the decision — it is written to the audit log.",
+        description:
+          "Enter at least 5 characters explaining the decision — it is written to the audit log.",
       });
       return;
     }
@@ -187,12 +205,18 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
         <td className="tabular px-6 py-4 text-sm font-semibold">{loan.ref}</td>
         <td className="px-6 py-4 text-sm">
           <div className="font-medium">{loan.member_name ?? "—"}</div>
-          <div className="tabular text-[11px] text-muted-foreground">{loan.member_no ?? loan.user_id.slice(0, 8)}</div>
+          <div className="tabular text-[11px] text-muted-foreground">
+            {loan.member_no ?? loan.user_id.slice(0, 8)}
+          </div>
         </td>
         <td className="px-6 py-4 text-sm text-muted-foreground">{loan.product}</td>
-        <td className="px-6 py-4 text-right"><Money amount={loan.amount} /></td>
+        <td className="px-6 py-4 text-right">
+          <Money amount={loan.amount} />
+        </td>
         <td className="tabular px-6 py-4 text-right text-sm">{loan.term_months} mo</td>
-        <td className="px-6 py-4 text-right"><StatusPill status={loan.status} /></td>
+        <td className="px-6 py-4 text-right">
+          <StatusPill status={loan.status} />
+        </td>
         <td className="px-6 py-4 text-right">
           <Link
             to="/admin/loans/$loanId"
@@ -236,7 +260,8 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
           <td colSpan={7} className="bg-cream/30 px-6 py-3">
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Decision note <span className="text-destructive">*required, written to audit log</span>
+                Decision note{" "}
+                <span className="text-destructive">*required, written to audit log</span>
               </label>
               <textarea
                 value={note}
@@ -245,7 +270,9 @@ function LoanRow({ loan }: { loan: AdminLoanRow; filter: string }) {
                 placeholder="Explain the approval or rejection (min. 5 characters)…"
                 className="w-full rounded border border-emerald-deep/15 bg-card px-3 py-2 text-xs outline-none focus:border-emerald-mid"
               />
-              <div className={`text-[10px] ${noteValid ? "text-muted-foreground" : "text-destructive"}`}>
+              <div
+                className={`text-[10px] ${noteValid ? "text-muted-foreground" : "text-destructive"}`}
+              >
                 {note.trim().length}/1000 — {noteValid ? "OK" : "at least 5 characters"}
               </div>
             </div>

@@ -52,7 +52,11 @@ const columns: ExportColumn<UploadScan>[] = [
   { header: "File", accessor: (r) => r.filename },
   { header: "Uploader", accessor: (r) => r.uploader },
   { header: "MIME", accessor: (r) => r.mime_type ?? "" },
-  { header: "Size (KB)", accessor: (r) => (r.size_bytes ? Math.round(r.size_bytes / 1024) : ""), align: "right" },
+  {
+    header: "Size (KB)",
+    accessor: (r) => (r.size_bytes ? Math.round(r.size_bytes / 1024) : ""),
+    align: "right",
+  },
   { header: "Verdict", accessor: (r) => r.verdict.toUpperCase() },
   { header: "Reasons", accessor: (r) => r.reasons.join("; ") },
 ];
@@ -85,9 +89,19 @@ function Content() {
   return (
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-4">
-        <KPIStat label="Files scanned" value={<span className="tabular">{data.kpis.scanned}</span>} />
-        <KPIStat label="Blocked" value={<span className="tabular">{data.kpis.blocked}</span>} accent />
-        <KPIStat label="Quarantined" value={<span className="tabular">{data.kpis.quarantined}</span>} />
+        <KPIStat
+          label="Files scanned"
+          value={<span className="tabular">{data.kpis.scanned}</span>}
+        />
+        <KPIStat
+          label="Blocked"
+          value={<span className="tabular">{data.kpis.blocked}</span>}
+          accent
+        />
+        <KPIStat
+          label="Quarantined"
+          value={<span className="tabular">{data.kpis.quarantined}</span>}
+        />
         <KPIStat
           label="Scanner"
           value={
@@ -110,17 +124,25 @@ function Content() {
       <SectionCard title="Upload policy in force">
         <div className="grid gap-4 p-6 text-sm md:grid-cols-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">Size ceiling</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">
+              Size ceiling
+            </p>
             <p className="tabular font-semibold">{data.policy.max_upload_mb} MB</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">Executables</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">
+              Executables
+            </p>
             <p className="font-semibold">{data.policy.block_executables ? "Blocked" : "Allowed"}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">Accepted types</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-deep/45">
+              Accepted types
+            </p>
             <p className="text-xs text-muted-foreground">
-              {data.policy.allowed_upload_mime.length ? data.policy.allowed_upload_mime.join(", ") : "Any"}
+              {data.policy.allowed_upload_mime.length
+                ? data.policy.allowed_upload_mime.join(", ")
+                : "Any"}
             </p>
           </div>
         </div>
@@ -155,15 +177,30 @@ function Content() {
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             From
-            <input type="date" className={field} value={s.from} onChange={(e) => setSearch({ from: e.target.value })} />
+            <input
+              type="date"
+              className={field}
+              value={s.from}
+              onChange={(e) => setSearch({ from: e.target.value })}
+            />
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             To
-            <input type="date" className={field} value={s.to} onChange={(e) => setSearch({ to: e.target.value })} />
+            <input
+              type="date"
+              className={field}
+              value={s.to}
+              onChange={(e) => setSearch({ to: e.target.value })}
+            />
           </label>
           <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Filename
-            <input className={field} value={s.q} onChange={(e) => setSearch({ q: e.target.value })} placeholder="search" />
+            <input
+              className={field}
+              value={s.q}
+              onChange={(e) => setSearch({ q: e.target.value })}
+              placeholder="search"
+            />
           </label>
         </div>
 
@@ -189,12 +226,19 @@ function Content() {
                     <td className="tabular px-6 py-4 text-xs text-muted-foreground">
                       {new Date(r.created_at).toLocaleString()}
                     </td>
-                    <td className="max-w-[16rem] truncate px-6 py-4 text-sm font-semibold" title={r.filename}>
+                    <td
+                      className="max-w-[16rem] truncate px-6 py-4 text-sm font-semibold"
+                      title={r.filename}
+                    >
                       {r.filename}
                     </td>
                     <td className="px-6 py-4 text-sm">{r.uploader}</td>
-                    <td className="px-6 py-4 text-xs text-muted-foreground">{r.mime_type ?? "—"}</td>
-                    <td className="tabular px-6 py-4 text-right text-xs">{sizeLabel(r.size_bytes)}</td>
+                    <td className="px-6 py-4 text-xs text-muted-foreground">
+                      {r.mime_type ?? "—"}
+                    </td>
+                    <td className="tabular px-6 py-4 text-right text-xs">
+                      {sizeLabel(r.size_bytes)}
+                    </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${

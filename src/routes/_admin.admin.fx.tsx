@@ -5,18 +5,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRightLeft, RefreshCw, TrendingUp } from "lucide-react";
-import {
-  EmptyState,
-  ErrorState,
-  KPIStat,
-  PageHeader,
-  SectionCard,
-} from "@/components/primitives";
+import { EmptyState, ErrorState, KPIStat, PageHeader, SectionCard } from "@/components/primitives";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
-import { getFxRates, DEFAULT_BASE, SUPPORTED_QUOTES, FX_RANGES, type FxRangeKey } from "@/lib/fx.functions";
+import {
+  getFxRates,
+  DEFAULT_BASE,
+  SUPPORTED_QUOTES,
+  FX_RANGES,
+  type FxRangeKey,
+} from "@/lib/fx.functions";
 import { FxHistoryChart } from "@/components/fx-history-chart";
 
 const DEFAULT_REFRESH_SECONDS = 60;
@@ -75,7 +75,9 @@ function FxDashboard() {
   const base = (SUPPORTED_QUOTES as readonly string[]).includes(search.base.toUpperCase())
     ? search.base.toUpperCase()
     : DEFAULT_BASE;
-  const range = (Object.keys(FX_RANGES).includes(search.range) ? search.range : "30D") as FxRangeKey;
+  const range = (
+    Object.keys(FX_RANGES).includes(search.range) ? search.range : "30D"
+  ) as FxRangeKey;
   const chartQuotes = useMemo(() => {
     const list = String(search.quotes)
       .split(",")
@@ -176,7 +178,12 @@ function FxDashboard() {
                 </button>
               ))}
             </div>
-            <Button size="sm" variant="outline" onClick={() => void refreshAll()} disabled={q.isFetching}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void refreshAll()}
+              disabled={q.isFetching}
+            >
               <RefreshCw className={`mr-1 size-3.5 ${q.isFetching ? "animate-spin" : ""}`} />
               {q.isFetching ? "Refreshing…" : "Refresh now"}
             </Button>
@@ -186,7 +193,10 @@ function FxDashboard() {
 
       <section className="grid gap-6 md:grid-cols-4">
         <KPIStat label="Base currency" value={base} accent hint="Institution reporting currency" />
-        <KPIStat label="Currencies tracked" value={<span className="tabular">{rows.length}</span>} />
+        <KPIStat
+          label="Currencies tracked"
+          value={<span className="tabular">{rows.length}</span>}
+        />
         <KPIStat
           label="Rate source"
           value={<span className="capitalize">{q.data?.source ?? "…"}</span>}
@@ -194,7 +204,9 @@ function FxDashboard() {
         />
         <KPIStat
           label="Auto-refresh"
-          value={refreshSeconds ? INTERVALS.find((i) => i.seconds === refreshSeconds)!.label : "Off"}
+          value={
+            refreshSeconds ? INTERVALS.find((i) => i.seconds === refreshSeconds)!.label : "Off"
+          }
           hint={
             q.isFetching
               ? "Refreshing now…"
@@ -212,7 +224,9 @@ function FxDashboard() {
         quotes={chartQuotes}
         range={range}
         autoRefreshMs={intervalMs}
-        onRangeChange={(next) => void navigate({ search: (prev: typeof search) => ({ ...prev, range: next }) })}
+        onRangeChange={(next) =>
+          void navigate({ search: (prev: typeof search) => ({ ...prev, range: next }) })
+        }
         onQuotesChange={(next) =>
           void navigate({ search: (prev: typeof search) => ({ ...prev, quotes: next.join(",") }) })
         }
@@ -223,7 +237,9 @@ function FxDashboard() {
         action={
           <div className="flex flex-wrap items-end gap-3">
             <div>
-              <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Base</Label>
+              <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                Base
+              </Label>
               <select
                 value={base}
                 onChange={(e) => setBase(e.target.value)}
@@ -238,7 +254,9 @@ function FxDashboard() {
               </select>
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Amount</Label>
+              <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                Amount
+              </Label>
               <Input
                 className="mt-1 h-8 w-28 text-xs"
                 inputMode="decimal"
@@ -262,13 +280,21 @@ function FxDashboard() {
               <caption className="sr-only">Live exchange rates against {base}</caption>
               <thead>
                 <tr className="border-b border-border text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th scope="col" className="px-4 py-2.5">Currency</th>
-                  <th scope="col" className="px-4 py-2.5 text-right">1 {base} =</th>
+                  <th scope="col" className="px-4 py-2.5">
+                    Currency
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    1 {base} =
+                  </th>
                   <th scope="col" className="px-4 py-2.5 text-right">
                     {amountValid ? `${numAmount.toLocaleString()} ${base} =` : "Converted"}
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-right">Inverse</th>
-                  <th scope="col" className="px-4 py-2.5 text-right">Updated</th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Inverse
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Updated
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -282,7 +308,9 @@ function FxDashboard() {
                     </td>
                     <td className="tabular px-4 py-2.5 text-right font-medium">
                       {amountValid
-                        ? (numAmount * r.rate).toLocaleString(undefined, { maximumFractionDigits: 2 })
+                        ? (numAmount * r.rate).toLocaleString(undefined, {
+                            maximumFractionDigits: 2,
+                          })
                         : "—"}
                     </td>
                     <td className="tabular px-4 py-2.5 text-right text-muted-foreground">
@@ -314,7 +342,9 @@ function FxDashboard() {
             </p>
           </div>
           <div className="rounded-md border border-border/60 bg-muted/30 p-4">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Live user activity</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              Live user activity
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">
               See who is using the platform right now on the{" "}
               <Link to="/admin/live-users" className="font-medium text-primary hover:underline">

@@ -138,7 +138,11 @@ export function DocumentPreviewPanel({
           <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
         ) : (
           <div className="space-y-3">
-            <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Uploaded documents">
+            <div
+              className="flex gap-2 overflow-x-auto pb-1"
+              role="tablist"
+              aria-label="Uploaded documents"
+            >
               {documents.map((d) => (
                 <button
                   key={d.id}

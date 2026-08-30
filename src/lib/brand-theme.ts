@@ -32,7 +32,10 @@ export function parseHex(hex: string): Rgb | null {
 }
 
 function toHex({ r, g, b }: Rgb): string {
-  const c = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  const c = (v: number) =>
+    Math.max(0, Math.min(255, Math.round(v)))
+      .toString(16)
+      .padStart(2, "0");
   return `#${c(r)}${c(g)}${c(b)}`;
 }
 
@@ -118,7 +121,10 @@ export function buildBrandPaletteCss(input: BrandPaletteInput): string {
     ["--brand-primary-rgb", rgbTriplet(primary)],
   ];
   if (secondary) {
-    brandVars.push(["--brand-secondary", toHex(secondary)], ["--brand-secondary-rgb", rgbTriplet(secondary)]);
+    brandVars.push(
+      ["--brand-secondary", toHex(secondary)],
+      ["--brand-secondary-rgb", rgbTriplet(secondary)],
+    );
   }
   if (accent) {
     brandVars.push(["--brand-accent", toHex(accent)], ["--brand-accent-rgb", rgbTriplet(accent)]);

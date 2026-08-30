@@ -7,7 +7,7 @@ on:
     branches: [main]
   schedule:
     # Daily re-scan so newly published advisories fail the build even without a commit.
-    - cron: '17 6 * * *'
+    - cron: "17 6 * * *"
   workflow_dispatch:
 
 jobs:
@@ -30,12 +30,12 @@ jobs:
       - name: SECURITY DEFINER allowlist
         run: node scripts/security-definer-scan.mjs
         env:
-          SECURITY_GATE_STRICT: '1'
+          SECURITY_GATE_STRICT: "1"
 
       - name: RLS policy & grant posture
         run: node scripts/rls-policy-scan.mjs --list
         env:
-          SECURITY_GATE_STRICT: '1'
+          SECURITY_GATE_STRICT: "1"
 
       - name: Hardcoded credential scan
         run: node scripts/secret-scan.mjs

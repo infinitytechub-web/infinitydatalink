@@ -76,14 +76,17 @@ function scheduleCommit(users: PresenceUser[]) {
     return;
   }
   if (timer !== null) return;
-  timer = setTimeout(() => {
-    timer = null;
-    if (pending) {
-      const next = pending;
-      pending = null;
-      commit(next);
-    }
-  }, Math.max(0, THROTTLE_MS - elapsed));
+  timer = setTimeout(
+    () => {
+      timer = null;
+      if (pending) {
+        const next = pending;
+        pending = null;
+        commit(next);
+      }
+    },
+    Math.max(0, THROTTLE_MS - elapsed),
+  );
 }
 
 function resetThrottle() {
@@ -216,8 +219,5 @@ export function useOnlinePresence() {
   const getSnapshot = useCallback(() => snapshot, []);
   const users = useSyncExternalStore(subscribe, getSnapshot, () => EMPTY);
 
-  return useMemo(
-    () => ({ users, total: users.length, staff: stats.staff, meId }),
-    [users, meId],
-  );
+  return useMemo(() => ({ users, total: users.length, staff: stats.staff, meId }), [users, meId]);
 }

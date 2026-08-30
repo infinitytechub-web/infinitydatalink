@@ -24,9 +24,8 @@ export const Route = createFileRoute("/api/public/hooks/vault-retention")({
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { loadVaultRetentionPolicy, purgeExpiredVaultEntries } = await import(
-            "@/lib/kyc-vault-purge.server"
-          );
+          const { loadVaultRetentionPolicy, purgeExpiredVaultEntries } =
+            await import("@/lib/kyc-vault-purge.server");
 
           const policy = await loadVaultRetentionPolicy(supabaseAdmin as any);
           if (!policy.auto_purge_enabled) {

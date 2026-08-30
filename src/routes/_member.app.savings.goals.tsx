@@ -16,7 +16,6 @@ import { withOfflineFallback } from "@/lib/offline-snapshot";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useBackgroundSync } from "@/hooks/use-background-sync";
 
-
 const GOALS_SNAPSHOT_KEY = "savings-goals";
 
 const goalsQuery = queryOptions({
@@ -26,7 +25,6 @@ const goalsQuery = queryOptions({
   // Offline reads come from the snapshot; retrying just delays the fallback.
   retry: 0,
 });
-
 
 export const Route = createFileRoute("/_member/app/savings/goals")({
   head: () => ({
@@ -40,7 +38,8 @@ export const Route = createFileRoute("/_member/app/savings/goals")({
       { property: "og:title", content: "Savings goals tracker — IT-360 CashApp" },
       {
         property: "og:description",
-        content: "Progress, remaining balance and required monthly contribution for each savings goal.",
+        content:
+          "Progress, remaining balance and required monthly contribution for each savings goal.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -89,7 +88,9 @@ function Body() {
   });
   const data = result.data;
   const overall =
-    data.total_target > 0 ? Math.min(100, Math.round((data.total_saved / data.total_target) * 100)) : 0;
+    data.total_target > 0
+      ? Math.min(100, Math.round((data.total_saved / data.total_target) * 100))
+      : 0;
 
   const banner =
     !online || result.stale ? (
@@ -100,7 +101,8 @@ function Body() {
       >
         {online ? <CloudOff className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
         <span>
-          {online ? "Live sync unavailable." : "You're offline."} Showing your last synced goal progress
+          {online ? "Live sync unavailable." : "You're offline."} Showing your last synced goal
+          progress
           {result.saved_at ? ` from ${new Date(result.saved_at).toLocaleString()}` : ""}.{" "}
           {online
             ? "We keep retrying in the background and missed deposits or transfers will appear automatically."
@@ -125,7 +127,6 @@ function Body() {
       </p>
     );
 
-
   if (data.rows.length === 0) {
     return (
       <div className="space-y-4">
@@ -148,10 +149,12 @@ function Body() {
       <section className="grid gap-6 md:grid-cols-4">
         <KPIStat label="Saved toward goals" value={<Money amount={data.total_saved} />} accent />
         <KPIStat label="Total target" value={<Money amount={data.total_target} />} />
-        <KPIStat label="Contributed since start" value={<Money amount={data.total_contributed} />} />
+        <KPIStat
+          label="Contributed since start"
+          value={<Money amount={data.total_contributed} />}
+        />
         <KPIStat label="Overall progress" value={<span className="tabular">{overall}%</span>} />
       </section>
-
 
       <div className="grid gap-4 md:grid-cols-2">
         {data.rows.map((g) => (

@@ -46,10 +46,12 @@ async function assertAttestationRole(supabase: any, userId: string): Promise<str
 }
 
 function safeName(name: string) {
-  return (name.split("/").pop() ?? "file")
-    .replace(/[^A-Za-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80) || "file";
+  return (
+    (name.split("/").pop() ?? "file")
+      .replace(/[^A-Za-z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "file"
+  );
 }
 
 function decodeBase64(b64: string): Uint8Array {
@@ -86,15 +88,22 @@ export const listMinorAttestations = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await sb
       .from("kyc_documents")
-      .select("id, doc_type, storage_path, mime_type, size_bytes, review_notes, reviewed_by, created_at")
+      .select(
+        "id, doc_type, storage_path, mime_type, size_bytes, review_notes, reviewed_by, created_at",
+      )
       .eq("member_id", data.member_id)
-      .in("doc_type", MINOR_ATTESTATION_TYPES.map((t) => t.value))
+      .in(
+        "doc_type",
+        MINOR_ATTESTATION_TYPES.map((t) => t.value),
+      )
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
     const out: MinorAttestation[] = [];
     for (const r of (rows ?? []) as any[]) {
-      const { data: signed } = await sb.storage.from(KYC_BUCKET).createSignedUrl(r.storage_path, 300);
+      const { data: signed } = await sb.storage
+        .from(KYC_BUCKET)
+        .createSignedUrl(r.storage_path, 300);
       out.push({
         id: r.id,
         doc_type: r.doc_type,

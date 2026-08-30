@@ -41,7 +41,12 @@ export const Route = createFileRoute("/blog/choosing-credit-union-software")({
               name: "Home",
               item: "https://infinitydatalink.lovable.app/",
             },
-            { "@type": "ListItem", position: 2, name: "Choosing credit union software", item: CANONICAL },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "Choosing credit union software",
+              item: CANONICAL,
+            },
           ],
         }),
       },
@@ -58,20 +63,24 @@ const CAPABILITIES: Array<{
 }> = [
   {
     area: "Member records & KYC",
-    mustHave: "National ID capture and validation, document uploads, reviewer notes, approval workflow",
+    mustHave:
+      "National ID capture and validation, document uploads, reviewer notes, approval workflow",
     niceToHave: "Minor/guardian rules, risk flags, re-submission tracking",
     redFlag: "KYC handled in spreadsheets alongside the core system",
   },
   {
     area: "Savings",
-    mustHave: "Multiple products, scheduled contributions, withdrawals with approval, interest posting",
+    mustHave:
+      "Multiple products, scheduled contributions, withdrawals with approval, interest posting",
     niceToHave: "Goals, fixed deposits, holds, group/Susu pots, sweep rules",
     redFlag: "Balances recalculated by hand or editable without an audit trail",
   },
   {
     area: "Loan management",
-    mustHave: "Applications, eligibility checks, multi-level approval, disbursement, amortisation schedules",
-    niceToHave: "Guarantors, collateral, arrears ageing, restructuring, provisioning, early settlement",
+    mustHave:
+      "Applications, eligibility checks, multi-level approval, disbursement, amortisation schedules",
+    niceToHave:
+      "Guarantors, collateral, arrears ageing, restructuring, provisioning, early settlement",
     redFlag: "No repayment schedule generated at disbursement",
   },
   {
@@ -83,7 +92,8 @@ const CAPABILITIES: Array<{
   {
     area: "Controls & audit",
     mustHave: "Role-based access, immutable audit log, mandatory decision notes",
-    niceToHave: "Two-person approval for sensitive changes, step-up re-authentication, retention policies",
+    niceToHave:
+      "Two-person approval for sensitive changes, step-up re-authentication, retention policies",
     redFlag: "Shared admin accounts, or audit entries staff can edit or delete",
   },
   {
@@ -137,7 +147,10 @@ function GuidePage() {
       </header>
 
       <article className="mx-auto max-w-4xl px-6 pb-24">
-        <nav aria-label="Breadcrumb" className="mb-6 text-[11px] uppercase tracking-widest text-muted-foreground">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-6 text-[11px] uppercase tracking-widest text-muted-foreground"
+        >
           <Link to="/" className="hover:underline">
             Home
           </Link>
@@ -160,7 +173,9 @@ function GuidePage() {
         </p>
 
         <section className="mt-12">
-          <h2 className="font-serif text-2xl">1. Start from your operating model, not the feature list</h2>
+          <h2 className="font-serif text-2xl">
+            1. Start from your operating model, not the feature list
+          </h2>
           <p className="mt-3 text-sm text-muted-foreground">
             Write down, in one page: your savings products and their schedules, your loan products
             and approval levels, who may approve what, and which payment rails members actually use.
@@ -223,16 +238,23 @@ function GuidePage() {
           </p>
           <ol className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li>
-              <span className="font-semibold text-emerald-deep">Approve a loan as a junior officer.</span>{" "}
+              <span className="font-semibold text-emerald-deep">
+                Approve a loan as a junior officer.
+              </span>{" "}
               The system should refuse, or route it for a second approval, and record the attempt.
             </li>
             <li>
-              <span className="font-semibold text-emerald-deep">Change a member's KYC tier from a member account.</span>{" "}
+              <span className="font-semibold text-emerald-deep">
+                Change a member's KYC tier from a member account.
+              </span>{" "}
               This must be impossible from the member portal, not merely hidden in the UI.
             </li>
             <li>
-              <span className="font-semibold text-emerald-deep">Delete an audit entry as an administrator.</span>{" "}
-              Deletion should either be blocked or move the record to a retained archive with its own log entry.
+              <span className="font-semibold text-emerald-deep">
+                Delete an audit entry as an administrator.
+              </span>{" "}
+              Deletion should either be blocked or move the record to a retained archive with its
+              own log entry.
             </li>
           </ol>
         </section>
@@ -266,10 +288,10 @@ function GuidePage() {
           <p className="mt-3 text-sm text-muted-foreground">
             IT-360 CashApp covers the six areas above in one platform: membership and KYC with
             reviewer workflows, savings products with scheduled contributions and interest posting,
-            end-to-end loan origination and servicing with arrears and provisioning, mobile money and
-            bank payment rails, plus role-based access, mandatory decision notes and an immutable
-            audit log with retention policies. Members and administrators use separate portals over
-            the same records.
+            end-to-end loan origination and servicing with arrears and provisioning, mobile money
+            and bank payment rails, plus role-based access, mandatory decision notes and an
+            immutable audit log with retention policies. Members and administrators use separate
+            portals over the same records.
           </p>
           <Link
             to="/auth"

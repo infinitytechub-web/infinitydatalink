@@ -86,7 +86,8 @@ export const upsertRelationshipType = createServerFn({ method: "POST" })
       .select("id, code, label, is_active, sort_order")
       .single();
     if (error) {
-      if (/duplicate key/i.test(error.message)) throw new Error("That relationship code already exists.");
+      if (/duplicate key/i.test(error.message))
+        throw new Error("That relationship code already exists.");
       throw new Error(error.message);
     }
 

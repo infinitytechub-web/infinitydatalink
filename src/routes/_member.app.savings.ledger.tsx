@@ -151,7 +151,11 @@ function LedgerPage() {
 
       {isError ? (
         <div className="mt-6">
-          <ErrorState title="Could not load ledger" message={error.message} onRetry={() => void refetch()} />
+          <ErrorState
+            title="Could not load ledger"
+            message={error.message}
+            onRetry={() => void refetch()}
+          />
         </div>
       ) : isPending || !data ? (
         <div className="mt-6">
@@ -184,7 +188,8 @@ function LedgerPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <caption className="sr-only">
-                      Savings ledger entries with date, reference, type, amount, status and running balance
+                      Savings ledger entries with date, reference, type, amount, status and running
+                      balance
                     </caption>
                     <thead className="border-b border-border bg-muted/40 text-[11px] uppercase tracking-widest text-muted-foreground">
                       <tr>
@@ -192,7 +197,9 @@ function LedgerPage() {
                           label="Date"
                           field="created_at"
                           sort={sort}
-                          onSort={(n) => setSearch({ sortBy: n.sortBy as Search["sortBy"], sortDir: n.sortDir })}
+                          onSort={(n) =>
+                            setSearch({ sortBy: n.sortBy as Search["sortBy"], sortDir: n.sortDir })
+                          }
                         />
                         <th className="px-6 py-3 text-left font-medium">Reference</th>
                         <th className="px-6 py-3 text-left font-medium">Account</th>
@@ -202,7 +209,9 @@ function LedgerPage() {
                           field="amount"
                           align="right"
                           sort={sort}
-                          onSort={(n) => setSearch({ sortBy: n.sortBy as Search["sortBy"], sortDir: n.sortDir })}
+                          onSort={(n) =>
+                            setSearch({ sortBy: n.sortBy as Search["sortBy"], sortDir: n.sortDir })
+                          }
                         />
                         <th className="px-6 py-3 text-left font-medium">Status</th>
                         <th className="px-6 py-3 text-right font-medium">Balance</th>
@@ -231,14 +240,22 @@ function LedgerPage() {
                           <td className="px-6 py-3">
                             <span className="inline-flex items-center gap-1.5 capitalize">
                               {r.direction === "credit" ? (
-                                <ArrowDownLeft className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+                                <ArrowDownLeft
+                                  className="h-3.5 w-3.5 text-emerald-600"
+                                  aria-hidden="true"
+                                />
                               ) : (
-                                <ArrowUpRight className="h-3.5 w-3.5 text-rose-500" aria-hidden="true" />
+                                <ArrowUpRight
+                                  className="h-3.5 w-3.5 text-rose-500"
+                                  aria-hidden="true"
+                                />
                               )}
                               {r.kind.replace(/_/g, " ")}
                             </span>
                             {r.note ? (
-                              <span className="block text-[11px] text-muted-foreground">{r.note}</span>
+                              <span className="block text-[11px] text-muted-foreground">
+                                {r.note}
+                              </span>
                             ) : null}
                           </td>
                           <td
@@ -264,7 +281,9 @@ function LedgerPage() {
                   page={data.page}
                   pageSize={data.page_size}
                   total={data.total}
-                  onPage={(n) => navigate({ search: (p: Search) => ({ ...p, page: n }), replace: true })}
+                  onPage={(n) =>
+                    navigate({ search: (p: Search) => ({ ...p, page: n }), replace: true })
+                  }
                   onPageSize={(n) => setSearch({ pageSize: n })}
                 />
               </>
@@ -279,22 +298,32 @@ function LedgerPage() {
 function SummaryStrip({ data }: { data: LedgerResult }) {
   const cards = [
     { label: "Current balance", value: formatMoney(data.closing_balance), tone: "text-foreground" },
-    { label: "Deposits in view", value: formatMoney(data.totals.deposits), tone: "text-emerald-600" },
-    { label: "Withdrawals in view", value: formatMoney(data.totals.withdrawals), tone: "text-rose-500" },
+    {
+      label: "Deposits in view",
+      value: formatMoney(data.totals.deposits),
+      tone: "text-emerald-600",
+    },
+    {
+      label: "Withdrawals in view",
+      value: formatMoney(data.totals.withdrawals),
+      tone: "text-rose-500",
+    },
     { label: "Net movement", value: formatMoney(data.totals.net), tone: "text-foreground" },
   ];
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((c) => (
         <div key={c.label} className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{c.label}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {c.label}
+          </p>
           <p className={`mt-2 font-display text-xl font-bold tabular ${c.tone}`}>{c.value}</p>
         </div>
       ))}
       {data.totals.pending_count > 0 ? (
         <p className="sm:col-span-2 xl:col-span-4 text-xs text-muted-foreground">
-          {data.totals.pending_count} pending entr{data.totals.pending_count === 1 ? "y" : "ies"} are shown but not yet
-          included in the running balance.
+          {data.totals.pending_count} pending entr{data.totals.pending_count === 1 ? "y" : "ies"}{" "}
+          are shown but not yet included in the running balance.
         </p>
       ) : null}
     </div>
@@ -345,11 +374,15 @@ function Filters({
         </select>
       </label>
       <label className="flex flex-col gap-1">
-        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Direction</span>
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          Direction
+        </span>
         <select
           className={field}
           value={search.direction ?? ""}
-          onChange={(e) => setSearch({ direction: (e.target.value || undefined) as Search["direction"] })}
+          onChange={(e) =>
+            setSearch({ direction: (e.target.value || undefined) as Search["direction"] })
+          }
         >
           <option value="">Money in & out</option>
           <option value="credit">Money in</option>
@@ -395,7 +428,8 @@ function Filters({
           className={`${field} w-52`}
           defaultValue={search.q ?? ""}
           onKeyDown={(e) => {
-            if (e.key === "Enter") setSearch({ q: (e.target as HTMLInputElement).value || undefined });
+            if (e.key === "Enter")
+              setSearch({ q: (e.target as HTMLInputElement).value || undefined });
           }}
           onBlur={(e) => setSearch({ q: e.target.value || undefined })}
         />

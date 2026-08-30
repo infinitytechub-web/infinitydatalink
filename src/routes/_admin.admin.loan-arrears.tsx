@@ -15,8 +15,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatMoney } from "@/lib/org-config";
 import {
   ARREARS_BUCKETS,
@@ -32,9 +44,15 @@ export const Route = createFileRoute("/_admin/admin/loan-arrears")({
   head: () => ({
     meta: [
       { title: "Arrears & Delinquency — Loan Collections" },
-      { name: "description", content: "Aging buckets, portfolio-at-risk KPIs, collections worklist and late-fee ledger." },
+      {
+        name: "description",
+        content: "Aging buckets, portfolio-at-risk KPIs, collections worklist and late-fee ledger.",
+      },
       { property: "og:title", content: "Arrears & Delinquency" },
-      { property: "og:description", content: "Loan aging buckets, portfolio at risk and automated late fees." },
+      {
+        property: "og:description",
+        content: "Loan aging buckets, portfolio at risk and automated late fees.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -47,7 +65,11 @@ function PageError({ error }: { error: Error }) {
   const router = useRouter();
   return (
     <div className="p-6">
-      <ErrorState title="Arrears failed to load" message={error.message} onRetry={() => router.invalidate()} />
+      <ErrorState
+        title="Arrears failed to load"
+        message={error.message}
+        onRetry={() => router.invalidate()}
+      />
     </div>
   );
 }
@@ -62,7 +84,13 @@ const arrearsQuery = (bucket: string, sort: string, dir: string, page: number, p
     queryKey: ["admin", "loan-arrears", "list", bucket, sort, dir, page, pageSize],
     queryFn: () =>
       listLoanArrears({
-        data: { bucket: bucket as any, sort: sort as any, dir: dir as any, page, page_size: pageSize },
+        data: {
+          bucket: bucket as any,
+          sort: sort as any,
+          dir: dir as any,
+          page,
+          page_size: pageSize,
+        },
       }),
   });
 
@@ -129,7 +157,11 @@ function ArrearsContent() {
       <SectionCard
         title="Aging buckets"
         action={
-          <Button size="sm" disabled={refreshMutation.isPending} onClick={() => refreshMutation.mutate()}>
+          <Button
+            size="sm"
+            disabled={refreshMutation.isPending}
+            onClick={() => refreshMutation.mutate()}
+          >
             {refreshMutation.isPending ? "Running…" : "Re-age & assess fees"}
           </Button>
         }
@@ -137,10 +169,14 @@ function ArrearsContent() {
         <div className="grid gap-3 sm:grid-cols-5">
           {summary.buckets.map((b) => (
             <div key={b.bucket} className="rounded-lg border border-border/60 p-3">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">{b.bucket}</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                {b.bucket}
+              </div>
               <div className="mt-1 text-lg font-semibold">{b.loans}</div>
               <div className="text-xs text-muted-foreground">arrears {formatMoney(b.arrears)}</div>
-              <div className="text-xs text-muted-foreground">outstanding {formatMoney(b.outstanding)}</div>
+              <div className="text-xs text-muted-foreground">
+                outstanding {formatMoney(b.outstanding)}
+              </div>
             </div>
           ))}
         </div>
@@ -185,14 +221,21 @@ function ArrearsContent() {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setDir((d) => (d === "asc" ? "desc" : "asc"))}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDir((d) => (d === "asc" ? "desc" : "asc"))}
+            >
               {dir === "asc" ? "Ascending" : "Descending"}
             </Button>
           </div>
         }
       >
         {list.rows.length === 0 ? (
-          <EmptyState title="Nothing in arrears" hint="Every active loan is current for the selected bucket." />
+          <EmptyState
+            title="Nothing in arrears"
+            hint="Every active loan is current for the selected bucket."
+          />
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -233,10 +276,20 @@ function ArrearsContent() {
                 Page {page} of {pages}
               </span>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => p - 1)}
+                >
                   Previous
                 </Button>
-                <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= pages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
                   Next
                 </Button>
               </div>
@@ -340,16 +393,25 @@ function WaiveDialog({ penalty, onClose }: { penalty: PenaltyRow | null; onClose
         </DialogHeader>
         <div className="space-y-2 text-sm">
           <p className="text-muted-foreground">
-            {penalty ? `${penalty.loan_ref ?? ""} · ${formatMoney(penalty.amount)} · ${penalty.days_late} days late` : ""}
+            {penalty
+              ? `${penalty.loan_ref ?? ""} · ${formatMoney(penalty.amount)} · ${penalty.days_late} days late`
+              : ""}
           </p>
           <Label>Waiver reason (required)</Label>
-          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Approved hardship relief" />
+          <Input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Approved hardship relief"
+          />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button disabled={mutation.isPending || note.trim().length < 5} onClick={() => mutation.mutate()}>
+          <Button
+            disabled={mutation.isPending || note.trim().length < 5}
+            onClick={() => mutation.mutate()}
+          >
             {mutation.isPending ? "Waiving…" : "Waive fee"}
           </Button>
         </DialogFooter>

@@ -1,9 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { EmptyState, KPIStat, Money, PageHeader, SectionCard, StatusPill } from "@/components/primitives";
+import {
+  EmptyState,
+  KPIStat,
+  Money,
+  PageHeader,
+  SectionCard,
+  StatusPill,
+} from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMyLoanDetail, submitLoanRepayment } from "@/lib/member-data.functions";
 import { getLoanPayoffQuote } from "@/lib/loan-payoff.functions";
@@ -28,7 +41,9 @@ function MemberLoanDetail() {
   return (
     <>
       <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-        <Link to="/app/loans" className="hover:underline">← Back to my loans</Link>
+        <Link to="/app/loans" className="hover:underline">
+          ← Back to my loans
+        </Link>
       </div>
       <PageHeader
         eyebrow="Member portal"
@@ -52,36 +67,58 @@ function Body({ loanId }: { loanId: string }) {
       <section className="grid gap-6 md:grid-cols-4">
         <KPIStat label="Principal" value={<Money amount={loan.amount} />} />
         <KPIStat label="Outstanding" value={<Money amount={loan.outstanding_principal} />} accent />
-        <KPIStat label="Monthly payment" value={loan.monthly_payment != null ? <Money amount={loan.monthly_payment} /> : "—"} />
-        <KPIStat label="Paid installments" value={`${paid} / ${loan.term_months}`} hint={nextDue ? `Next due ${nextDue.due_date}` : "All installments paid"} />
+        <KPIStat
+          label="Monthly payment"
+          value={loan.monthly_payment != null ? <Money amount={loan.monthly_payment} /> : "—"}
+        />
+        <KPIStat
+          label="Paid installments"
+          value={`${paid} / ${loan.term_months}`}
+          hint={nextDue ? `Next due ${nextDue.due_date}` : "All installments paid"}
+        />
       </section>
 
-      <SectionCard title={`${loan.ref} · ${loan.product}`} action={<StatusPill status={loan.status} />}>
+      <SectionCard
+        title={`${loan.ref} · ${loan.product}`}
+        action={<StatusPill status={loan.status} />}
+      >
         <div className="grid gap-6 p-6 md:grid-cols-2 text-sm">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Terms</div>
-            <div>{loan.term_months} months · {loan.interest_rate}% p.a.</div>
+            <div>
+              {loan.term_months} months · {loan.interest_rate}% p.a.
+            </div>
             <div className="text-[11px] text-muted-foreground">
               First due {loan.first_payment_at ?? "—"} · Matures {loan.maturity_at ?? "—"}
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Timeline</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Timeline
+            </div>
             <div className="text-[11px] text-muted-foreground">
               Applied {new Date(loan.created_at).toLocaleDateString()}
-              {loan.decided_at ? ` · Decided ${new Date(loan.decided_at).toLocaleDateString()}` : ""}
-              {loan.disbursed_at ? ` · Disbursed ${new Date(loan.disbursed_at).toLocaleDateString()}` : ""}
+              {loan.decided_at
+                ? ` · Decided ${new Date(loan.decided_at).toLocaleDateString()}`
+                : ""}
+              {loan.disbursed_at
+                ? ` · Disbursed ${new Date(loan.disbursed_at).toLocaleDateString()}`
+                : ""}
             </div>
           </div>
           {loan.purpose && (
             <div className="md:col-span-2">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Purpose</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Purpose
+              </div>
               <div className="text-muted-foreground">{loan.purpose}</div>
             </div>
           )}
           {loan.decision_note && (
             <div className="md:col-span-2">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Officer note</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Officer note
+              </div>
               <div className="text-muted-foreground">{loan.decision_note}</div>
             </div>
           )}
@@ -120,13 +157,20 @@ function Body({ loanId }: { loanId: string }) {
       )}
       {loan.status === "closed" && (
         <SectionCard title="Loan closed">
-          <div className="p-6 text-sm text-muted-foreground">This loan has been fully repaid. Thank you.</div>
+          <div className="p-6 text-sm text-muted-foreground">
+            This loan has been fully repaid. Thank you.
+          </div>
         </SectionCard>
       )}
 
       <SectionCard title="Repayment schedule">
         {loan.schedule.length === 0 ? (
-          <div className="p-6"><EmptyState title="No schedule yet" hint="A schedule is generated when your loan is disbursed." /></div>
+          <div className="p-6">
+            <EmptyState
+              title="No schedule yet"
+              hint="A schedule is generated when your loan is disbursed."
+            />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -146,11 +190,21 @@ function Body({ loanId }: { loanId: string }) {
                   <tr key={r.id}>
                     <td className="tabular px-6 py-3 text-sm">{r.installment_no}</td>
                     <td className="tabular px-6 py-3 text-sm">{r.due_date}</td>
-                    <td className="px-6 py-3 text-right"><Money amount={r.principal_due} /></td>
-                    <td className="px-6 py-3 text-right"><Money amount={r.interest_due} /></td>
-                    <td className="px-6 py-3 text-right"><Money amount={r.total_due} /></td>
-                    <td className="px-6 py-3 text-right"><Money amount={r.paid_amount} /></td>
-                    <td className="px-6 py-3 text-right"><StatusPill status={r.status as any} /></td>
+                    <td className="px-6 py-3 text-right">
+                      <Money amount={r.principal_due} />
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <Money amount={r.interest_due} />
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <Money amount={r.total_due} />
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <Money amount={r.paid_amount} />
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <StatusPill status={r.status as any} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -207,7 +261,6 @@ function PayoffCard({ loanId }: { loanId: string }) {
     onError: (e: Error) => toast.error("Could not withdraw request", { description: e.message }),
   });
 
-
   return (
     <SectionCard
       title="Early settlement quote"
@@ -225,7 +278,9 @@ function PayoffCard({ loanId }: { loanId: string }) {
       }
     >
       {quote.isPending ? (
-        <div className="p-6"><Skeleton className="h-32 w-full" /></div>
+        <div className="p-6">
+          <Skeleton className="h-32 w-full" />
+        </div>
       ) : quote.isError ? (
         <div className="p-6 text-sm text-muted-foreground">
           Settlement quote unavailable: {(quote.error as Error).message}
@@ -234,7 +289,10 @@ function PayoffCard({ loanId }: { loanId: string }) {
         <div className="grid gap-6 p-6 md:grid-cols-2">
           <div className="space-y-2 text-sm">
             {quote.data.lines.map((line) => (
-              <div key={line.label} className="flex items-start justify-between gap-4 border-b border-emerald-deep/5 pb-2">
+              <div
+                key={line.label}
+                className="flex items-start justify-between gap-4 border-b border-emerald-deep/5 pb-2"
+              >
                 <div>
                   <div className="text-muted-foreground">{line.label}</div>
                   {line.note && <div className="text-[11px] text-emerald-deep/45">{line.note}</div>}
@@ -254,7 +312,9 @@ function PayoffCard({ loanId }: { loanId: string }) {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">
-                {quote.data.savings_covers_payoff ? "Surplus after settlement" : "Shortfall to fund"}
+                {quote.data.savings_covers_payoff
+                  ? "Surplus after settlement"
+                  : "Shortfall to fund"}
               </span>
               <Money
                 amount={
@@ -272,7 +332,9 @@ function PayoffCard({ loanId }: { loanId: string }) {
               <span className="text-muted-foreground">Interest saved by settling</span>
               <Money amount={quote.data.interest_rebate} />
             </div>
-            <p className="text-[11px] leading-relaxed text-muted-foreground">{quote.data.disclaimer}</p>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              {quote.data.disclaimer}
+            </p>
           </div>
         </div>
       ) : null}
@@ -282,9 +344,12 @@ function PayoffCard({ loanId }: { loanId: string }) {
           {pendingRequest ? (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-cream/60 p-4 text-sm">
               <div>
-                <div className="font-semibold text-emerald-deep">Settlement request awaiting approval</div>
+                <div className="font-semibold text-emerald-deep">
+                  Settlement request awaiting approval
+                </div>
                 <div className="text-[11px] text-muted-foreground">
-                  <Money amount={pendingRequest.quoted_total} /> to settle on {pendingRequest.settle_on} · submitted{" "}
+                  <Money amount={pendingRequest.quoted_total} /> to settle on{" "}
+                  {pendingRequest.settle_on} · submitted{" "}
                   {new Date(pendingRequest.requested_at).toLocaleDateString()}
                 </div>
               </div>
@@ -317,8 +382,8 @@ function PayoffCard({ loanId }: { loanId: string }) {
                 {request.isPending ? "Submitting…" : "Request settlement"}
               </button>
               <p className="text-[11px] text-muted-foreground md:col-span-2">
-                Submitting sends the quoted figure for {settleOn} to the finance office for approval. You will be
-                notified once it is approved or declined.
+                Submitting sends the quoted figure for {settleOn} to the finance office for
+                approval. You will be notified once it is approved or declined.
               </p>
             </div>
           )}
@@ -331,14 +396,19 @@ function PayoffCard({ loanId }: { loanId: string }) {
               {(requests.data ?? [])
                 .filter((r) => r.status !== "pending")
                 .map((r) => (
-                  <div key={r.id} className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                  <div
+                    key={r.id}
+                    className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground"
+                  >
                     <StatusPill status={r.status === "approved" ? "approved" : "rejected"} />
                     <span>{r.status}</span>
                     <span>·</span>
                     <span>
                       <Money amount={r.quoted_total} /> for {r.settle_on}
                     </span>
-                    {r.decision_note && <span className="text-muted-foreground">“{r.decision_note}”</span>}
+                    {r.decision_note && (
+                      <span className="text-muted-foreground">“{r.decision_note}”</span>
+                    )}
                   </div>
                 ))}
             </div>
@@ -346,11 +416,20 @@ function PayoffCard({ loanId }: { loanId: string }) {
         </div>
       )}
     </SectionCard>
-
   );
 }
 
-function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string; loanRef: string; outstanding: number; suggested: number }) {
+function RepayCard({
+  loanId,
+  loanRef,
+  outstanding,
+  suggested,
+}: {
+  loanId: string;
+  loanRef: string;
+  outstanding: number;
+  suggested: number;
+}) {
   const qc = useQueryClient();
   const submit = useServerFn(submitLoanRepayment);
   const [amount, setAmount] = useState<string>(suggested ? suggested.toFixed(2) : "");
@@ -359,7 +438,10 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
   const parsed = Number(amount);
   const valid = Number.isFinite(parsed) && parsed > 0;
   const mutation = useMutation({
-    mutationFn: () => submit({ data: { loan_id: loanId, amount: parsed, channel, note: note.trim() || undefined } }),
+    mutationFn: () =>
+      submit({
+        data: { loan_id: loanId, amount: parsed, channel, note: note.trim() || undefined },
+      }),
     onSuccess: (r) => {
       toast.success("Payment submitted", {
         description: `${r.ref} for ${loanRef} is pending finance reconciliation.`,
@@ -374,11 +456,17 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
   return (
     <SectionCard
       title="Make a repayment"
-      action={<span className="text-[11px] text-muted-foreground">Outstanding <Money amount={outstanding} /></span>}
+      action={
+        <span className="text-[11px] text-muted-foreground">
+          Outstanding <Money amount={outstanding} />
+        </span>
+      }
     >
       <div className="grid gap-3 p-6 md:grid-cols-[160px_200px_1fr_auto] md:items-end">
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Amount (GH₵)</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Amount (GH₵)
+          </span>
           <input
             inputMode="decimal"
             value={amount}
@@ -387,7 +475,9 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Payment channel</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Payment channel
+          </span>
           <select
             value={channel}
             onChange={(e) => setChannel(e.target.value)}
@@ -400,7 +490,9 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Reference / note (optional)</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Reference / note (optional)
+          </span>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -417,7 +509,8 @@ function RepayCard({ loanId, loanRef, outstanding, suggested }: { loanId: string
         </button>
       </div>
       <p className="border-t border-emerald-deep/5 px-6 py-3 text-[11px] text-muted-foreground">
-        Payments show as pending until a finance officer reconciles the transfer. Your outstanding balance updates once cleared.
+        Payments show as pending until a finance officer reconciles the transfer. Your outstanding
+        balance updates once cleared.
       </p>
     </SectionCard>
   );

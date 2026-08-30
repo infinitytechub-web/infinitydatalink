@@ -79,9 +79,7 @@ export function assessResubmissionRisk(input: RiskInput): RiskAssessment {
   const isBlank = (v: string | null) => !v || String(v).trim() === "";
 
   // 1. Reviewer asked for a document, member re-submitted nothing new.
-  const staleDocs = input.rows.filter(
-    (r) => r.kind === "document" && r.requested && !r.changed,
-  );
+  const staleDocs = input.rows.filter((r) => r.kind === "document" && r.requested && !r.changed);
   if (staleDocs.length > 0) {
     flags.push({
       code: "unchanged_requested_documents",
@@ -94,9 +92,7 @@ export function assessResubmissionRisk(input: RiskInput): RiskAssessment {
   }
 
   // 2. Reviewer asked for a field change, value is byte-identical.
-  const staleFields = input.rows.filter(
-    (r) => r.kind === "profile" && r.requested && !r.changed,
-  );
+  const staleFields = input.rows.filter((r) => r.kind === "profile" && r.requested && !r.changed);
   if (staleFields.length > 0) {
     flags.push({
       code: "unchanged_requested_fields",

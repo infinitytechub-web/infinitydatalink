@@ -160,7 +160,8 @@ function Content() {
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    audit_min_severity: e.target.value as SecurityAlertSettings["audit_min_severity"],
+                    audit_min_severity: e.target
+                      .value as SecurityAlertSettings["audit_min_severity"],
                   })
                 }
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
@@ -244,9 +245,7 @@ function Content() {
               max={1440}
               value={form.throttle_minutes}
               disabled={readOnly}
-              onChange={(e) =>
-                setForm({ ...form, throttle_minutes: Number(e.target.value) || 0 })
-              }
+              onChange={(e) => setForm({ ...form, throttle_minutes: Number(e.target.value) || 0 })}
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
             />
             <span className="block text-[11px] text-muted-foreground">

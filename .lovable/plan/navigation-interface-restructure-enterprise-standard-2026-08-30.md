@@ -34,6 +34,7 @@ Platform        Security centre (+ firewall, sessions, uploads, alerts),
 ```
 
 Rules applied:
+
 - Every item gets an explicit `cap` (e.g. `security.view`, `users.manage`, `settings.manage`, `reports.view`, `savings.approve`). Nothing is left ungated except the Overview dashboard.
 - Super admin keeps full visibility (already handled in `PortalShell`).
 - Sub-pages that belong to a parent (security sub-pages, change-approval sub-pages, super-admin history, savings sub-modules) move out of the sidebar into an in-page section tab bar on the parent route, so the rail stays scannable.

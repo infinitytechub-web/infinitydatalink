@@ -114,7 +114,13 @@ export type SavingsInsights = {
   streak_months: number;
   projected_12m: number;
   monthly: Array<{ month: string; deposits: number; withdrawals: number; net: number }>;
-  goals: Array<{ account: string; goal: number; balance: number; pct: number; target_date: string | null }>;
+  goals: Array<{
+    account: string;
+    goal: number;
+    balance: number;
+    pct: number;
+    target_date: string | null;
+  }>;
 };
 
 // ============================================================================
@@ -142,14 +148,21 @@ function accountLabel(a: any): string {
 
 async function profileMap(supabase: any, ids: string[]) {
   const unique = [...new Set(ids)].filter(Boolean);
-  if (unique.length === 0) return new Map<string, { full_name: string | null; member_no: string | null }>();
-  const { data } = await supabase.from("profiles").select("id, full_name, member_no").in("id", unique);
+  if (unique.length === 0)
+    return new Map<string, { full_name: string | null; member_no: string | null }>();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, member_no")
+    .in("id", unique);
   return new Map<string, { full_name: string | null; member_no: string | null }>(
     ((data ?? []) as any[]).map((p) => [p.id, { full_name: p.full_name, member_no: p.member_no }]),
   );
 }
 
-function mapDeposit(r: any, profile?: { full_name: string | null; member_no: string | null } | null): FixedDeposit {
+function mapDeposit(
+  r: any,
+  profile?: { full_name: string | null; member_no: string | null } | null,
+): FixedDeposit {
   return {
     id: r.id,
     ref: r.ref,
@@ -184,7 +197,9 @@ export const listFixedDepositProducts = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<FixedDepositProduct[]> => {
     const { data, error } = await context.supabase
       .from("fixed_deposit_products")
-      .select("id, code, name, description, term_months, rate_annual, min_amount, max_amount, early_break_penalty_pct")
+      .select(
+        "id, code, name, description, term_months, rate_annual, min_amount, max_amount, early_break_penalty_pct",
+      )
       .eq("is_active", true)
       .order("sort_order");
     if (error) throw new Error(error.message);
@@ -254,7 +269,12 @@ export const breakFixedDeposit = createServerFn({ method: "POST" })
       actor_role: "member",
       action: "fixed_deposit.broken",
       target: data.id,
-      meta: { ref: r?.ref, principal: r?.principal, penalty: r?.penalty_amount, reason: data.reason },
+      meta: {
+        ref: r?.ref,
+        principal: r?.principal,
+        penalty: r?.penalty_amount,
+        reason: data.reason,
+      },
     });
     return mapDeposit(r);
   });
@@ -274,30 +294,41 @@ export const adminListFixedDeposits = createServerFn({ method: "GET" })
       })
       .parse(d ?? {}),
   )
-  .handler(async ({ data, context }): Promise<{ rows: FixedDeposit[]; total: number; principal_active: number }> => {
-    await requireRoles(context, [...FINANCE_ROLES, "auditor"], "finance");
-    const from = (data.page - 1) * data.page_size;
-    let q = context.supabase
-      .from("fixed_deposits")
-      .select("*, fixed_deposit_products(name)", { count: "exact" })
-      .order("maturity_date", { ascending: true })
-      .range(from, from + data.page_size - 1);
-    if (data.status !== "all") q = q.eq("status", data.status);
-    const { data: rows, count, error } = await q;
-    if (error) throw new Error(error.message);
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ rows: FixedDeposit[]; total: number; principal_active: number }> => {
+      await requireRoles(context, [...FINANCE_ROLES, "auditor"], "finance");
+      const from = (data.page - 1) * data.page_size;
+      let q = context.supabase
+        .from("fixed_deposits")
+        .select("*, fixed_deposit_products(name)", { count: "exact" })
+        .order("maturity_date", { ascending: true })
+        .range(from, from + data.page_size - 1);
+      if (data.status !== "all") q = q.eq("status", data.status);
+      const { data: rows, count, error } = await q;
+      if (error) throw new Error(error.message);
 
-    const profiles = await profileMap(context.supabase, ((rows ?? []) as any[]).map((r) => r.user_id));
-    const { data: activeRows } = await context.supabase
-      .from("fixed_deposits")
-      .select("principal")
-      .eq("status", "active");
+      const profiles = await profileMap(
+        context.supabase,
+        ((rows ?? []) as any[]).map((r) => r.user_id),
+      );
+      const { data: activeRows } = await context.supabase
+        .from("fixed_deposits")
+        .select("principal")
+        .eq("status", "active");
 
-    return {
-      rows: ((rows ?? []) as any[]).map((r) => mapDeposit(r, profiles.get(r.user_id))),
-      total: count ?? 0,
-      principal_active: ((activeRows ?? []) as any[]).reduce((s, r) => s + Number(r.principal), 0),
-    };
-  });
+      return {
+        rows: ((rows ?? []) as any[]).map((r) => mapDeposit(r, profiles.get(r.user_id))),
+        total: count ?? 0,
+        principal_active: ((activeRows ?? []) as any[]).reduce(
+          (s, r) => s + Number(r.principal),
+          0,
+        ),
+      };
+    },
+  );
 
 export const adminRunMaturities = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -321,7 +352,10 @@ export const adminRunMaturities = createServerFn({ method: "POST" })
 // Savings holds (loan collateral)
 // ============================================================================
 
-function mapHold(r: any, profile?: { full_name: string | null; member_no: string | null } | null): SavingsHold {
+function mapHold(
+  r: any,
+  profile?: { full_name: string | null; member_no: string | null } | null,
+): SavingsHold {
   return {
     id: r.id,
     account_id: r.account_id,
@@ -365,34 +399,44 @@ export const adminListHolds = createServerFn({ method: "GET" })
       })
       .parse(d ?? {}),
   )
-  .handler(async ({ data, context }): Promise<{ rows: SavingsHold[]; total: number; held_total: number }> => {
-    await requireRoles(context, [...HOLD_ROLES, "auditor"], "finance or loans");
-    const from = (data.page - 1) * data.page_size;
-    let q = context.supabase
-      .from("savings_holds")
-      .select(HOLD_SELECT, { count: "exact" })
-      .order("created_at", { ascending: false })
-      .range(from, from + data.page_size - 1);
-    if (data.status !== "all") q = q.eq("status", data.status);
-    const { data: rows, count, error } = await q;
-    if (error) throw new Error(error.message);
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ rows: SavingsHold[]; total: number; held_total: number }> => {
+      await requireRoles(context, [...HOLD_ROLES, "auditor"], "finance or loans");
+      const from = (data.page - 1) * data.page_size;
+      let q = context.supabase
+        .from("savings_holds")
+        .select(HOLD_SELECT, { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, from + data.page_size - 1);
+      if (data.status !== "all") q = q.eq("status", data.status);
+      const { data: rows, count, error } = await q;
+      if (error) throw new Error(error.message);
 
-    const profiles = await profileMap(context.supabase, ((rows ?? []) as any[]).map((r) => r.user_id));
-    const { data: activeRows } = await context.supabase
-      .from("savings_holds")
-      .select("amount")
-      .eq("status", "active");
+      const profiles = await profileMap(
+        context.supabase,
+        ((rows ?? []) as any[]).map((r) => r.user_id),
+      );
+      const { data: activeRows } = await context.supabase
+        .from("savings_holds")
+        .select("amount")
+        .eq("status", "active");
 
-    return {
-      rows: ((rows ?? []) as any[]).map((r) => mapHold(r, profiles.get(r.user_id))),
-      total: count ?? 0,
-      held_total: ((activeRows ?? []) as any[]).reduce((s, r) => s + Number(r.amount), 0),
-    };
-  });
+      return {
+        rows: ((rows ?? []) as any[]).map((r) => mapHold(r, profiles.get(r.user_id))),
+        total: count ?? 0,
+        held_total: ((activeRows ?? []) as any[]).reduce((s, r) => s + Number(r.amount), 0),
+      };
+    },
+  );
 
 export const adminSearchSavingsAccounts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ q: z.string().trim().max(120).default("") }).parse(d ?? {}))
+  .inputValidator((d: unknown) =>
+    z.object({ q: z.string().trim().max(120).default("") }).parse(d ?? {}),
+  )
   .handler(async ({ data, context }) => {
     await requireRoles(context, HOLD_ROLES, "finance or loans");
     let userIds: string[] | null = null;
@@ -414,7 +458,10 @@ export const adminSearchSavingsAccounts = createServerFn({ method: "GET" })
     if (userIds) q = q.in("user_id", userIds);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    const profiles = await profileMap(context.supabase, ((rows ?? []) as any[]).map((r) => r.user_id));
+    const profiles = await profileMap(
+      context.supabase,
+      ((rows ?? []) as any[]).map((r) => r.user_id),
+    );
     return ((rows ?? []) as any[]).map((r) => ({
       id: r.id as string,
       user_id: r.user_id as string,
@@ -651,7 +698,11 @@ export const adminListPots = createServerFn({ method: "GET" })
 
       const potIds = ((pots ?? []) as any[]).map((p) => p.id);
       const { data: counts } = potIds.length
-        ? await context.supabase.from("group_pot_members").select("pot_id").in("pot_id", potIds).eq("status", "active")
+        ? await context.supabase
+            .from("group_pot_members")
+            .select("pot_id")
+            .in("pot_id", potIds)
+            .eq("status", "active")
         : { data: [] as any[] };
       const { data: payouts } = potIds.length
         ? await context.supabase
@@ -661,7 +712,10 @@ export const adminListPots = createServerFn({ method: "GET" })
             .order("cycle", { ascending: true })
         : { data: [] as any[] };
 
-      const profiles = await profileMap(context.supabase, ((payouts ?? []) as any[]).map((p) => p.profile_id));
+      const profiles = await profileMap(
+        context.supabase,
+        ((payouts ?? []) as any[]).map((p) => p.profile_id),
+      );
       const potNames = new Map(((pots ?? []) as any[]).map((p) => [p.id, p.name as string]));
 
       return {
@@ -704,7 +758,11 @@ export const adminPayPotPayout = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const actorRole = await requireRoles(context, FINANCE_ROLES, "finance");
     const { assertStepUp } = await import("@/lib/step-up.server");
-    const proof = await assertStepUp(context.userId, data.step_up_token, "release a group pot payout");
+    const proof = await assertStepUp(
+      context.userId,
+      data.step_up_token,
+      "release a group pot payout",
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin.rpc("pay_pot_payout", {
       _payout_id: data.payout_id,
@@ -742,25 +800,30 @@ export const getSavingsInsights = createServerFn({ method: "GET" })
     since.setMonth(since.getMonth() - 11);
     since.setDate(1);
 
-    const [{ data: accounts }, { data: txns }, { data: holds }, { data: pending }] = await Promise.all([
-      context.supabase
-        .from("savings_accounts")
-        .select("id, balance, nickname, goal_amount, goal_target_date, savings_plans(name)")
-        .eq("user_id", context.userId),
-      context.supabase
-        .from("transactions")
-        .select("kind, amount, status, created_at")
-        .eq("user_id", context.userId)
-        .eq("status", "cleared")
-        .gte("created_at", since.toISOString())
-        .order("created_at"),
-      context.supabase.from("savings_holds").select("amount").eq("user_id", context.userId).eq("status", "active"),
-      context.supabase
-        .from("savings_withdrawal_requests")
-        .select("amount")
-        .eq("user_id", context.userId)
-        .in("status", ["pending", "approved"]),
-    ]);
+    const [{ data: accounts }, { data: txns }, { data: holds }, { data: pending }] =
+      await Promise.all([
+        context.supabase
+          .from("savings_accounts")
+          .select("id, balance, nickname, goal_amount, goal_target_date, savings_plans(name)")
+          .eq("user_id", context.userId),
+        context.supabase
+          .from("transactions")
+          .select("kind, amount, status, created_at")
+          .eq("user_id", context.userId)
+          .eq("status", "cleared")
+          .gte("created_at", since.toISOString())
+          .order("created_at"),
+        context.supabase
+          .from("savings_holds")
+          .select("amount")
+          .eq("user_id", context.userId)
+          .eq("status", "active"),
+        context.supabase
+          .from("savings_withdrawal_requests")
+          .select("amount")
+          .eq("user_id", context.userId)
+          .in("status", ["pending", "approved"]),
+      ]);
 
     const accts = (accounts ?? []) as any[];
     const total_balance = accts.reduce((s, a) => s + Number(a.balance), 0);
@@ -782,7 +845,8 @@ export const getSavingsInsights = createServerFn({ method: "GET" })
       const amt = Number(t.amount);
       if (t.kind === "interest") interest_earned += amt;
       if (!bucket) continue;
-      if (t.kind === "deposit" || t.kind === "interest" || t.kind === "transfer_in") bucket.deposits += amt;
+      if (t.kind === "deposit" || t.kind === "interest" || t.kind === "transfer_in")
+        bucket.deposits += amt;
       else if (t.kind === "withdrawal" || t.kind === "transfer_out") bucket.withdrawals += amt;
     }
 

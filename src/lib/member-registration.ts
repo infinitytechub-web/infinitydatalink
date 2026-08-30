@@ -14,12 +14,7 @@ export const GHANA_CARD_PREFIX = "GHA-";
 export const GHANA_CARD_REGEX = /^GHA-\d{9}-\d$/;
 export const GHANA_CARD_INPUT_REGEX = /^GHA-(\d{10}|\d{9}-\d)$/;
 
-export const MEMBERSHIP_TYPES = [
-  "individual",
-  "group",
-  "department",
-  "institution",
-] as const;
+export const MEMBERSHIP_TYPES = ["individual", "group", "department", "institution"] as const;
 export type MembershipType = (typeof MEMBERSHIP_TYPES)[number];
 
 export const MEMBERSHIP_TYPE_LABEL: Record<MembershipType, string> = {

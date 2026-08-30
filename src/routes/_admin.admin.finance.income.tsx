@@ -39,10 +39,15 @@ export const Route = createFileRoute("/_admin/admin/finance/income")({
   validateSearch: zodValidator(searchSchema),
   component: IncomePage,
   errorComponent: ({ error }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const router = useRouter();
     return (
       <div className="p-6">
-        <ErrorState title="Income failed to load" message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState
+          title="Income failed to load"
+          message={error.message}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -63,11 +68,21 @@ function IncomePage() {
           <div className="flex flex-wrap items-end gap-2">
             <label className="text-[11px] uppercase tracking-widest text-muted-foreground">
               From
-              <input type="date" value={from} onChange={(e) => setField("from", e.target.value)} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
+              <input
+                type="date"
+                value={from}
+                onChange={(e) => setField("from", e.target.value)}
+                className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm"
+              />
             </label>
             <label className="text-[11px] uppercase tracking-widest text-muted-foreground">
               To
-              <input type="date" value={to} onChange={(e) => setField("to", e.target.value)} className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm" />
+              <input
+                type="date"
+                value={to}
+                onChange={(e) => setField("to", e.target.value)}
+                className="mt-1 block rounded-md border border-border bg-background px-2 py-1 text-sm"
+              />
             </label>
           </div>
         }
@@ -86,20 +101,34 @@ function IncomePage() {
   );
 }
 
-
 function IncomeBody({ from, to }: { from: string; to: string }) {
   const { data } = useSuspenseQuery(incomeQuery(from, to));
   return (
     <div className="mt-6 space-y-8">
       <section className="grid gap-6 md:grid-cols-3">
         <KPIStat label="Total income" value={<Money amount={data.total} />} accent />
-        <KPIStat label="Top kind" value={(data.by_kind[0]?.kind ?? "—").replace(/_/g, " ")} hint={data.by_kind[0] ? <Money amount={data.by_kind[0].amount} /> : null} />
-        <KPIStat label="Top channel" value={data.by_channel[0]?.channel ?? "—"} hint={data.by_channel[0] ? <Money amount={data.by_channel[0].amount} /> : null} />
+        <KPIStat
+          label="Top kind"
+          value={(data.by_kind[0]?.kind ?? "—").replace(/_/g, " ")}
+          hint={data.by_kind[0] ? <Money amount={data.by_kind[0].amount} /> : null}
+        />
+        <KPIStat
+          label="Top channel"
+          value={data.by_channel[0]?.channel ?? "—"}
+          hint={data.by_channel[0] ? <Money amount={data.by_channel[0].amount} /> : null}
+        />
       </section>
 
       <SectionCard
         title="Trend"
-        action={<Link to="/admin/finance/contributions" className="text-xs text-primary underline-offset-2 hover:underline">Deposits ledger →</Link>}
+        action={
+          <Link
+            to="/admin/finance/contributions"
+            className="text-xs text-primary underline-offset-2 hover:underline"
+          >
+            Deposits ledger →
+          </Link>
+        }
       >
         <div className="p-4 sm:p-6">
           <TrendChart
@@ -115,14 +144,22 @@ function IncomeBody({ from, to }: { from: string; to: string }) {
       <div className="grid gap-6 md:grid-cols-2">
         <SectionCard title="By kind">
           <BarList
-            rows={data.by_kind.map((r) => ({ label: r.kind.replace(/_/g, " "), value: r.amount, hint: `${r.count} txns` }))}
+            rows={data.by_kind.map((r) => ({
+              label: r.kind.replace(/_/g, " "),
+              value: r.amount,
+              hint: `${r.count} txns`,
+            }))}
             format={(v) => formatMoney(v)}
             emptyLabel="No income in this window"
           />
         </SectionCard>
         <SectionCard title="By channel">
           <BarList
-            rows={data.by_channel.map((r) => ({ label: r.channel, value: r.amount, hint: `${r.count} txns` }))}
+            rows={data.by_channel.map((r) => ({
+              label: r.channel,
+              value: r.amount,
+              hint: `${r.count} txns`,
+            }))}
             format={(v) => formatMoney(v)}
             emptyLabel="No income in this window"
           />

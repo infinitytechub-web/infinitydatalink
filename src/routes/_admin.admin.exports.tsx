@@ -63,7 +63,9 @@ export const Route = createFileRoute("/_admin/admin/exports")({
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">Report failed to load: {error.message}</div>
   ),
-  notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Report not found.</div>,
+  notFoundComponent: () => (
+    <div className="p-6 text-sm text-muted-foreground">Report not found.</div>
+  ),
 });
 
 function ExportsPage() {
@@ -88,7 +90,17 @@ function ExportsPage() {
     void navigate({ search: (prev) => ({ ...prev, page: 1, ...patch }) });
 
   const query = useQuery({
-    queryKey: ["admin", "report-export", s.dataset, s.from, s.to, s.status, s.q, s.page, s.page_size],
+    queryKey: [
+      "admin",
+      "report-export",
+      s.dataset,
+      s.from,
+      s.to,
+      s.status,
+      s.q,
+      s.page,
+      s.page_size,
+    ],
     queryFn: () =>
       fetchReport({
         data: {
@@ -159,7 +171,11 @@ function ExportsPage() {
           <SectionCard
             title="Filters"
             action={
-              <Link to="/admin/reports" search={{ from: s.from, to: s.to, granularity: "day" as const }} className="text-primary underline-offset-2 hover:underline">
+              <Link
+                to="/admin/reports"
+                search={{ from: s.from, to: s.to, granularity: "day" as const }}
+                className="text-primary underline-offset-2 hover:underline"
+              >
                 Analytics view →
               </Link>
             }
@@ -252,9 +268,7 @@ function ExportsPage() {
             {query.isPending ? (
               <Skeleton className="h-64 w-full" />
             ) : query.isError ? (
-              <div className="p-6 text-sm text-destructive">
-                {(query.error as Error).message}
-              </div>
+              <div className="p-6 text-sm text-destructive">{(query.error as Error).message}</div>
             ) : !result || result.rows.length === 0 ? (
               <EmptyState
                 icon={<FileBarChart className="h-5 w-5" />}

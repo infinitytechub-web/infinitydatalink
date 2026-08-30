@@ -98,11 +98,15 @@ export const getArrearsSummary = createServerFn({ method: "GET" })
     );
 
     return {
-      buckets: ARREARS_BUCKETS.map((b) => ({ bucket: b, ...(map.get(b) ?? { loans: 0, arrears: 0, outstanding: 0 }) })),
+      buckets: ARREARS_BUCKETS.map((b) => ({
+        bucket: b,
+        ...(map.get(b) ?? { loans: 0, arrears: 0, outstanding: 0 }),
+      })),
       total_arrears: Math.round(totalArrears * 100) / 100,
       total_outstanding: Math.round(totalOutstanding * 100) / 100,
       loans_in_arrears: inArrears,
-      portfolio_at_risk_pct: totalOutstanding > 0 ? Math.round((atRisk / totalOutstanding) * 10000) / 100 : 0,
+      portfolio_at_risk_pct:
+        totalOutstanding > 0 ? Math.round((atRisk / totalOutstanding) * 10000) / 100 : 0,
       penalties_outstanding: Math.round(penalties * 100) / 100,
       as_of: new Date().toISOString(),
     };
@@ -113,8 +117,14 @@ export const listLoanArrears = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
     z
       .object({
-        bucket: z.enum(["all", ...ARREARS_BUCKETS]).optional().default("all"),
-        sort: z.enum(["days_past_due", "arrears_amount", "outstanding_principal"]).optional().default("days_past_due"),
+        bucket: z
+          .enum(["all", ...ARREARS_BUCKETS])
+          .optional()
+          .default("all"),
+        sort: z
+          .enum(["days_past_due", "arrears_amount", "outstanding_principal"])
+          .optional()
+          .default("days_past_due"),
         dir: z.enum(["asc", "desc"]).optional().default("desc"),
         page: z.number().int().min(1).max(500).optional().default(1),
         page_size: z.number().int().min(5).max(200).optional().default(25),
@@ -198,7 +208,9 @@ export const listLoanPenalties = createServerFn({ method: "GET" })
     await assertArrearsRead(context.supabase, context.userId);
     let q = context.supabase
       .from("loan_penalties")
-      .select("id, loan_id, repayment_id, period_month, amount, days_late, reason, waived_at, waive_note, created_at")
+      .select(
+        "id, loan_id, repayment_id, period_month, amount, days_late, reason, waived_at, waive_note, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(data.limit);
     if (data.loan_id) q = q.eq("loan_id", data.loan_id);
@@ -212,11 +224,17 @@ export const listLoanPenalties = createServerFn({ method: "GET" })
     let loans = new Map<string, any>();
     let profiles = new Map<string, any>();
     if (loanIds.length) {
-      const { data: l } = await context.supabase.from("loans").select("id, ref, user_id").in("id", loanIds);
+      const { data: l } = await context.supabase
+        .from("loans")
+        .select("id, ref, user_id")
+        .in("id", loanIds);
       loans = new Map((l ?? []).map((row: any) => [row.id, row]));
       const userIds = Array.from(new Set((l ?? []).map((row: any) => row.user_id)));
       if (userIds.length) {
-        const { data: p } = await context.supabase.from("profiles").select("id, full_name").in("id", userIds);
+        const { data: p } = await context.supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
         profiles = new Map((p ?? []).map((row: any) => [row.id, row]));
       }
     }
@@ -238,7 +256,11 @@ export const waiveLoanPenalty = createServerFn({ method: "POST" })
     z
       .object({
         penalty_id: z.string().uuid(),
-        note: z.string().trim().min(5, "A waiver reason of at least 5 characters is required").max(500),
+        note: z
+          .string()
+          .trim()
+          .min(5, "A waiver reason of at least 5 characters is required")
+          .max(500),
       })
       .parse(d),
   )
@@ -262,7 +284,9 @@ export const runArrearsRefresh = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: arrears, error: aErr } = await (supabaseAdmin as any).rpc("refresh_loan_arrears");
     if (aErr) throw new Error(aErr.message);
-    const { data: penalties, error: pErr } = await (supabaseAdmin as any).rpc("assess_loan_penalties");
+    const { data: penalties, error: pErr } = await (supabaseAdmin as any).rpc(
+      "assess_loan_penalties",
+    );
     if (pErr) throw new Error(pErr.message);
     return { arrears, penalties };
   });

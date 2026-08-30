@@ -33,9 +33,13 @@ describe("national ID normalization", () => {
   });
 
   it("treats formatting variants of the same document as duplicates", () => {
-    expect(isSameNationalId("ghana_card", "GHA-123456789-0", "ghana_card", "gha 1234567890")).toBe(true);
+    expect(isSameNationalId("ghana_card", "GHA-123456789-0", "ghana_card", "gha 1234567890")).toBe(
+      true,
+    );
     expect(isSameNationalId("passport", "G1234567", "passport", " g-123 4567 ")).toBe(true);
-    expect(isSameNationalId("ghana_card", "GHA-123456789-0", "ghana_card", "GHA-123456789-1")).toBe(false);
+    expect(isSameNationalId("ghana_card", "GHA-123456789-0", "ghana_card", "GHA-123456789-1")).toBe(
+      false,
+    );
     expect(isSameNationalId("passport", "G1234567", "ssnit", "G1234567")).toBe(false);
   });
 
@@ -54,7 +58,11 @@ const hasDb = !!process.env.PGHOST;
 const d = hasDb ? describe : describe.skip;
 
 function q(sql: string): string {
-  return execFileSync("psql", ["-tAX", "-c", sql], { encoding: "utf8" }).trim().split("\n").pop()!.trim();
+  return execFileSync("psql", ["-tAX", "-c", sql], { encoding: "utf8" })
+    .trim()
+    .split("\n")
+    .pop()!
+    .trim();
 }
 
 d("database normalization matches the UI helpers", () => {

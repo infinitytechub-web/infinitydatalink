@@ -24,13 +24,16 @@ const FilterSchema = z.object({
 });
 
 async function assertStaff(supabase: any, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) throw new Error(error.message);
   const roles: string[] = (data ?? []).map((r: any) => String(r.role));
-  const allowed = ["super_admin", "compliance_officer", "auditor", "finance_officer", "loan_officer"];
+  const allowed = [
+    "super_admin",
+    "compliance_officer",
+    "auditor",
+    "finance_officer",
+    "loan_officer",
+  ];
   if (!roles.some((r: string) => allowed.includes(r))) throw new Error("Forbidden");
   return roles;
 }
@@ -43,9 +46,12 @@ export const adminListNotificationOutbox = createServerFn({ method: "GET" })
 
     let query = context.supabase
       .from("notification_outbox")
-      .select("id, user_id, channel, category, title, body, status, attempts, error, sent_at, created_at", {
-        count: "exact",
-      })
+      .select(
+        "id, user_id, channel, category, title, body, status, attempts, error, sent_at, created_at",
+        {
+          count: "exact",
+        },
+      )
       .order("created_at", { ascending: false });
 
     if (data.status !== "all") query = query.eq("status", data.status);
@@ -57,13 +63,20 @@ export const adminListNotificationOutbox = createServerFn({ method: "GET" })
     const { data: rows, count, error } = await query;
     if (error) throw new Error(error.message);
 
-    return { rows: (rows ?? []) as AdminOutboxRow[], total: count ?? 0, page: data.page, pageSize: data.pageSize };
+    return {
+      rows: (rows ?? []) as AdminOutboxRow[],
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
   });
 
 /** Re-queues skipped/failed deliveries so the next dispatch run retries them. */
 export const adminRetryNotification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ ids: z.array(z.string().uuid()).min(1).max(100) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ ids: z.array(z.string().uuid()).min(1).max(100) }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     const roles = await assertStaff(context.supabase, context.userId);
     if (!roles.includes("super_admin") && !roles.includes("compliance_officer")) {

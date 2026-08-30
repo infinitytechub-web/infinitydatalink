@@ -4,7 +4,13 @@ import { z } from "zod";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
-import { EmptyState, PageHeader, SectionCard, SectionCardSkeleton, StatusPill } from "@/components/primitives";
+import {
+  EmptyState,
+  PageHeader,
+  SectionCard,
+  SectionCardSkeleton,
+  StatusPill,
+} from "@/components/primitives";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -93,7 +99,9 @@ function OutboxTable() {
           <select
             className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
             value={search.status}
-            onChange={(e) => navigate({ search: { ...search, status: e.target.value as any, page: 1 } })}
+            onChange={(e) =>
+              navigate({ search: { ...search, status: e.target.value as any, page: 1 } })
+            }
           >
             {["all", "pending", "sent", "failed", "skipped"].map((s) => (
               <option key={s} value={s}>
@@ -104,7 +112,9 @@ function OutboxTable() {
           <select
             className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
             value={search.channel}
-            onChange={(e) => navigate({ search: { ...search, channel: e.target.value as any, page: 1 } })}
+            onChange={(e) =>
+              navigate({ search: { ...search, channel: e.target.value as any, page: 1 } })
+            }
           >
             {["all", "email", "sms"].map((c) => (
               <option key={c} value={c}>
@@ -112,7 +122,12 @@ function OutboxTable() {
               </option>
             ))}
           </select>
-          <Button size="sm" variant="outline" disabled={selected.length === 0 || retry.isPending} onClick={() => retry.mutate(selected)}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={selected.length === 0 || retry.isPending}
+            onClick={() => retry.mutate(selected)}
+          >
             <RefreshCw className="mr-1 h-3.5 w-3.5" /> Retry selected
           </Button>
           <Button size="sm" disabled={dispatch.isPending} onClick={() => dispatch.mutate()}>
@@ -122,7 +137,10 @@ function OutboxTable() {
       }
     >
       {data.rows.length === 0 ? (
-        <EmptyState title="Nothing queued" hint="Alerts appear here when loan or savings events fire." />
+        <EmptyState
+          title="Nothing queued"
+          hint="Alerts appear here when loan or savings events fire."
+        />
       ) : (
         <>
           <div className="overflow-x-auto">
@@ -156,9 +174,19 @@ function OutboxTable() {
                     <td className="py-2 text-xs uppercase">{row.channel}</td>
                     <td className="py-2">
                       <StatusPill
-                        status={row.status === "sent" ? "cleared" : row.status === "pending" ? "pending" : "rejected"}
+                        status={
+                          row.status === "sent"
+                            ? "cleared"
+                            : row.status === "pending"
+                              ? "pending"
+                              : "rejected"
+                        }
                       />
-                      {row.error ? <div className="mt-1 max-w-xs text-xs text-muted-foreground">{row.error}</div> : null}
+                      {row.error ? (
+                        <div className="mt-1 max-w-xs text-xs text-muted-foreground">
+                          {row.error}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="py-2 text-xs">{row.attempts}</td>
                     <td className="py-2 text-xs text-muted-foreground">

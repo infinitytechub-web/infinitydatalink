@@ -14,7 +14,8 @@ export const Route = createFileRoute("/_admin/admin/security")({
       { property: "og:title", content: "Security Centre — IT-360 Admin" },
       {
         property: "og:description",
-        content: "Administrator security operations: events, firewall, upload scans and live sessions.",
+        content:
+          "Administrator security operations: events, firewall, upload scans and live sessions.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

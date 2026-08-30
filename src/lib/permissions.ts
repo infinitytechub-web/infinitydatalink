@@ -109,14 +109,39 @@ export const DEFAULT_ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     ["view", "create", "edit", "approve", "reject", "export", "print", "download"],
   ),
   manager: grid(
-    ["kyc", "members", "entities", "savings", "loans", "payments", "approvals", "reports", "documents", "notifications"],
+    [
+      "kyc",
+      "members",
+      "entities",
+      "savings",
+      "loans",
+      "payments",
+      "approvals",
+      "reports",
+      "documents",
+      "notifications",
+    ],
     DECIDE,
   ),
-  compliance_officer: grid(["kyc", "members", "entities", "documents", "notifications", "reports"], DECIDE),
+  compliance_officer: grid(
+    ["kyc", "members", "entities", "documents", "notifications", "reports"],
+    DECIDE,
+  ),
   loan_officer: grid(["loans", "members", "reports"], [...DECIDE, "create"]),
   finance_officer: grid(["savings", "payments", "loans", "reports"], [...DECIDE, "create"]),
   auditor: grid(
-    ["kyc", "members", "entities", "savings", "loans", "payments", "approvals", "reports", "security", "documents"],
+    [
+      "kyc",
+      "members",
+      "entities",
+      "savings",
+      "loans",
+      "payments",
+      "approvals",
+      "reports",
+      "security",
+      "documents",
+    ],
     READ_ONLY,
   ),
   teller: [
@@ -165,7 +190,10 @@ export function can(caps: CapabilitySet, module: PermModule, action: PermAction)
 }
 
 /** Loads the caller's effective capabilities from the database matrix. */
-export async function loadCapabilities(supabase: any, roles: readonly Role[]): Promise<Set<Capability>> {
+export async function loadCapabilities(
+  supabase: any,
+  roles: readonly Role[],
+): Promise<Set<Capability>> {
   const set = new Set<Capability>();
   try {
     const { data, error } = await supabase.rpc("my_permissions");
@@ -177,7 +205,8 @@ export async function loadCapabilities(supabase: any, roles: readonly Role[]): P
   } catch {
     /* fall through to the static matrix */
   }
-  if (roles.includes("super_admin")) for (const c of DEFAULT_ROLE_CAPABILITIES.super_admin) set.add(c);
+  if (roles.includes("super_admin"))
+    for (const c of DEFAULT_ROLE_CAPABILITIES.super_admin) set.add(c);
   if (set.size === 0) for (const c of capabilitiesForRoles(roles)) set.add(c);
   return set;
 }

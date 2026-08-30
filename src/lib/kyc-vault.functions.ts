@@ -10,10 +10,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { writeAudit } from "@/lib/audit-log";
-import {
-  type VaultDocument,
-  type VaultEntry,
-} from "@/lib/kyc-vault.shared";
+import { type VaultDocument, type VaultEntry } from "@/lib/kyc-vault.shared";
 
 const BUCKET = "kyc-documents";
 
@@ -69,7 +66,11 @@ export const listKycVault = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { admin } = await ctx(context, "view");
     const from = (data.page - 1) * data.pageSize;
-    const { data: rows, count, error } = await admin
+    const {
+      data: rows,
+      count,
+      error,
+    } = await admin
       .from("recycle_bin")
       .select("*", { count: "exact" })
       .eq("entity_table", "kyc_review")
@@ -81,7 +82,6 @@ export const listKycVault = createServerFn({ method: "GET" })
     const q = data.q?.toLowerCase();
     if (q) {
       entries = entries.filter((e: VaultEntry) =>
-
         [e.member_name, e.member_no, e.member_id, e.deleted_by_email]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(q)),
@@ -370,13 +370,9 @@ export const getKycVaultEntry = createServerFn({ method: "GET" })
         previous_kyc: entry.previous_kyc,
         kyc_notes: snap.kyc_notes ?? null,
         reviewed_at: snap.kyc_reviewed_at ?? null,
-        reviewed_by: snap.kyc_reviewed_by
-          ? (staff[String(snap.kyc_reviewed_by)] ?? null)
-          : null,
+        reviewed_by: snap.kyc_reviewed_by ? (staff[String(snap.kyc_reviewed_by)] ?? null) : null,
         assigned_at: snap.kyc_assigned_at ?? null,
-        assigned_to: snap.kyc_assigned_to
-          ? (staff[String(snap.kyc_assigned_to)] ?? null)
-          : null,
+        assigned_to: snap.kyc_assigned_to ? (staff[String(snap.kyc_assigned_to)] ?? null) : null,
         submitted_at: snap.kyc_submitted_at ?? null,
         resubmitted_at: snap.kyc_resubmitted_at ?? null,
         attempts: snap.kyc_attempts ?? null,

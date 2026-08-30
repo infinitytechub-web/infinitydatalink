@@ -33,9 +33,8 @@ const KycRejectedEmail = ({
       <Container style={container}>
         <Heading style={h1}>Action needed on your verification</Heading>
         <Text style={text}>
-          {memberName ? `Hi ${memberName},` : "Hello,"} we reviewed your KYC
-          submission for <strong>{siteName}</strong> and could not approve it as
-          submitted.
+          {memberName ? `Hi ${memberName},` : "Hello,"} we reviewed your KYC submission for{" "}
+          <strong>{siteName}</strong> and could not approve it as submitted.
         </Text>
         {reviewerNote ? (
           <Section style={noteBox}>
@@ -44,8 +43,8 @@ const KycRejectedEmail = ({
           </Section>
         ) : null}
         <Text style={text}>
-          Please update your profile and re-upload the required documents.
-          You'll be able to resubmit for another review right away.
+          Please update your profile and re-upload the required documents. You'll be able to
+          resubmit for another review right away.
         </Text>
         <Section style={{ textAlign: "center", margin: "28px 0" }}>
           <Button style={button} href={appUrl}>

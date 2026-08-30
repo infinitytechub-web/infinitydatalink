@@ -74,9 +74,15 @@ export const getMySavings = createServerFn({ method: "GET" })
     const sortCol = SAVINGS_SORT[data.sortBy] ?? "created_at";
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: rows, error, count } = await context.supabase
+    const {
+      data: rows,
+      error,
+      count,
+    } = await context.supabase
       .from("savings_accounts")
-      .select("id, balance, created_at, savings_plans(id, name, schedule, interest_rate)", { count: "exact" })
+      .select("id, balance, created_at, savings_plans(id, name, schedule, interest_rate)", {
+        count: "exact",
+      })
       .eq("user_id", context.userId)
       .order(sortCol, { ascending: data.sortDir === "asc" })
       .range(from, to);
@@ -102,9 +108,16 @@ export const getMyLoans = createServerFn({ method: "GET" })
     const sortCol = LOAN_SORT[data.sortBy] ?? "created_at";
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: rows, error, count } = await context.supabase
+    const {
+      data: rows,
+      error,
+      count,
+    } = await context.supabase
       .from("loans")
-      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, outstanding_principal, monthly_payment", { count: "exact" })
+      .select(
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, outstanding_principal, monthly_payment",
+        { count: "exact" },
+      )
       .eq("user_id", context.userId)
       .order(sortCol, { ascending: data.sortDir === "asc" })
       .range(from, to);
@@ -130,7 +143,11 @@ export const getMyTransactions = createServerFn({ method: "GET" })
     const sortCol = TXN_SORT[data.sortBy] ?? "created_at";
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: rows, error, count } = await context.supabase
+    const {
+      data: rows,
+      error,
+      count,
+    } = await context.supabase
       .from("transactions")
       .select("id, ref, kind, amount, channel, note, status, created_at", { count: "exact" })
       .eq("user_id", context.userId)
@@ -144,7 +161,6 @@ export const getMyTransactions = createServerFn({ method: "GET" })
       pageSize: data.pageSize,
     };
   });
-
 
 export const getMySummary = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -181,12 +197,15 @@ export const applyForLoan = createServerFn({ method: "POST" })
     let rate: number | null = null;
     if (data.product_id) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: verdict, error: eligErr } = await (supabaseAdmin as any).rpc("check_loan_eligibility", {
-        _user_id: context.userId,
-        _product_id: data.product_id,
-        _amount: data.amount,
-        _term_months: data.term_months,
-      });
+      const { data: verdict, error: eligErr } = await (supabaseAdmin as any).rpc(
+        "check_loan_eligibility",
+        {
+          _user_id: context.userId,
+          _product_id: data.product_id,
+          _amount: data.amount,
+          _term_months: data.term_months,
+        },
+      );
       if (eligErr) throw new Error(eligErr.message);
       const v = (verdict ?? {}) as any;
       if (!v.eligible) {
@@ -209,10 +228,11 @@ export const applyForLoan = createServerFn({ method: "POST" })
         purpose: data.purpose ?? null,
         status: "pending",
       })
-      .select("id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at")
+      .select(
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at",
+      )
       .single();
     if (error) throw new Error(error.message);
-
 
     await writeAudit({
       actor_id: context.userId,
@@ -223,7 +243,11 @@ export const applyForLoan = createServerFn({ method: "POST" })
       meta: { ref, product: data.product, amount: data.amount, term_months: data.term_months },
     });
 
-    return { ...inserted, amount: Number(inserted.amount), interest_rate: Number(inserted.interest_rate) } as LoanRow;
+    return {
+      ...inserted,
+      amount: Number(inserted.amount),
+      interest_rate: Number(inserted.interest_rate),
+    } as LoanRow;
   });
 
 export type MemberLoanScheduleRow = {
@@ -264,7 +288,9 @@ export const getMyLoanDetail = createServerFn({ method: "GET" })
     if (!loan) throw new Error("Loan not found");
     const { data: sched } = await context.supabase
       .from("loan_repayments")
-      .select("id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, paid_at, status")
+      .select(
+        "id, installment_no, due_date, principal_due, interest_due, total_due, paid_amount, paid_at, status",
+      )
       .eq("loan_id", loan.id)
       .order("installment_no", { ascending: true });
     return {

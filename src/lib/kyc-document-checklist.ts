@@ -5,11 +5,7 @@
  * can never drift from the rule that blocks an approval.
  */
 
-export const KYC_REQUIRED_DOC_TYPES = [
-  "national_id_front",
-  "national_id_back",
-  "selfie",
-] as const;
+export const KYC_REQUIRED_DOC_TYPES = ["national_id_front", "national_id_back", "selfie"] as const;
 
 /** Extra attachments required only when the member is under 18. */
 export const KYC_MINOR_DOC_TYPES = ["guardian_consent", "safeguarding_attestation"] as const;

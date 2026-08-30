@@ -14,7 +14,11 @@ export type ProbeResult = {
 async function assertStaff(supabase: any, userId: string) {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   const roles = new Set((data ?? []).map((r: any) => r.role as string));
-  if (!roles.has("super_admin") && !roles.has("compliance_officer") && !roles.has("finance_officer")) {
+  if (
+    !roles.has("super_admin") &&
+    !roles.has("compliance_officer") &&
+    !roles.has("finance_officer")
+  ) {
     throw new Error("Forbidden: staff role required");
   }
 }
@@ -35,7 +39,10 @@ const PROBES: Probe[] = [
     name: "transactions → profiles",
     detail: "transactions_user_id_profiles_fkey",
     run: (sb) =>
-      sb.from("transactions").select("id, profiles!transactions_user_id_profiles_fkey(id)").limit(1),
+      sb
+        .from("transactions")
+        .select("id, profiles!transactions_user_id_profiles_fkey(id)")
+        .limit(1),
   },
   {
     id: "rel.transactions.savings_accounts",
@@ -113,22 +120,118 @@ const PROBES: Probe[] = [
   },
 
   // Table reachability — RLS-scoped counts prove the Data API can reach the table.
-  { id: "tbl.profiles", category: "table", name: "profiles", detail: "SELECT 1", run: (sb) => sb.from("profiles").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.user_roles", category: "table", name: "user_roles", detail: "SELECT 1", run: (sb) => sb.from("user_roles").select("user_id", { head: true, count: "exact" }) },
-  { id: "tbl.savings_plans", category: "table", name: "savings_plans", detail: "SELECT 1", run: (sb) => sb.from("savings_plans").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.savings_accounts", category: "table", name: "savings_accounts", detail: "SELECT 1", run: (sb) => sb.from("savings_accounts").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.transactions", category: "table", name: "transactions", detail: "SELECT 1", run: (sb) => sb.from("transactions").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.loans", category: "table", name: "loans", detail: "SELECT 1", run: (sb) => sb.from("loans").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.loan_repayments", category: "table", name: "loan_repayments", detail: "SELECT 1", run: (sb) => sb.from("loan_repayments").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.expenses", category: "table", name: "expenses", detail: "SELECT 1", run: (sb) => sb.from("expenses").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.expense_categories", category: "table", name: "expense_categories", detail: "SELECT 1", run: (sb) => sb.from("expense_categories").select("code", { head: true, count: "exact" }) },
-  { id: "tbl.transfers", category: "table", name: "transfers", detail: "SELECT 1", run: (sb) => sb.from("transfers").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.entities", category: "table", name: "entities", detail: "SELECT 1", run: (sb) => sb.from("entities").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.entity_memberships", category: "table", name: "entity_memberships", detail: "SELECT 1", run: (sb) => sb.from("entity_memberships").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.kyc_documents", category: "table", name: "kyc_documents", detail: "SELECT 1", run: (sb) => sb.from("kyc_documents").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.next_of_kin", category: "table", name: "next_of_kin", detail: "SELECT 1", run: (sb) => sb.from("next_of_kin").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.audit_log", category: "table", name: "audit_log", detail: "SELECT 1", run: (sb) => sb.from("audit_log").select("id", { head: true, count: "exact" }) },
-  { id: "tbl.balance_adjustments", category: "table", name: "balance_adjustments", detail: "SELECT 1", run: (sb) => sb.from("balance_adjustments").select("id", { head: true, count: "exact" }) },
+  {
+    id: "tbl.profiles",
+    category: "table",
+    name: "profiles",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("profiles").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.user_roles",
+    category: "table",
+    name: "user_roles",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("user_roles").select("user_id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.savings_plans",
+    category: "table",
+    name: "savings_plans",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("savings_plans").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.savings_accounts",
+    category: "table",
+    name: "savings_accounts",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("savings_accounts").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.transactions",
+    category: "table",
+    name: "transactions",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("transactions").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.loans",
+    category: "table",
+    name: "loans",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("loans").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.loan_repayments",
+    category: "table",
+    name: "loan_repayments",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("loan_repayments").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.expenses",
+    category: "table",
+    name: "expenses",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("expenses").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.expense_categories",
+    category: "table",
+    name: "expense_categories",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("expense_categories").select("code", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.transfers",
+    category: "table",
+    name: "transfers",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("transfers").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.entities",
+    category: "table",
+    name: "entities",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("entities").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.entity_memberships",
+    category: "table",
+    name: "entity_memberships",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("entity_memberships").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.kyc_documents",
+    category: "table",
+    name: "kyc_documents",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("kyc_documents").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.next_of_kin",
+    category: "table",
+    name: "next_of_kin",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("next_of_kin").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.audit_log",
+    category: "table",
+    name: "audit_log",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("audit_log").select("id", { head: true, count: "exact" }),
+  },
+  {
+    id: "tbl.balance_adjustments",
+    category: "table",
+    name: "balance_adjustments",
+    detail: "SELECT 1",
+    run: (sb) => sb.from("balance_adjustments").select("id", { head: true, count: "exact" }),
+  },
 
   // RPC reachability — ensures privileged helpers are callable via PostgREST.
   {
@@ -140,7 +243,8 @@ const PROBES: Probe[] = [
       const r = await sb.rpc("list_super_admins");
       // Non-super_admin callers see a permission error — that's an expected
       // guardrail, not an integration failure. Treat 42501 as pass.
-      if (r.error && /forbidden|permission/i.test(r.error.message)) return { data: null, error: null };
+      if (r.error && /forbidden|permission/i.test(r.error.message))
+        return { data: null, error: null };
       return r;
     },
   },
@@ -186,7 +290,9 @@ export const adminRunHealthCheck = createServerFn({ method: "GET" })
         }
       }),
     );
-    results.sort((a, b) => (a.status === b.status ? a.name.localeCompare(b.name) : a.status === "fail" ? -1 : 1));
+    results.sort((a, b) =>
+      a.status === b.status ? a.name.localeCompare(b.name) : a.status === "fail" ? -1 : 1,
+    );
     const passed = results.filter((r) => r.status === "pass").length;
     return {
       ran_at: new Date().toISOString(),

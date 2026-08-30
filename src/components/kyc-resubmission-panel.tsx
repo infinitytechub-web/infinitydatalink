@@ -130,9 +130,9 @@ export function KycResubmissionPanel({
         >
           {resubWindow.blocked_reason === "deadline" ? (
             <>
-              <span className="font-semibold">Deadline passed.</span> Your resubmission window closed
-              on {new Date(resubWindow.deadline as string).toLocaleDateString()}. Contact support to
-              have it reopened.
+              <span className="font-semibold">Deadline passed.</span> Your resubmission window
+              closed on {new Date(resubWindow.deadline as string).toLocaleDateString()}. Contact
+              support to have it reopened.
             </>
           ) : resubWindow.blocked_reason === "attempts" ? (
             <>
@@ -185,9 +185,7 @@ export function KycResubmissionPanel({
                       id={`rem-${field}`}
                       type={field === "date_of_birth" ? "date" : "text"}
                       value={values[field] ?? ""}
-                      onChange={(e) =>
-                        setValues((prev) => ({ ...prev, [field]: e.target.value }))
-                      }
+                      onChange={(e) => setValues((prev) => ({ ...prev, [field]: e.target.value }))}
                     />
                   </div>
                 );

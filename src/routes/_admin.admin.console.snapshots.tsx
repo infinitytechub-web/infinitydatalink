@@ -150,7 +150,11 @@ function SnapshotsInner() {
                     key={r.id}
                     row={r}
                     onRestore={() => {
-                      if (window.confirm(`Restore snapshot "${r.label}"? This overwrites the current branding.`))
+                      if (
+                        window.confirm(
+                          `Restore snapshot "${r.label}"? This overwrites the current branding.`,
+                        )
+                      )
                         restore.mutate(r.id);
                     }}
                     onDelete={() => {

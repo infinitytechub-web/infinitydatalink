@@ -44,9 +44,26 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
     signatureAlgo: "sha512",
     signatureHeader: "x-paystack-signature",
     fields: [
-      { key: "public_key", label: "Public key", kind: "text", placeholder: "pk_test_…", required: true },
-      { key: "base_url", label: "API base URL", kind: "url", placeholder: "https://api.paystack.co", required: true },
-      { key: "callback_url", label: "Customer callback URL", kind: "url", placeholder: "https://…/app/payments" },
+      {
+        key: "public_key",
+        label: "Public key",
+        kind: "text",
+        placeholder: "pk_test_…",
+        required: true,
+      },
+      {
+        key: "base_url",
+        label: "API base URL",
+        kind: "url",
+        placeholder: "https://api.paystack.co",
+        required: true,
+      },
+      {
+        key: "callback_url",
+        label: "Customer callback URL",
+        kind: "url",
+        placeholder: "https://…/app/payments",
+      },
     ],
   },
   {
@@ -60,7 +77,13 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
     fields: [
       { key: "client_id", label: "Client ID", kind: "text", required: true },
       { key: "merchant_account", label: "Merchant account number", kind: "text", required: true },
-      { key: "base_url", label: "API base URL", kind: "url", placeholder: "https://api.hubtel.com", required: true },
+      {
+        key: "base_url",
+        label: "API base URL",
+        kind: "url",
+        placeholder: "https://api.hubtel.com",
+        required: true,
+      },
     ],
   },
   {
@@ -73,7 +96,13 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
     signatureHeader: "verif-hash",
     fields: [
       { key: "public_key", label: "Public key", kind: "text", required: true },
-      { key: "base_url", label: "API base URL", kind: "url", placeholder: "https://api.flutterwave.com/v3", required: true },
+      {
+        key: "base_url",
+        label: "API base URL",
+        kind: "url",
+        placeholder: "https://api.flutterwave.com/v3",
+        required: true,
+      },
     ],
   },
   {
@@ -86,8 +115,20 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
     signatureHeader: "x-momo-signature",
     fields: [
       { key: "subscription_key", label: "Subscription key", kind: "text", required: true },
-      { key: "environment", label: "Target environment", kind: "text", placeholder: "mtnghana", required: true },
-      { key: "base_url", label: "API base URL", kind: "url", placeholder: "https://proxy.momoapi.mtn.com", required: true },
+      {
+        key: "environment",
+        label: "Target environment",
+        kind: "text",
+        placeholder: "mtnghana",
+        required: true,
+      },
+      {
+        key: "base_url",
+        label: "API base URL",
+        kind: "url",
+        placeholder: "https://proxy.momoapi.mtn.com",
+        required: true,
+      },
     ],
   },
   {
@@ -120,7 +161,8 @@ export function defaultWebhookPath(code: string): string {
 export function normalizeIntentStatus(raw: string | null | undefined): string {
   const v = (raw ?? "").toLowerCase();
   if (["success", "successful", "succeeded", "paid", "completed"].includes(v)) return "succeeded";
-  if (["failed", "failure", "declined", "cancelled", "canceled", "abandoned"].includes(v)) return "failed";
+  if (["failed", "failure", "declined", "cancelled", "canceled", "abandoned"].includes(v))
+    return "failed";
   if (["reversed", "refunded", "chargeback"].includes(v)) return "reversed";
   return "pending";
 }
