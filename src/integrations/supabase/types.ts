@@ -5150,6 +5150,7 @@ export type Database = {
         Args: { _minutes?: number }
         Returns: boolean
       }
+      clear_my_read_notifications: { Args: never; Returns: number }
       clear_transfer: {
         Args: { _actor_id: string; _transfer_id: string }
         Returns: {
