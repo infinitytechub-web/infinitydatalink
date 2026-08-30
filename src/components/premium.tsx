@@ -4,7 +4,7 @@
  * executive dashboards. All colors come from tone tokens / CSS variables so
  * light and dark mode both stay legible.
  */
-import type { ReactNode } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { KPI_TONES, CHART_PALETTE, type ToneName } from "@/lib/theme-tokens";
@@ -123,6 +123,9 @@ export function PremiumStatCard({
   spark,
   progress,
   className,
+  onActivate,
+  tooltip,
+  actionLabel,
 }: {
   label: string;
   value: ReactNode;
@@ -136,15 +139,39 @@ export function PremiumStatCard({
   /** 0..1 — renders a thin progress meter at the card foot. */
   progress?: number;
   className?: string;
+  /** When provided the card becomes a keyboard-operable button (drill-down). */
+  onActivate?: () => void;
+  /** Native tooltip text explaining the metric. */
+  tooltip?: string;
+  /** Accessible name suffix, e.g. "View underlying deposits". */
+  actionLabel?: string;
 }) {
   const t = KPI_TONES[tone];
+  const interactive = typeof onActivate === "function";
   return (
     <div
+      {...(interactive
+        ? {
+            role: "button" as const,
+            tabIndex: 0,
+            "aria-label": `${label}${actionLabel ? ` — ${actionLabel}` : " — view details"}`,
+            onClick: onActivate,
+            onKeyDown: (e: ReactKeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onActivate!();
+              }
+            },
+          }
+        : {})}
+      title={tooltip}
       className={cn(
         "group relative isolate overflow-hidden rounded-2xl p-5 ring-1",
         "shadow-[0_14px_36px_-18px_rgba(15,23,42,0.45)]",
         "motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out",
         "motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-[0_26px_52px_-20px_rgba(15,23,42,0.55)]",
+        interactive &&
+          "cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         t.bg,
         t.ring,
         className,
@@ -226,6 +253,8 @@ export function ProgressRing({
   caption,
   tone = 0,
   size = 108,
+  onActivate,
+  tooltip,
 }: {
   /** 0..1 */
   value: number;
@@ -234,15 +263,35 @@ export function ProgressRing({
   /** Index into the chart palette. */
   tone?: number;
   size?: number;
+  /** When provided the gauge becomes a keyboard-operable drill-down trigger. */
+  onActivate?: () => void;
+  tooltip?: string;
 }) {
   const pct = Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
   const color = CHART_PALETTE[tone % CHART_PALETTE.length];
   const r = 42;
   const c = 2 * Math.PI * r;
+  const interactive = typeof onActivate === "function";
+  const Wrapper: any = interactive ? "button" : "div";
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
+    <Wrapper
+      {...(interactive
+        ? { type: "button", onClick: onActivate, "aria-label": `${label} ${(pct * 100).toFixed(1)}% — view details` }
+        : {})}
+      title={tooltip}
+      className={cn(
+        "flex flex-col items-center gap-2 rounded-xl p-2 text-center",
+        interactive &&
+          "cursor-pointer transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring",
+      )}
+    >
       <div className="relative" style={{ width: size, height: size }}>
-        <svg viewBox="0 0 100 100" className="size-full -rotate-90" role="img" aria-label={`${label} ${(pct * 100).toFixed(1)}%`}>
+        <svg
+          viewBox="0 0 100 100"
+          className="size-full -rotate-90"
+          role="img"
+          aria-label={`${label} ${(pct * 100).toFixed(1)}%`}
+        >
           <circle cx="50" cy="50" r={r} fill="none" stroke="var(--chart-grid)" strokeWidth={9} />
           <circle
             cx="50"
@@ -263,7 +312,7 @@ export function ProgressRing({
       </div>
       <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
       {caption ? <p className="text-[11px] text-muted-foreground">{caption}</p> : null}
-    </div>
+    </Wrapper>
   );
 }
 

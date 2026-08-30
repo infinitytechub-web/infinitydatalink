@@ -60,6 +60,38 @@ export function num(v: unknown) {
   return Number(v ?? 0) || 0;
 }
 
+/**
+ * Organisation scope → member user ids.
+ *
+ * Analytics fact tables (`transactions`, `loans`,
+ * `savings_withdrawal_requests`) are keyed by `user_id`, so an entity scope is
+ * resolved to the entity's active membership list and applied as an `IN`
+ * filter. Returns `null` for the institution-wide scope ("all") and `[]` when
+ * the entity has no members (which yields empty analytics rather than
+ * unscoped totals).
+ */
+export async function resolveScopeUserIds(
+  supabase: any,
+  entityId: string | null | undefined,
+): Promise<string[] | null> {
+  if (!entityId || entityId === "all") return null;
+  const { data, error } = await supabase
+    .from("entity_memberships")
+    .select("profile_id")
+    .eq("entity_id", entityId);
+  if (error) throw new Error(error.message);
+  return Array.from(new Set((data ?? []).map((r: any) => String(r.profile_id)).filter(Boolean)));
+}
+
+/** Applies an optional `user_id IN (...)` scope filter to a PostgREST builder. */
+export function scoped<T>(query: T, userIds: string[] | null, column = "user_id"): T {
+  if (!userIds) return query;
+  return (query as any).in(column, userIds.length ? userIds : [NO_MATCH_UUID]) as T;
+}
+
+/** Sentinel used so an empty scope returns zero rows instead of every row. */
+export const NO_MATCH_UUID = "00000000-0000-0000-0000-000000000000";
+
 export function pct(part: number, whole: number) {
   return whole <= 0 ? 0 : part / whole;
 }

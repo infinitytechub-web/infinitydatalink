@@ -7,6 +7,9 @@ import {
   bucketRange,
   num,
   pct,
+  resolveScopeUserIds,
+  scoped,
+  NO_MATCH_UUID,
   type Granularity,
 } from "@/lib/admin-insights.server";
 
@@ -91,6 +94,8 @@ const InputSchema = z.object({
   from: z.string(),
   to: z.string(),
   granularity: z.enum(["day", "week", "month"]).default("day"),
+  /** Organisation scope: "all" (institution-wide) or an entity id. */
+  entity: z.string().default("all"),
 });
 
 export const getAdminInsights = createServerFn({ method: "GET" })
@@ -105,35 +110,60 @@ export const getAdminInsights = createServerFn({ method: "GET" })
     const fromISO = fromDate.toISOString();
     const toISO = new Date(toDate.getTime() + 24 * 3600 * 1000 - 1).toISOString();
 
+    // Organisation scope → member ids, applied to every user-keyed fact table.
+    const scopeIds = await resolveScopeUserIds(sb, data.entity);
+    let scopedLoanIds: string[] | null = null;
+    if (scopeIds) {
+      const { data: loanRows } = await scoped(sb.from("loans").select("id"), scopeIds);
+      scopedLoanIds = (loanRows ?? []).map((r: any) => String(r.id));
+    }
+
     const [txRes, priorTxRes, wdRes, loansRes, repayRes] = await Promise.all([
-      sb
-        .from("transactions")
-        .select("amount, kind, created_at")
-        .eq("status", "cleared")
-        .gte("created_at", fromISO)
-        .lte("created_at", toISO),
-      sb
-        .from("transactions")
-        .select("amount, kind")
-        .eq("status", "cleared")
-        .lt("created_at", fromISO),
-      sb
-        .from("savings_withdrawal_requests")
-        .select(
-          "amount, channel, status, reason, cancellation_reason, cancelled_by_role, created_at, approved_at, rejected_at, paid_at, cancelled_at",
-        )
-        .gte("created_at", fromISO)
-        .lte("created_at", toISO),
-      sb
-        .from("loans")
-        .select("amount, product, status, outstanding_principal, created_at, disbursed_at, decided_at")
-        .gte("created_at", fromISO)
-        .lte("created_at", toISO),
-      sb
-        .from("loan_repayments")
-        .select("total_due, paid_amount, due_date, paid_at, status")
-        .gte("due_date", data.from)
-        .lte("due_date", data.to),
+      scoped(
+        sb
+          .from("transactions")
+          .select("amount, kind, created_at")
+          .eq("status", "cleared")
+          .gte("created_at", fromISO)
+          .lte("created_at", toISO),
+        scopeIds,
+      ),
+      scoped(
+        sb
+          .from("transactions")
+          .select("amount, kind")
+          .eq("status", "cleared")
+          .lt("created_at", fromISO),
+        scopeIds,
+      ),
+      scoped(
+        sb
+          .from("savings_withdrawal_requests")
+          .select(
+            "amount, channel, status, reason, cancellation_reason, cancelled_by_role, created_at, approved_at, rejected_at, paid_at, cancelled_at",
+          )
+          .gte("created_at", fromISO)
+          .lte("created_at", toISO),
+        scopeIds,
+      ),
+      scoped(
+        sb
+          .from("loans")
+          .select("amount, product, status, outstanding_principal, created_at, disbursed_at, decided_at")
+          .gte("created_at", fromISO)
+          .lte("created_at", toISO),
+        scopeIds,
+      ),
+      (() => {
+        const q = sb
+          .from("loan_repayments")
+          .select("total_due, paid_amount, due_date, paid_at, status")
+          .gte("due_date", data.from)
+          .lte("due_date", data.to);
+        return scopedLoanIds
+          ? q.in("loan_id", scopedLoanIds.length ? scopedLoanIds : [NO_MATCH_UUID])
+          : q;
+      })(),
     ]);
 
     const buckets = bucketRange(fromDate, toDate, g);
