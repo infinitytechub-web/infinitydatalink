@@ -94,9 +94,8 @@ export async function buildBiSnapshot(supabase: Client, windowDays = 90): Promis
   let inflowTotal = 0;
   let outflowTotal = 0;
   for (const t of txnRows) {
-    if (t.status && t.status !== "completed" && t.status !== "posted" && t.status !== "success") {
-      continue;
-    }
+    // Only settled money movements count towards flow analytics.
+    if (t.status && t.status !== "cleared") continue;
     const key = weekKey(String(t.created_at));
     const point = byWeek.get(key) ?? { bucket: key, inflow: 0, outflow: 0, volume: 0 };
     const amount = Math.abs(num(t.amount));
@@ -154,7 +153,7 @@ export async function buildBiSnapshot(supabase: Client, windowDays = 90): Promis
     queues: {
       pendingLoans: countBy(loanRows, "pending"),
       pendingWithdrawals: countBy(withdrawalRows, "pending"),
-      pendingKyc: profileRows.filter((p) => p.kyc === "pending" || p.kyc === "submitted").length,
+      pendingKyc: profileRows.filter((p) => p.kyc === "pending").length,
       openTickets: (tickets.data ?? []).filter(
         (t) => t.status !== "closed" && t.status !== "resolved",
       ).length,
