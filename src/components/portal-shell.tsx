@@ -328,17 +328,18 @@ export function PortalShell({
             >
               {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
             </button>
-            <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
+            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-sm font-medium">
               <span className="hidden truncate text-muted-foreground sm:inline">{displayName}</span>
-              <span className="hidden text-muted-foreground sm:inline">/</span>
-              <span className="truncate">{breadcrumb}</span>
-            </div>
+              <span className="hidden text-muted-foreground sm:inline" aria-hidden="true">
+                /
+              </span>
+              <span aria-current="page" className="truncate">
+                {breadcrumb}
+              </span>
+            </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden h-9 w-56 items-center gap-2 rounded-full border border-border bg-muted/60 px-4 text-xs text-muted-foreground backdrop-blur md:flex">
-              <Search className="size-3.5" />
-              <span>Search…</span>
-            </div>
+
             <UniversalClock />
             <OnlinePresencePill />
             <NotificationBell />
