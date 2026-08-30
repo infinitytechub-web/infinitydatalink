@@ -408,7 +408,7 @@ describe("receipt generation", () => {
     // A receipt on a still-open payment must surface as a mismatch.
     await issueReceipt(open.intent, ACTOR);
 
-    const summary = await buildReconciliation();
+    const { summary } = await buildReconciliation();
     expect(summary.manual_confirmed).toBe(1);
     expect(summary.provider_confirmed).toBe(1);
     expect(summary.awaiting_provider).toBe(1);
