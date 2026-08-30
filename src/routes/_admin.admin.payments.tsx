@@ -18,6 +18,7 @@ import {
   type AdminPendingPayment,
 } from "@/lib/admin-loans.functions";
 import { useAuth } from "@/lib/auth";
+import { GatewayPaymentsPanel } from "@/components/gateway-payments-panel";
 
 const KIND_FILTERS = ["all", "deposit", "withdrawal", "loan_repayment"] as const;
 type KindFilter = (typeof KIND_FILTERS)[number];
@@ -94,6 +95,8 @@ function Body() {
           <Queue kind={kind} />
         </Suspense>
       </SectionCard>
+
+      <GatewayPaymentsPanel />
     </>
   );
 }
