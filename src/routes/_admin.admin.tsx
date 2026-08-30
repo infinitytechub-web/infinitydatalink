@@ -38,6 +38,7 @@ import {
   PlugZap,
   Calculator,
 
+  LifeBuoy,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 
@@ -103,8 +104,10 @@ const groups: NavGroup[] = [
     label: "Counter",
     items: [
       { to: "/admin/teller", label: "Teller Mode", icon: <Calculator />, cap: "teller.view" },
+      { to: "/admin/support", label: "Support queue", icon: <LifeBuoy />, cap: "support.view" },
     ],
   },
+
   {
     label: "Governance",
     items: [
@@ -179,6 +182,8 @@ const CRUMBS: Record<string, string> = {
   "/admin/documents": "Document Management",
   "/admin/files": "Member Files",
   "/admin/operations": "Operations Dashboard",
+  "/admin/support": "Support Queue",
+
   "/admin/relationships": "Relationship Types",
   "/admin/super-admins": "Super Admins",
 

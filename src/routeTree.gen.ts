@@ -42,6 +42,7 @@ import { Route as MemberAppGuaranteesRouteImport } from './routes/_member.app.gu
 import { Route as MemberAppFilesRouteImport } from './routes/_member.app.files'
 import { Route as AdminAdminVaultRouteImport } from './routes/_admin.admin.vault'
 import { Route as AdminAdminTellerRouteImport } from './routes/_admin.admin.teller'
+import { Route as AdminAdminSupportRouteImport } from './routes/_admin.admin.support'
 import { Route as AdminAdminSuperAdminsRouteImport } from './routes/_admin.admin.super-admins'
 import { Route as AdminAdminSettingsRouteImport } from './routes/_admin.admin.settings'
 import { Route as AdminAdminSecurityRouteImport } from './routes/_admin.admin.security'
@@ -306,6 +307,11 @@ const AdminAdminVaultRoute = AdminAdminVaultRouteImport.update({
 const AdminAdminTellerRoute = AdminAdminTellerRouteImport.update({
   id: '/teller',
   path: '/teller',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSupportRoute = AdminAdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminSuperAdminsRoute = AdminAdminSuperAdminsRouteImport.update({
@@ -910,6 +916,7 @@ export interface FileRoutesByFullPath {
   '/admin/security': typeof AdminAdminSecurityRouteWithChildren
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/admin/support': typeof AdminAdminSupportRoute
   '/admin/teller': typeof AdminAdminTellerRoute
   '/admin/vault': typeof AdminAdminVaultRoute
   '/app/files': typeof MemberAppFilesRoute
@@ -1038,6 +1045,7 @@ export interface FileRoutesByTo {
   '/admin/savings': typeof AdminAdminSavingsRouteWithChildren
   '/admin/settings': typeof AdminAdminSettingsRoute
   '/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/admin/support': typeof AdminAdminSupportRoute
   '/admin/teller': typeof AdminAdminTellerRoute
   '/admin/vault': typeof AdminAdminVaultRoute
   '/app/files': typeof MemberAppFilesRoute
@@ -1174,6 +1182,7 @@ export interface FileRoutesById {
   '/_admin/admin/security': typeof AdminAdminSecurityRouteWithChildren
   '/_admin/admin/settings': typeof AdminAdminSettingsRoute
   '/_admin/admin/super-admins': typeof AdminAdminSuperAdminsRouteWithChildren
+  '/_admin/admin/support': typeof AdminAdminSupportRoute
   '/_admin/admin/teller': typeof AdminAdminTellerRoute
   '/_admin/admin/vault': typeof AdminAdminVaultRoute
   '/_member/app/files': typeof MemberAppFilesRoute
@@ -1310,6 +1319,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/settings'
     | '/admin/super-admins'
+    | '/admin/support'
     | '/admin/teller'
     | '/admin/vault'
     | '/app/files'
@@ -1438,6 +1448,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/super-admins'
+    | '/admin/support'
     | '/admin/teller'
     | '/admin/vault'
     | '/app/files'
@@ -1573,6 +1584,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/security'
     | '/_admin/admin/settings'
     | '/_admin/admin/super-admins'
+    | '/_admin/admin/support'
     | '/_admin/admin/teller'
     | '/_admin/admin/vault'
     | '/_member/app/files'
@@ -1917,6 +1929,13 @@ declare module '@tanstack/react-router' {
       path: '/teller'
       fullPath: '/admin/teller'
       preLoaderRoute: typeof AdminAdminTellerRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/support': {
+      id: '/_admin/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminAdminSupportRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/super-admins': {
@@ -2847,6 +2866,7 @@ interface AdminAdminRouteChildren {
   AdminAdminSecurityRoute: typeof AdminAdminSecurityRouteWithChildren
   AdminAdminSettingsRoute: typeof AdminAdminSettingsRoute
   AdminAdminSuperAdminsRoute: typeof AdminAdminSuperAdminsRouteWithChildren
+  AdminAdminSupportRoute: typeof AdminAdminSupportRoute
   AdminAdminTellerRoute: typeof AdminAdminTellerRoute
   AdminAdminVaultRoute: typeof AdminAdminVaultRoute
   AdminAdminIndexRoute: typeof AdminAdminIndexRoute
@@ -2892,6 +2912,7 @@ const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminSecurityRoute: AdminAdminSecurityRouteWithChildren,
   AdminAdminSettingsRoute: AdminAdminSettingsRoute,
   AdminAdminSuperAdminsRoute: AdminAdminSuperAdminsRouteWithChildren,
+  AdminAdminSupportRoute: AdminAdminSupportRoute,
   AdminAdminTellerRoute: AdminAdminTellerRoute,
   AdminAdminVaultRoute: AdminAdminVaultRoute,
   AdminAdminIndexRoute: AdminAdminIndexRoute,
