@@ -3947,6 +3947,113 @@ export type Database = {
         }
         Relationships: []
       }
+      support_messages: {
+        Row: {
+          attachment_path: string | null
+          author_id: string | null
+          author_role: string | null
+          body: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          is_staff: boolean
+          ticket_id: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          author_id?: string | null
+          author_role?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          is_staff?: boolean
+          ticket_id: string
+        }
+        Update: {
+          attachment_path?: string | null
+          author_id?: string | null
+          author_role?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          is_staff?: boolean
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assignee_id: string | null
+          attachment_path: string | null
+          category: Database["public"]["Enums"]["support_category"]
+          closed_at: string | null
+          created_at: string
+          first_response_at: string | null
+          id: string
+          last_member_activity_at: string
+          last_staff_activity_at: string | null
+          priority: Database["public"]["Enums"]["support_priority"]
+          ref: string
+          reopened_at: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["support_status"]
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          attachment_path?: string | null
+          category?: Database["public"]["Enums"]["support_category"]
+          closed_at?: string | null
+          created_at?: string
+          first_response_at?: string | null
+          id?: string
+          last_member_activity_at?: string
+          last_staff_activity_at?: string | null
+          priority?: Database["public"]["Enums"]["support_priority"]
+          ref?: string
+          reopened_at?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["support_status"]
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assignee_id?: string | null
+          attachment_path?: string | null
+          category?: Database["public"]["Enums"]["support_category"]
+          closed_at?: string | null
+          created_at?: string
+          first_response_at?: string | null
+          id?: string
+          last_member_activity_at?: string
+          last_staff_activity_at?: string | null
+          priority?: Database["public"]["Enums"]["support_priority"]
+          ref?: string
+          reopened_at?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["support_status"]
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -5104,6 +5211,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      gen_support_ref: { Args: never; Returns: string }
       gen_txn_ref: { Args: { _prefix: string }; Returns: string }
       grant_super_admin_by_email:
         | {
@@ -6338,6 +6446,20 @@ export type Database = {
         | "rejected"
         | "cancelled"
       share_txn_kind: "purchase" | "sale" | "dividend"
+      support_category:
+        | "savings"
+        | "loans"
+        | "payments"
+        | "kyc"
+        | "account"
+        | "other"
+      support_priority: "low" | "normal" | "high" | "urgent"
+      support_status:
+        | "open"
+        | "in_progress"
+        | "awaiting_member"
+        | "resolved"
+        | "closed"
       transfer_status: "pending" | "cleared" | "failed" | "reversed"
       txn_kind:
         | "deposit"
@@ -6546,6 +6668,22 @@ export const Constants = {
         "cancelled",
       ],
       share_txn_kind: ["purchase", "sale", "dividend"],
+      support_category: [
+        "savings",
+        "loans",
+        "payments",
+        "kyc",
+        "account",
+        "other",
+      ],
+      support_priority: ["low", "normal", "high", "urgent"],
+      support_status: [
+        "open",
+        "in_progress",
+        "awaiting_member",
+        "resolved",
+        "closed",
+      ],
       transfer_status: ["pending", "cleared", "failed", "reversed"],
       txn_kind: [
         "deposit",
