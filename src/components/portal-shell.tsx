@@ -180,7 +180,7 @@ export function PortalShell({
         >
           <Link
             to="/"
-            className="flex items-center gap-2 font-serif text-xl tracking-tight text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]"
+            className="flex min-w-0 items-center gap-2 overflow-hidden font-serif text-lg tracking-tight text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]"
           >
             {branding.logo_url ? (
               <img
