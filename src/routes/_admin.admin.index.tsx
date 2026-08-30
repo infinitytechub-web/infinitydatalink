@@ -7,20 +7,27 @@ import {
   EmptyState,
   ErrorState,
   KPIGridSkeleton,
-  KPIStat,
   Money,
   PageHeader,
   SectionCard,
   SectionCardSkeleton,
   StatusPill,
 } from "@/components/primitives";
+import { PremiumStatCard } from "@/components/premium";
 import { ExportBar } from "@/components/export-bar";
 import { formatMoney } from "@/lib/org-config";
 import { generateBusinessInsights } from "@/lib/ai-insights.functions";
 import { getAdminOverview, type ActivityEntry, type PendingApproval } from "@/lib/admin-analytics.functions";
 import { decideLoan } from "@/lib/admin-loans.functions";
 import { useStepUp } from "@/components/step-up-dialog";
-import { RefreshCw, Sparkles } from "lucide-react";
+import {
+  ClipboardCheck,
+  Landmark,
+  PiggyBank,
+  RefreshCw,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { FxConverterWidget } from "@/components/fx-converter-widget";
 import { PurgeControlsWidget } from "@/components/purge-controls-widget";
 import { RealtimeNotifications } from "@/components/realtime-notifications";
