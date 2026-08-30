@@ -21,6 +21,7 @@ import {
   BellRing,
   Handshake as HandshakeIcon,
   Calculator,
+  FileBarChart,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
@@ -75,6 +76,7 @@ const CRUMBS: Record<string, string> = {
   "/app/investments": "Investments & Shares",
   "/app/withdrawals": "Withdrawals",
   "/app/files": "My Documents",
+  "/app/reports": "Reports & Statements",
   "/app/transactions": "Transactions",
   "/app/payments": "Payments",
   "/app/transfers": "Transfers",
