@@ -824,3 +824,46 @@ export const getLoanScheduleProjection = createServerFn({ method: "GET" })
       schedule: estimate.schedule,
     };
   });
+
+export const requestLoanDisbursement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        loan_id: z.string().uuid(),
+        channel: z.string().trim().min(2).max(40),
+        reference: z.string().trim().max(80).optional(),
+        value_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        note: z.string().trim().max(500).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertLoanDisbursementRole(context.supabase, context.userId);
+    const { error } = await context.supabase.rpc("request_loan_disbursement", {
+      _loan_id: data.loan_id,
+      _channel: data.channel,
+      _reference: data.reference ?? null,
+      _value_date: data.value_date,
+      _note: data.note ?? null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const cancelLoanDisbursement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({ loan_id: z.string().uuid(), reason: z.string().trim().min(5).max(500) })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertLoanDisbursementRole(context.supabase, context.userId);
+    const { error } = await context.supabase.rpc("cancel_loan_disbursement", {
+      _loan_id: data.loan_id,
+      _reason: data.reason,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
