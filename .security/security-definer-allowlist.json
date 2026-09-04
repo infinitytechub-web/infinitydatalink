@@ -30,6 +30,7 @@
     "public.create_settings_snapshot(text,text)",
     "public.delete_email(text,bigint)",
     "public.disburse_loan(uuid,text,text,uuid)",
+    "public.set_approved_loan_terms(uuid)",
     "public.enqueue_email(text,jsonb)",
     "public.execute_dividend_run(uuid,uuid)",
     "public.finalize_transaction(uuid,public.txn_status,text)",

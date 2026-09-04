@@ -160,6 +160,16 @@ export const decideLoan = createServerFn({ method: "POST" })
       },
     });
 
+    // Approved loans immediately get their projected repayment terms (monthly
+    // instalment, first due date, maturity) so the interest-bearing settlement
+    // plan is visible before disbursement writes the real schedule.
+    if (data.decision === "approved") {
+      const { error: termsErr } = await context.supabase.rpc("set_approved_loan_terms", {
+        _loan_id: updated.id,
+      });
+      if (termsErr) console.error("set_approved_loan_terms failed", termsErr.message);
+    }
+
     // Tell the member their application has been decided (in-app + email/SMS
     // per their preferences). Never allowed to fail the decision itself.
     const { notifyUser } = await import("@/lib/notify.server");
