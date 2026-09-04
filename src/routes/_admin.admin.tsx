@@ -151,6 +151,12 @@ const groups: NavGroup[] = [
     label: "Lending",
     items: [
       {
+        to: "/admin/loan-dashboard",
+        label: "Loan officer dashboard",
+        icon: <BadgeDollarSign />,
+        cap: "loans.view",
+      },
+      {
         to: "/admin/loans",
         label: "Loan book & approvals",
         icon: <BadgeDollarSign />,
@@ -435,6 +441,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/recurring": "Recurring schedules",
 
   "/admin/loans": "Loans & Approvals",
+  "/admin/loan-dashboard": "Loan Dashboard",
   "/admin/loan-products": "Loan products & eligibility",
   "/admin/loan-calculator": "Loan Calculator",
   "/admin/loan-arrears": "Arrears & delinquency",
