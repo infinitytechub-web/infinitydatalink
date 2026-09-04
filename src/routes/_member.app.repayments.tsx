@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { CalendarClock, Receipt } from "lucide-react";
 import {
@@ -12,7 +12,10 @@ import {
   StatusPill,
 } from "@/components/primitives";
 import { formatMoney } from "@/lib/org-config";
-import { getMyRepaymentDashboard } from "@/lib/member-repayments.functions";
+import {
+  getMyRepaymentDashboard,
+  type RepaymentDashboard,
+} from "@/lib/member-repayments.functions";
 import { LoanRepaymentDialog } from "@/components/loan-repayment-dialog";
 
 export const Route = createFileRoute("/_member/app/repayments")({
@@ -53,7 +56,7 @@ function RepaymentsPage() {
 
 function RepaymentsContent() {
   const { data } = useSuspenseQuery(dashboardQuery);
-  const { totals, loans, upcoming, history } = data;
+  const { totals, loans, ledger, upcoming, history } = data;
 
   return (
     <div className="space-y-6">
@@ -289,5 +292,111 @@ function RepaymentsContent() {
         )}
       </SectionCard>
     </div>
+  );
+}
+
+function LedgerSection({
+  ledger,
+  loans,
+}: {
+  ledger: RepaymentDashboard["ledger"];
+  loans: RepaymentDashboard["loans"];
+}) {
+  const [loanId, setLoanId] = useState<string>("all");
+  const rows = loanId === "all" ? ledger : ledger.filter((r) => r.loan_id === loanId);
+  const totalDue = rows.reduce((s, r) => s + r.total_due, 0);
+  const totalPaid = rows.reduce((s, r) => s + r.paid_amount, 0);
+  const totalRemaining = rows.reduce((s, r) => s + r.remaining, 0);
+
+  return (
+    <SectionCard
+      title="Repayment ledger"
+      description="Every scheduled installment with the amount allocated against it."
+      actions={
+        loans.length > 1 ? (
+          <select
+            aria-label="Filter ledger by loan"
+            value={loanId}
+            onChange={(event) => setLoanId(event.target.value)}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+          >
+            <option value="all">All loans</option>
+            {loans.map((loan) => (
+              <option key={loan.id} value={loan.id}>
+                {loan.ref}
+              </option>
+            ))}
+          </select>
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
+        <div className="p-6">
+          <EmptyState
+            title="No schedule yet"
+            hint="A repayment schedule is created once your loan is disbursed."
+            icon={<CalendarClock className="size-5" aria-hidden="true" />}
+          />
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="px-6 py-3 font-medium">#</th>
+                <th className="px-6 py-3 font-medium">Loan</th>
+                <th className="px-6 py-3 font-medium">Due date</th>
+                <th className="px-6 py-3 text-right font-medium">Amount due</th>
+                <th className="px-6 py-3 text-right font-medium">Paid</th>
+                <th className="px-6 py-3 text-right font-medium">Remaining</th>
+                <th className="px-6 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {rows.map((row) => (
+                <tr key={row.id} className="hover:bg-muted/30">
+                  <td className="px-6 py-3 tabular-nums text-muted-foreground">
+                    {row.installment_no}
+                  </td>
+                  <td className="px-6 py-3">{row.loan_ref}</td>
+                  <td className="px-6 py-3 text-muted-foreground">{fmtDate(row.due_date)}</td>
+                  <td className="px-6 py-3 text-right tabular-nums">
+                    {formatMoney(row.total_due)}
+                  </td>
+                  <td className="px-6 py-3 text-right tabular-nums">
+                    {formatMoney(row.paid_amount)}
+                  </td>
+                  <td className="px-6 py-3 text-right tabular-nums">
+                    {formatMoney(row.remaining)}
+                  </td>
+                  <td className="px-6 py-3">
+                    {row.remaining <= 0.005 ? (
+                      <StatusPill status="cleared" />
+                    ) : row.overdue ? (
+                      <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-destructive">
+                        Overdue
+                      </span>
+                    ) : (
+                      <StatusPill status="pending" />
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot className="border-t border-border bg-muted/30 text-xs font-semibold">
+              <tr>
+                <td className="px-6 py-3" colSpan={3}>
+                  Totals
+                </td>
+                <td className="px-6 py-3 text-right tabular-nums">{formatMoney(totalDue)}</td>
+                <td className="px-6 py-3 text-right tabular-nums">{formatMoney(totalPaid)}</td>
+                <td className="px-6 py-3 text-right tabular-nums">{formatMoney(totalRemaining)}</td>
+                <td />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
+    </SectionCard>
   );
 }
