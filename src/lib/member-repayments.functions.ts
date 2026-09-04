@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
 
 export type RepaymentLoanSummary = {
   id: string;
@@ -18,6 +19,9 @@ export type RepaymentLoanSummary = {
   arrears: number;
   next_due_date: string | null;
   next_due_amount: number | null;
+  /** Repayments the member has submitted that staff have not confirmed yet. */
+  pending_submitted: number;
+  payable: boolean;
 };
 
 export type UpcomingInstallment = {
@@ -54,6 +58,7 @@ export type RepaymentDashboard = {
     activeLoans: number;
     nextDueDate: string | null;
     nextDueAmount: number | null;
+    pendingSubmitted: number;
   };
   loans: RepaymentLoanSummary[];
   upcoming: UpcomingInstallment[];
@@ -136,6 +141,9 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
       const rows = schedule.filter((s) => s.loan_id === l.id);
       const open = rows.filter((s) => s.remaining > 0.005);
       const next = open[0] ?? null;
+      const pendingSubmitted = history
+        .filter((h) => h.loan_id === l.id && h.status === "pending")
+        .reduce((s, h) => s + h.amount, 0);
       return {
         id: l.id,
         ref: l.ref,
@@ -153,6 +161,8 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
         arrears: rows.filter((r) => r.overdue).reduce((s, r) => s + r.remaining, 0),
         next_due_date: next?.due_date ?? null,
         next_due_amount: next?.remaining ?? null,
+        pending_submitted: pendingSubmitted,
+        payable: l.status === "active" && open.length > 0,
       };
     });
 
@@ -177,9 +187,59 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
           .length,
         nextDueDate: upcoming[0]?.due_date ?? null,
         nextDueAmount: upcoming[0]?.remaining ?? null,
+        pendingSubmitted: history
+          .filter((h) => h.status === "pending")
+          .reduce((s, h) => s + h.amount, 0),
       },
       loans: loanSummaries,
       upcoming,
       history,
     };
+  });
+
+export const REPAYMENT_CHANNELS = [
+  "mobile_money",
+  "bank_transfer",
+  "card",
+  "cash",
+] as const;
+
+/**
+ * Members submit a repayment for their own active loan. It lands as a pending
+ * payment that staff confirm before it is allocated against the schedule.
+ */
+export const submitMyLoanRepayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        loan_id: z.string().uuid(),
+        amount: z.coerce.number().positive().max(10_000_000),
+        channel: z.enum(REPAYMENT_CHANNELS),
+        reference: z.string().trim().max(80).optional(),
+        note: z.string().trim().max(300).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: txn, error } = await context.supabase.rpc("submit_member_loan_repayment", {
+      _loan_id: data.loan_id,
+      _amount: data.amount,
+      _channel: data.channel,
+      _reference: data.reference ?? null,
+      _note: data.note ?? null,
+    });
+    if (error) {
+      const map: Record<string, string> = {
+        loan_not_found: "We could not find that loan.",
+        forbidden: "You can only pay your own loans.",
+        loan_not_active: "This loan is not active yet.",
+        invalid_amount: "Enter an amount greater than zero.",
+        amount_exceeds_balance: "That is more than the balance still owed on this loan.",
+        channel_required: "Choose how you are paying.",
+      };
+      const key = Object.keys(map).find((k) => error.message.includes(k));
+      throw new Error(key ? map[key]! : error.message);
+    }
+    return txn as { id: string; ref: string; amount: number; status: string };
   });
