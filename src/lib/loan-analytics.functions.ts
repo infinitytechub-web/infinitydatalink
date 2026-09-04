@@ -169,7 +169,6 @@ export const getLoanAnalytics = createServerFn({ method: "GET" })
     const productAgg = new Map<string, ProductPerformance>();
 
     let dueToDateTotal = 0;
-    let collectedTotal = 0;
     let onTime = 0;
     let matured = 0;
 
@@ -212,7 +211,6 @@ export const getLoanAnalytics = createServerFn({ method: "GET" })
         }
       }
       agg.collected += Math.min(paid, total);
-      collectedTotal += Math.min(paid, total);
     }
 
     for (const loan of loans) {
