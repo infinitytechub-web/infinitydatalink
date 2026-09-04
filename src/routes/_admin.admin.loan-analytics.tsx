@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_admin/admin/loan-analytics")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: LoanAnalyticsPage;
+  component: LoanAnalyticsPage,
 });
 
 const analyticsQuery = (months: number) =>
