@@ -13,6 +13,7 @@ import {
 } from "@/components/primitives";
 import { formatMoney } from "@/lib/org-config";
 import { getMyRepaymentDashboard } from "@/lib/member-repayments.functions";
+import { LoanRepaymentDialog } from "@/components/loan-repayment-dialog";
 
 export const Route = createFileRoute("/_member/app/repayments")({
   head: () => ({
@@ -33,6 +34,11 @@ function fmtDate(value: string | null) {
     month: "short",
     day: "numeric",
   });
+}
+
+/** Total still owed across every open installment of one loan. */
+function balanceOwed(loanId: string, rows: { loan_id: string; remaining: number }[]) {
+  return rows.filter((r) => r.loan_id === loanId).reduce((sum, r) => sum + r.remaining, 0);
 }
 
 function RepaymentsPage() {
@@ -78,7 +84,11 @@ function RepaymentsContent() {
         <KPIStat
           label="Repaid this month"
           value={formatMoney(totals.repaidThisMonth)}
-          hint={`${formatMoney(totals.repaidTotal)} repaid in total`}
+          hint={
+            totals.pendingSubmitted > 0
+              ? `${formatMoney(totals.pendingSubmitted)} awaiting confirmation`
+              : `${formatMoney(totals.repaidTotal)} repaid in total`
+          }
           tone="emerald"
         />
       </div>
@@ -111,6 +121,7 @@ function RepaymentsContent() {
                   <th className="px-6 py-3 text-right font-medium">Progress</th>
                   <th className="px-6 py-3 text-right font-medium">Next due</th>
                   <th className="px-6 py-3 text-right font-medium">Arrears</th>
+                  <th className="px-6 py-3 text-right font-medium">Pay</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -148,6 +159,27 @@ function RepaymentsContent() {
                         </span>
                       ) : (
                         <span className="text-muted-foreground">—</span>
+                      )}
+                      {loan.pending_submitted > 0 ? (
+                        <p className="text-[11px] text-muted-foreground">
+                          {formatMoney(loan.pending_submitted)} awaiting confirmation
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      {loan.payable ? (
+                        <LoanRepaymentDialog
+                          loanId={loan.id}
+                          loanRef={loan.ref}
+                          suggestedAmount={loan.next_due_amount}
+                          maxAmount={Math.max(
+                            0,
+                            balanceOwed(loan.id, upcoming) - loan.pending_submitted,
+                          )}
+                          triggerLabel="Pay"
+                        />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </td>
                   </tr>
@@ -192,13 +224,13 @@ function RepaymentsContent() {
                   <span className="text-sm font-semibold tabular-nums">
                     {formatMoney(item.remaining)}
                   </span>
-                  <Link
-                    to="/app/loans/$loanId"
-                    params={{ loanId: item.loan_id }}
-                    className="text-xs font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    Pay
-                  </Link>
+                  <LoanRepaymentDialog
+                    loanId={item.loan_id}
+                    loanRef={item.loan_ref}
+                    suggestedAmount={item.remaining}
+                    maxAmount={item.remaining}
+                    triggerLabel="Pay"
+                  />
                 </div>
               </li>
             ))}
