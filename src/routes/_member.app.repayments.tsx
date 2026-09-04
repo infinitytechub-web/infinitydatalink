@@ -36,11 +36,6 @@ function fmtDate(value: string | null) {
   });
 }
 
-/** Total still owed across every open installment of one loan. */
-function balanceOwed(loanId: string, rows: { loan_id: string; remaining: number }[]) {
-  return rows.filter((r) => r.loan_id === loanId).reduce((sum, r) => sum + r.remaining, 0);
-}
-
 function RepaymentsPage() {
   return (
     <div className="space-y-6">
@@ -172,10 +167,7 @@ function RepaymentsContent() {
                           loanId={loan.id}
                           loanRef={loan.ref}
                           suggestedAmount={loan.next_due_amount}
-                          maxAmount={Math.max(
-                            0,
-                            balanceOwed(loan.id, upcoming) - loan.pending_submitted,
-                          )}
+                          maxAmount={Math.max(0, loan.balance_due - loan.pending_submitted)}
                           triggerLabel="Pay"
                         />
                       ) : (

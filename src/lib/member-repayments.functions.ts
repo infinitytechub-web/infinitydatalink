@@ -21,6 +21,8 @@ export type RepaymentLoanSummary = {
   next_due_amount: number | null;
   /** Repayments the member has submitted that staff have not confirmed yet. */
   pending_submitted: number;
+  /** Everything still owed across open installments (principal + interest). */
+  balance_due: number;
   payable: boolean;
 };
 
@@ -162,6 +164,7 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
         next_due_date: next?.due_date ?? null,
         next_due_amount: next?.remaining ?? null,
         pending_submitted: pendingSubmitted,
+        balance_due: open.reduce((s, r) => s + r.remaining, 0),
         payable: l.status === "active" && open.length > 0,
       };
     });
