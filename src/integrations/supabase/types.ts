@@ -6434,6 +6434,48 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_approved_loan_terms: {
+        Args: { _loan_id: string }
+        Returns: {
+          amount: number
+          arrears_amount: number
+          arrears_bucket: string
+          arrears_refreshed_at: string | null
+          created_at: string
+          days_past_due: number
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          first_payment_at: string | null
+          id: string
+          interest_rate: number
+          maturity_at: string | null
+          monthly_payment: number | null
+          outstanding_principal: number
+          penalty_accrued: number
+          penalty_paid: number
+          product: string
+          product_id: string | null
+          purpose: string | null
+          ref: string
+          restructure_count: number
+          restructured_at: string | null
+          status: Database["public"]["Enums"]["loan_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+          written_off_amount: number | null
+          written_off_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_guarantor_consent: {
         Args: {
           _actor_id: string
