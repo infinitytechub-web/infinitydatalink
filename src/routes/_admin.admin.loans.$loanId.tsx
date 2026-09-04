@@ -117,10 +117,19 @@ function DetailBody({ loanId }: { loanId: string }) {
         />
       )}
 
+      {loan.status === "approved" && (
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+          <ProjectedSchedule loanId={loan.id} />
+        </Suspense>
+      )}
+
       <SectionCard title="Repayment schedule">
         {loan.schedule.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No schedule yet" hint="Schedule is generated at disbursement." />
+            <EmptyState
+              title="No schedule yet"
+              hint="The binding schedule is written at disbursement — the projection above shows the interest-bearing plan."
+            />
           </div>
         ) : (
           <table className="w-full">
