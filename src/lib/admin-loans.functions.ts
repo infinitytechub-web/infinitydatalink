@@ -843,9 +843,9 @@ export const requestLoanDisbursement = createServerFn({ method: "POST" })
     const { error } = await context.supabase.rpc("request_loan_disbursement", {
       _loan_id: data.loan_id,
       _channel: data.channel,
-      _reference: data.reference ?? null,
+      _reference: data.reference ?? "",
       _value_date: data.value_date,
-      _note: data.note ?? null,
+      _note: data.note ?? "",
     });
     if (error) throw new Error(error.message);
     return { ok: true as const };

@@ -229,8 +229,8 @@ export const submitMyLoanRepayment = createServerFn({ method: "POST" })
       _loan_id: data.loan_id,
       _amount: data.amount,
       _channel: data.channel,
-      _reference: data.reference ?? null,
-      _note: data.note ?? null,
+      _reference: data.reference ?? "",
+      _note: data.note ?? "",
     });
     if (error) {
       const map: Record<string, string> = {
