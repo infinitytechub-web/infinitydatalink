@@ -16,6 +16,8 @@ import {
   getAdminLoanDetail,
   getLoanScheduleProjection,
   disburseLoan,
+  requestLoanDisbursement,
+  cancelLoanDisbursement,
   recordLoanRepayment,
   type LoanDetail,
 } from "@/lib/admin-loans.functions";
@@ -109,7 +111,7 @@ function DetailBody({ loanId }: { loanId: string }) {
         </div>
       </SectionCard>
 
-      {loan.status === "approved" && <DisburseCard loanId={loan.id} loanRef={loan.ref} />}
+      {loan.status === "approved" && <DisburseCard loan={loan} />}
       {loan.status === "active" && (
         <RepaymentCard
           loanId={loan.id}
@@ -175,59 +177,190 @@ function DetailBody({ loanId }: { loanId: string }) {
   );
 }
 
-function DisburseCard({ loanId, loanRef }: { loanId: string; loanRef: string }) {
+function DisburseCard({ loan }: { loan: LoanDetail }) {
   const qc = useQueryClient();
-  const disburse = useServerFn(disburseLoan);
-  const [channel, setChannel] = useState("bank_transfer");
+  const request = useServerFn(requestLoanDisbursement);
+  const confirm = useServerFn(disburseLoan);
+  const cancelStaged = useServerFn(cancelLoanDisbursement);
+  const [channel, setChannel] = useState(loan.disbursement_channel ?? "bank_transfer");
+  const [reference, setReference] = useState(loan.disbursement_reference ?? "");
+  const [valueDate, setValueDate] = useState(
+    loan.interest_start_at ?? new Date().toISOString().slice(0, 10),
+  );
   const [note, setNote] = useState("");
-  const mutation = useMutation({
+  const [reason, setReason] = useState("");
+  const staged = loan.disbursement_status === "awaiting_confirmation";
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["admin", "loans"] });
+  };
+
+  const stage = useMutation({
     mutationFn: () =>
-      disburse({ data: { loan_id: loanId, channel, note: note.trim() || undefined } }),
+      request({
+        data: {
+          loan_id: loan.id,
+          channel,
+          reference: reference.trim() || undefined,
+          value_date: valueDate,
+          note: note.trim() || undefined,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Disbursement staged", {
+        description: `${loan.ref} is awaiting confirmation by a finance officer or administrator.`,
+      });
+      invalidate();
+    },
+    onError: (e: Error) => toast.error("Could not stage disbursement", { description: e.message }),
+  });
+
+  const release = useMutation({
+    mutationFn: () =>
+      confirm({
+        data: { loan_id: loan.id, channel, note: note.trim() || undefined },
+      }),
     onSuccess: () => {
       toast.success("Loan disbursed", {
-        description: `Reference ${loanRef} · schedule generated.`,
+        description: `${loan.ref} released · schedule generated from ${valueDate}.`,
       });
-      qc.invalidateQueries({ queryKey: ["admin", "loans"] });
+      invalidate();
     },
     onError: (e: Error) => toast.error("Disbursement failed", { description: e.message }),
   });
 
+  const cancel = useMutation({
+    mutationFn: () => cancelStaged({ data: { loan_id: loan.id, reason: reason.trim() } }),
+    onSuccess: () => {
+      toast.success("Staged disbursement cancelled");
+      setReason("");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error("Could not cancel", { description: e.message }),
+  });
+
   return (
-    <SectionCard title="Disburse">
-      <div className="grid gap-3 p-6 md:grid-cols-[220px_1fr_auto] md:items-end">
-        <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Channel
-          </span>
-          <select
-            value={channel}
-            onChange={(e) => setChannel(e.target.value)}
-            className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+    <SectionCard
+      title="Disbursement"
+      action={
+        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+          {loan.disbursement_status === "awaiting_confirmation"
+            ? "Awaiting confirmation"
+            : loan.disbursement_status === "cancelled"
+              ? "Cancelled"
+              : loan.disbursement_status === "disbursed"
+                ? "Released"
+                : "Not requested"}
+        </span>
+      }
+    >
+      <div className="space-y-4 p-6">
+        {staged ? (
+          <div className="rounded border border-emerald-deep/15 bg-muted/30 p-4 text-sm">
+            <p className="font-medium">Staged for release</p>
+            <p className="text-[11px] text-muted-foreground">
+              {loan.disbursement_channel ?? "—"}
+              {loan.disbursement_reference ? ` · ${loan.disbursement_reference}` : ""} · interest
+              starts {loan.interest_start_at ?? "—"} · requested{" "}
+              {loan.disbursement_requested_at
+                ? new Date(loan.disbursement_requested_at).toLocaleString()
+                : "—"}
+            </p>
+            {loan.disbursement_note ? (
+              <p className="mt-1 text-[11px] text-muted-foreground">{loan.disbursement_note}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="grid gap-3 md:grid-cols-[200px_200px_180px_1fr] md:items-end">
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Channel
+            </span>
+            <select
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+              className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+            >
+              <option value="bank_transfer">Bank transfer</option>
+              <option value="mobile_money">Mobile money</option>
+              <option value="cheque">Cheque</option>
+              <option value="cash">Cash</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Payout reference
+            </span>
+            <input
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              placeholder="Bank / MoMo reference"
+              className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Value date (interest starts)
+            </span>
+            <input
+              type="date"
+              value={valueDate}
+              onChange={(e) => setValueDate(e.target.value)}
+              className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Note (optional)
+            </span>
+            <input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Account, approval memo, etc."
+              className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => stage.mutate()}
+            disabled={stage.isPending}
+            className="h-10 rounded border border-emerald-deep/20 px-4 text-xs font-bold uppercase tracking-widest hover:bg-muted/50 disabled:opacity-50"
           >
-            <option value="bank_transfer">Bank transfer</option>
-            <option value="mobile_money">Mobile money</option>
-            <option value="cheque">Cheque</option>
-            <option value="cash">Cash</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Note (optional)
-          </span>
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Ref, account, etc."
-            className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
-          />
-        </label>
-        <button
-          onClick={() => mutation.mutate()}
-          disabled={mutation.isPending}
-          className="h-10 rounded bg-emerald-deep px-4 text-xs font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
-        >
-          {mutation.isPending ? "Disbursing…" : "Disburse loan"}
-        </button>
+            {stage.isPending ? "Staging…" : staged ? "Update request" : "Request disbursement"}
+          </button>
+          <button
+            onClick={() => release.mutate()}
+            disabled={release.isPending || !staged}
+            title={staged ? undefined : "Stage the disbursement first"}
+            className="h-10 rounded bg-emerald-deep px-4 text-xs font-bold uppercase tracking-widest text-cream hover:bg-emerald-mid disabled:opacity-50"
+          >
+            {release.isPending ? "Releasing…" : "Confirm & release funds"}
+          </button>
+          {staged ? (
+            <div className="flex items-center gap-2">
+              <input
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Reason to cancel"
+                className="h-10 rounded border border-emerald-deep/15 bg-card px-3 text-sm outline-none focus:border-emerald-mid"
+              />
+              <button
+                onClick={() => cancel.mutate()}
+                disabled={cancel.isPending || reason.trim().length < 5}
+                className="h-10 rounded border border-destructive/40 px-4 text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : null}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Requesting officer and confirming officer are recorded separately. Interest and the
+          repayment schedule both start from the value date.
+        </p>
       </div>
     </SectionCard>
   );
