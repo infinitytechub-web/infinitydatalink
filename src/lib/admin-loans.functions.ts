@@ -22,12 +22,21 @@ async function assertAdmin(supabase: any, userId: string) {
 }
 
 const DISBURSEMENT_ROLES = new Set(["super_admin", "finance_officer", "loan_officer"]);
+/** Confirming a release is a separate, higher-trust step than staging one. */
+const DISBURSEMENT_CONFIRM_ROLES = new Set(["super_admin", "admin", "finance_officer"]);
 
 async function assertLoanDisbursementRole(supabase: any, userId: string) {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   const roles = new Set((data ?? []).map((r: any) => r.role as string));
   const ok = Array.from(roles).some((r) => DISBURSEMENT_ROLES.has(r as string));
   if (!ok) throw new Error("Forbidden: loan or finance officer role required");
+}
+
+async function assertDisbursementConfirmRole(supabase: any, userId: string) {
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const roles = new Set((data ?? []).map((r: any) => r.role as string));
+  const ok = Array.from(roles).some((r) => DISBURSEMENT_CONFIRM_ROLES.has(r as string));
+  if (!ok) throw new Error("Forbidden: finance officer or administrator role required to confirm a disbursement");
 }
 
 export type AdminLoanRow = {
@@ -342,7 +351,16 @@ export type LoanScheduleRow = {
   status: "due" | "partial" | "paid" | "late";
 };
 
+export type DisbursementStatus = "not_requested" | "awaiting_confirmation" | "disbursed" | "cancelled";
+
 export type LoanDetail = AdminLoanRow & {
+  disbursement_status: DisbursementStatus;
+  disbursement_channel: string | null;
+  disbursement_reference: string | null;
+  disbursement_note: string | null;
+  disbursement_requested_at: string | null;
+  disbursement_requested_by: string | null;
+  interest_start_at: string | null;
   disbursed_at: string | null;
   disbursed_by: string | null;
   outstanding_principal: number;
@@ -361,7 +379,7 @@ export const getAdminLoanDetail = createServerFn({ method: "GET" })
     const { data: loan, error } = await context.supabase
       .from("loans")
       .select(
-        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, decision_note, user_id, disbursed_at, disbursed_by, outstanding_principal, monthly_payment, first_payment_at, maturity_at",
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, decision_note, user_id, disbursed_at, disbursed_by, outstanding_principal, monthly_payment, first_payment_at, maturity_at, disbursement_status, disbursement_channel, disbursement_reference, disbursement_note, disbursement_requested_at, disbursement_requested_by, interest_start_at",
       )
       .eq("id", data.loan_id)
       .maybeSingle();
@@ -411,7 +429,7 @@ export const disburseLoan = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertLoanDisbursementRole(context.supabase, context.userId);
+    await assertDisbursementConfirmRole(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: loan, error } = await supabaseAdmin.rpc("disburse_loan", {
       _loan_id: data.loan_id,
