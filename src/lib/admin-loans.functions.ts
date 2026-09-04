@@ -160,6 +160,32 @@ export const decideLoan = createServerFn({ method: "POST" })
       },
     });
 
+    // Tell the member their application has been decided (in-app + email/SMS
+    // per their preferences). Never allowed to fail the decision itself.
+    const { notifyUser } = await import("@/lib/notify.server");
+    await notifyUser({
+      userId: updated.user_id,
+      category: data.decision === "approved" ? "loan.approved" : "loan.rejected",
+      title:
+        data.decision === "approved"
+          ? `Loan ${updated.ref} approved`
+          : `Loan ${updated.ref} declined`,
+      body:
+        data.decision === "approved"
+          ? `Your ${updated.product} application for GH₵ ${Number(updated.amount).toLocaleString()} has been approved. Officer note: ${data.note}`
+          : `Your ${updated.product} application was declined. Officer note: ${data.note}`,
+      link: `/app/loans/${updated.id}`,
+      dedupeKey: `loan-decision:${updated.id}:${data.decision}`,
+      meta: {
+        loan_id: updated.id,
+        ref: updated.ref,
+        decision: data.decision,
+        amount: Number(updated.amount),
+      },
+    });
+
+
+
     return {
       ...updated,
       amount: Number(updated.amount),
