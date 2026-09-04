@@ -311,8 +311,7 @@ function LedgerSection({
   return (
     <SectionCard
       title="Repayment ledger"
-      description="Every scheduled installment with the amount allocated against it."
-      actions={
+      action={
         loans.length > 1 ? (
           <select
             aria-label="Filter ledger by loan"
