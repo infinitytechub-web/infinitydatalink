@@ -63,6 +63,8 @@ export type RepaymentDashboard = {
     pendingSubmitted: number;
   };
   loans: RepaymentLoanSummary[];
+  /** Every installment across the member's loans, paid and unpaid. */
+  ledger: UpcomingInstallment[];
   upcoming: UpcomingInstallment[];
   history: RepaymentHistoryRow[];
 };
@@ -195,6 +197,7 @@ export const getMyRepaymentDashboard = createServerFn({ method: "GET" })
           .reduce((s, h) => s + h.amount, 0),
       },
       loans: loanSummaries,
+      ledger: schedule,
       upcoming,
       history,
     };
