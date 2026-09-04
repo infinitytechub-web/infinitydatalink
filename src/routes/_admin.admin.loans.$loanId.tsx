@@ -14,6 +14,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   getAdminLoanDetail,
+  getLoanScheduleProjection,
   disburseLoan,
   recordLoanRepayment,
   type LoanDetail,
@@ -117,10 +118,19 @@ function DetailBody({ loanId }: { loanId: string }) {
         />
       )}
 
+      {loan.status === "approved" && (
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+          <ProjectedSchedule loanId={loan.id} />
+        </Suspense>
+      )}
+
       <SectionCard title="Repayment schedule">
         {loan.schedule.length === 0 ? (
           <div className="p-6">
-            <EmptyState title="No schedule yet" hint="Schedule is generated at disbursement." />
+            <EmptyState
+              title="No schedule yet"
+              hint="The binding schedule is written at disbursement — the projection above shows the interest-bearing plan."
+            />
           </div>
         ) : (
           <table className="w-full">
@@ -312,6 +322,72 @@ function RepaymentCard({
           {mutation.isPending ? "Recording…" : "Record payment"}
         </button>
       </div>
+    </SectionCard>
+  );
+}
+
+/** Interest-bearing settlement plan for an approved (not yet disbursed) loan. */
+function ProjectedSchedule({ loanId }: { loanId: string }) {
+  const { data } = useSuspenseQuery(
+    queryOptions({
+      queryKey: ["admin", "loans", "projection", loanId],
+      queryFn: () => getLoanScheduleProjection({ data: { loan_id: loanId } }),
+    }),
+  );
+  return (
+    <SectionCard title="Projected repayment schedule (pre-disbursement)">
+      <div className="grid gap-6 p-6 md:grid-cols-3 text-sm">
+        <div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Monthly instalment
+          </div>
+          <Money amount={data.installment} />
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Total interest
+          </div>
+          <Money amount={data.totalInterest} />
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Total repayable
+          </div>
+          <Money amount={data.totalRepayment} />
+        </div>
+      </div>
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-emerald-deep/5 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
+            <th className="px-6 py-3 font-medium">#</th>
+            <th className="px-6 py-3 font-medium">Due date</th>
+            <th className="px-6 py-3 text-right font-medium">Principal</th>
+            <th className="px-6 py-3 text-right font-medium">Interest</th>
+            <th className="px-6 py-3 text-right font-medium">Payment</th>
+            <th className="px-6 py-3 text-right font-medium">Balance</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-emerald-deep/5">
+          {data.schedule.map((r) => (
+            <tr key={r.period}>
+              <td className="tabular px-6 py-3 text-sm">{r.period}</td>
+              <td className="tabular px-6 py-3 text-sm">{r.dueDate}</td>
+              <td className="px-6 py-3 text-right">
+                <Money amount={r.principal} />
+              </td>
+              <td className="px-6 py-3 text-right">
+                <Money amount={r.interest} />
+              </td>
+              <td className="px-6 py-3 text-right">
+                <Money amount={r.payment} />
+              </td>
+              <td className="px-6 py-3 text-right">
+                <Money amount={r.balance} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </SectionCard>
   );
 }
