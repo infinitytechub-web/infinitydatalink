@@ -157,6 +157,12 @@ const groups: NavGroup[] = [
         cap: "loans.view",
       },
       {
+        to: "/admin/loan-analytics",
+        label: "Portfolio analytics",
+        icon: <BadgeDollarSign />,
+        cap: "loans.view",
+      },
+      {
         to: "/admin/loans",
         label: "Loan book & approvals",
         icon: <BadgeDollarSign />,
@@ -442,6 +448,7 @@ const CRUMBS: Record<string, string> = {
 
   "/admin/loans": "Loans & Approvals",
   "/admin/loan-dashboard": "Loan Dashboard",
+  "/admin/loan-analytics": "Portfolio analytics",
   "/admin/loan-products": "Loan products & eligibility",
   "/admin/loan-calculator": "Loan Calculator",
   "/admin/loan-arrears": "Arrears & delinquency",

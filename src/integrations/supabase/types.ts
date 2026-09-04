@@ -1954,9 +1954,16 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_channel: string | null
+          disbursement_note: string | null
+          disbursement_reference: string | null
+          disbursement_requested_at: string | null
+          disbursement_requested_by: string | null
+          disbursement_status: string
           first_payment_at: string | null
           id: string
           interest_rate: number
+          interest_start_at: string | null
           maturity_at: string | null
           monthly_payment: number | null
           outstanding_principal: number
@@ -1987,9 +1994,16 @@ export type Database = {
           decision_note?: string | null
           disbursed_at?: string | null
           disbursed_by?: string | null
+          disbursement_channel?: string | null
+          disbursement_note?: string | null
+          disbursement_reference?: string | null
+          disbursement_requested_at?: string | null
+          disbursement_requested_by?: string | null
+          disbursement_status?: string
           first_payment_at?: string | null
           id?: string
           interest_rate?: number
+          interest_start_at?: string | null
           maturity_at?: string | null
           monthly_payment?: number | null
           outstanding_principal?: number
@@ -2020,9 +2034,16 @@ export type Database = {
           decision_note?: string | null
           disbursed_at?: string | null
           disbursed_by?: string | null
+          disbursement_channel?: string | null
+          disbursement_note?: string | null
+          disbursement_reference?: string | null
+          disbursement_requested_at?: string | null
+          disbursement_requested_by?: string | null
+          disbursement_status?: string
           first_payment_at?: string | null
           id?: string
           interest_rate?: number
+          interest_start_at?: string | null
           maturity_at?: string | null
           monthly_payment?: number | null
           outstanding_principal?: number
@@ -5042,6 +5063,55 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancel_loan_disbursement: {
+        Args: { _loan_id: string; _reason: string }
+        Returns: {
+          amount: number
+          arrears_amount: number
+          arrears_bucket: string
+          arrears_refreshed_at: string | null
+          created_at: string
+          days_past_due: number
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          disbursement_channel: string | null
+          disbursement_note: string | null
+          disbursement_reference: string | null
+          disbursement_requested_at: string | null
+          disbursement_requested_by: string | null
+          disbursement_status: string
+          first_payment_at: string | null
+          id: string
+          interest_rate: number
+          interest_start_at: string | null
+          maturity_at: string | null
+          monthly_payment: number | null
+          outstanding_principal: number
+          penalty_accrued: number
+          penalty_paid: number
+          product: string
+          product_id: string | null
+          purpose: string | null
+          ref: string
+          restructure_count: number
+          restructured_at: string | null
+          status: Database["public"]["Enums"]["loan_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+          written_off_amount: number | null
+          written_off_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancel_loan_settlement: {
         Args: { _actor_id?: string; _note?: string; _request_id: string }
         Returns: {
@@ -5312,9 +5382,16 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_channel: string | null
+          disbursement_note: string | null
+          disbursement_reference: string | null
+          disbursement_requested_at: string | null
+          disbursement_requested_by: string | null
+          disbursement_status: string
           first_payment_at: string | null
           id: string
           interest_rate: number
+          interest_start_at: string | null
           maturity_at: string | null
           monthly_payment: number | null
           outstanding_principal: number
@@ -5918,9 +5995,16 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_channel: string | null
+          disbursement_note: string | null
+          disbursement_reference: string | null
+          disbursement_requested_at: string | null
+          disbursement_requested_by: string | null
+          disbursement_status: string
           first_payment_at: string | null
           id: string
           interest_rate: number
+          interest_start_at: string | null
           maturity_at: string | null
           monthly_payment: number | null
           outstanding_principal: number
@@ -6203,6 +6287,61 @@ export type Database = {
         Args: { _actor_id: string; _guarantor_id: string }
         Returns: boolean
       }
+      request_loan_disbursement: {
+        Args: {
+          _channel: string
+          _loan_id: string
+          _note: string
+          _reference: string
+          _value_date: string
+        }
+        Returns: {
+          amount: number
+          arrears_amount: number
+          arrears_bucket: string
+          arrears_refreshed_at: string | null
+          created_at: string
+          days_past_due: number
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          disbursement_channel: string | null
+          disbursement_note: string | null
+          disbursement_reference: string | null
+          disbursement_requested_at: string | null
+          disbursement_requested_by: string | null
+          disbursement_status: string
+          first_payment_at: string | null
+          id: string
+          interest_rate: number
+          interest_start_at: string | null
+          maturity_at: string | null
+          monthly_payment: number | null
+          outstanding_principal: number
+          penalty_accrued: number
+          penalty_paid: number
+          product: string
+          product_id: string | null
+          purpose: string | null
+          ref: string
+          restructure_count: number
+          restructured_at: string | null
+          status: Database["public"]["Enums"]["loan_status"]
+          term_months: number
+          updated_at: string
+          user_id: string
+          written_off_amount: number | null
+          written_off_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "loans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       request_loan_restructure: {
         Args: {
           _actor_id: string
@@ -6448,9 +6587,16 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_channel: string | null
+          disbursement_note: string | null
+          disbursement_reference: string | null
+          disbursement_requested_at: string | null
+          disbursement_requested_by: string | null
+          disbursement_status: string
           first_payment_at: string | null
           id: string
           interest_rate: number
+          interest_start_at: string | null
           maturity_at: string | null
           monthly_payment: number | null
           outstanding_principal: number
@@ -6551,6 +6697,34 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "dividend_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_member_loan_repayment: {
+        Args: {
+          _amount: number
+          _channel: string
+          _loan_id: string
+          _note: string
+          _reference: string
+        }
+        Returns: {
+          amount: number
+          channel: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["txn_kind"]
+          loan_id: string | null
+          note: string | null
+          ref: string
+          savings_account_id: string | null
+          status: Database["public"]["Enums"]["txn_status"]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
           isOneToOne: true
           isSetofReturn: false
         }
