@@ -778,11 +778,11 @@ export const getLoanScheduleProjection = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!loan) throw new Error("Loan not found");
 
-    const { estimateLoan } = await import("@/lib/loan-schedule");
+    const { computeLoanEstimate } = await import("@/lib/loan-schedule");
     const start = loan.first_payment_at
       ? new Date(loan.first_payment_at as string)
       : new Date();
-    const estimate = estimateLoan({
+    const estimate = computeLoanEstimate({
       amount: Number(loan.amount),
       annualRatePercent: Number(loan.interest_rate),
       termMonths: loan.term_months,
