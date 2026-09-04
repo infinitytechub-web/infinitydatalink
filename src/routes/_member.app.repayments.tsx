@@ -230,6 +230,10 @@ function RepaymentsContent() {
         )}
       </SectionCard>
 
+      <LedgerSection ledger={ledger} loans={loans} />
+
+
+
       <SectionCard title="Payment history" accent="emerald">
         {history.length === 0 ? (
           <div className="p-6">
