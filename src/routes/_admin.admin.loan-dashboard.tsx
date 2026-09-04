@@ -258,7 +258,7 @@ function DashboardBody() {
                     {d.decision_note ?? "—"}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <StatusPill status={d.status} />
+                    <StatusPill status={d.status as "approved" | "rejected" | "active" | "closed" | "pending"} />
                   </td>
                 </tr>
               ))}
