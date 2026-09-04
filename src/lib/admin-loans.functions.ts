@@ -641,3 +641,158 @@ export const adminReconcilePayment = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+// ============================================================================
+// Loan officer dashboard: pipeline overview + decision history analytics
+// ============================================================================
+
+export type LoanOfficerOverview = {
+  pending: AdminLoanRow[];
+  counts: { pending: number; approved: number; rejected: number; active: number; closed: number };
+  pendingValue: number;
+  portfolioValue: number;
+  approvalRate: number;
+  avgDecisionHours: number | null;
+  trend: Array<{ day: string; approved: number; rejected: number }>;
+  recentDecisions: Array<{
+    id: string;
+    ref: string;
+    product: string;
+    amount: number;
+    status: string;
+    decided_at: string | null;
+    decision_note: string | null;
+    member_name: string | null;
+    member_no: string | null;
+  }>;
+};
+
+export const getLoanOfficerOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ days: z.number().int().min(7).max(180).default(30) }).parse(d ?? {}))
+  .handler(async ({ data, context }): Promise<LoanOfficerOverview> => {
+    await assertAdmin(context.supabase, context.userId);
+    const since = new Date(Date.now() - data.days * 86_400_000);
+    const sinceIso = since.toISOString();
+
+    const { data: loans, error } = await context.supabase
+      .from("loans")
+      .select(
+        "id, ref, product, amount, term_months, interest_rate, status, purpose, created_at, decided_at, decision_note, user_id",
+      )
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+
+    const rows = (loans ?? []).map((l: any) => ({ ...l, amount: Number(l.amount), interest_rate: Number(l.interest_rate) }));
+
+    const ids = Array.from(new Set(rows.map((l: any) => l.user_id)));
+    let profileMap = new Map<string, { full_name: string | null; member_no: string | null }>();
+    if (ids.length) {
+      const { data: profiles } = await context.supabase
+        .from("profiles")
+        .select("id, full_name, member_no")
+        .in("id", ids);
+      profileMap = new Map(
+        (profiles ?? []).map((p: any) => [p.id, { full_name: p.full_name, member_no: p.member_no }]),
+      );
+    }
+    const named = (l: any) => ({
+      ...l,
+      member_name: profileMap.get(l.user_id)?.full_name ?? null,
+      member_no: profileMap.get(l.user_id)?.member_no ?? null,
+    });
+
+    const counts = { pending: 0, approved: 0, rejected: 0, active: 0, closed: 0 };
+    for (const l of rows) {
+      if (l.status in counts) (counts as any)[l.status] += 1;
+    }
+
+    const trendMap = new Map<string, { approved: number; rejected: number }>();
+    for (let i = data.days - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10);
+      trendMap.set(d, { approved: 0, rejected: 0 });
+    }
+    let decidedCount = 0;
+    let approvedCount = 0;
+    let hoursTotal = 0;
+    let hoursSamples = 0;
+    for (const l of rows) {
+      if (!l.decided_at) continue;
+      const isApproved = l.status !== "rejected";
+      decidedCount += 1;
+      if (isApproved) approvedCount += 1;
+      hoursTotal += (new Date(l.decided_at).getTime() - new Date(l.created_at).getTime()) / 3_600_000;
+      hoursSamples += 1;
+      if (l.decided_at < sinceIso) continue;
+      const key = l.decided_at.slice(0, 10);
+      const bucket = trendMap.get(key);
+      if (bucket) bucket[isApproved ? "approved" : "rejected"] += 1;
+    }
+
+    return {
+      pending: rows.filter((l: any) => l.status === "pending").map(named) as AdminLoanRow[],
+      counts,
+      pendingValue: rows.filter((l: any) => l.status === "pending").reduce((s: number, l: any) => s + l.amount, 0),
+      portfolioValue: rows
+        .filter((l: any) => l.status === "approved" || l.status === "active")
+        .reduce((s: number, l: any) => s + l.amount, 0),
+      approvalRate: decidedCount ? Math.round((approvedCount / decidedCount) * 1000) / 10 : 0,
+      avgDecisionHours: hoursSamples ? Math.round((hoursTotal / hoursSamples) * 10) / 10 : null,
+      trend: Array.from(trendMap.entries()).map(([day, v]) => ({ day, ...v })),
+      recentDecisions: rows
+        .filter((l: any) => l.decided_at)
+        .slice(0, 15)
+        .map((l: any) => {
+          const p = profileMap.get(l.user_id);
+          return {
+            id: l.id,
+            ref: l.ref,
+            product: l.product,
+            amount: l.amount,
+            status: l.status,
+            decided_at: l.decided_at,
+            decision_note: l.decision_note ?? null,
+            member_name: p?.full_name ?? null,
+            member_no: p?.member_no ?? null,
+          };
+        }),
+    };
+  });
+
+/**
+ * Projected amortisation for an approved (not yet disbursed) loan, so officers
+ * can see the interest-bearing settlement plan before money moves. The real
+ * `loan_repayments` rows are still written by `disburse_loan`.
+ */
+export const getLoanScheduleProjection = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ loan_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: loan, error } = await context.supabase
+      .from("loans")
+      .select("id, amount, term_months, interest_rate, status, first_payment_at, monthly_payment")
+      .eq("id", data.loan_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!loan) throw new Error("Loan not found");
+
+    const { estimateLoan } = await import("@/lib/loan-schedule");
+    const start = loan.first_payment_at
+      ? new Date(loan.first_payment_at as string)
+      : new Date();
+    const estimate = estimateLoan({
+      amount: Number(loan.amount),
+      annualRatePercent: Number(loan.interest_rate),
+      termMonths: loan.term_months,
+      frequency: "monthly",
+      startDate: start.toISOString().slice(0, 10),
+    });
+    return {
+      installment: estimate.installment,
+      totalInterest: estimate.totalInterest,
+      totalRepayment: estimate.totalRepayment,
+      schedule: estimate.schedule,
+    };
+  });
