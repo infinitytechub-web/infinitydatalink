@@ -133,10 +133,10 @@
   },
   "overrides": {
     "js-yaml": "^4.3.0",
-    "@tanstack/router-core": "1.171.15"
+    "@tanstack/router-core": "1.171.34"
   },
   "resolutions": {
     "js-yaml": "^4.3.0",
-    "@tanstack/router-core": "1.171.15"
+    "@tanstack/router-core": "1.171.34"
   }
 }
