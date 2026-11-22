@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_admin/admin/finance/expenses")({
       <div className="p-6">
         <ErrorState
           title="Expenses failed to load"
-          message={error.message}
+          message={(error as Error).message}
           onRetry={() => router.invalidate()}
         />
       </div>

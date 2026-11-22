@@ -51,7 +51,7 @@ export const Route = createFileRoute("/_member/app/savings/insights")({
   component: InsightsPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Insights unavailable" message={error.message} />
+      <ErrorState title="Insights unavailable" message={(error as Error).message} />
     </div>
   ),
 });

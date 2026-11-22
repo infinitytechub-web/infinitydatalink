@@ -58,7 +58,7 @@ export const Route = createFileRoute("/_admin/admin/loan-arrears")({
     ],
   }),
   component: ArrearsPage,
-  errorComponent: ({ error }) => <PageError error={error} />,
+  errorComponent: ({ error }) => <PageError error={error as Error} />,
 });
 
 function PageError({ error }: { error: Error }) {

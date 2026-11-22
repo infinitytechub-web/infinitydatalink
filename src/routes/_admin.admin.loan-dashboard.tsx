@@ -39,13 +39,13 @@ export const Route = createFileRoute("/_admin/admin/loan-dashboard")({
   }),
 });
 
-function DashboardError({ error }: { error: Error }) {
+function DashboardError({ error }: { error: unknown }) {
   const router = useRouter();
   return (
     <div className="p-6">
       <ErrorState
         title="Loan dashboard failed to load"
-        message={error.message}
+        message={(error as Error).message}
         onRetry={() => router.invalidate()}
       />
     </div>

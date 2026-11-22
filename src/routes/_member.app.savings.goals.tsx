@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_member/app/savings/goals")({
   component: GoalsPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Goals unavailable" message={error.message} />
+      <ErrorState title="Goals unavailable" message={(error as Error).message} />
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,

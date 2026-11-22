@@ -91,7 +91,7 @@ export const Route = createFileRoute("/_admin/admin/files")({
     ],
   }),
   errorComponent: ({ error }) => (
-    <ErrorState title="File register unavailable" message={error.message} />
+    <ErrorState title="File register unavailable" message={(error as Error).message} />
   ),
   notFoundComponent: () => (
     <EmptyState title="Nothing here" hint="This file view does not exist." />

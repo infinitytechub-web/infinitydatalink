@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_member/app/savings/enroll")({
   loader: ({ context }) => context.queryClient.ensureQueryData(plansQuery),
   component: EnrollPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Failed to load plans: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Failed to load plans: {(error as Error).message}</div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });

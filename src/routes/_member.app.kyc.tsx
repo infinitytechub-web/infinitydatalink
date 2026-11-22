@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_member/app/kyc")({
   component: KycStatusPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">
-      Verification status failed to load: {error.message}
+      Verification status failed to load: {(error as Error).message}
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,

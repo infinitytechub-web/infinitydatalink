@@ -67,7 +67,7 @@ export const Route = createFileRoute("/_member/app/reports")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  errorComponent: ({ error }) => <ErrorState title="Reports unavailable" message={error.message} />,
+  errorComponent: ({ error }) => <ErrorState title="Reports unavailable" message={(error as Error).message} />,
   notFoundComponent: () => (
     <EmptyState title="Nothing here" hint="This statement does not exist." />
   ),

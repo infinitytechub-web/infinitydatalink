@@ -62,7 +62,7 @@ export const Route = createFileRoute("/_admin/admin/fx")({
   component: FxDashboard,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Rates unavailable" message={error.message} />
+      <ErrorState title="Rates unavailable" message={(error as Error).message} />
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,

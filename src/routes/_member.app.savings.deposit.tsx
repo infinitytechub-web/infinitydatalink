@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_member/app/savings/deposit")({
   loader: ({ context }) => context.queryClient.ensureQueryData(accountsQuery),
   component: DepositPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Failed to load deposit flow: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Failed to load deposit flow: {(error as Error).message}</div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
 });

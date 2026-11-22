@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_admin/admin/relationships")({
   component: RelationshipTypesPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">
-      Unable to load relationship types: {error.message}
+      Unable to load relationship types: {(error as Error).message}
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm">Not found.</div>,

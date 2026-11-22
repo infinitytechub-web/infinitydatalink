@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_member/app/account")({
   }),
   component: AccountPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Account unavailable: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Account unavailable: {(error as Error).message}</div>
   ),
 });
 

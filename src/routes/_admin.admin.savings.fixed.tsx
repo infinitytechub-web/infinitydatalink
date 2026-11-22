@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_admin/admin/savings/fixed")({
   component: AdminFixedPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Fixed deposit book unavailable" message={error.message} />
+      <ErrorState title="Fixed deposit book unavailable" message={(error as Error).message} />
     </div>
   ),
 });

@@ -82,7 +82,7 @@ export const Route = createFileRoute("/_member/app/savings/ledger")({
   component: LedgerPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Ledger unavailable" message={error.message} />
+      <ErrorState title="Ledger unavailable" message={(error as Error).message} />
     </div>
   ),
 });

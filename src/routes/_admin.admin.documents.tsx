@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_admin/admin/documents")({
   component: DocumentsPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">
-      Document register unavailable: {error.message}
+      Document register unavailable: {(error as Error).message}
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm">Not found.</div>,

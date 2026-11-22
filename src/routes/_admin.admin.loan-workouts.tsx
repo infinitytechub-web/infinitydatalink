@@ -60,7 +60,7 @@ export const Route = createFileRoute("/_admin/admin/loan-workouts")({
     ],
   }),
   component: WorkoutsPage,
-  errorComponent: ({ error }) => <PageError error={error} />,
+  errorComponent: ({ error }) => <PageError error={error as Error} />,
 });
 
 function PageError({ error }: { error: Error }) {

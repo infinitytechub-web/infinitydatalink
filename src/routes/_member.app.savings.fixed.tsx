@@ -75,7 +75,7 @@ export const Route = createFileRoute("/_member/app/savings/fixed")({
   component: FixedDepositsPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Fixed deposits unavailable" message={error.message} />
+      <ErrorState title="Fixed deposits unavailable" message={(error as Error).message} />
     </div>
   ),
 });

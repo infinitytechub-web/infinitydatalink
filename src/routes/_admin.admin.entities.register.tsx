@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_admin/admin/entities/register")({
       <div className="p-6">
         <ErrorState
           title="Could not open form"
-          message={error.message}
+          message={(error as Error).message}
           onRetry={() => router.invalidate()}
         />
       </div>

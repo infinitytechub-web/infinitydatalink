@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_admin/admin/savings/pots")({
   component: AdminPotsPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Group pots unavailable" message={error.message} />
+      <ErrorState title="Group pots unavailable" message={(error as Error).message} />
     </div>
   ),
 });

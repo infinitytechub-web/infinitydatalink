@@ -51,7 +51,7 @@ export const Route = createFileRoute("/_admin/admin/reports")({
   validateSearch: zodValidator(search),
   component: ReportsPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Reports failed to load: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Reports failed to load: {(error as Error).message}</div>
   ),
 });
 

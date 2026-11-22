@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_admin/admin/members/$id")({
   }),
   component: MemberDetailPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Member unavailable: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Member unavailable: {(error as Error).message}</div>
   ),
 });
 

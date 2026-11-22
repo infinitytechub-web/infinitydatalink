@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_member/app/savings/$accountId")({
     context.queryClient.ensureQueryData(detailQuery(params.accountId)),
   component: AccountPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Failed to load account: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Failed to load account: {(error as Error).message}</div>
   ),
   notFoundComponent: () => (
     <div className="p-6 text-sm text-muted-foreground">

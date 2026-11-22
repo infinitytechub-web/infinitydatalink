@@ -64,7 +64,7 @@ export const Route = createFileRoute("/_member/app/transfers")({
       <div className="p-6">
         <ErrorState
           title="Transfers unavailable"
-          message={error.message}
+          message={(error as Error).message}
           onRetry={() => router.invalidate()}
         />
       </div>

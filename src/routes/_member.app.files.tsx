@@ -63,7 +63,7 @@ export const Route = createFileRoute("/_member/app/files")({
   }),
   loader: () => null,
   errorComponent: ({ error }) => (
-    <ErrorState title="Documents unavailable" message={error.message} />
+    <ErrorState title="Documents unavailable" message={(error as Error).message} />
   ),
   notFoundComponent: () => (
     <EmptyState title="Nothing here" hint="This document view does not exist." />

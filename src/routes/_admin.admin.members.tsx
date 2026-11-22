@@ -108,7 +108,7 @@ export const Route = createFileRoute("/_admin/admin/members")({
   component: MembersPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Queue failed to load" message={error.message} />
+      <ErrorState title="Queue failed to load" message={(error as Error).message} />
     </div>
   ),
 });

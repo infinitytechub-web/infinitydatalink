@@ -24,13 +24,13 @@ export const Route = createFileRoute("/_admin/admin/loans")({
   errorComponent: LoansError,
 });
 
-function LoansError({ error }: { error: Error }) {
+function LoansError({ error }: { error: unknown }) {
   const router = useRouter();
   return (
     <div className="p-6">
       <ErrorState
         title="Loans failed to load"
-        message={error.message}
+        message={(error as Error).message}
         onRetry={() => router.invalidate()}
       />
     </div>

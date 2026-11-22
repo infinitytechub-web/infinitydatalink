@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_member/app/withdrawals")({
     ],
   }),
   errorComponent: ({ error }) => (
-    <ErrorState title="Withdrawals unavailable" message={error.message} />
+    <ErrorState title="Withdrawals unavailable" message={(error as Error).message} />
   ),
   notFoundComponent: () => (
     <EmptyState title="Nothing here" hint="This withdrawal view does not exist." />

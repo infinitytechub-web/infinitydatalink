@@ -110,7 +110,7 @@ export const Route = createFileRoute("/_admin/admin/analytics")({
   }),
   component: AnalyticsPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Analytics failed to load: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Analytics failed to load: {(error as Error).message}</div>
   ),
 });
 

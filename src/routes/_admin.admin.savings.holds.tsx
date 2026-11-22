@@ -68,7 +68,7 @@ export const Route = createFileRoute("/_admin/admin/savings/holds")({
   component: HoldsPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Holds unavailable" message={error.message} />
+      <ErrorState title="Holds unavailable" message={(error as Error).message} />
     </div>
   ),
 });

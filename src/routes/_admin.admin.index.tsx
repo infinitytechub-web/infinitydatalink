@@ -47,13 +47,13 @@ export const Route = createFileRoute("/_admin/admin/")({
   errorComponent: DashboardError,
 });
 
-function DashboardError({ error }: { error: Error }) {
+function DashboardError({ error }: { error: unknown }) {
   const router = useRouter();
   return (
     <div className="p-6">
       <ErrorState
         title="Dashboard failed to load"
-        message={error.message}
+        message={(error as Error).message}
         onRetry={() => router.invalidate()}
       />
     </div>

@@ -49,7 +49,7 @@ export const Route = createFileRoute("/_member/app/profile")({
   }),
   component: ProfilePage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Profile unavailable: {error.message}</div>
+    <div className="p-6 text-sm text-destructive">Profile unavailable: {(error as Error).message}</div>
   ),
 });
 

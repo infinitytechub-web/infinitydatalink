@@ -71,7 +71,7 @@ export const Route = createFileRoute("/_admin/admin/recurring")({
   component: AdminRecurringPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Failed to load recurring schedules" message={error.message} />
+      <ErrorState title="Failed to load recurring schedules" message={(error as Error).message} />
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,

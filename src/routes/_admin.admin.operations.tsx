@@ -34,7 +34,7 @@ export const Route = createFileRoute("/_admin/admin/operations")({
     ],
   }),
   errorComponent: ({ error }) => (
-    <ErrorState title="Operations board unavailable" message={error.message} />
+    <ErrorState title="Operations board unavailable" message={(error as Error).message} />
   ),
   notFoundComponent: () => (
     <EmptyState title="Nothing here" hint="This operations view does not exist." />

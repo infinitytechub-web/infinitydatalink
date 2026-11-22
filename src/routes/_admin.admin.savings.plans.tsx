@@ -49,7 +49,7 @@ export const Route = createFileRoute("/_admin/admin/savings/plans")({
   component: PlansPage,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Plans unavailable" message={error.message} />
+      <ErrorState title="Plans unavailable" message={(error as Error).message} />
     </div>
   ),
 });

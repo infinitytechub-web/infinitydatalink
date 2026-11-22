@@ -63,7 +63,7 @@ export const Route = createFileRoute("/_admin/admin/teller")({
     ],
   }),
   errorComponent: ({ error }) => (
-    <ErrorState title="Teller mode unavailable" message={error.message} />
+    <ErrorState title="Teller mode unavailable" message={(error as Error).message} />
   ),
   notFoundComponent: () => (
     <EmptyState title="Nothing here" hint="This teller view does not exist." />

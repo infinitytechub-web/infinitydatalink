@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_admin/admin/live-users")({
   component: LiveUsersPanel,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Live panel unavailable" message={error.message} />
+      <ErrorState title="Live panel unavailable" message={(error as Error).message} />
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,

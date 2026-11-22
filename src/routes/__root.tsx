@@ -42,7 +42,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -50,8 +50,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     void import("@/lib/runtime-error-logger").then((m) =>
       m.logRuntimeError({
         kind: "route",
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
         meta: { boundary: "tanstack_root_error_component" },
       }),
     );

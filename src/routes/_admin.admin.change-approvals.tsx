@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_admin/admin/change-approvals")({
   component: ChangeApprovalsLayout,
   errorComponent: ({ error }) => (
     <div className="p-6">
-      <ErrorState title="Change approvals unavailable" message={error.message} />
+      <ErrorState title="Change approvals unavailable" message={(error as Error).message} />
     </div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm text-muted-foreground">Not found.</div>,
