@@ -12,6 +12,7 @@ import {
   EmptyState,
 } from "@/components/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoanDocumentsReview } from "@/components/loans/loan-documents-review";
 import {
   getAdminLoanDetail,
   getLoanScheduleProjection,
@@ -111,6 +112,8 @@ function DetailBody({ loanId }: { loanId: string }) {
           )}
         </div>
       </SectionCard>
+
+      <LoanDocumentsReview loanId={loan.id} />
 
       {loan.status === "approved" && <DisburseCard loan={loan} />}
       {loan.status === "active" && (

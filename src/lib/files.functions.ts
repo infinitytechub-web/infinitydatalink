@@ -406,7 +406,7 @@ export const adminReviewFile = createServerFn({ method: "POST" })
       } as never)
       .eq("id", data.id)
       .is("deleted_at", null)
-      .select("id, owner_id, filename")
+      .select("id, owner_id, filename, loan_id")
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("File not found");
@@ -424,7 +424,7 @@ export const adminReviewFile = createServerFn({ method: "POST" })
         category: data.decision === "approved" ? "file.approved" : "file.rejected",
         title: data.decision === "approved" ? "Document approved" : "Document needs attention",
         body: `${(row as any).filename}: ${data.note}`,
-        link: "/app/files",
+        link: (row as any).loan_id ? "/app/loan-documents" : "/app/files",
       });
     } catch (err) {
       console.error("file review notification failed", (err as Error)?.message);

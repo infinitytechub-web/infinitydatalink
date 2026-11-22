@@ -27,6 +27,7 @@ import {
   HandCoins,
   BanknoteArrowDown,
   SlidersHorizontal,
+  FileText,
 } from "lucide-react";
 import { PortalShell, type NavGroup } from "@/components/portal-shell";
 import { useAuth } from "@/lib/auth";
@@ -64,6 +65,7 @@ function buildGroups(kycApproved: boolean): NavGroup[] {
       items: [
         { to: "/app/loans", label: "My loans", icon: <Landmark />, ...locked },
         { to: "/app/repayments", label: "Repayments", icon: <ReceiptText />, ...locked },
+        { to: "/app/loan-documents", label: "Loan documents", icon: <FileText />, ...locked },
         { to: "/app/guarantees", label: "My guarantees", icon: <HandshakeIcon />, ...locked },
         { to: "/app/loan-calculator", label: "Loan calculator", icon: <Calculator /> },
       ],
@@ -120,6 +122,7 @@ const CRUMBS: Record<string, string> = {
 
   "/app/loans": "Active Loans",
   "/app/repayments": "Loan Repayments",
+  "/app/loan-documents": "Loan documents",
   "/app/loan-calculator": "Loan Calculator",
   "/app/guarantees": "My Guarantees",
   "/app/investments": "Investments & Shares",

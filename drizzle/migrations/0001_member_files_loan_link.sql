@@ -1,0 +1,2 @@
+ALTER TABLE public.member_files ADD COLUMN IF NOT EXISTS loan_id uuid REFERENCES public.loans(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS member_files_loan_id_idx ON public.member_files(loan_id) WHERE deleted_at IS NULL;

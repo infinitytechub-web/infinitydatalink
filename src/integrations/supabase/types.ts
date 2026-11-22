@@ -2157,6 +2157,7 @@ export type Database = {
           deleted_by: string | null
           filename: string
           id: string
+          loan_id: string | null
           mime_type: string
           owner_id: string
           review_note: string | null
@@ -2177,6 +2178,7 @@ export type Database = {
           deleted_by?: string | null
           filename: string
           id?: string
+          loan_id?: string | null
           mime_type: string
           owner_id: string
           review_note?: string | null
@@ -2197,6 +2199,7 @@ export type Database = {
           deleted_by?: string | null
           filename?: string
           id?: string
+          loan_id?: string | null
           mime_type?: string
           owner_id?: string
           review_note?: string | null
@@ -2209,7 +2212,15 @@ export type Database = {
           updated_at?: string
           uploaded_by?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "member_files_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       minor_status_changes: {
         Row: {

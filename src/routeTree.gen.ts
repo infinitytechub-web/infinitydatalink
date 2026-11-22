@@ -75,6 +75,7 @@ import { Route as MemberAppInboxRouteImport } from './routes/_member.app.inbox'
 import { Route as MemberAppInvestmentsRouteImport } from './routes/_member.app.investments'
 import { Route as MemberAppKycRouteImport } from './routes/_member.app.kyc'
 import { Route as MemberAppLoanCalculatorRouteImport } from './routes/_member.app.loan-calculator'
+import { Route as MemberAppLoanDocumentsRouteImport } from './routes/_member.app.loan-documents'
 import { Route as MemberAppLoansRouteImport } from './routes/_member.app.loans'
 import { Route as MemberAppNotificationsRouteImport } from './routes/_member.app.notifications'
 import { Route as MemberAppPaymentsRouteImport } from './routes/_member.app.payments'
@@ -483,6 +484,11 @@ const MemberAppKycRoute = MemberAppKycRouteImport.update({
 const MemberAppLoanCalculatorRoute = MemberAppLoanCalculatorRouteImport.update({
   id: '/loan-calculator',
   path: '/loan-calculator',
+  getParentRoute: () => MemberAppRoute,
+} as any)
+const MemberAppLoanDocumentsRoute = MemberAppLoanDocumentsRouteImport.update({
+  id: '/loan-documents',
+  path: '/loan-documents',
   getParentRoute: () => MemberAppRoute,
 } as any)
 const MemberAppLoansRoute = MemberAppLoansRouteImport.update({
@@ -973,6 +979,7 @@ export interface FileRoutesByFullPath {
   '/app/investments': typeof MemberAppInvestmentsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loan-calculator': typeof MemberAppLoanCalculatorRoute
+  '/app/loan-documents': typeof MemberAppLoanDocumentsRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
   '/app/notifications': typeof MemberAppNotificationsRoute
   '/app/payments': typeof MemberAppPaymentsRoute
@@ -1109,6 +1116,7 @@ export interface FileRoutesByTo {
   '/app/investments': typeof MemberAppInvestmentsRoute
   '/app/kyc': typeof MemberAppKycRoute
   '/app/loan-calculator': typeof MemberAppLoanCalculatorRoute
+  '/app/loan-documents': typeof MemberAppLoanDocumentsRoute
   '/app/loans': typeof MemberAppLoansRouteWithChildren
   '/app/notifications': typeof MemberAppNotificationsRoute
   '/app/payments': typeof MemberAppPaymentsRoute
@@ -1253,6 +1261,7 @@ export interface FileRoutesById {
   '/_member/app/investments': typeof MemberAppInvestmentsRoute
   '/_member/app/kyc': typeof MemberAppKycRoute
   '/_member/app/loan-calculator': typeof MemberAppLoanCalculatorRoute
+  '/_member/app/loan-documents': typeof MemberAppLoanDocumentsRoute
   '/_member/app/loans': typeof MemberAppLoansRouteWithChildren
   '/_member/app/notifications': typeof MemberAppNotificationsRoute
   '/_member/app/payments': typeof MemberAppPaymentsRoute
@@ -1397,6 +1406,7 @@ export interface FileRouteTypes {
     | '/app/investments'
     | '/app/kyc'
     | '/app/loan-calculator'
+    | '/app/loan-documents'
     | '/app/loans'
     | '/app/notifications'
     | '/app/payments'
@@ -1533,6 +1543,7 @@ export interface FileRouteTypes {
     | '/app/investments'
     | '/app/kyc'
     | '/app/loan-calculator'
+    | '/app/loan-documents'
     | '/app/loans'
     | '/app/notifications'
     | '/app/payments'
@@ -1676,6 +1687,7 @@ export interface FileRouteTypes {
     | '/_member/app/investments'
     | '/_member/app/kyc'
     | '/_member/app/loan-calculator'
+    | '/_member/app/loan-documents'
     | '/_member/app/loans'
     | '/_member/app/notifications'
     | '/_member/app/payments'
@@ -2246,6 +2258,13 @@ declare module '@tanstack/react-router' {
       path: '/loan-calculator'
       fullPath: '/app/loan-calculator'
       preLoaderRoute: typeof MemberAppLoanCalculatorRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
+    '/_member/app/loan-documents': {
+      id: '/_member/app/loan-documents'
+      path: '/loan-documents'
+      fullPath: '/app/loan-documents'
+      preLoaderRoute: typeof MemberAppLoanDocumentsRouteImport
       parentRoute: typeof MemberAppRoute
     }
     '/_member/app/loans': {
@@ -3125,6 +3144,7 @@ interface MemberAppRouteChildren {
   MemberAppInvestmentsRoute: typeof MemberAppInvestmentsRoute
   MemberAppKycRoute: typeof MemberAppKycRoute
   MemberAppLoanCalculatorRoute: typeof MemberAppLoanCalculatorRoute
+  MemberAppLoanDocumentsRoute: typeof MemberAppLoanDocumentsRoute
   MemberAppLoansRoute: typeof MemberAppLoansRouteWithChildren
   MemberAppNotificationsRoute: typeof MemberAppNotificationsRoute
   MemberAppPaymentsRoute: typeof MemberAppPaymentsRoute
@@ -3148,6 +3168,7 @@ const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppInvestmentsRoute: MemberAppInvestmentsRoute,
   MemberAppKycRoute: MemberAppKycRoute,
   MemberAppLoanCalculatorRoute: MemberAppLoanCalculatorRoute,
+  MemberAppLoanDocumentsRoute: MemberAppLoanDocumentsRoute,
   MemberAppLoansRoute: MemberAppLoansRouteWithChildren,
   MemberAppNotificationsRoute: MemberAppNotificationsRoute,
   MemberAppPaymentsRoute: MemberAppPaymentsRoute,

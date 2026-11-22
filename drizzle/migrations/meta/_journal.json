@@ -8,6 +8,13 @@
       "when": 1795383234508,
       "tag": "0000_loan_disbursement_to_savings_reminders_login_history",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795384078950,
+      "tag": "0001_member_files_loan_link",
+      "breakpoints": true
     }
   ]
 }
