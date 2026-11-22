@@ -86,6 +86,7 @@ function buildGroups(kycApproved: boolean): NavGroup[] {
     {
       label: "Account",
       items: [
+        { to: "/app/account", label: "My account", icon: <UserCircle2 /> },
         { to: "/app/profile", label: "Profile", icon: <UserCircle2 /> },
         { to: "/app/kyc", label: "Verification status", icon: <ShieldCheck /> },
         {
@@ -128,6 +129,7 @@ const CRUMBS: Record<string, string> = {
   "/app/transactions": "Transactions",
   "/app/payments": "Payments",
   "/app/transfers": "Transfers",
+  "/app/account": "My account",
   "/app/profile": "Profile & KYC",
   "/app/kyc": "Verification status",
   "/app/entities/register": "Register organization",
@@ -145,6 +147,7 @@ export const Route = createFileRoute("/_member/app")({
 
 // Pages a member may always reach while KYC is incomplete.
 const KYC_ALLOWED_PATHS = [
+  "/app/account",
   "/app/kyc",
   "/app/profile",
   "/app/notifications",

@@ -1749,6 +1749,41 @@ export type Database = {
         }
         Relationships: []
       }
+      loan_reminder_log: {
+        Row: {
+          created_at: string
+          email_status: string
+          id: string
+          repayment_id: string
+          stage: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_status?: string
+          id?: string
+          repayment_id: string
+          stage: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_status?: string
+          id?: string
+          repayment_id?: string
+          stage?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_reminder_log_repayment_id_fkey"
+            columns: ["repayment_id"]
+            isOneToOne: false
+            referencedRelation: "loan_repayments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loan_repayments: {
         Row: {
           created_at: string
@@ -1954,6 +1989,7 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_account_id: string | null
           disbursement_channel: string | null
           disbursement_note: string | null
           disbursement_reference: string | null
@@ -1994,6 +2030,7 @@ export type Database = {
           decision_note?: string | null
           disbursed_at?: string | null
           disbursed_by?: string | null
+          disbursement_account_id?: string | null
           disbursement_channel?: string | null
           disbursement_note?: string | null
           disbursement_reference?: string | null
@@ -2034,6 +2071,7 @@ export type Database = {
           decision_note?: string | null
           disbursed_at?: string | null
           disbursed_by?: string | null
+          disbursement_account_id?: string | null
           disbursement_channel?: string | null
           disbursement_note?: string | null
           disbursement_reference?: string | null
@@ -2064,6 +2102,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "loans_disbursement_account_id_fkey"
+            columns: ["disbursement_account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "loans_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -2078,6 +2123,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      login_events: {
+        Row: {
+          created_at: string
+          id: string
+          method: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          method?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          method?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       member_files: {
         Row: {
@@ -5077,6 +5146,7 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_account_id: string | null
           disbursement_channel: string | null
           disbursement_note: string | null
           disbursement_reference: string | null
@@ -5382,6 +5452,7 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_account_id: string | null
           disbursement_channel: string | null
           disbursement_note: string | null
           disbursement_reference: string | null
@@ -5995,6 +6066,7 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_account_id: string | null
           disbursement_channel: string | null
           disbursement_note: string | null
           disbursement_reference: string | null
@@ -6029,6 +6101,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      record_login_event: {
+        Args: { _method: string; _user_agent: string }
+        Returns: undefined
       }
       recycle_notifications: {
         Args: { _before?: string; _retention_days?: number; _scope?: string }
@@ -6307,6 +6383,7 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_account_id: string | null
           disbursement_channel: string | null
           disbursement_note: string | null
           disbursement_reference: string | null
@@ -6587,6 +6664,7 @@ export type Database = {
           decision_note: string | null
           disbursed_at: string | null
           disbursed_by: string | null
+          disbursement_account_id: string | null
           disbursement_channel: string | null
           disbursement_note: string | null
           disbursement_reference: string | null
@@ -6651,6 +6729,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_loan_disbursement_account: {
+        Args: { _account_id: string; _loan_id: string }
+        Returns: undefined
       }
       set_user_active:
         | {

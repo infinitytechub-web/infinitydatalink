@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
-import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -16,6 +16,7 @@ import {
   getAdminLoanDetail,
   getLoanScheduleProjection,
   disburseLoan,
+  listMemberSavingsAccounts,
   requestLoanDisbursement,
   cancelLoanDisbursement,
   recordLoanRepayment,
@@ -182,7 +183,14 @@ function DisburseCard({ loan }: { loan: LoanDetail }) {
   const request = useServerFn(requestLoanDisbursement);
   const confirm = useServerFn(disburseLoan);
   const cancelStaged = useServerFn(cancelLoanDisbursement);
-  const [channel, setChannel] = useState(loan.disbursement_channel ?? "bank_transfer");
+  const [channel, setChannel] = useState(loan.disbursement_channel ?? "savings_account");
+  const accountsFn = useServerFn(listMemberSavingsAccounts);
+  const accounts = useQuery({
+    queryKey: ["admin", "member-savings-accounts", loan.user_id],
+    queryFn: () => accountsFn({ data: { user_id: loan.user_id } }),
+  });
+  const [accountId, setAccountId] = useState<string>("");
+  const effectiveAccount = accountId || accounts.data?.[0]?.id || "";
   const [reference, setReference] = useState(loan.disbursement_reference ?? "");
   const [valueDate, setValueDate] = useState(
     loan.interest_start_at ?? new Date().toISOString().slice(0, 10),
@@ -204,6 +212,7 @@ function DisburseCard({ loan }: { loan: LoanDetail }) {
           reference: reference.trim() || undefined,
           value_date: valueDate,
           note: note.trim() || undefined,
+          account_id: channel === "savings_account" && effectiveAccount ? effectiveAccount : undefined,
         },
       }),
     onSuccess: () => {
@@ -282,12 +291,40 @@ function DisburseCard({ loan }: { loan: LoanDetail }) {
               onChange={(e) => setChannel(e.target.value)}
               className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
             >
+              <option value="savings_account">Credit member savings account</option>
               <option value="bank_transfer">Bank transfer</option>
               <option value="mobile_money">Mobile money</option>
               <option value="cheque">Cheque</option>
               <option value="cash">Cash</option>
             </select>
           </label>
+          {channel === "savings_account" ? (
+            <label className="flex flex-col gap-1 md:col-span-4">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Destination savings account
+              </span>
+              <select
+                value={effectiveAccount}
+                onChange={(e) => setAccountId(e.target.value)}
+                disabled={staged}
+                className="rounded border border-emerald-deep/15 bg-card px-3 py-2 text-sm outline-none focus:border-emerald-mid"
+              >
+                {(accounts.data ?? []).length === 0 ? (
+                  <option value="">
+                    {accounts.isLoading ? "Loading accounts…" : "Member has no active savings account"}
+                  </option>
+                ) : null}
+                {(accounts.data ?? []).map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label} · balance GH₵ {a.balance.toFixed(2)}
+                  </option>
+                ))}
+              </select>
+              <span className="text-[11px] text-muted-foreground">
+                The loan amount is added to this account's balance the moment the release is confirmed.
+              </span>
+            </label>
+          ) : null}
           <label className="flex flex-col gap-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Payout reference

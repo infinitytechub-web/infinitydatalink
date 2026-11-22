@@ -239,6 +239,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
         if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+        if (event === "SIGNED_IN" && session?.user) {
+          const method = (session.user.app_metadata as { provider?: string } | undefined)?.provider ?? "email";
+          setTimeout(() => {
+            void (supabase as any)
+              .rpc("record_login_event", { _method: method, _user_agent: navigator.userAgent })
+              .then(() => undefined, () => undefined);
+          }, 0);
+        }
         // Defer to avoid deadlock inside the callback.
         setTimeout(() => {
           void hydrate(session?.user ?? null);

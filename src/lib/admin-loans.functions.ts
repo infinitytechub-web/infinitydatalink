@@ -835,11 +835,17 @@ export const requestLoanDisbursement = createServerFn({ method: "POST" })
         reference: z.string().trim().max(80).optional(),
         value_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         note: z.string().trim().max(500).optional(),
+        account_id: z.string().uuid().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertLoanDisbursementRole(context.supabase, context.userId);
+    const { error: accErr } = await (context.supabase as any).rpc("set_loan_disbursement_account", {
+      _loan_id: data.loan_id,
+      _account_id: data.channel === "savings_account" ? (data.account_id ?? null) : null,
+    });
+    if (accErr) throw new Error(accErr.message);
     const { error } = await context.supabase.rpc("request_loan_disbursement", {
       _loan_id: data.loan_id,
       _channel: data.channel,
@@ -866,4 +872,115 @@ export const cancelLoanDisbursement = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     return { ok: true as const };
+  });
+
+// ============================================================================
+// Disbursement destination: the member's active savings accounts
+// ============================================================================
+
+export type MemberSavingsAccountOption = { id: string; label: string; balance: number };
+
+export const listMemberSavingsAccounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<MemberSavingsAccountOption[]> => {
+    await assertLoanDisbursementRole(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("savings_accounts")
+      .select("id, nickname, balance, status, created_at, savings_plans(name)")
+      .eq("user_id", data.user_id)
+      .eq("status", "active")
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((r: any) => ({
+      id: r.id,
+      label: `${r.nickname || r.savings_plans?.name || "Savings"} · ${String(r.id).slice(0, 8).toUpperCase()}`,
+      balance: Number(r.balance ?? 0),
+    }));
+  });
+
+// ============================================================================
+// Officer repayment book: per-loan installment progress
+// ============================================================================
+
+export type RepaymentBookRow = {
+  loan_id: string;
+  ref: string;
+  product: string;
+  member_name: string | null;
+  member_no: string | null;
+  installments_total: number;
+  installments_paid: number;
+  installments_overdue: number;
+  installments_remaining: number;
+  amount_paid: number;
+  balance_due: number;
+  next_due_date: string | null;
+  pending: Array<{ id: string; ref: string; amount: number; channel: string | null; created_at: string }>;
+};
+
+export const getLoanRepaymentBook = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<RepaymentBookRow[]> => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: loans, error } = await supabaseAdmin
+      .from("loans")
+      .select("id, ref, product, user_id, status")
+      .in("status", ["active", "closed"])
+      .order("disbursed_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    const list = loans ?? [];
+    if (!list.length) return [];
+    const ids = list.map((l: any) => l.id);
+    const userIds = Array.from(new Set(list.map((l: any) => l.user_id)));
+    const [{ data: sched }, { data: profiles }, { data: pend }] = await Promise.all([
+      supabaseAdmin
+        .from("loan_repayments")
+        .select("loan_id, due_date, total_due, paid_amount, status")
+        .in("loan_id", ids),
+      supabaseAdmin.from("profiles").select("id, full_name, member_no").in("id", userIds),
+      supabaseAdmin
+        .from("transactions")
+        .select("id, ref, amount, channel, created_at, loan_id")
+        .in("loan_id", ids)
+        .eq("kind", "loan_repayment")
+        .eq("status", "pending"),
+    ]);
+    const pmap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+    const today = new Date().toISOString().slice(0, 10);
+    return list.map((l: any) => {
+      const rows = (sched ?? []).filter((r: any) => r.loan_id === l.id);
+      let paid = 0, overdue = 0, amountPaid = 0, balance = 0;
+      let next: string | null = null;
+      for (const r of rows) {
+        const due = Number(r.total_due), p = Number(r.paid_amount ?? 0);
+        amountPaid += p;
+        const isPaid = r.status === "paid" || p >= due - 0.005;
+        if (isPaid) { paid++; continue; }
+        balance += Math.max(due - p, 0);
+        if (r.due_date < today) overdue++;
+        if (!next || r.due_date < next) next = r.due_date;
+      }
+      const prof: any = pmap.get(l.user_id);
+      return {
+        loan_id: l.id,
+        ref: l.ref,
+        product: l.product,
+        member_name: prof?.full_name ?? null,
+        member_no: prof?.member_no ?? null,
+        installments_total: rows.length,
+        installments_paid: paid,
+        installments_overdue: overdue,
+        installments_remaining: rows.length - paid,
+        amount_paid: Math.round(amountPaid * 100) / 100,
+        balance_due: Math.round(balance * 100) / 100,
+        next_due_date: next,
+        pending: (pend ?? [])
+          .filter((t: any) => t.loan_id === l.id)
+          .map((t: any) => ({ id: t.id, ref: t.ref, amount: Number(t.amount), channel: t.channel, created_at: t.created_at })),
+      };
+    });
   });

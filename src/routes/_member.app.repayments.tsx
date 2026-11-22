@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { Suspense, useEffect, useState } from "react";
+import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { CalendarClock, Receipt } from "lucide-react";
 import {
   EmptyState,
@@ -56,6 +57,19 @@ function RepaymentsPage() {
 
 function RepaymentsContent() {
   const { data } = useSuspenseQuery(dashboardQuery);
+  const qc = useQueryClient();
+  // Live updates: RLS limits these events to the member's own schedule and transactions.
+  useEffect(() => {
+    const refresh = () => qc.invalidateQueries({ queryKey: dashboardQuery.queryKey });
+    const channel = supabase
+      .channel(`repayments-${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "loan_repayments" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, refresh)
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
   const { totals, loans, ledger, upcoming, history } = data;
 
   return (

@@ -15,6 +15,7 @@ import {
 import { BarList, TrendChart } from "@/components/charts";
 import { formatMoney } from "@/lib/org-config";
 import { getLoanOfficerOverview } from "@/lib/admin-loans.functions";
+import { RepaymentBook } from "@/components/loans/repayment-book";
 
 export const Route = createFileRoute("/_admin/admin/loan-dashboard")({
   component: LoanDashboard,
@@ -207,6 +208,8 @@ function DashboardBody() {
           </table>
         )}
       </SectionCard>
+
+      <RepaymentBook />
 
       <SectionCard
         title="Approval history"

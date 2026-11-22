@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { template as kycApprovedTemplate } from "./kyc-approved";
 import { template as kycRejectedTemplate } from "./kyc-rejected";
+import { template as repaymentReminderTemplate } from "./repayment-reminder";
 
 export interface TemplateEntry {
   component: ComponentType<any>;
@@ -14,4 +15,5 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   "kyc-approved": kycApprovedTemplate,
   "kyc-rejected": kycRejectedTemplate,
+  "repayment-reminder": repaymentReminderTemplate,
 };
