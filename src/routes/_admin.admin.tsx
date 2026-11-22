@@ -108,6 +108,12 @@ const groups: NavGroup[] = [
         cap: "savings.view",
       },
       {
+        to: "/admin/savings/deposits",
+        label: "Deposit approvals",
+        icon: <PiggyBank />,
+        cap: "savings.approve",
+      },
+      {
         to: "/admin/savings/withdrawals",
         label: "Withdrawal approvals",
         icon: <BanknoteArrowDown />,
@@ -437,6 +443,7 @@ const CRUMBS: Record<string, string> = {
   "/admin/relationships": "Relationship Types",
 
   "/admin/savings": "Savings",
+  "/admin/savings/deposits": "Deposit approvals",
   "/admin/savings/withdrawals": "Withdrawal approvals",
   "/admin/savings/plans": "Savings plans & products",
   "/admin/savings/fixed": "Fixed deposits",

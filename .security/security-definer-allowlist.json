@@ -99,6 +99,9 @@
     "public.suspend_entity(uuid,text)",
     "public.suspend_entity(uuid,text,uuid)",
     "public.transfer_shares(uuid,text,integer,text,uuid)",
-    "public.upsert_fx_rate(text,text,numeric)"
+    "public.upsert_fx_rate(text,text,numeric)",
+    "public.request_savings_deposit(uuid,numeric,text,text,text)",
+    "public.cancel_savings_deposit(uuid)",
+    "public.decide_savings_deposit(uuid,boolean,text,uuid)"
   ]
 }

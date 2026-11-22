@@ -3165,6 +3165,65 @@ export type Database = {
           },
         ]
       }
+      savings_deposit_requests: {
+        Row: {
+          account_id: string
+          amount: number
+          channel: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          note: string | null
+          payment_reference: string | null
+          ref: string
+          status: string
+          txn_id: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          channel?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          note?: string | null
+          payment_reference?: string | null
+          ref?: string
+          status?: string
+          txn_id?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          channel?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          note?: string | null
+          payment_reference?: string | null
+          ref?: string
+          status?: string
+          txn_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_deposit_requests_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "savings_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       savings_holds: {
         Row: {
           account_id: string
@@ -5219,6 +5278,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancel_savings_deposit: { Args: { _id: string }; Returns: undefined }
       cancel_savings_withdrawal: {
         Args: { _id: string; _reason?: string }
         Returns: {
@@ -5432,6 +5492,36 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "loan_settlement_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      decide_savings_deposit: {
+        Args: {
+          _actor_id: string
+          _approve: boolean
+          _id: string
+          _note: string
+        }
+        Returns: {
+          account_id: string
+          amount: number
+          channel: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          note: string | null
+          payment_reference: string | null
+          ref: string
+          status: string
+          txn_id: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_deposit_requests"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -6497,6 +6587,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "loan_settlement_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      request_savings_deposit: {
+        Args: {
+          _account_id: string
+          _amount: number
+          _channel: string
+          _note: string
+          _payment_reference: string
+        }
+        Returns: {
+          account_id: string
+          amount: number
+          channel: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          note: string | null
+          payment_reference: string | null
+          ref: string
+          status: string
+          txn_id: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "savings_deposit_requests"
           isOneToOne: true
           isSetofReturn: false
         }

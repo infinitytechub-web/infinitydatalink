@@ -69,6 +69,7 @@ import { Route as AdminAdminTellerRouteImport } from './routes/_admin.admin.tell
 import { Route as AdminAdminVaultRouteImport } from './routes/_admin.admin.vault'
 import { Route as MemberAppIndexRouteImport } from './routes/_member.app.index'
 import { Route as MemberAppAccountRouteImport } from './routes/_member.app.account'
+import { Route as MemberAppDepositsRouteImport } from './routes/_member.app.deposits'
 import { Route as MemberAppFilesRouteImport } from './routes/_member.app.files'
 import { Route as MemberAppGuaranteesRouteImport } from './routes/_member.app.guarantees'
 import { Route as MemberAppInboxRouteImport } from './routes/_member.app.inbox'
@@ -111,6 +112,7 @@ import { Route as AdminAdminFinanceTransfersRouteImport } from './routes/_admin.
 import { Route as AdminAdminInvestmentsAuditRouteImport } from './routes/_admin.admin.investments.audit'
 import { Route as AdminAdminLoansLoanIdRouteImport } from './routes/_admin.admin.loans.$loanId'
 import { Route as AdminAdminMembersIdRouteImport } from './routes/_admin.admin.members.$id'
+import { Route as AdminAdminSavingsDepositsRouteImport } from './routes/_admin.admin.savings.deposits'
 import { Route as AdminAdminSavingsFixedRouteImport } from './routes/_admin.admin.savings.fixed'
 import { Route as AdminAdminSavingsHoldsRouteImport } from './routes/_admin.admin.savings.holds'
 import { Route as AdminAdminSavingsInterestRouteImport } from './routes/_admin.admin.savings.interest'
@@ -456,6 +458,11 @@ const MemberAppAccountRoute = MemberAppAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => MemberAppRoute,
 } as any)
+const MemberAppDepositsRoute = MemberAppDepositsRouteImport.update({
+  id: '/deposits',
+  path: '/deposits',
+  getParentRoute: () => MemberAppRoute,
+} as any)
 const MemberAppFilesRoute = MemberAppFilesRouteImport.update({
   id: '/files',
   path: '/files',
@@ -684,6 +691,12 @@ const AdminAdminMembersIdRoute = AdminAdminMembersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminAdminMembersRoute,
 } as any)
+const AdminAdminSavingsDepositsRoute =
+  AdminAdminSavingsDepositsRouteImport.update({
+    id: '/deposits',
+    path: '/deposits',
+    getParentRoute: () => AdminAdminSavingsRoute,
+  } as any)
 const AdminAdminSavingsFixedRoute = AdminAdminSavingsFixedRouteImport.update({
   id: '/fixed',
   path: '/fixed',
@@ -973,6 +986,7 @@ export interface FileRoutesByFullPath {
   '/admin/teller': typeof AdminAdminTellerRoute
   '/admin/vault': typeof AdminAdminVaultRoute
   '/app/account': typeof MemberAppAccountRoute
+  '/app/deposits': typeof MemberAppDepositsRoute
   '/app/files': typeof MemberAppFilesRoute
   '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/inbox': typeof MemberAppInboxRoute
@@ -1014,6 +1028,7 @@ export interface FileRoutesByFullPath {
   '/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/admin/savings/deposits': typeof AdminAdminSavingsDepositsRoute
   '/admin/savings/fixed': typeof AdminAdminSavingsFixedRoute
   '/admin/savings/holds': typeof AdminAdminSavingsHoldsRoute
   '/admin/savings/interest': typeof AdminAdminSavingsInterestRoute
@@ -1110,6 +1125,7 @@ export interface FileRoutesByTo {
   '/admin/teller': typeof AdminAdminTellerRoute
   '/admin/vault': typeof AdminAdminVaultRoute
   '/app/account': typeof MemberAppAccountRoute
+  '/app/deposits': typeof MemberAppDepositsRoute
   '/app/files': typeof MemberAppFilesRoute
   '/app/guarantees': typeof MemberAppGuaranteesRoute
   '/app/inbox': typeof MemberAppInboxRoute
@@ -1150,6 +1166,7 @@ export interface FileRoutesByTo {
   '/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/admin/savings/deposits': typeof AdminAdminSavingsDepositsRoute
   '/admin/savings/fixed': typeof AdminAdminSavingsFixedRoute
   '/admin/savings/holds': typeof AdminAdminSavingsHoldsRoute
   '/admin/savings/interest': typeof AdminAdminSavingsInterestRoute
@@ -1255,6 +1272,7 @@ export interface FileRoutesById {
   '/_admin/admin/teller': typeof AdminAdminTellerRoute
   '/_admin/admin/vault': typeof AdminAdminVaultRoute
   '/_member/app/account': typeof MemberAppAccountRoute
+  '/_member/app/deposits': typeof MemberAppDepositsRoute
   '/_member/app/files': typeof MemberAppFilesRoute
   '/_member/app/guarantees': typeof MemberAppGuaranteesRoute
   '/_member/app/inbox': typeof MemberAppInboxRoute
@@ -1296,6 +1314,7 @@ export interface FileRoutesById {
   '/_admin/admin/investments/audit': typeof AdminAdminInvestmentsAuditRoute
   '/_admin/admin/loans/$loanId': typeof AdminAdminLoansLoanIdRoute
   '/_admin/admin/members/$id': typeof AdminAdminMembersIdRoute
+  '/_admin/admin/savings/deposits': typeof AdminAdminSavingsDepositsRoute
   '/_admin/admin/savings/fixed': typeof AdminAdminSavingsFixedRoute
   '/_admin/admin/savings/holds': typeof AdminAdminSavingsHoldsRoute
   '/_admin/admin/savings/interest': typeof AdminAdminSavingsInterestRoute
@@ -1400,6 +1419,7 @@ export interface FileRouteTypes {
     | '/admin/teller'
     | '/admin/vault'
     | '/app/account'
+    | '/app/deposits'
     | '/app/files'
     | '/app/guarantees'
     | '/app/inbox'
@@ -1441,6 +1461,7 @@ export interface FileRouteTypes {
     | '/admin/investments/audit'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
+    | '/admin/savings/deposits'
     | '/admin/savings/fixed'
     | '/admin/savings/holds'
     | '/admin/savings/interest'
@@ -1537,6 +1558,7 @@ export interface FileRouteTypes {
     | '/admin/teller'
     | '/admin/vault'
     | '/app/account'
+    | '/app/deposits'
     | '/app/files'
     | '/app/guarantees'
     | '/app/inbox'
@@ -1577,6 +1599,7 @@ export interface FileRouteTypes {
     | '/admin/investments/audit'
     | '/admin/loans/$loanId'
     | '/admin/members/$id'
+    | '/admin/savings/deposits'
     | '/admin/savings/fixed'
     | '/admin/savings/holds'
     | '/admin/savings/interest'
@@ -1681,6 +1704,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/teller'
     | '/_admin/admin/vault'
     | '/_member/app/account'
+    | '/_member/app/deposits'
     | '/_member/app/files'
     | '/_member/app/guarantees'
     | '/_member/app/inbox'
@@ -1722,6 +1746,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/investments/audit'
     | '/_admin/admin/loans/$loanId'
     | '/_admin/admin/members/$id'
+    | '/_admin/admin/savings/deposits'
     | '/_admin/admin/savings/fixed'
     | '/_admin/admin/savings/holds'
     | '/_admin/admin/savings/interest'
@@ -2218,6 +2243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberAppAccountRouteImport
       parentRoute: typeof MemberAppRoute
     }
+    '/_member/app/deposits': {
+      id: '/_member/app/deposits'
+      path: '/deposits'
+      fullPath: '/app/deposits'
+      preLoaderRoute: typeof MemberAppDepositsRouteImport
+      parentRoute: typeof MemberAppRoute
+    }
     '/_member/app/files': {
       id: '/_member/app/files'
       path: '/files'
@@ -2511,6 +2543,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/members/$id'
       preLoaderRoute: typeof AdminAdminMembersIdRouteImport
       parentRoute: typeof AdminAdminMembersRoute
+    }
+    '/_admin/admin/savings/deposits': {
+      id: '/_admin/admin/savings/deposits'
+      path: '/deposits'
+      fullPath: '/admin/savings/deposits'
+      preLoaderRoute: typeof AdminAdminSavingsDepositsRouteImport
+      parentRoute: typeof AdminAdminSavingsRoute
     }
     '/_admin/admin/savings/fixed': {
       id: '/_admin/admin/savings/fixed'
@@ -2927,6 +2966,7 @@ const AdminAdminMembersRouteWithChildren =
   AdminAdminMembersRoute._addFileChildren(AdminAdminMembersRouteChildren)
 
 interface AdminAdminSavingsRouteChildren {
+  AdminAdminSavingsDepositsRoute: typeof AdminAdminSavingsDepositsRoute
   AdminAdminSavingsFixedRoute: typeof AdminAdminSavingsFixedRoute
   AdminAdminSavingsHoldsRoute: typeof AdminAdminSavingsHoldsRoute
   AdminAdminSavingsInterestRoute: typeof AdminAdminSavingsInterestRoute
@@ -2937,6 +2977,7 @@ interface AdminAdminSavingsRouteChildren {
 }
 
 const AdminAdminSavingsRouteChildren: AdminAdminSavingsRouteChildren = {
+  AdminAdminSavingsDepositsRoute: AdminAdminSavingsDepositsRoute,
   AdminAdminSavingsFixedRoute: AdminAdminSavingsFixedRoute,
   AdminAdminSavingsHoldsRoute: AdminAdminSavingsHoldsRoute,
   AdminAdminSavingsInterestRoute: AdminAdminSavingsInterestRoute,
@@ -3138,6 +3179,7 @@ const MemberAppSavingsRouteWithChildren =
 
 interface MemberAppRouteChildren {
   MemberAppAccountRoute: typeof MemberAppAccountRoute
+  MemberAppDepositsRoute: typeof MemberAppDepositsRoute
   MemberAppFilesRoute: typeof MemberAppFilesRoute
   MemberAppGuaranteesRoute: typeof MemberAppGuaranteesRoute
   MemberAppInboxRoute: typeof MemberAppInboxRoute
@@ -3162,6 +3204,7 @@ interface MemberAppRouteChildren {
 
 const MemberAppRouteChildren: MemberAppRouteChildren = {
   MemberAppAccountRoute: MemberAppAccountRoute,
+  MemberAppDepositsRoute: MemberAppDepositsRoute,
   MemberAppFilesRoute: MemberAppFilesRoute,
   MemberAppGuaranteesRoute: MemberAppGuaranteesRoute,
   MemberAppInboxRoute: MemberAppInboxRoute,

@@ -29,6 +29,20 @@
       "when": 1795385461345,
       "tag": "0003_loans_require_approved_kyc",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795385612616,
+      "tag": "0004_savings_deposit_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795385741511,
+      "tag": "0005_deposit_approval_credits_balance",
+      "breakpoints": true
     }
   ]
 }
