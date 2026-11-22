@@ -15,6 +15,13 @@
       "when": 1795384078950,
       "tag": "0001_member_files_loan_link",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795385377162,
+      "tag": "0002_restrict_settings_reads",
+      "breakpoints": true
     }
   ]
 }

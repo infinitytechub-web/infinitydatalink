@@ -106,8 +106,10 @@ function pickActorRole(roles: ReadonlySet<Role>): string {
 export const getMyWithdrawals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<MemberWithdrawalView> => {
+    // Settings rows are staff-readable only; serve the member-facing limits here.
+    const { supabaseAdmin: settingsDb } = await import("@/integrations/supabase/client.server");
     const [{ data: settings, error: sErr }, { data: rows, error: rErr }] = await Promise.all([
-      context.supabase
+      settingsDb
         .from("savings_withdrawal_settings")
         .select("min_amount, max_amount, daily_limit, require_dual_control")
         .eq("id", 1)

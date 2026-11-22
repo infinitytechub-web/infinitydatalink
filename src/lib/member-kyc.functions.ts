@@ -205,7 +205,9 @@ export const getMyKycStatus = createServerFn({ method: "GET" })
 
     // Resubmission window + attempt allowance. Both are enforced in
     // resubmit_own_kyc; surfaced here so the UI can explain the block up front.
-    const { data: resubSettings } = await sb
+    // Settings rows are staff-readable only; serve the three public limits here.
+    const { supabaseAdmin: settingsDb } = await import("@/integrations/supabase/client.server");
+    const { data: resubSettings } = await settingsDb
       .from("kyc_resubmission_settings")
       .select("deadline_days, max_attempts, enforce_deadline")
       .maybeSingle();
