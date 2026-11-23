@@ -241,6 +241,9 @@ export const deleteMyFile = createServerFn({ method: "POST" })
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    if (!String((row as any).storage_path).startsWith(`${(row as any).owner_id ?? context.userId}/`)) {
+      throw new Error("File path is invalid");
+    }
     await supabaseAdmin.storage.from(FILE_BUCKET).remove([(row as any).storage_path]);
 
     await writeAudit({
@@ -280,6 +283,9 @@ export const signFileUrl = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       if (!row) throw new Error("File not found");
 
+      if (!String((row as any).storage_path).startsWith(`${(row as any).owner_id}/`)) {
+        throw new Error("File path is invalid");
+      }
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: signed, error: sErr } = await supabaseAdmin.storage
         .from(FILE_BUCKET)
@@ -449,6 +455,9 @@ export const adminDeleteFile = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("File not found");
+    if (!String((row as any).storage_path).startsWith(`${(row as any).owner_id ?? context.userId}/`)) {
+      throw new Error("File path is invalid");
+    }
     await supabaseAdmin.storage.from(FILE_BUCKET).remove([(row as any).storage_path]);
 
     await writeAudit({

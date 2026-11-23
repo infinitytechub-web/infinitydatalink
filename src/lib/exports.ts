@@ -250,20 +250,18 @@ export async function exportPrint<T>(opts: ExportOptions<T>) {
         `<tr>${opts.columns
           .map(
             (c) =>
-              `<td style="text-align:${c.align || "left"}">${String(c.accessor(r))
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")}</td>`,
+              `<td style="text-align:${c.align || "left"}">${escapeHtml(c.accessor(r))}</td>`,
           )
           .join("")}</tr>`,
     )
     .join("");
 
   const headHtml = opts.columns
-    .map((c) => `<th style="text-align:${c.align || "left"}">${c.header}</th>`)
+    .map((c) => `<th style="text-align:${c.align || "left"}">${escapeHtml(c.header)}</th>`)
     .join("");
 
   win.document.write(`<!doctype html><html><head><meta charset="utf-8"/>
-  <title>${opts.title} · ${BRAND.name}</title>
+  <title>${escapeHtml(opts.title)} · ${escapeHtml(BRAND.name)}</title>
   <style>
     @page { size: A4 landscape; margin: 14mm; }
     * { box-sizing: border-box; }
@@ -303,8 +301,8 @@ export async function exportPrint<T>(opts: ExportOptions<T>) {
         <p>Region: ${cfg.name} · Currency: ${cfg.currency.code}</p>
       </div>
       <div class="meta">
-        <h2>${opts.title}</h2>
-        ${opts.subtitle ? `<p>${opts.subtitle}</p>` : ""}
+        <h2>${escapeHtml(opts.title)}</h2>
+        ${opts.subtitle ? `<p>${escapeHtml(opts.subtitle)}</p>` : ""}
         <p>Doc ID: ${docId}</p>
         <p>Generated: ${new Date().toLocaleString(cfg.currency.locale)}</p>
         <div class="qr"><img src="${qr}" alt="Document verification QR code"/></div>
@@ -451,4 +449,14 @@ export async function exportDocx<T>(opts: ExportOptions<T>) {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+
+function escapeHtml(v: unknown): string {
+  return String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

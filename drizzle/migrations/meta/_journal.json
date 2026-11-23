@@ -43,6 +43,13 @@
       "when": 1795385741511,
       "tag": "0005_deposit_approval_credits_balance",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795418988156,
+      "tag": "0006_harden_dividends_entities_loans_files_savings",
+      "breakpoints": true
     }
   ]
 }
